@@ -86,6 +86,8 @@ public class CommonUtils {
         return dbType;
     }
 
+    public static final String MAPPING_URL_SUBFIX = "MAPPINGS_URL";
+
     public static Dbms getMapping(URL mappingFilesDir, JDBCDataStore dataStore,
             String dbTypeByComponentType/*
                                          * for example, if tjdbcxxx, the type is "General JDBC", if tmysqlxxx, the type

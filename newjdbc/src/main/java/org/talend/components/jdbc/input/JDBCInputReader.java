@@ -25,6 +25,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.sql.*;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -51,12 +52,15 @@ public class JDBCInputReader {
 
     private long totalCount;
 
+    private transient Map<String, Object> context;
+
     public JDBCInputReader(JDBCInputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
-            RecordBuilderFactory recordBuilderFactory) {
+            RecordBuilderFactory recordBuilderFactory, final Map<String, Object> context) {
         this.config = config;
         this.useExistedConnection = useExistedConnection;
         this.conn = conn;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.context = context;
     }
 
     private Schema getSchema() throws SQLException {
@@ -69,10 +73,16 @@ public class JDBCInputReader {
 
             // no set schema for cloud platform, or use dynamic in studio platform
             if (querySchema == null || querySchema.getEntries().isEmpty()) {
-                // TODO how to get it?
                 URL mappingFileDir = null;
+                if (context != null) {
+                    // TODO set and init it in common javajet
+                    Object value = context.get(CommonUtils.MAPPING_URL_SUBFIX);
+                    if (value != null) {
+                        mappingFileDir = (URL) value;
+                    }
+                }
 
-                DBType dbTypeInComponentSetting = config.getMapping();
+                DBType dbTypeInComponentSetting = config.isEnableMapping() ? config.getMapping() : null;
 
                 Dbms mapping = null;
                 if (mappingFileDir != null) {

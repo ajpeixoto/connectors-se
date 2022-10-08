@@ -79,7 +79,7 @@ public class QueryEmitter implements Serializable {
             useExistedConnection = true;
         }
 
-        reader = new JDBCInputReader(configuration, useExistedConnection, dataSource, recordBuilderFactory);
+        reader = new JDBCInputReader(configuration, useExistedConnection, dataSource, recordBuilderFactory, context);
         reader.open();
     }
 
