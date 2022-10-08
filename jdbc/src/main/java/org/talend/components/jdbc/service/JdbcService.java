@@ -60,10 +60,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class JdbcService {
 
-    // TODO consider move it to tck framework as is a common requirement to know the origin type in source system like
-    // database/crm and so on
-    private static final String ORIGIN_TYPE = "origin.type";
-
     private static final String SNOWFLAKE_DATABASE_NAME = "Snowflake";
 
     private static final Pattern READ_ONLY_QUERY_PATTERN = Pattern
@@ -373,7 +369,7 @@ public class JdbcService {
                 entryBuilder.withType(STRING);
                 final String columnTypeName = metaData.getColumnTypeName(columnIndex);
                 if (columnTypeName != null && !columnTypeName.isEmpty()) {
-                    entryBuilder.withProp(ORIGIN_TYPE, columnTypeName);
+                    entryBuilder.withProp("logicalType", columnTypeName);
                 }
                 builder.withEntry(entryBuilder.build());
                 break;
