@@ -17,10 +17,8 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -338,7 +336,13 @@ public class SchemaInferer {
                 builder.withBoolean(entry, resultSet.getBoolean(index + 1));
                 break;
             case DATETIME:
-                builder.withDateTime(entry, resultSet.getDate(index + 1));
+                Date date;
+                try {
+                    date = resultSet.getTimestamp(index + 1);
+                } catch (Exception e) {
+                    date = resultSet.getDate(index + 1);
+                }
+                builder.withDateTime(entry, date);
                 break;
             case BYTES:
                 builder.withBytes(entry, resultSet.getBytes(index + 1));
