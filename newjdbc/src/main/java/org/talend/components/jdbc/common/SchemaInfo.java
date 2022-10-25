@@ -57,11 +57,11 @@ public class SchemaInfo implements Serializable {
 
     @Option
     @Documentation("Length or decimal type precision.")
-    private int length;
+    private Integer length;
 
     @Option
     @Documentation("Precision or decimal type scale.")
-    private int precision;
+    private Integer precision;
 
     @Option
     @Documentation("Default value.")

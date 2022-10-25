@@ -14,6 +14,7 @@ package org.talend.components.jdbc.input;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DBType;
+import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.schema.SchemaInferer;
@@ -25,6 +26,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.sql.*;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -42,7 +44,7 @@ public class JDBCInputReader {
 
     private RecordBuilderFactory recordBuilderFactory;
 
-    private transient Schema querySchema;
+    private Schema querySchema;
 
     private Statement statement;
 
@@ -54,6 +56,8 @@ public class JDBCInputReader {
 
     private transient Map<String, Object> context;
 
+    private final boolean trimAll;
+
     public JDBCInputReader(JDBCInputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
             RecordBuilderFactory recordBuilderFactory, final Map<String, Object> context) {
         this.config = config;
@@ -61,6 +65,15 @@ public class JDBCInputReader {
         this.conn = conn;
         this.recordBuilderFactory = recordBuilderFactory;
         this.context = context;
+
+        trimAll = config.isTrimAllStringOrCharColumns();
+
+        if(!trimAll) {
+            List<ColumnTrim> columnTrimList = config.getColumnTrims();
+            //TODO now if studio design schema have dynamic type column, this fields will be empty as not pass
+            //here must use SchemaInfo.label to search in columnTrimList, can't use entry name and origin db name(right?)
+            List<SchemaInfo> fields = config.getDataSet().getSchema();
+        }
     }
 
     private Schema getSchema() throws SQLException {
@@ -203,7 +216,6 @@ public class JDBCInputReader {
     }
 
     public Record getCurrent() throws NoSuchElementException {
-        // TODO(igonchar) correctly check whether start() method was called; throw NoSuchElementException if it wasn't
         if (currentRecord == null) {
             throw new NoSuchElementException("start() wasn't called");
         }

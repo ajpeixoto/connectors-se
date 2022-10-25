@@ -20,6 +20,7 @@ import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.components.jdbc.input.ColumnTrim;
 import org.talend.components.jdbc.input.JDBCInputConfig;
+import org.talend.components.jdbc.input.QueryEmitter;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
@@ -209,17 +210,7 @@ public class JDBCInputTestIT {
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
 
-        String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job
-                .components()
-                .component("in", "JDBCNew://Input?" + inConfig)
-                .component("out", "test://collector")
-                .connections()
-                .from("in")
-                .to("out")
-                .build()
-                .run();
-        List<Record> data = componentsHandler.getCollectedData(Record.class);
+        List<Record> data = run(config);
 
         assertEquals(3, data.size());
 
@@ -231,8 +222,6 @@ public class JDBCInputTestIT {
 
         assertEquals(3, getValueByIndex(data.get(2), 0));
         assertEquals("dabao", getValueByIndex(data.get(2), 1));
-
-        componentsHandler.resetState();
     }
 
     @Test
@@ -245,17 +234,7 @@ public class JDBCInputTestIT {
         config.setDataSet(dataSet);
         config.setTrimAllStringOrCharColumns(true);
 
-        String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job
-                .components()
-                .component("in", "JDBCNew://Input?" + inConfig)
-                .component("out", "test://collector")
-                .connections()
-                .from("in")
-                .to("out")
-                .build()
-                .run();
-        List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
+        List<Record> data = run(config);
 
         assertEquals(1, getValueByIndex(data.get(0), 0));
         assertEquals("wangwei", getValueByIndex(data.get(0), 1));
@@ -265,8 +244,6 @@ public class JDBCInputTestIT {
 
         assertEquals(3, getValueByIndex(data.get(2), 0));
         assertEquals("dabao", getValueByIndex(data.get(2), 1));
-
-        componentsHandler.resetState();
     }
 
     @Test
@@ -279,17 +256,7 @@ public class JDBCInputTestIT {
         config.setDataSet(dataSet);
         config.setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("NAME", true)));
 
-        final String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job
-                .components()
-                .component("in", "JDBCNew://Input?" + inConfig)
-                .component("out", "test://collector")
-                .connections()
-                .from("in")
-                .to("out")
-                .build()
-                .run();
-        List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
+        List<Record> data = run(config);
 
         assertEquals(1, getValueByIndex(data.get(0), 0));
         assertEquals("wangwei", getValueByIndex(data.get(0), 1));
@@ -299,8 +266,6 @@ public class JDBCInputTestIT {
 
         assertEquals(3, getValueByIndex(data.get(2), 0));
         assertEquals("dabao", getValueByIndex(data.get(2), 1));
-
-        componentsHandler.resetState();
     }
 
     private Object getValueByIndex(Record record, int index) {
@@ -317,17 +282,7 @@ public class JDBCInputTestIT {
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
 
-        String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job
-                .components()
-                .component("in", "JDBCNew://Input?" + inConfig)
-                .component("out", "test://collector")
-                .connections()
-                .from("in")
-                .to("out")
-                .build()
-                .run();
-        List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
+        List<Record> data = run(config);
 
         Record record = data.get(0);
 
@@ -366,12 +321,10 @@ public class JDBCInputTestIT {
         List<Schema.Entry> actualFields = actualSchema.getEntries();
 
         assertEquals(14, actualFields.size());
-
-        componentsHandler.resetState();
     }
 
     @Test
-    public void testUsePrepareStatement() {
+    public void testUsePrepareStatement() throws SQLException {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName_all_type) + " where INT_COL = ? and VARCHAR_COL = ?");
@@ -382,19 +335,20 @@ public class JDBCInputTestIT {
         config.setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 2147483647),
                 new PreparedStatementParameter(2, Type.String, "abcdefg")));
 
-        String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job
-                .components()
-                .component("in", "JDBCNew://Input?" + inConfig)
-                .component("out", "test://collector")
-                .connections()
-                .from("in")
-                .to("out")
-                .build()
-                .run();
-        List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
+        //skip parameter ser, as PreparedStatementParameter use object to store value, and the function only for studio
+        List<Record> records = new ArrayList<>();
+        QueryEmitter qe = new QueryEmitter(config, jdbcService, recordBuilderFactory);
+        try {
+            qe.init();
+            Record r;
+            while((r = qe.next())!=null) {
+                records.add(r);
+            }
+        } finally {
+            qe.release();
+        }
 
-        Record record = data.get(0);
+        Record record = records.get(0);
 
         Short col0 = (Short) getValueByIndex(record, 0);
         Integer col1 = (Integer) getValueByIndex(record, 1);
@@ -442,6 +396,13 @@ public class JDBCInputTestIT {
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
 
+        List<Record> records = run(config);
+
+        assertEquals(Schema.Type.INT, records.get(0).getSchema().getEntries().get(0).getType());
+        assertEquals(Schema.Type.STRING, records.get(0).getSchema().getEntries().get(1).getType());
+    }
+
+    private List<Record> run(JDBCInputConfig config) {
         String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
         Job
                 .components()
@@ -453,10 +414,9 @@ public class JDBCInputTestIT {
                 .build()
                 .run();
         List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
-
-        // TODO assert type
-
         componentsHandler.resetState();
+
+        return data;
     }
 
 }

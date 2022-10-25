@@ -437,11 +437,19 @@ public class SchemaInferer {
                     .withType(convertTalendType2TckType(TalendType.get(info.getTalendType())))
                     // TODO also define a pro for origin db type like VARCHAR? info.getType()
                     .withProp("talend.studio.type", info.getTalendType())
-                    .withProp("talend.studio.key", String.valueOf(info.isKey()))
-                    .withProp("talend.studio.pattern", info.getPattern())
-                    // TODO how to treat differently for null, 0, empty?
-                    .withProp("talend.studio.length", String.valueOf(info.getLength()))
-                    .withProp("talend.studio.precision", String.valueOf(info.getPrecision()));
+                    .withProp("talend.studio.key", String.valueOf(info.isKey()));
+
+                    if(info.getPattern()!=null) {
+                        entryBuilder.withProp("talend.studio.pattern", info.getPattern());
+                    }
+
+                    if(info.getLength()!=null) {
+                        entryBuilder.withProp("talend.studio.length", String.valueOf(info.getLength()));
+                    }
+
+                    if(info.getPrecision()!=null) {
+                        entryBuilder.withProp("talend.studio.precision", String.valueOf(info.getPrecision()));
+                    }
 
             schemaBuilder.withEntry(entryBuilder.build());
         });
