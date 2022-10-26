@@ -16,7 +16,6 @@ import lombok.Data;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;

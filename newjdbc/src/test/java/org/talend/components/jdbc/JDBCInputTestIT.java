@@ -10,11 +10,14 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.common;
+package org.talend.components.jdbc;
 
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.talend.components.jdbc.common.PreparedStatementParameter;
+import org.talend.components.jdbc.common.Type;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
@@ -31,7 +34,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -42,11 +44,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+import static org.talend.components.jdbc.DBTestUtils.*;
 
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisplayName("Testing of JDBC component")
+@DisplayName("Testing of JDBC input component")
 public class JDBCInputTestIT {
 
     @Injected
@@ -58,7 +60,7 @@ public class JDBCInputTestIT {
     @Service
     private JDBCService jdbcService;
 
-    private static JDBCDataStore dataStore;
+    private JDBCDataStore dataStore;
 
     private static final String tableName = "JDBCINPUT";
 
@@ -66,7 +68,7 @@ public class JDBCInputTestIT {
 
     @BeforeAll
     public void beforeAll() throws Exception {
-        dataStore = DBTestUtils.createDataStore();
+        dataStore = DBTestUtils.createDataStore(true);
         JDBCService service = componentsHandler.findService(JDBCService.class);
         try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
@@ -117,7 +119,7 @@ public class JDBCInputTestIT {
     }
 
     public void testGetSchemaNamesWithWrongClass() throws Exception {
-        JDBCDataStore dataStore = DBTestUtils.createDataStore();
+        JDBCDataStore dataStore = DBTestUtils.createDataStore(true);
         dataStore.setJdbcClass("notexist");
         try {
             jdbcService.fetchTables(dataStore);
@@ -128,7 +130,7 @@ public class JDBCInputTestIT {
     }
 
     public void testGetSchemaWithWrongClass() throws Exception {
-        JDBCDataStore dataStore = DBTestUtils.createDataStore();
+        JDBCDataStore dataStore = DBTestUtils.createDataStore(true);
         dataStore.setJdbcClass("notexist");
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(dataStore);
@@ -154,7 +156,7 @@ public class JDBCInputTestIT {
     }
 
     public void testGetSchemaFromQueryWithWrongClass() throws Exception {
-        JDBCDataStore dataStore = DBTestUtils.createDataStore();
+        JDBCDataStore dataStore = DBTestUtils.createDataStore(true);
         dataStore.setJdbcClass("notexist");
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
@@ -168,7 +170,7 @@ public class JDBCInputTestIT {
     }
 
     public void testGetSchemaFromQueryWithWrongURL() throws Exception {
-        JDBCDataStore dataStore = DBTestUtils.createDataStore();
+        JDBCDataStore dataStore = DBTestUtils.createDataStore(true);
         dataStore.setJdbcUrl("wrongone");
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
@@ -210,7 +212,7 @@ public class JDBCInputTestIT {
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
 
-        List<Record> data = run(config);
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
         assertEquals(3, data.size());
 
@@ -234,7 +236,7 @@ public class JDBCInputTestIT {
         config.setDataSet(dataSet);
         config.setTrimAllStringOrCharColumns(true);
 
-        List<Record> data = run(config);
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
         assertEquals(1, getValueByIndex(data.get(0), 0));
         assertEquals("wangwei", getValueByIndex(data.get(0), 1));
@@ -256,7 +258,7 @@ public class JDBCInputTestIT {
         config.setDataSet(dataSet);
         config.setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("NAME", true)));
 
-        List<Record> data = run(config);
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
         assertEquals(1, getValueByIndex(data.get(0), 0));
         assertEquals("wangwei", getValueByIndex(data.get(0), 1));
@@ -266,10 +268,6 @@ public class JDBCInputTestIT {
 
         assertEquals(3, getValueByIndex(data.get(2), 0));
         assertEquals("dabao", getValueByIndex(data.get(2), 1));
-    }
-
-    private Object getValueByIndex(Record record, int index) {
-        return record.get(Object.class, record.getSchema().getEntries().get(index));
     }
 
     // TODO fix the mapping
@@ -282,7 +280,7 @@ public class JDBCInputTestIT {
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
 
-        List<Record> data = run(config);
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
         Record record = data.get(0);
 
@@ -396,27 +394,10 @@ public class JDBCInputTestIT {
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
 
-        List<Record> records = run(config);
+        List<Record> records = DBTestUtils.runInput(componentsHandler, config);
 
         assertEquals(Schema.Type.INT, records.get(0).getSchema().getEntries().get(0).getType());
         assertEquals(Schema.Type.STRING, records.get(0).getSchema().getEntries().get(1).getType());
-    }
-
-    private List<Record> run(JDBCInputConfig config) {
-        String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job
-                .components()
-                .component("in", "JDBCNew://Input?" + inConfig)
-                .component("out", "test://collector")
-                .connections()
-                .from("in")
-                .to("out")
-                .build()
-                .run();
-        List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
-        componentsHandler.resetState();
-
-        return data;
     }
 
 }

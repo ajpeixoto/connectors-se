@@ -13,9 +13,6 @@
 package org.talend.components.jdbc.sp;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.common.Reject;
-import org.talend.components.jdbc.row.JDBCRowConfig;
-import org.talend.components.jdbc.row.JDBCRowWriter;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -26,8 +23,6 @@ import org.talend.sdk.component.api.processor.*;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.connection.Connection;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-import org.talend.sdk.component.api.standalone.DriverRunner;
-import org.talend.sdk.component.api.standalone.RunAtDriver;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

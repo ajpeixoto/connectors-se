@@ -12,7 +12,9 @@
  */
 package org.talend.components.jdbc.common;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -22,6 +24,8 @@ import java.io.Serializable;
 
 // TODO remove unnecessary info
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @GridLayout({ @GridLayout.Row({ "label", "originalDbColumnName", "key", "type", "talendType", "nullable", "pattern",
         "length", "precision", "defaultValue", "comment" }) })
 @Documentation("Schema definition.")

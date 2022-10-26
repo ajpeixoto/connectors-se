@@ -14,7 +14,6 @@ package org.talend.components.jdbc.output;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.common.Reject;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -81,7 +80,7 @@ public class OutputProcessor implements Serializable {
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
             @Output("reject") final OutputEmitter<Record>/* OutputEmitter<Reject> */ reject)
-            throws SQLException, IOException {
+            throws SQLException {
         if (!init) {
             boolean useExistedConnection = false;
 
@@ -89,6 +88,10 @@ public class OutputProcessor implements Serializable {
                 try {
                     dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                             configuration.getDataSet().getDataStore(), context, false);
+
+                    if(configuration.getCommitEvery()!=0) {
+                        dataSource.getConnection().setAutoCommit(false);
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

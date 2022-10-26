@@ -15,7 +15,6 @@ package org.talend.components.jdbc.dataset;
 import lombok.Data;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
-import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;

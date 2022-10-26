@@ -10,7 +10,7 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.common;
+package org.talend.components.jdbc;
 
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
@@ -24,6 +24,8 @@ import org.talend.components.jdbc.sp.JDBCSPConfig;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.junit.BaseComponentsHandler;
+import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,8 +41,43 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 public class DBTestUtils {
+
+    static Object getValueByIndex(Record record, int index) {
+        return record.get(Object.class, record.getSchema().getEntries().get(index));
+    }
+
+    static List<Record> runInput(BaseComponentsHandler componentsHandler, JDBCInputConfig config) {
+        String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
+        Job.components()
+                .component("in", "JDBCNew://Input?" + inConfig)
+                .component("out", "test://collector")
+                .connections()
+                .from("in")
+                .to("out")
+                .build()
+                .run();
+        List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
+        componentsHandler.resetState();
+
+        return data;
+    }
+
+    static void runOutput(List<Record> input, BaseComponentsHandler componentsHandler, JDBCOutputConfig config) {
+        componentsHandler.setInputData(input);
+        String outConfig = configurationByExample().forInstance(config).configured().toQueryString();
+        Job.components()
+                .component("in", "test://emitter")
+                .component("out", "JDBCNew://Output?" + outConfig)
+                .connections()
+                .from("in")
+                .to("out")
+                .build()
+                .run();
+        componentsHandler.resetState();
+    }
 
     public static void shutdownDBIfNecessary() {
     }
@@ -503,11 +540,6 @@ public class DBTestUtils {
         return result;
     }
 
-    public static List<Record> fetchDataByReaderFromTable(String tableName) {
-        // TODO
-        return null;
-    }
-
     private static Record copyValueFrom(RecordBuilderFactory recordBuilderFactory, Record record) {
         Schema schema = record.getSchema();
         Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
@@ -621,7 +653,7 @@ public class DBTestUtils {
 
     private static java.util.Properties props = null;
 
-    public static JDBCDataStore createDataStore() throws IOException {
+    public static JDBCDataStore createDataStore(boolean autoCommit) throws IOException {
         if (props == null) {
             try (InputStream is = DBTestUtils.class.getClassLoader().getResourceAsStream("connection.properties")) {
                 props = new java.util.Properties();
@@ -645,7 +677,7 @@ public class DBTestUtils {
         dataStore.setPassword(password);
 
         dataStore.setUseAutoCommit(true);
-        dataStore.setAutoCommit(true);
+        dataStore.setAutoCommit(autoCommit);
 
         return dataStore;
     }

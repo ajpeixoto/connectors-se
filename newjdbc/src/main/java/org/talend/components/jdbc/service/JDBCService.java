@@ -182,7 +182,12 @@ public class JDBCService implements Serializable {
     @CreateConnection
     public DataSourceWrapper createConnection(@Option("configuration") final JDBCDataStore dataStore)
             throws SQLException {
-        return createConnectionOrGetFromSharedConnectionPoolOrDataSource(dataStore, context, false);
+        DataSourceWrapper dataSourceWrapper = createConnectionOrGetFromSharedConnectionPoolOrDataSource(dataStore, context, false);
+        //not call this in HikariDataSource wrapper as worry HikariDataSource implement
+        if(dataStore.isUseAutoCommit()) {
+            dataSourceWrapper.getConnection().setAutoCommit(dataStore.isAutoCommit());
+        }
+        return dataSourceWrapper;
     }
 
     @CloseConnection
@@ -387,8 +392,6 @@ public class JDBCService implements Serializable {
                 dataSource.setUsername(dataStore.getUserId());
                 dataSource.setPassword(dataStore.getPassword());
 
-                dataSource.setAutoCommit(dataStore.isUseAutoCommit() && dataStore.isAutoCommit());
-
                 dataSource.setMaximumPoolSize(1);
 
                 // mysql special property?
@@ -482,7 +485,8 @@ public class JDBCService implements Serializable {
             }
 
             if (dataSource != null) {
-                return dataSource.getConnection();
+                connection = dataSource.getConnection();
+                return connection;
             }
 
             return null;

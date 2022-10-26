@@ -130,7 +130,7 @@ public class JDBCDataStore implements Serializable {
     // TODO how to hide it for components like tjdbcinput/tjdbcrow
     @Option
     @Documentation("decide if call auto commit method")
-    private boolean useAutoCommit;
+    private boolean useAutoCommit = true;
 
     @Option
     @ActiveIf(target = "useAutoCommit", value = { "true" })

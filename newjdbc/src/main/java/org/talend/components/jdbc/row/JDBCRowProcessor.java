@@ -13,7 +13,6 @@
 package org.talend.components.jdbc.row;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.common.Reject;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -79,6 +78,13 @@ public class JDBCRowProcessor implements Serializable {
                 try {
                     dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                             configuration.getDataSet().getDataStore(), context, false);
+
+                    if(configuration.getCommitEvery()!=0) {
+                        java.sql.Connection connection = dataSource.getConnection();
+                        if(connection.getAutoCommit()) {
+                            connection.setAutoCommit(false);
+                        }
+                    }
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

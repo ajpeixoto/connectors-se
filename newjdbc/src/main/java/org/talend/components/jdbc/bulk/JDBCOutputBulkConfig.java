@@ -14,7 +14,6 @@ package org.talend.components.jdbc.bulk;
 
 import lombok.Data;
 import org.talend.components.jdbc.common.SchemaInfo;
-import org.talend.components.jdbc.sp.JDBCSchemaDataSet;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Structure;
