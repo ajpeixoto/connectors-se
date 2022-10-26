@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.35.0-SNAPSHOT</version>
+        <version>1.39.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bigquery</artifactId>
@@ -14,18 +14,13 @@
     <description>Google Big Query</description>
 
     <properties>
-        <google.bq.sdk.version>1.117.1</google.bq.sdk.version>
-        <google.gcs.sdk.version>1.113.1</google.gcs.sdk.version>
+        <google.bq.sdk.version>2.13.2</google.bq.sdk.version>
+        <google.gcs.sdk.version>2.8.1</google.gcs.sdk.version>
 
         <talend.scan.scannedDependencies>org.talend.components:stream-api</talend.scan.scannedDependencies>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.talend.components</groupId>
-            <artifactId>bigquery-locales</artifactId>
-            <version>${locales.version}</version>
-        </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-bigquery</artifactId>
@@ -58,6 +53,11 @@
             <groupId>org.talend.components</groupId>
             <artifactId>stream-csv</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>${netty4.version}</version>
         </dependency>
 
         <!-- Tests -->
