@@ -33,9 +33,11 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
+import org.talend.sdk.component.runtime.output.Branches;
 
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -116,14 +118,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(5, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -139,9 +134,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -155,16 +148,11 @@ public class JDBCOutputTestIT {
 
         randomBatchAndCommit(config);
 
-        DBTestUtils.runOutput(records, componentsHandler, config);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
+        assertEquals(records, outputs.get(Record.class, Branches.DEFAULT_BRANCH));
+        assertNull(outputs.get(Record.class, "reject"));
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(5, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -183,9 +171,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",7).withString("NAME", "xiaored").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",8).withString("NAME", "xiaohei").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -202,14 +188,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(8, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -234,9 +213,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",7).withString("NAME", "the line should be rejected as it's too long").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",8).withString("NAME", "dabao").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -249,16 +226,11 @@ public class JDBCOutputTestIT {
         config.setUseBatch(false);
         config.setCommitEvery(DBTestUtils.randomInt());
 
-        DBTestUtils.runOutput(records, componentsHandler, config);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
+        assertEquals(Arrays.asList(records.get(0), records.get(2), records.get(4)), outputs.get(Record.class, Branches.DEFAULT_BRANCH));
+        assertEquals(2, outputs.get(Record.class, "reject").size());
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(6, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -293,14 +265,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(3, result.size());
         assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
@@ -318,9 +283,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -336,14 +299,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(3, result.size());
         assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
@@ -364,9 +320,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "the line should be rejected as it's too long").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",3).withString("NAME", "dabao1").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -381,14 +335,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(3, result.size());
         assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
@@ -423,14 +370,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(1, result.size());
         assertEquals(new Integer(3), getValueByIndex(result.get(0), 0));
@@ -444,9 +384,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -462,14 +400,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(1, result.size());
         assertEquals(new Integer(3), getValueByIndex(result.get(0), 0));
@@ -487,9 +418,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "the line is not rejected though it's too long as only key is used by deleting action").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",3).withString("NAME", "dabao1").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -504,14 +433,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(0, result.size());
     }
@@ -540,14 +462,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
         assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
@@ -568,9 +483,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "new one").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -586,14 +499,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
         assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
@@ -630,14 +536,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
         assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
@@ -658,9 +557,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "new one").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -676,14 +573,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
         assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
@@ -703,9 +593,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -724,14 +612,7 @@ public class JDBCOutputTestIT {
 
         DBTestUtils.runOutput(records, componentsHandler, config);
 
-        JDBCInputConfig inputConfig = new JDBCInputConfig();
-        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
-        dataset4Input.setDataStore(dataStore);
-        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
-        dataset4Input.setSchema(schemaInfos);
-        inputConfig.setDataSet(dataset4Input);
-
-        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         if (action == DataAction.INSERT || action == DataAction.INSERT_OR_UPDATE || action == DataAction.UPDATE_OR_INSERT) {
             assertEquals(2, result.size());
@@ -760,9 +641,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "too long value").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -771,7 +650,7 @@ public class JDBCOutputTestIT {
         dataSet4Output.setSchema(schemaInfos);
         config.setDataSet(dataSet4Output);
 
-        DataAction action = DBTestUtils.randomDataActionExceptDelete();
+        DataAction action = DBTestUtils.randomDataActionExceptDeleteAndUpdate();
         config.setDataAction(action);
         config.setDieOnError(true);
 

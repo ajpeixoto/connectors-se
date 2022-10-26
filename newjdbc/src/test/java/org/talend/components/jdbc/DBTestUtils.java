@@ -12,12 +12,14 @@
  */
 package org.talend.components.jdbc;
 
+import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.components.jdbc.input.JDBCInputConfig;
 import org.talend.components.jdbc.output.DataAction;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.output.OutputProcessor;
 import org.talend.components.jdbc.row.JDBCRowConfig;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.components.jdbc.sp.JDBCSPConfig;
@@ -25,7 +27,10 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
+import org.talend.sdk.component.junit.MainInputFactory;
 import org.talend.sdk.component.runtime.manager.chain.Job;
+import org.talend.sdk.component.runtime.output.Branches;
+import org.talend.sdk.component.runtime.output.Processor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,8 +50,47 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 public class DBTestUtils {
 
+    static List<SchemaInfo> createTestSchemaInfos() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
+        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        return schemaInfos;
+    }
+
+    static List<SchemaInfo> createTestSchemaInfos4RowResultSet() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("RESULTSET", null, false, null, "id_Object", true, null, null, null, null, null));
+        return schemaInfos;
+    }
+
     static Object getValueByIndex(Record record, int index) {
         return record.get(Object.class, record.getSchema().getEntries().get(index));
+    }
+
+    static List<Record> runInput(BaseComponentsHandler componentsHandler, JDBCDataStore dataStore, String tableName, List<SchemaInfo> schemaInfos) {
+        JDBCInputConfig inputConfig = new JDBCInputConfig();
+        JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
+        dataset4Input.setDataStore(dataStore);
+        dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
+        dataset4Input.setSchema(schemaInfos);
+        inputConfig.setDataSet(dataset4Input);
+
+        List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
+        return result;
+    }
+
+    static void runRow(List<Record> input, BaseComponentsHandler componentsHandler, JDBCRowConfig config) {
+        componentsHandler.setInputData(input);
+        String rowConfig = configurationByExample().forInstance(config).configured().toQueryString();
+        Job.components()
+                .component("in", "test://emitter")
+                .component("out", "JDBCNew://Row?" + rowConfig)
+                .connections()
+                .from("in")
+                .to("out")
+                .build()
+                .run();
+        componentsHandler.resetState();
     }
 
     static List<Record> runInput(BaseComponentsHandler componentsHandler, JDBCInputConfig config) {
@@ -77,6 +121,14 @@ public class DBTestUtils {
                 .build()
                 .run();
         componentsHandler.resetState();
+    }
+
+    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler, JDBCOutputConfig config) {
+        final Processor processor = componentsHandler.createProcessor(OutputProcessor.class, config);
+        final BaseComponentsHandler.Outputs outputs =
+                componentsHandler.collect(processor, new MainInputFactory(input.iterator()));
+
+        return outputs;
     }
 
     public static void shutdownDBIfNecessary() {
@@ -579,16 +631,14 @@ public class DBTestUtils {
         }
     }
 
-    public static DataAction randomDataActionExceptDelete() {
-        int value = random.nextInt(4);
+    public static DataAction randomDataActionExceptDeleteAndUpdate() {
+        int value = random.nextInt(3);
         switch (value) {
         case 0:
             return DataAction.INSERT;
         case 1:
-            return DataAction.UPDATE;
-        case 2:
             return DataAction.INSERT_OR_UPDATE;
-        case 3:
+        case 2:
             return DataAction.UPDATE_OR_INSERT;
         default:
             return DataAction.INSERT;
