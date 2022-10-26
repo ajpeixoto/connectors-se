@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.talend.components.rejector.service.UiServices;
 import org.talend.sdk.component.api.configuration.Option;
@@ -89,4 +90,9 @@ public class RejectorGenerator implements Serializable {
             return null;
         }
     }
+
+    @PreDestroy
+    public void shutdown() {
+    }
+
 }

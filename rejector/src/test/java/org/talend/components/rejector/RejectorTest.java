@@ -16,7 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,9 @@ import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.junit.ComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
+import org.talend.sdk.component.runtime.input.Input;
+import org.talend.sdk.component.runtime.input.Mapper;
+import org.talend.sdk.component.runtime.input.PartitionMapperImpl;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import lombok.extern.slf4j.Slf4j;
@@ -68,6 +73,29 @@ public class RejectorTest {
                 .run();
         final List<Record> data = new ArrayList<>(handler.getCollectedData(Record.class));
         assertEquals(5, data.size());
+    }
+
+    @Test
+    void testConfig() {
+        Mapper mapper = handler.asManager()
+                .findMapper("Rejector", "RejectorInfiniteStoppableSource", 1, new HashMap<String, String>() {
+
+                    {
+                        put("configuration.dataSet.dataStore.anInteger", "200");
+                        put("configuration.$maxDurationMs", "200");
+                        put("configuration.$maxRecords", "5");
+                    }
+                })
+                .get();
+        Map<String, String> internals = PartitionMapperImpl.class.cast(mapper).getInternalConfiguration();
+        log.warn("[testConfig] internals: {}", internals);
+        Input input = null;
+        mapper.start();
+        input = mapper.create();
+        input.start();
+        log.warn("[testConfig] {}", input.next());
+        input.stop();
+        mapper.stop();
     }
 
 }

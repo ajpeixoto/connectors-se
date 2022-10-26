@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 
 import org.talend.components.rejector.service.UiServices;
 import org.talend.sdk.component.api.configuration.Option;
@@ -71,8 +72,12 @@ public class RejectorInfiniteGenerator implements Serializable {
     }
 
     @PostConstruct
-    public void init() {
+    public void initProducer() {
         schema = uiServices.guessSchema(configuration.getDataSet());
+    }
+
+    @PreDestroy
+    public void preKillInput() {
     }
 
     @Producer

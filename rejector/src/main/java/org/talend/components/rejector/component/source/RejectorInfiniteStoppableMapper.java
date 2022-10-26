@@ -17,6 +17,9 @@ import static java.util.Collections.singletonList;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.talend.components.rejector.service.UiServices;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Icon.IconType;
@@ -30,6 +33,9 @@ import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @PartitionMapper(name = "RejectorInfiniteStoppableSource", infinite = true, stoppable = true)
 @Icon(value = IconType.CUSTOM, custom = "rejector")
 @Version(1)
@@ -57,6 +63,14 @@ public class RejectorInfiniteStoppableMapper implements Serializable {
     @Split
     public List<RejectorInfiniteStoppableMapper> split(@PartitionSize final long desiredSize) {
         return singletonList(this);
+    }
+
+    @PostConstruct
+    public void initMapper() {
+    }
+
+    @PreDestroy
+    public void preKillMapper() {
     }
 
     @Emitter

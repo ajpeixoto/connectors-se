@@ -17,6 +17,9 @@ import static java.util.Collections.singletonList;
 import java.io.Serializable;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+
 import org.talend.components.rejector.service.UiServices;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Icon.IconType;
@@ -63,5 +66,13 @@ public class RejectorMapper implements Serializable {
     public RejectorGenerator createWorker() {
 
         return new RejectorGenerator(configuration, recordBuilder, uiServices);
+    }
+
+    @PostConstruct
+    public void init() {
+    }
+
+    @PreDestroy
+    public void shutdown() {
     }
 }

@@ -23,8 +23,8 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus.Status;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-import org.talend.sdk.component.api.service.schema.DiscoverProcessorSchema;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
+import org.talend.sdk.component.api.service.schema.DiscoverSchemaExtended;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +41,7 @@ public class UiServices {
         return new HealthCheckStatus(Status.OK, "Connection OK");
     }
 
-    @DiscoverProcessorSchema("RejectorProcessorSchema")
+    @DiscoverSchemaExtended("RejectorProcessorSchema")
     public Schema discoverProcessorSchema(final Schema incomingSchema,
             @Option final RejectorProcessorConfiguration configuration, final String branch) {
         log.warn("[discoverProcessorSchema]branch: {}, incoming: {}, conf: {}.", branch, incomingSchema, configuration);
