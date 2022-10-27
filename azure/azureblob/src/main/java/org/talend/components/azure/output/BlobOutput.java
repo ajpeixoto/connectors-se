@@ -34,18 +34,25 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 @Version(value = 2, migrationHandler = AzureStorageRuntimeDatasetMigration.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "azure-blob-output")
 @Processor(name = "Output")
 @Documentation("Azure Blob Storage Writer")
 public class BlobOutput implements Serializable {
 
+    @Getter(AccessLevel.PROTECTED)
     private final BlobOutputConfiguration configuration;
 
+    @Getter(AccessLevel.PROTECTED)
     private final AzureBlobComponentServices service;
 
     private final MessageService messageService;
 
+    @Setter(AccessLevel.PROTECTED)
     private BlobFileWriter fileWriter;
 
     public BlobOutput(@Option("configuration") final BlobOutputConfiguration configuration,

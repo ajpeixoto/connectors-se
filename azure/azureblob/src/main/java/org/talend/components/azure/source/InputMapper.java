@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import org.talend.components.azure.migration.AzureStorageRuntimeDatasetMigration;
+import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -29,8 +30,6 @@ import org.talend.sdk.component.api.input.PartitionSize;
 import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
-import org.talend.components.azure.service.AzureBlobComponentServices;
 
 //
 // this class role is to enable the work to be distributed in environments supporting it.

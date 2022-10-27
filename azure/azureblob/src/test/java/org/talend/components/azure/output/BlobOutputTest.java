@@ -12,25 +12,26 @@
  */
 package org.talend.components.azure.output;
 
+import static org.mockito.ArgumentMatchers.any;
+
 import java.net.URISyntaxException;
+
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.blob.CloudBlobClient;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.talend.components.azure.common.FileFormat;
+import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
-import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.exception.ComponentException;
-
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import static org.mockito.ArgumentMatchers.any;
 
 public class BlobOutputTest {
 

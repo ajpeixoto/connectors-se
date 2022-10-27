@@ -19,14 +19,12 @@ import java.util.UUID;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonBuilderFactory;
 
+import com.microsoft.azure.storage.StorageException;
+
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.common.stream.output.json.RecordToJson;
 import org.talend.sdk.component.api.record.Record;
-
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
 
 public class JsonBlobFileWriter extends BlobFileWriter {
 
@@ -58,20 +56,15 @@ public class JsonBlobFileWriter extends BlobFileWriter {
 
     @Override
     protected void generateFile(String directoryName) throws URISyntaxException, StorageException {
-        String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".json";
-        CloudBlob blob = getContainer().getBlockBlobReference(fileName);
-        while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".json";
-            blob = getContainer().getBlockBlobReference(fileName);
-        }
-
-        setCurrentItem(blob);
+        final CloudBlobWriter writer = getWriterBuilder()
+                .build(() -> directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".json");
+        setCurrentItem(writer);
     }
 
     @Override
     public void flush() throws IOException, StorageException {
         byte[] batchBytes = convertBatchToBytes();
-        getCurrentItem().uploadFromByteArray(batchBytes, 0, batchBytes.length);
+        getCurrentItem().upload(batchBytes);
         getBatch().clear();
     }
 

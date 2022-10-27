@@ -18,6 +18,9 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.UUID;
+
+import com.microsoft.azure.storage.StorageException;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.talend.components.azure.output.BlobOutputConfiguration;
@@ -29,8 +32,7 @@ import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudAppendBlob;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -47,21 +49,13 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         super(config, connectionServices);
         this.config = config;
         this.configCSV = config.getDataset().getCsvOptions();
-
     }
 
     @Override
     public void generateFile(String directoryName) throws URISyntaxException, StorageException {
-        String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".csv";
-        CloudAppendBlob currentItem = getContainer().getAppendBlobReference(itemName);
-
-        while (currentItem.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
-            currentItem = getContainer().getAppendBlobReference(itemName);
-        }
-
-        currentItem.createOrReplace();
-        setCurrentItem(currentItem);
+        final CloudBlobWriter writer = this.getWriterBuilder()
+                .build(() -> directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".csv");
+        setCurrentItem(writer);
     }
 
     @Override
@@ -90,9 +84,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         }
 
         byte[] contentBytes = content.getBytes(AzureBlobFormatUtils.getUsedEncodingValue(config.getDataset()));
-        ((CloudAppendBlob) getCurrentItem())
-                .appendFromByteArray(contentBytes, 0, contentBytes.length, null, null,
-                        AzureComponentServices.getTalendOperationContext());
+        this.getCurrentItem().append(contentBytes, AzureComponentServices.getTalendOperationContext());
         fileIsEmpty = false;
 
         getBatch().clear();
@@ -112,7 +104,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
                     .append(FormatUtils.getFieldDelimiterValue(configCSV))
                     .append(getSchema().getEntries().get(i).getName());
         }
-        ((CloudAppendBlob) getCurrentItem())
+        getCurrentItem()
                 .appendText(headerBuilder.toString() + FormatUtils.getRecordDelimiterValue(configCSV));
         fileIsEmpty = false;
     }

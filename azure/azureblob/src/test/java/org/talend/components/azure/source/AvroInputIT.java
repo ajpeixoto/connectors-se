@@ -12,6 +12,8 @@
  */
 package org.talend.components.azure.source;
 
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.time.Instant;
@@ -19,9 +21,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import com.microsoft.azure.storage.StorageException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
@@ -31,9 +34,6 @@ import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
-
-import com.microsoft.azure.storage.StorageException;
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
 class AvroInputIT extends BaseIT {

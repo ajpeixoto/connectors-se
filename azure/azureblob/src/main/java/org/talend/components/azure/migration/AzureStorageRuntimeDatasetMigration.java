@@ -12,9 +12,9 @@
  */
 package org.talend.components.azure.migration;
 
-import org.talend.sdk.component.api.component.MigrationHandler;
-
 import java.util.Map;
+
+import org.talend.sdk.component.api.component.MigrationHandler;
 
 /**
  * This class is a workaround to migrate dataset encoding on pipelines until AzureStorageDatasetMigration

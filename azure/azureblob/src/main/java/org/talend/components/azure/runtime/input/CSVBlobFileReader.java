@@ -18,19 +18,20 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.ListBlobItem;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.talend.components.common.formats.Encoding;
 import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.common.converters.CSVConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
+import org.talend.components.common.converters.CSVConverter;
+import org.talend.components.common.formats.Encoding;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

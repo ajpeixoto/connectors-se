@@ -14,14 +14,14 @@ package org.talend.components.azure;
 
 import java.net.URISyntaxException;
 
+import com.microsoft.azure.storage.CloudStorageAccount;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.talend.components.azure.service.RegionUtils;
 import org.talend.components.common.connection.azureblob.AzureStorageConnectionAccount;
 import org.talend.components.common.connection.azureblob.AzureStorageConnectionSignature;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
-import org.talend.components.azure.service.RegionUtils;
-
-import com.microsoft.azure.storage.CloudStorageAccount;
 
 public class RegionTest {
 

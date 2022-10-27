@@ -13,6 +13,7 @@
 package org.talend.components.azure.migration;
 
 import java.util.Map;
+
 import org.talend.components.common.formats.Encoding;
 import org.talend.sdk.component.api.component.MigrationHandler;
 

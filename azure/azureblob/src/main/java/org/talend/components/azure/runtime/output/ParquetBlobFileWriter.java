@@ -18,20 +18,17 @@ import java.io.OutputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 
+import com.microsoft.azure.storage.StorageException;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.fs.Path;
 import org.apache.parquet.avro.AvroParquetWriter;
 import org.apache.parquet.hadoop.ParquetFileWriter;
 import org.apache.parquet.hadoop.ParquetWriter;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.common.converters.ParquetConverter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.common.converters.ParquetConverter;
 import org.talend.sdk.component.api.record.Record;
-
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
-import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class ParquetBlobFileWriter extends BlobFileWriter {
 
@@ -60,15 +57,9 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
 
     @Override
     public void generateFile(String directoryName) throws URISyntaxException, StorageException {
-        String fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + ".parquet";
-
-        CloudBlob blob = getContainer().getBlockBlobReference(fileName);
-        while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + ".parquet";
-            blob = getContainer().getBlockBlobReference(fileName);
-        }
-
-        setCurrentItem(blob);
+        final CloudBlobWriter writer = getWriterBuilder()
+                .build(() -> directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + ".parquet");
+        setCurrentItem(writer);
     }
 
     @Override
@@ -91,10 +82,10 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
             }
 
             writer.close();
-            OutputStream blobOutputStream = ((CloudBlockBlob) getCurrentItem()).openOutputStream();
-            Files.copy(tempFilePath.toPath(), blobOutputStream);
-            blobOutputStream.flush();
-            blobOutputStream.close();
+            final java.nio.file.Path tempPath = tempFilePath.toPath();
+            this.getCurrentItem()
+                    .onOutput(
+                            (OutputStream out) -> Files.copy(tempPath, out));
         } catch (IOException | StorageException e) {
             throw new RuntimeException(e);
         } finally {

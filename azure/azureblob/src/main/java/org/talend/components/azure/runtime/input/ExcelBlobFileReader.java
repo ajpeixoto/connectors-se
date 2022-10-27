@@ -12,30 +12,34 @@
  */
 package org.talend.components.azure.runtime.input;
 
+import avro.shaded.com.google.common.collect.Iterators;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.talend.components.common.formats.excel.ExcelFormat;
-import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.common.converters.ExcelConverter;
-import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.components.azure.service.MessageService;
-import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.monitorjbl.xlsx.StreamingReader;
 import com.monitorjbl.xlsx.exceptions.MissingSheetException;
 import com.monitorjbl.xlsx.impl.StreamingSheet;
 import com.monitorjbl.xlsx.impl.StreamingWorkbook;
-import avro.shaded.com.google.common.collect.Iterators;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.azure.service.MessageService;
+import org.talend.components.common.converters.ExcelConverter;
+import org.talend.components.common.formats.excel.ExcelFormat;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

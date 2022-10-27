@@ -12,26 +12,27 @@
  */
 package org.talend.components.azure.source;
 
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+
+import com.microsoft.azure.storage.StorageException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
-import org.talend.components.common.formats.Encoding;
 import org.talend.components.azure.common.FileFormat;
+import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.common.formats.Encoding;
 import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.common.formats.excel.ExcelFormatOptions;
-import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
-
-import com.microsoft.azure.storage.StorageException;
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.azure")
 class Excel2007IT extends BaseIT {

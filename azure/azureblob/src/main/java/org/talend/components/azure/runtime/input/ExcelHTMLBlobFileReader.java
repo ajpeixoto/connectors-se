@@ -15,6 +15,10 @@ package org.talend.components.azure.runtime.input;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.Iterator;
+
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.ListBlobItem;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -27,8 +31,6 @@ import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.ListBlobItem;
 
 public class ExcelHTMLBlobFileReader extends BlobFileReader {
 

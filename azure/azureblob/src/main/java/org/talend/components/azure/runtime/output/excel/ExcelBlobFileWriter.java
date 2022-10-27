@@ -19,20 +19,19 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.UUID;
 
+import com.microsoft.azure.storage.StorageException;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.talend.components.common.formats.excel.ExcelFormat;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.azure.output.BlobOutputConfiguration;
-import org.talend.components.common.converters.ExcelConverter;
 import org.talend.components.azure.runtime.output.BlobFileWriter;
+import org.talend.components.azure.runtime.output.CloudBlobWriter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.common.converters.ExcelConverter;
+import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.sdk.component.api.record.Record;
-
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
 
 public class ExcelBlobFileWriter extends BlobFileWriter {
 
@@ -72,15 +71,9 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
      */
     @Override
     public void generateFile(String directoryName) throws URISyntaxException, StorageException {
-        String itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
-
-        CloudBlob excelFile = getContainer().getBlockBlobReference(itemName);
-        while (excelFile.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            itemName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension;
-            excelFile = getContainer().getBlockBlobReference(itemName);
-
-        }
-        setCurrentItem(excelFile);
+        CloudBlobWriter writer = this.getWriterBuilder()
+                .build(() -> directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + fileExtension);
+        setCurrentItem(writer);
     }
 
     @Override
@@ -144,7 +137,7 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
 
         flushBatchToByteArray();
 
-        getCurrentItem().upload(new ByteArrayInputStream(bos.toByteArray()), -1);
+        getCurrentItem().upload(new ByteArrayInputStream(bos.toByteArray()));
         bos.close();
         getBatch().clear();
     }

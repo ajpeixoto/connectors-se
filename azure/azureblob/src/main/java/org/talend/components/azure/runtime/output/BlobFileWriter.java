@@ -17,17 +17,13 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.talend.components.common.service.azureblob.AzureComponentServices;
+import com.microsoft.azure.storage.StorageException;
+
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 
-import com.microsoft.azure.storage.CloudStorageAccount;
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
-import com.microsoft.azure.storage.blob.CloudBlobClient;
-import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -37,20 +33,16 @@ public abstract class BlobFileWriter {
 
     private Schema schema;
 
-    private CloudBlob currentItem = null;
+    private CloudBlobWriter currentItem = null;
 
-    private final CloudBlobContainer container;
+    private final CloudBlobWriterBuilder writerBuilder;
 
     private String directoryName;
 
     public BlobFileWriter(BlobOutputConfiguration config, AzureBlobComponentServices connectionServices)
             throws Exception {
-        CloudStorageAccount connection = connectionServices.createStorageAccount(config.getDataset().getConnection());
-        CloudBlobClient blobClient = connectionServices
-                .getConnectionService()
-                .createCloudBlobClient(connection,
-                        AzureComponentServices.DEFAULT_RETRY_POLICY);
-        container = blobClient.getContainerReference(config.getDataset().getContainerName());
+
+        this.writerBuilder = connectionServices.buildWriter(config);
 
         directoryName = config.getDataset().getDirectory();
 
@@ -85,16 +77,16 @@ public abstract class BlobFileWriter {
         return batch;
     }
 
-    protected CloudBlob getCurrentItem() {
+    protected CloudBlobWriter getCurrentItem() {
         return currentItem;
     }
 
-    protected void setCurrentItem(CloudBlob currentItem) {
+    protected void setCurrentItem(CloudBlobWriter currentItem) {
         this.currentItem = currentItem;
     }
 
-    protected CloudBlobContainer getContainer() {
-        return container;
+    protected CloudBlobWriterBuilder getWriterBuilder() {
+        return this.writerBuilder;
     }
 
     protected Schema getSchema() {

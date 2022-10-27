@@ -17,32 +17,20 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.Assertions;
-import org.talend.components.azure.common.FileFormat;
-import org.talend.components.common.connection.azureblob.AzureStorageConnectionAccount;
-import org.talend.components.common.formats.csv.CSVFormatOptions;
-import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.datastore.AzureCloudConnection;
-import org.talend.components.common.converters.CSVConverter;
-import org.talend.components.azure.source.BlobInputProperties;
-import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-import org.talend.sdk.component.maven.MavenDecrypter;
-import org.talend.sdk.component.maven.Server;
+import java.util.stream.Stream;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
@@ -52,6 +40,24 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlobDirectory;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.ListBlobItem;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.Assertions;
+import org.talend.components.azure.common.FileFormat;
+import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.datastore.AzureCloudConnection;
+import org.talend.components.azure.source.BlobInputProperties;
+import org.talend.components.common.connection.azureblob.AzureStorageConnectionAccount;
+import org.talend.components.common.converters.CSVConverter;
+import org.talend.components.common.formats.csv.CSVFormatOptions;
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+import org.talend.sdk.component.maven.MavenDecrypter;
+import org.talend.sdk.component.maven.Server;
 
 public class BlobTestUtils {
 
@@ -132,6 +138,34 @@ public class BlobTestUtils {
         printer.flush();
         printer.close();
         return byteArrayOutputStream.toByteArray();
+    }
+
+    public static List<Record> readRecordFromCSVDirectory(String directoryName,
+            AzureBlobDataset config,
+            CSVFormat format) throws IOException {
+        Stream<CSVRecord> csvRecords = readCSV(directoryName, format);
+        CSVConverter converter = CSVConverter.of(recordBuilderFactory, config.getCsvOptions());
+        return csvRecords.map(converter::toRecord).collect(Collectors.toList());
+    }
+
+    private static Stream<CSVRecord> readCSV(String directoryName, final CSVFormat format) throws IOException {
+        File root = new File(directoryName);
+        return Files.walk(root.toPath())
+                .filter((Path p) -> p.toFile().isFile() && p.toFile().getName().endsWith(".csv"))
+                .map((Path p) -> {
+                    try {
+                        return new FileReader(p.toFile());
+                    } catch (FileNotFoundException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                })
+                .flatMap((FileReader r) -> {
+                    try {
+                        return new CSVParser(r, format).getRecords().stream();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 
     public static List<Record> readDataFromCSVDirectory(String directoryName, CloudStorageAccount connectionAccount,

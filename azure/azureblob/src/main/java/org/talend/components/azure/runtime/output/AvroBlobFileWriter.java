@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
+import com.microsoft.azure.storage.StorageException;
+
 import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
@@ -24,12 +26,8 @@ import org.apache.avro.io.DatumWriter;
 import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.common.Constants;
-import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.components.common.stream.output.avro.RecordToAvro;
 import org.talend.sdk.component.api.record.Record;
-
-import com.microsoft.azure.storage.StorageException;
-import com.microsoft.azure.storage.blob.CloudBlob;
 
 public class AvroBlobFileWriter extends BlobFileWriter {
 
@@ -46,14 +44,11 @@ public class AvroBlobFileWriter extends BlobFileWriter {
 
     @Override
     public void generateFile(String directoryName) throws URISyntaxException, StorageException {
-        String fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
-        CloudBlob blob = getContainer().getBlockBlobReference(fileName);
-        while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            fileName = directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro";
-            blob = getContainer().getBlockBlobReference(fileName);
-        }
+        final CloudBlobWriter writer = this.getWriterBuilder()
+                .build(
+                        () -> directoryName + config.getBlobNameTemplate() + UUID.randomUUID() + ".avro");
 
-        setCurrentItem(blob);
+        setCurrentItem(writer);
     }
 
     @Override
@@ -74,7 +69,7 @@ public class AvroBlobFileWriter extends BlobFileWriter {
         }
 
         byte[] batchBytes = convertBatchToBytes();
-        getCurrentItem().uploadFromByteArray(batchBytes, 0, batchBytes.length);
+        getCurrentItem().upload(batchBytes);
         getBatch().clear();
     }
 
