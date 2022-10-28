@@ -150,7 +150,6 @@ public class JDBCOutputTestIT {
 
         BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
         assertEquals(records, outputs.get(Record.class, Branches.DEFAULT_BRANCH));
-        assertNull(outputs.get(Record.class, "reject"));
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
@@ -186,7 +185,8 @@ public class JDBCOutputTestIT {
         config.setBatchSize(2);
         config.setCommitEvery(3);
 
-        DBTestUtils.runOutput(records, componentsHandler, config);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
+        assertEquals(records, outputs.get(Record.class, Branches.DEFAULT_BRANCH));
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
@@ -297,7 +297,8 @@ public class JDBCOutputTestIT {
 
         randomBatchAndCommit(config);
 
-        DBTestUtils.runOutput(records, componentsHandler, config);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
+        assertEquals(records, outputs.get(Record.class, Branches.DEFAULT_BRANCH));
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
@@ -317,7 +318,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "the line should be rejected as it's too long").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "newkey").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "the line should be rejected as it's too long").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "the line is not rejected though it's too long as key not matched when update action").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",3).withString("NAME", "dabao1").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
@@ -333,7 +334,10 @@ public class JDBCOutputTestIT {
         config.setUseBatch(false);
         config.setCommitEvery(DBTestUtils.randomInt());
 
-        DBTestUtils.runOutput(records, componentsHandler, config);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
+        //if not update that row, the jdbc not throw exception? TODO check it, it depend on jdbc implement
+        assertEquals(Arrays.asList(records.get(1), records.get(2), records.get(3),records.get(4)), outputs.get(Record.class, Branches.DEFAULT_BRANCH));
+        assertEquals(1, outputs.get(Record.class, "reject").size());
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
@@ -407,7 +411,7 @@ public class JDBCOutputTestIT {
         assertEquals("dabao", getValueByIndex(result.get(0), 1));
     }
 
-    // TODO how to make a delete action fail?
+    // TODO how to make a delete action reject happen?
     @Test
     public void testDeleteReject() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
@@ -431,7 +435,9 @@ public class JDBCOutputTestIT {
         config.setUseBatch(false);
         config.setCommitEvery(DBTestUtils.randomInt());
 
-        DBTestUtils.runOutput(records, componentsHandler, config);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
+        assertEquals(records, outputs.get(Record.class, Branches.DEFAULT_BRANCH));
+        assertNull(outputs.get(Record.class, "reject"));
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 

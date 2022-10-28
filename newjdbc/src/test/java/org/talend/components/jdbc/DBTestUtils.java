@@ -12,6 +12,8 @@
  */
 package org.talend.components.jdbc;
 
+import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
@@ -21,34 +23,47 @@ import org.talend.components.jdbc.output.DataAction;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.output.OutputProcessor;
 import org.talend.components.jdbc.row.JDBCRowConfig;
+import org.talend.components.jdbc.row.JDBCRowProcessor;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.components.jdbc.sp.JDBCSPConfig;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
+import org.talend.sdk.component.junit.ControllableInputFactory;
 import org.talend.sdk.component.junit.MainInputFactory;
+import org.talend.sdk.component.runtime.base.Delegated;
+import org.talend.sdk.component.runtime.manager.chain.AutoChunkProcessor;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 import org.talend.sdk.component.runtime.output.Branches;
+import org.talend.sdk.component.runtime.output.OutputFactory;
 import org.talend.sdk.component.runtime.output.Processor;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.sql.Date;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+@Slf4j
 public class DBTestUtils {
+
+    static List<SchemaInfo> createTestSchemaInfosWithResultSet() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
+        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        schemaInfos.add(new SchemaInfo("RESULTSET", null, false, null, "id_Object", true, null, null, null, null, null));
+        return schemaInfos;
+    }
 
     static List<SchemaInfo> createTestSchemaInfos() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
@@ -79,18 +94,64 @@ public class DBTestUtils {
         return result;
     }
 
-    static void runRow(List<Record> input, BaseComponentsHandler componentsHandler, JDBCRowConfig config) {
-        componentsHandler.setInputData(input);
-        String rowConfig = configurationByExample().forInstance(config).configured().toQueryString();
-        Job.components()
-                .component("in", "test://emitter")
-                .component("out", "JDBCNew://Row?" + rowConfig)
-                .connections()
-                .from("in")
-                .to("out")
-                .build()
-                .run();
-        componentsHandler.resetState();
+    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler, JDBCRowConfig config, List<Object> preparedValues) {
+        final Processor processor = componentsHandler.createProcessor(JDBCRowProcessor.class, config);
+
+        fillPreparedValues(preparedValues, processor);
+
+        final BaseComponentsHandler.Outputs outputs =
+                componentsHandler.collect(processor, new MainInputFactory(input.iterator()));
+
+        return outputs;
+    }
+
+    private static void fillPreparedValues(List<Object> preparedValues, Processor processor) {
+        if(preparedValues == null || preparedValues.isEmpty()) return;
+
+        JDBCRowProcessor delegated = JDBCRowProcessor.class.cast(Delegated.class.cast(processor).getDelegate());
+        try {
+            Field field = delegated.getClass().getDeclaredField("configuration");
+            field.setAccessible(true);
+            JDBCRowConfig deser_config = JDBCRowConfig.class.cast(field.get(delegated));
+            if(deser_config.isUsePreparedStatement()) {
+                List<PreparedStatementParameter> list = deser_config.getPreparedStatementParameters();
+                for(int i=0;i<list.size(); i++) {
+                    PreparedStatementParameter p = list.get(i);
+                    p.setDataValue(preparedValues.get(i));
+                }
+            }
+        } catch(Exception e) {
+            log.warn(e.getMessage());
+        }
+    }
+
+    static Map<String, List<?>> runProcessorWithoutInput(BaseComponentsHandler componentsHandler, JDBCRowConfig config, List<Object> preparedValues) {
+        final Processor processor = componentsHandler.createProcessor(JDBCRowProcessor.class, config);
+
+        fillPreparedValues(preparedValues, processor);
+
+        MainInputFactory inputs = new MainInputFactory(Collections.emptyIterator());
+        AutoChunkProcessor autoChunkProcessor = new AutoChunkProcessor(10, processor);
+        autoChunkProcessor.start();
+        Map<String, List<?>> data = new HashMap<>();
+        OutputFactory outputFactory = (name) -> {
+            return (value) -> {
+                List aggregator = (List)data.computeIfAbsent(name, (n) -> {
+                    return new ArrayList();
+                });
+                aggregator.add(value);
+            };
+        };
+
+        try {
+            autoChunkProcessor.onElement(inputs, outputFactory);
+
+            autoChunkProcessor.flush(outputFactory);
+        } finally {
+            autoChunkProcessor.stop();
+        }
+
+        return data;
     }
 
     static List<Record> runInput(BaseComponentsHandler componentsHandler, JDBCInputConfig config) {
