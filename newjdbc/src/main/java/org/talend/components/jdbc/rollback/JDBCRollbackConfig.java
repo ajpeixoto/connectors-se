@@ -33,6 +33,6 @@ public class JDBCRollbackConfig implements Serializable {
 
     @Option
     @Documentation("")
-    private boolean close;
+    private boolean close = true;
 
 }

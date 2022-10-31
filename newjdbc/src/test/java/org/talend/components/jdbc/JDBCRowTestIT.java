@@ -12,20 +12,12 @@
 //============================================================================
 package org.talend.components.jdbc;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
-
 import org.talend.components.jdbc.common.PreparedStatementParameter;
-import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.common.Type;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
-import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
-import org.talend.components.jdbc.input.JDBCInputConfig;
-import org.talend.components.jdbc.output.DataAction;
-import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.row.JDBCRowConfig;
-import org.talend.components.jdbc.row.JDBCRowProcessor;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
@@ -38,14 +30,13 @@ import org.talend.sdk.component.runtime.output.Branches;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.talend.components.jdbc.DBTestUtils.*;
+import static org.talend.components.jdbc.DBTestUtils.getValueByIndex;
 
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -107,7 +98,7 @@ public class JDBCRowTestIT {
         config.setDieOnError(true);
         randomCommit(config);
 
-        DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
+        DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
@@ -130,7 +121,7 @@ public class JDBCRowTestIT {
         config.setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 4),
                 new PreparedStatementParameter(2, Type.String, "momo")));
 
-        DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
+        DBTestUtils.runProcessorWithoutInput(componentsHandler, config, Arrays.asList(4, "momo"));
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
@@ -151,7 +142,7 @@ public class JDBCRowTestIT {
         randomCommit(config);
 
         try {
-            DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
+            DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
             fail();
         } catch(Exception e) {
 
@@ -176,8 +167,8 @@ public class JDBCRowTestIT {
 
         //this is not valid usage for cloud platform as jdbcrow is processor component in fact, only valid for studio platform,
         // so can't call common api to run it here
-        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
-        List<Record> result = outputs.get(Record.class, Branches.DEFAULT_BRANCH);
+        Map<String, List<?>> outputs = DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
+        List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
         assertTrue(jdbcResultSetObject!=null && ResultSet.class.isInstance(jdbcResultSetObject));
     }
@@ -203,8 +194,8 @@ public class JDBCRowTestIT {
 
         //this is not valid usage for cloud platform as jdbcrow is processor component in fact, only valid for studio platform,
         // so can't call common api to run it here
-        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
-        List<Record> result = outputs.get(Record.class, Branches.DEFAULT_BRANCH);
+        Map<String, List<?>> outputs = DBTestUtils.runProcessorWithoutInput(componentsHandler, config, Arrays.asList(1));
+        List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
         assertTrue(jdbcResultSetObject!=null && ResultSet.class.isInstance(jdbcResultSetObject));
     }
@@ -226,7 +217,7 @@ public class JDBCRowTestIT {
         config.setRecordSetColumn("RESULTSET");
 
         try {
-            BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
+            DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
             fail();
         } catch(Exception e) {
 
@@ -285,7 +276,8 @@ public class JDBCRowTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "xiaobai").build());
 
         BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, null);
-        assertEquals(records, outputs.get(Record.class, Branches.DEFAULT_BRANCH));
+        assertEquals(2, outputs.get(Record.class, Branches.DEFAULT_BRANCH).size());
+        assertNull(outputs.get(Record.class, "reject"));
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
@@ -317,7 +309,7 @@ public class JDBCRowTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
 
-        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(4, "a too long value"));
         assertNull(outputs.get(Record.class, Branches.DEFAULT_BRANCH));
         assertEquals(2, outputs.get(Record.class, "reject").size());
 
@@ -348,7 +340,7 @@ public class JDBCRowTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
 
         try {
-            DBTestUtils.runProcessor(Collections.emptyList(), componentsHandler, config, null);
+            DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(4, "a too long value"));
             fail();
         } catch(Exception e) {
 
@@ -356,7 +348,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_propagate_query_result_set_as_output() throws Exception {
+    public void test_propagate_query_result_set_as_output() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -370,12 +362,15 @@ public class JDBCRowTestIT {
         config.setUsePreparedStatement(true);
         config.setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 3)));
 
+        config.setPropagateRecordSet(true);
+        config.setRecordSetColumn("RESULTSET");
+
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
 
-        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, null);
+        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(3));
         List<Record> result = outputs.get(Record.class, Branches.DEFAULT_BRANCH);
         assertEquals(2, result.size());
         assertNull(outputs.get(Record.class, "reject"));

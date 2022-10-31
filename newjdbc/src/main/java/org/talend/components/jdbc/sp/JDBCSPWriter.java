@@ -124,7 +124,7 @@ public class JDBCSPWriter {
 
         try {
             if (inputRecord == null) {// standalone mode or output mode
-                cs.execute();
+                fillParameters(cs, componentSchema, null, null);
             } else {
                 Schema inputSchema = inputRecord.getSchema();
 

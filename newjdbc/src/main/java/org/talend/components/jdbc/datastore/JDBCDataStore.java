@@ -137,4 +137,8 @@ public class JDBCDataStore implements Serializable {
     @Documentation("if true, mean auto commit, else disable auto commit, as different database, default auto commit value is different")
     private boolean autoCommit;
 
+    public String getJdbcUrl() {
+        return jdbcUrl == null ? null : jdbcUrl.trim();
+    }
+
 }

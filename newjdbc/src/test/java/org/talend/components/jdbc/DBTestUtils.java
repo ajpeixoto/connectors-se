@@ -13,6 +13,7 @@
 package org.talend.components.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
@@ -26,6 +27,7 @@ import org.talend.components.jdbc.row.JDBCRowConfig;
 import org.talend.components.jdbc.row.JDBCRowProcessor;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.components.jdbc.sp.JDBCSPConfig;
+import org.talend.components.jdbc.sp.JDBCSPProcessor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -130,6 +132,21 @@ public class DBTestUtils {
 
         fillPreparedValues(preparedValues, processor);
 
+        Map<String, List<?>> data = execute(processor);
+
+        return data;
+    }
+
+    static Map<String, List<?>> runProcessorWithoutInput(BaseComponentsHandler componentsHandler, JDBCSPConfig config) {
+        final Processor processor = componentsHandler.createProcessor(JDBCSPProcessor.class, config);
+
+        Map<String, List<?>> data = execute(processor);
+
+        return data;
+    }
+
+    @NotNull
+    private static Map<String, List<?>> execute(Processor processor) {
         MainInputFactory inputs = new MainInputFactory(Collections.emptyIterator());
         AutoChunkProcessor autoChunkProcessor = new AutoChunkProcessor(10, processor);
         autoChunkProcessor.start();
@@ -150,7 +167,6 @@ public class DBTestUtils {
         } finally {
             autoChunkProcessor.stop();
         }
-
         return data;
     }
 
@@ -186,6 +202,14 @@ public class DBTestUtils {
 
     static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler, JDBCOutputConfig config) {
         final Processor processor = componentsHandler.createProcessor(OutputProcessor.class, config);
+        final BaseComponentsHandler.Outputs outputs =
+                componentsHandler.collect(processor, new MainInputFactory(input.iterator()));
+
+        return outputs;
+    }
+
+    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler, JDBCSPConfig config) {
+        final Processor processor = componentsHandler.createProcessor(JDBCSPProcessor.class, config);
         final BaseComponentsHandler.Outputs outputs =
                 componentsHandler.collect(processor, new MainInputFactory(input.iterator()));
 
@@ -856,6 +880,12 @@ public class DBTestUtils {
         }
     }
 
+    public static List<SchemaInfo> createSPSchemaInfo1() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("PARAMETER", "PARAMETER", false, "INT", "id_Integer", true, null, 10, null, null, null));
+        return schemaInfos;
+    }
+
     public static Schema createSPSchema1(RecordBuilderFactory recordBuilderFactory) {
         return recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilderFactory.newEntryBuilder()
@@ -866,6 +896,12 @@ public class DBTestUtils {
                 .build();
     }
 
+    public static List<SchemaInfo> createSPSchemaInfo2() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("PARAMETER", "PARAMETER", false, "VARCHAR", "id_String", true, null, 10, null, null, null));
+        return schemaInfos;
+    }
+
     public static Schema createSPSchema2(RecordBuilderFactory recordBuilderFactory) {
         return recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD)
                 .withEntry(recordBuilderFactory.newEntryBuilder()
@@ -874,6 +910,13 @@ public class DBTestUtils {
                         .withNullable(true)
                         .build())
                 .build();
+    }
+
+    public static List<SchemaInfo> createSPSchemaInfo3() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("PARAMETER1", "PARAMETER1", false, "INT", "id_Integer", true, null, 10, null, null, null));
+        schemaInfos.add(new SchemaInfo("PARAMETER2", "PARAMETER2", false, "VARCHAR", "id_String", true, null, 10, null, null, null));
+        return schemaInfos;
     }
 
     public static Schema createSPSchema3(RecordBuilderFactory recordBuilderFactory) {

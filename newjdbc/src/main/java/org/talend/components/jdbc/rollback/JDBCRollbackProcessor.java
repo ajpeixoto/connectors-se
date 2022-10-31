@@ -14,7 +14,6 @@ package org.talend.components.jdbc.rollback;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.commit.JDBCCommitConfig;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
@@ -38,7 +37,7 @@ public class JDBCRollbackProcessor implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    private final JDBCCommitConfig configuration;
+    private final JDBCRollbackConfig configuration;
 
     private final JDBCService jdbcService;
 
@@ -51,7 +50,7 @@ public class JDBCRollbackProcessor implements Serializable {
 
     private final RecordBuilderFactory recordBuilderFactory;
 
-    public JDBCRollbackProcessor(@Option("configuration") final JDBCCommitConfig configuration,
+    public JDBCRollbackProcessor(@Option("configuration") final JDBCRollbackConfig configuration,
             final JDBCService jdbcService, final RecordBuilderFactory recordBuilderFactory) {
         this.configuration = configuration;
         this.jdbcService = jdbcService;
@@ -62,6 +61,12 @@ public class JDBCRollbackProcessor implements Serializable {
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success)
             throws SQLException {
+        doRollback(connection);
+
+        success.emit(record);
+    }
+
+    public void doRollback(JDBCService.DataSourceWrapper connection) throws SQLException {
         if (connection == null) {
             throw new RuntimeException("can't find the connection object");
         }
@@ -73,8 +78,6 @@ public class JDBCRollbackProcessor implements Serializable {
                 connection.close();
             }
         }
-
-        success.emit(record);
     }
 
 }

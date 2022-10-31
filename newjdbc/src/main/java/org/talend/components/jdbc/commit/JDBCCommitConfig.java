@@ -33,6 +33,6 @@ public class JDBCCommitConfig implements Serializable {
 
     @Option
     @Documentation("")
-    private boolean close;
+    private boolean close = true;
 
 }
