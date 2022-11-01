@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.38.0-SNAPSHOT</version>
+        <version>1.39.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bigquery</artifactId>
@@ -53,6 +53,11 @@
             <groupId>org.talend.components</groupId>
             <artifactId>stream-csv</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-common</artifactId>
+            <version>${netty4.version}</version>
         </dependency>
 
         <!-- Tests -->
