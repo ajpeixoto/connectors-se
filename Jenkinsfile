@@ -185,8 +185,8 @@ pipeline {
                     }
                     else {
                         // Validate the branch name
-                        String brancherRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
-                        Matcher branchMatcher = "$env.BRANCH_NAME" =~ brancherRegex
+                        String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
+                        java.util.regex.Matcher branchMatcher = "$env.BRANCH_NAME" =~ branchRegex
                         assert branchMatcher.matches()
 
                         def branch_user = branchMatcher.group("user")
