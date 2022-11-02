@@ -34,8 +34,7 @@ final GString devNexusRepository = isOnMasterOrMaintenanceBranch
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
 final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
-final String BRANCH_REGEX = /^(?<user>.*)\/(?<jira>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
-final Matcher BRANCH_MATCHER = "$env.BRANCH_NAME" =~ "$BRANCH_REGEX"
+final Matcher BRANCH_MATCHER = "$env.BRANCH_NAME" =~ /^(?<user>.*)\/(?<jira>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
 
 // Pod config
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
