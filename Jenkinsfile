@@ -200,14 +200,14 @@ pipeline {
                             nexus_qualifier = "$env.BRANCH_NAME"
                             qualifierSource = "DEFAULT"
                         } else {
-                            nexus_qualifier = "$pomVersion-SNAPSHOT-$branch_ticket"
+                            nexus_qualifier = "$pomVersion-$branch_ticket"
                             qualifierSource = "from job parameter"
                         }
 
                         echo """
                           Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
-                          nexus_qualifier + $nexus_qualifier ($qualifierSource)"""
+                          nexus_qualifier = $nexus_qualifier ($qualifierSource)"""
 
                     }
 
