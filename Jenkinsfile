@@ -184,14 +184,20 @@ pipeline {
                         echo 'No DEV_NEXUS_REPOSITORY user for a Master or Maintenance branch'
                     }
                     else {
-                        echo "Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME"
-
                         // Validate the branch name
-                        def branchMatcher = "$env.BRANCH_NAME" =~ /^(?<user>.*)\/(?<jira>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
+                        String brancherRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
+                        Matcher branchMatcher = "$env.BRANCH_NAME" =~ brancherRegex
                         assert branchMatcher.matches()
-                        echo branchMatcher.group("user")
-                        echo branchMatcher.group("jira")
-                        echo branchMatcher.group("description")
+
+                        def branch_user = branchMatcher.group("user")
+                        def branch_ticket =  branchMatcher.group("ticket")
+                        def branch_description =  branchMatcher.group("description")
+
+                        echo """
+                          Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME
+                          with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description"""
+                        echo
+
                     }
 
                     echo 'Processing parameters'
