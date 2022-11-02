@@ -23,9 +23,12 @@ final String PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
 final String branchName = BRANCH_NAME.startsWith("PR-")
         ? env.CHANGE_BRANCH
         : env.BRANCH_NAME
+
 String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
+GString nexus_qualifier = ''
+
 final String escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
 final GString devNexusRepository = isOnMasterOrMaintenanceBranch
@@ -193,10 +196,18 @@ pipeline {
                         def branch_ticket =  branchMatcher.group("ticket")
                         def branch_description =  branchMatcher.group("description")
 
+                        if ("$param.NEXUS_QUALIFIER".equals("DEFAULT")) {
+                            nexus_qualifier = "$env.BRANCH_NAME"
+                            qualifierSource = "DEFAULT"
+                        } else {
+                            nexus_qualifier = "$pomVersion-SNAPSHOT-$branch_ticket"
+                            qualifierSource = "from job parameter"
+                        }
+
                         echo """
                           Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME
-                          with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description"""
-                        echo
+                          with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
+                          nexus_qualifier + $nexus_qualifier ($qualifierSource)"""
 
                     }
 
