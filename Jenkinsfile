@@ -196,7 +196,7 @@ pipeline {
                         def branch_ticket =  branchMatcher.group("ticket")
                         def branch_description =  branchMatcher.group("description")
 
-                        if ("$param.NEXUS_QUALIFIER".equals("DEFAULT")) {
+                        if ("$params.NEXUS_QUALIFIER".equals("DEFAULT")) {
                             nexus_qualifier = "$env.BRANCH_NAME"
                             qualifierSource = "DEFAULT"
                         } else {
