@@ -127,6 +127,15 @@ pipeline {
             STANDARD : (default) classical CI
             RELEASE : Build release, deploy to the Nexus for master/maintenance branches
             DEPLOY : Build snapshot, deploy it to the Nexus for any branch''')
+        string(
+          name: 'NEXUS_QUALIFIER',
+          defaultValue: 'DEFAULT',
+          description: '''
+            For branches, used qualifier to store dependencies in the nexus.
+            DEFAULT is {x.y.z}-SNAPSHOT-{jira-id} with:
+              - {x.y.z} the version read form pom.xml
+              - {jira-id} taken from branch name that has to be in the format: user/TDI-XXXXX_Custom_description
+              example: 1.38.0-SNAPSHOT-TDI-48419''')
         choice(
           name: 'FAIL_AT_END',
           choices: ['DEFAULT', 'YES', 'NO'],
@@ -167,6 +176,22 @@ pipeline {
 
                     if (params.Action == 'RELEASE' && !((String) env.BRANCH_NAME).startsWith('maintenance/')) {
                         error('Can only release from a maintenance branch, exiting.')
+                    }
+
+
+                    echo 'Manage the DEV_NEXUS_REPOSITORY storage'
+                    if (isOnMasterOrMaintenanceBranch) {
+                        echo 'No DEV_NEXUS_REPOSITORY user for a Master or Maintenance branch'
+                    }
+                    else {
+                        echo "Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME"
+                        // Validate the branch name
+                        def matcher = $env.BRANCH_NAME =~ /^(?<user>.*)\/(?<jira>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
+
+                        assert matcher.matches()
+                        echo matcher.group("user")
+                        echo matcher.group("jira")
+                        echo matcher.group("description")
                     }
 
                     echo 'Processing parameters'
