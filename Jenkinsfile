@@ -34,8 +34,6 @@ final GString devNexusRepository = isOnMasterOrMaintenanceBranch
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
 final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
-final def BRANCH_MATCHER = "$env.BRANCH_NAME" =~ /^(?<user>.*)\/(?<jira>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
-
 // Pod config
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
 final String tsbiImage = 'jdk11-svc-springboot-builder'
@@ -189,10 +187,11 @@ pipeline {
                         echo "Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME"
 
                         // Validate the branch name
-                        assert BRANCH_MATCHER.matches()
-                        echo matcher.group("user")
-                        echo matcher.group("jira")
-                        echo matcher.group("description")
+                        def branchMatcher = "$env.BRANCH_NAME" =~ /^(?<user>.*)\/(?<jira>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
+                        assert branchMatcher.matches()
+                        echo branchMatcher.group("user")
+                        echo branchMatcher.group("jira")
+                        echo branchMatcher.group("description")
                     }
 
                     echo 'Processing parameters'
