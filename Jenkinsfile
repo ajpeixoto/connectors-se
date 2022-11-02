@@ -27,7 +27,7 @@ final String branchName = BRANCH_NAME.startsWith("PR-")
 String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
-GString nexus_qualifier = ''
+GString nexus_qualifier
 
 final String escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
