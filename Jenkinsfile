@@ -462,5 +462,6 @@ private ArrayList extract_branch_info() {
     def branch_user = branchMatcher.group("user")
     def branch_ticket = branchMatcher.group("ticket")
     def branch_description = branchMatcher.group("description")
-    [branch_ticket, branch_user, branch_description]
+
+    return [branch_ticket, branch_user, branch_description]
 }
