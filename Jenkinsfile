@@ -191,20 +191,18 @@ pipeline {
                     }
                     else {
                         // Validate the branch name
-                        (branch_ticket, branch_user, branch_description) = extract_branch_info()
+                        extract_branch_info()
 
-                        if ("$params.NEXUS_QUALIFIER".equals("DEFAULT")) {
-                            nexus_qualifier = "$env.BRANCH_NAME"
-                            qualifierSource = "DEFAULT"
-                        } else {
-                            nexus_qualifier = "$pomVersion-$branch_ticket"
-                            qualifierSource = "from job parameter"
-                        }
+                        nexus_qualifier = create_qualifier_name(
+                          pomVersion,
+                          "$branch_ticket",
+                          "$params.NEXUS_QUALIFIER")
 
                         echo """
                           Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME
+                          requested qualifier: $params.NEXUS_QUALIFIER
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
-                          nexus_qualifier = $nexus_qualifier ($qualifierSource)"""
+                          nexus_qualifier = $nexus_qualifier"""
 
                     }
 
@@ -453,15 +451,24 @@ pipeline {
     }
 }
 
+private GString create_qualifier_name(GString pomVersion, String branch_ticket, GString input_qualifier) {
+   GString nexus_qualifier
+
+    if ("$input_qualifier".equals("DEFAULT")) {
+        nexus_qualifier = "$pomVersion-$branch_ticket"
+    } else {
+        nexus_qualifier = "$input_qualifier"
+    }
+    return nexus_qualifier
+}
+
 private ArrayList extract_branch_info() {
 
     String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
     java.util.regex.Matcher branchMatcher = "$env.BRANCH_NAME" =~ branchRegex
     assert branchMatcher.matches()
 
-    def branch_user = branchMatcher.group("user")
-    def branch_ticket = branchMatcher.group("ticket")
-    def branch_description = branchMatcher.group("description")
-
-    return [branch_ticket, branch_user, branch_description]
+    branch_user = branchMatcher.group("user")
+    branch_ticket = branchMatcher.group("ticket")
+    branch_description = branchMatcher.group("description")
 }
