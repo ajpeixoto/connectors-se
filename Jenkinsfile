@@ -27,6 +27,7 @@ final String branchName = BRANCH_NAME.startsWith("PR-")
 String branch_ticket
 String branch_user
 String branch_description
+String pomVersion
 String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
@@ -174,7 +175,7 @@ pipeline {
             steps {
                 script {
                     final def pom = readMavenPom file: 'pom.xml'
-                    final String pomVersion = pom.version
+                    pomVersion = pom.version
 
                     if (params.Action == 'RELEASE' && !pomVersion.endsWith('-SNAPSHOT')) {
                         error('Cannot release from a non SNAPSHOT, exiting.')
@@ -451,11 +452,11 @@ pipeline {
     }
 }
 
-private GString create_qualifier_name(GString pomVersion, String branch_ticket, GString input_qualifier) {
+private static GString create_qualifier_name(String pomVersion, GString ticket, GString input_qualifier) {
    GString nexus_qualifier
 
     if ("$input_qualifier".equals("DEFAULT")) {
-        nexus_qualifier = "$pomVersion-$branch_ticket"
+        nexus_qualifier = "$pomVersion-$ticket"
     } else {
         nexus_qualifier = "$input_qualifier"
     }
