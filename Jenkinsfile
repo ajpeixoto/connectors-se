@@ -24,8 +24,8 @@ final String branchName = BRANCH_NAME.startsWith("PR-")
         ? env.CHANGE_BRANCH
         : env.BRANCH_NAME
 
-String branch_ticket
 String branch_user
+String branch_ticket
 String branch_description
 String pomVersion
 String releaseVersion = ''
@@ -192,7 +192,9 @@ pipeline {
                     }
                     else {
                         // Validate the branch name
-                        extract_branch_info()
+                        (branch_user,
+                        branch_ticket,
+                        branch_description)= extract_branch_info("$env.BRANCH_NAME")
 
                         nexus_qualifier = create_qualifier_name(
                           pomVersion,
@@ -463,13 +465,15 @@ private static GString create_qualifier_name(String version, GString ticket, GSt
     return nexus_qualifier
 }
 
-private ArrayList extract_branch_info() {
+private static ArrayList<String> extract_branch_info(GString branch_name) {
 
     String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
-    java.util.regex.Matcher branchMatcher = "$env.BRANCH_NAME" =~ branchRegex
+    java.util.regex.Matcher branchMatcher = branch_name =~ branchRegex
     assert branchMatcher.matches()
 
-    branch_user = branchMatcher.group("user")
-    branch_ticket = branchMatcher.group("ticket")
-    branch_description = branchMatcher.group("description")
+    String user = branchMatcher.group("user")
+    String ticket = branchMatcher.group("ticket")
+    String description = branchMatcher.group("description")
+
+    return [user, ticket, description]
 }
