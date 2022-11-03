@@ -452,13 +452,13 @@ pipeline {
     }
 }
 
-private static GString create_qualifier_name(String pomVersion, GString ticket, GString input_qualifier) {
+private static GString create_qualifier_name(String version, GString ticket, GString input_qualifier) {
    GString nexus_qualifier
 
-    if ("$input_qualifier".equals("DEFAULT")) {
-        nexus_qualifier = "$pomVersion-$ticket"
+    if (input_qualifier.equals("DEFAULT")) {
+        nexus_qualifier = "$version-$ticket"
     } else {
-        nexus_qualifier = "$input_qualifier"
+        nexus_qualifier = input_qualifier
     }
     return nexus_qualifier
 }
