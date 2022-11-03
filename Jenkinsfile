@@ -24,6 +24,9 @@ final String branchName = BRANCH_NAME.startsWith("PR-")
         ? env.CHANGE_BRANCH
         : env.BRANCH_NAME
 
+String branch_ticket
+String branch_user
+String branch_description
 String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
@@ -188,13 +191,7 @@ pipeline {
                     }
                     else {
                         // Validate the branch name
-                        String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
-                        java.util.regex.Matcher branchMatcher = "$env.BRANCH_NAME" =~ branchRegex
-                        assert branchMatcher.matches()
-
-                        def branch_user = branchMatcher.group("user")
-                        def branch_ticket =  branchMatcher.group("ticket")
-                        def branch_description =  branchMatcher.group("description")
+                        (branch_ticket, branch_user, branch_description) = extract_branch_info()
 
                         if ("$params.NEXUS_QUALIFIER".equals("DEFAULT")) {
                             nexus_qualifier = "$env.BRANCH_NAME"
@@ -454,4 +451,16 @@ pipeline {
             }
         }
     }
+}
+
+private ArrayList extract_branch_info() {
+
+    String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
+    java.util.regex.Matcher branchMatcher = "$env.BRANCH_NAME" =~ branchRegex
+    assert branchMatcher.matches()
+
+    def branch_user = branchMatcher.group("user")
+    def branch_ticket = branchMatcher.group("ticket")
+    def branch_description = branchMatcher.group("description")
+    [branch_ticket, branch_user, branch_description]
 }
