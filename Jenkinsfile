@@ -455,7 +455,7 @@ pipeline {
 private static GString create_qualifier_name(String version, GString ticket, GString input_qualifier) {
    GString nexus_qualifier
 
-    if (input_qualifier.equals("DEFAULT")) {
+    if (input_qualifier.contains("DEFAULT")) {
         nexus_qualifier = "$version-$ticket"
     } else {
         nexus_qualifier = input_qualifier
