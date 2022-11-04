@@ -459,7 +459,8 @@ private static GString create_qualifier_name(GString version, GString ticket, GS
 
     if (input_qualifier.contains("DEFAULT")) {
         if(version.contains("-SNAPSHOT")){
-            nexus_qualifier = version.replaceAll("-SNAPSHOT", "-$ticket-SNAPSHOT")
+            //nexus_qualifier = version.replaceAll("-SNAPSHOT", "-$ticket-SNAPSHOT")
+            nexus_qualifier = "-$ticket-SNAPSHOT"
         }else {
             nexus_qualifier = "$version-$ticket"
         }
