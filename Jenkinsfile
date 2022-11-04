@@ -27,7 +27,7 @@ final String branchName = BRANCH_NAME.startsWith("PR-")
 String branch_user
 String branch_ticket
 String branch_description
-String pomVersion
+GString pomVersion
 String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
@@ -188,7 +188,7 @@ pipeline {
 
                     echo 'Manage the DEV_NEXUS_REPOSITORY storage'
                     if (isOnMasterOrMaintenanceBranch) {
-                        echo 'No DEV_NEXUS_REPOSITORY user for a Master or Maintenance branch'
+                        echo 'No DEV_NEXUS_REPOSITORY use for a Master or Maintenance branch'
                     }
                     else {
                         // Validate the branch name
@@ -206,7 +206,6 @@ pipeline {
                           requested qualifier: $params.NEXUS_QUALIFIER
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
                           nexus_qualifier = $nexus_qualifier"""
-
                     }
 
                     echo 'Processing parameters'
@@ -247,7 +246,8 @@ pipeline {
                     currentBuild.description = ("""
                       $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
                       Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
-                      Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING""".stripIndent()
+                      Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING
+                      Nexus_qualifier = $nexus_qualifier""".stripIndent()
                     )
                 }
             }
@@ -454,11 +454,15 @@ pipeline {
     }
 }
 
-private static GString create_qualifier_name(String version, GString ticket, GString input_qualifier) {
+private static GString create_qualifier_name(GString version, GString ticket, GString input_qualifier) {
    GString nexus_qualifier
 
     if (input_qualifier.contains("DEFAULT")) {
-        nexus_qualifier = "$version-$ticket"
+        if(version.contains("-SNAPSHOT")){
+            nexus_qualifier = version.replaceAll("-SNAPSHOT", "-$ticket-SNAPSHOT")
+        }else {
+            nexus_qualifier = "$version-$ticket"
+        }
     } else {
         nexus_qualifier = input_qualifier
     }
