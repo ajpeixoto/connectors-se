@@ -12,7 +12,6 @@ main() (
   mvn deploy \
     --errors \
     --batch-mode \
-    --fail-at-end \
     --activate-profiles "${jenkinsAction}" \
     "${extraBuildParams[@]}"
 )

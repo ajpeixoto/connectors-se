@@ -25,13 +25,14 @@ final String branchName = BRANCH_NAME.startsWith("PR-")
         : env.BRANCH_NAME
 String releaseVersion = ''
 String extraBuildParams = ''
+Boolean fail_at_end = false
 final String escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
 final GString devNexusRepository = isOnMasterOrMaintenanceBranch
         ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}"
         : "dev_branch_snapshots/branch_${escapedBranch}"
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
-final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_ARGS != ""
+final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
 // Pod config
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
@@ -126,6 +127,14 @@ pipeline {
             STANDARD : (default) classical CI
             RELEASE : Build release, deploy to the Nexus for master/maintenance branches
             DEPLOY : Build snapshot, deploy it to the Nexus for any branch''')
+        choice(
+          name: 'FAIL_AT_END',
+          choices: ['DEFAULT', 'YES', 'NO'],
+          description: '''
+            Choose to add "--fail-at-end" in the maven build
+              - DEFAULT : "--fail-at-end" activated for master and maintenance, not for others branches
+              - YES : Force the use of "--fail-at-end" 
+              - NO : Force to not use "--fail-at-end"''')
         booleanParam(
           name: 'SONAR_ANALYSIS',
           defaultValue: true,
@@ -169,10 +178,37 @@ pipeline {
                                 '--define', 'nexus_snapshots_pull_base_url=https://nexus-smart-branch.datapwn.com/nexus/content/repositories'
                         ])
                     }
+
+                    // Manage the failed at-end-option
+                    if( (isOnMasterOrMaintenanceBranch && params.FAIL_AT_END != 'NO') ||
+                      (params.FAIL_AT_END == 'YES')) {
+                        buildParamsAsArray.add('--fail-at-end')
+                        fail_at_end = true
+                    }
+
+                    // Manage the EXTRA_BUILD_PARAMS
                     buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
                     extraBuildParams = buildParamsAsArray.join(' ')
 
                     releaseVersion = pomVersion.split('-')[0]
+                }
+                ///////////////////////////////////////////
+                // Updating build displayName and description
+                ///////////////////////////////////////////
+                script {
+                    String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
+                    if ( user_name == null) { user_name = "auto" }
+
+                    currentBuild.displayName = (
+                      "#$currentBuild.number-$params.Action: $user_name"
+                    )
+
+                    // updating build description
+                    currentBuild.description = ("""
+                      $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
+                      Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
+                      Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING""".stripIndent()
+                    )
                 }
             }
         }
@@ -203,24 +239,6 @@ pipeline {
                             """
                         }
                     }
-                }
-                ///////////////////////////////////////////
-                // Updating build displayName and description
-                ///////////////////////////////////////////
-                script {
-                    String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
-                    if ( user_name == null) { user_name = "auto" }
-
-                    currentBuild.displayName = (
-                      "#$currentBuild.number-$params.Action: $user_name"
-                    )
-
-                    // updating build description
-                    currentBuild.description = ("""
-                           User: $user_name - $params.Action Build
-                           Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
-                           Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING""".stripIndent()
-                    )
                 }
             }
         }
