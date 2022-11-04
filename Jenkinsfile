@@ -19,11 +19,10 @@ def sonarCredentials = usernamePassword(
 
 // Job config
 final String slackChannel = 'components-ci'
-final String PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
-final String branchName = BRANCH_NAME.startsWith("PR-")
-        ? env.CHANGE_BRANCH
-        : env.BRANCH_NAME
+final String PRODUCTION_DEPLOY_REPOSITORY = "TalendOpenSourceSnapshot"
+final String DEVELOPMENT_DEPLOY_REPOSITORY = "dev_branch_snapshots"
 
+// Job variables declaration
 String branch_user
 String branch_ticket
 String branch_description
@@ -33,12 +32,11 @@ String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
 
-
-final String escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
+// Job constant config creation
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
-final GString devNexusRepository = isOnMasterOrMaintenanceBranch
-        ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}"
-        : "dev_branch_snapshots/branch_${escapedBranch}"
+final String devNexusRepository = isOnMasterOrMaintenanceBranch
+        ? PRODUCTION_DEPLOY_REPOSITORY
+        : DEVELOPMENT_DEPLOY_REPOSITORY
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
 final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
@@ -311,6 +309,7 @@ pipeline {
                 }
             }
         }
+
         stage('Build') {
             when {
                 expression { params.Action == 'STANDARD' }
