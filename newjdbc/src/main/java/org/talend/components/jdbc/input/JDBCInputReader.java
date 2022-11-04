@@ -92,8 +92,13 @@ public class JDBCInputReader {
                     // TODO set and init it in common javajet
                     Object value = context.get(CommonUtils.MAPPING_URL_SUBFIX);
                     if (value != null) {
-                        mappingFileDir = (URL) value;
+                        mappingFileDir = URL.class.cast(value);
                     }
+                }
+
+                // use the connector nested mapping file
+                if (mappingFileDir == null) {
+                    mappingFileDir = this.getClass().getResource("/mappings");
                 }
 
                 DBType dbTypeInComponentSetting = config.isEnableMapping() ? config.getMapping() : null;

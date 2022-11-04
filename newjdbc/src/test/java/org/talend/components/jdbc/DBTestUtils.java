@@ -838,9 +838,9 @@ public class DBTestUtils {
         assertEquals("ID", field.getOriginalFieldName());
         assertEquals(Schema.Type.INT, field.getType());
         // assertEquals("INTEGER", field.getProp(""));//TODO origin db type
-        assertEquals("10", field.getProp("talend.studio.length"));// TODO size
+        assertEquals(null, field.getProp("talend.studio.length"));
         assertEquals(null, field.getProp("talend.studio.precision"));// TODO scale
-        assertEquals(null, field.getProp(""));// TODO pattern
+        assertEquals(null, field.getProp("talend.studio.pattern"));// TODO pattern
         assertEquals(null, field.getProp(""));// TODO default
 
         field = columns.get(1);
@@ -848,9 +848,9 @@ public class DBTestUtils {
         assertEquals("NAME", field.getOriginalFieldName());
         assertEquals(Schema.Type.STRING, field.getType());
         // assertEquals("VARCHAR", field.getProp(""));//TODO origin db type
-        assertEquals("8", field.getProp("talend.studio.length"));// TODO size
-        assertEquals(null, field.getProp("talend.studio.precision"));// TODO scale
-        assertEquals(null, field.getProp(""));// TODO pattern
+        assertEquals("8", field.getProp("talend.studio.length"));
+        assertEquals(null, field.getProp("talend.studio.precision"));
+        assertEquals(null, field.getProp("talend.studio.pattern"));// TODO pattern
         assertEquals(null, field.getProp(""));// TODO default
     }
 

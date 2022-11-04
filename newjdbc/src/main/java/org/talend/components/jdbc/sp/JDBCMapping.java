@@ -14,6 +14,7 @@ package org.talend.components.jdbc.sp;
 
 import org.talend.sdk.component.api.record.Schema;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -37,7 +38,7 @@ public class JDBCMapping {
             throws SQLException {
         Schema.Type type = f.getType();
 
-        // TODO support decimal/short/byte/character
+        // TODO support short/byte/character
         if (value == null) {
             if (type == Schema.Type.STRING) {
                 statement.setNull(index, Types.VARCHAR);
@@ -53,6 +54,8 @@ public class JDBCMapping {
                 statement.setNull(index, Types.FLOAT);
             } else if (type == Schema.Type.BOOLEAN) {
                 statement.setNull(index, Types.BOOLEAN);
+            } else if (type == Schema.Type.DECIMAL) {
+                statement.setNull(index, Types.DECIMAL);
             } else if (type == Schema.Type.BYTES) {
                 // TODO check it, now only make a progress and make sure no regression with current version
                 // ARRAY is not common, don't exist on lots of database,
@@ -82,6 +85,8 @@ public class JDBCMapping {
             statement.setFloat(index, (Float) value);
         } else if (type == Schema.Type.BOOLEAN) {
             statement.setBoolean(index, (Boolean) value);
+        } else if (type == Schema.Type.DECIMAL) {
+            statement.setBigDecimal(index, (BigDecimal) value);
         } else if (type == Schema.Type.BYTES) {
             // TODO check it, now only make a progress and make sure no regression with current version
             statement.setBytes(index, (byte[]) value);
@@ -99,7 +104,7 @@ public class JDBCMapping {
     public static int getSQLTypeFromTckType(Schema.Entry f) {
         Schema.Type type = f.getType();
 
-        // TODO support decimal/short/byte/character
+        // TODO support short/byte/character
 
         if (type == Schema.Type.STRING) {
             return Types.VARCHAR;
@@ -115,6 +120,8 @@ public class JDBCMapping {
             return Types.FLOAT;
         } else if (type == Schema.Type.BOOLEAN) {
             return Types.BOOLEAN;
+        } else if (type == Schema.Type.DECIMAL) {
+            return Types.DECIMAL;
         } else if (type == Schema.Type.BYTES) {
             // TODO check it, now only make a progress and make sure no regression with current version
             // TODO maybe make it to ARRAY or BLOB?

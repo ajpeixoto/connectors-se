@@ -246,6 +246,13 @@ public class JDBCSPRecordCreator {
                     return value.getObject(index) == null ? null : value.getBoolean(index);
                 }
             };
+        } else if (type == Schema.Type.DECIMAL) {
+            return new JDBCSPConverter() {
+
+                public Object convert(CallableStatement value) throws SQLException {
+                    return value.getObject(index) == null ? null : value.getBigDecimal(index);
+                }
+            };
         } else if (type == Schema.Type.BYTES) {
             return new JDBCSPConverter() {
 

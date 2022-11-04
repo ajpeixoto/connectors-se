@@ -91,6 +91,8 @@ public class RowWriter {
                 writer = new FloatTypeWriter(statement, statementIndex, inputValueName);
             } else if (type == Schema.Type.BOOLEAN) {
                 writer = new BooleanTypeWriter(statement, statementIndex, inputValueName);
+            } else if (type == Schema.Type.DECIMAL) {
+                writer = new BigDecimalTypeWriter(statement, statementIndex, inputValueName);
             } else if (type == Schema.Type.BYTES) {
                 writer = new BytesTypeWriter(statement, statementIndex, inputValueName);
             } else {

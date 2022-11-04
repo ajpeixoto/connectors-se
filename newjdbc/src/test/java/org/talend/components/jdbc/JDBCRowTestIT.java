@@ -180,10 +180,6 @@ public class JDBCRowTestIT {
         List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
         assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
-
-        final Jsonb jsonb = JsonbProvider.provider().create().build();
-        String ser = jsonb.toJson(result);
-        ResultSet resultSet = (ResultSet) jsonb.fromJson(ser, jdbcResultSetObject.getClass());
     }
 
     @Test

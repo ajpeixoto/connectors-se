@@ -18,10 +18,13 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.*;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.talend.sdk.component.api.record.Schema.Type.*;
 
@@ -184,7 +187,7 @@ public class SchemaInferer {
             case java.sql.Types.BIGINT:
             case java.sql.Types.DECIMAL:
             case java.sql.Types.NUMERIC:
-                entryBuilder.withType(STRING).withProp("talend.studio.type", "id_BigDecimal");
+                entryBuilder.withType(DECIMAL).withProp("talend.studio.type", "id_BigDecimal");
                 break;
             case java.sql.Types.CHAR:
                 entryBuilder.withType(STRING).withProp("talend.studio.type", "id_Character");
@@ -208,7 +211,7 @@ public class SchemaInferer {
                 isIgnoreLength = sourceType.isIgnoreLength();
                 isIgnorePrecision = sourceType.isIgnorePrecision();
             } else {
-                // if not find any mapping by current column db type name, map to studio sstring type
+                // if not find any mapping by current column db type name, map to studio string type
                 talendType = TalendType.STRING;
             }
 
@@ -320,6 +323,9 @@ public class SchemaInferer {
             case STRING:
                 builder.withString(entry, String.valueOf(value));
                 break;
+            case DECIMAL:
+                builder.withDecimal(entry, resultSet.getBigDecimal(index + 1));
+                break;
             case INT:
                 builder.withInt(entry, resultSet.getInt(index + 1));
                 break;
@@ -342,7 +348,7 @@ public class SchemaInferer {
                 } catch (Exception e) {
                     date = resultSet.getDate(index + 1);
                 }
-                builder.withDateTime(entry, date);
+                builder.withTimestamp(entry, date.getTime());
                 break;
             case BYTES:
                 builder.withBytes(entry, resultSet.getBytes(index + 1));
@@ -370,7 +376,7 @@ public class SchemaInferer {
             return FLOAT;
         case BYTE:
             // no Schema.Type.BYTE
-            return STRING;
+            return INT;
         case BYTES:
             return BYTES;
         case SHORT:
@@ -380,8 +386,7 @@ public class SchemaInferer {
             // no Schema.Type.CHARACTER
             return STRING;
         case BIG_DECIMAL:
-            // no Schema.Type.DECIMA
-            return STRING;
+            return DECIMAL;
         case DATE:
             return DATETIME;
         case OBJECT:

@@ -28,6 +28,7 @@ import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.AND;
@@ -67,7 +68,8 @@ public class JDBCDataStore implements Serializable {
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @Documentation("jdbc driver table")
-    private List<Driver> jdbcDriver;// TODO can't use Driver bean class as not editable if that in ui
+    private List<Driver> jdbcDriver = Collections.emptyList();// TODO can't use Driver bean class as not editable if
+                                                              // that in ui
 
     @Option
     @Required

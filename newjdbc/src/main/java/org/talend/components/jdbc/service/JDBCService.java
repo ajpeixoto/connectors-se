@@ -510,7 +510,7 @@ public class JDBCService implements Serializable {
     public Schema guessSchemaByQuery(@Option final JDBCQueryDataSet dataSet) throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
-        URL mappingFileDir = null;
+        URL mappingFileDir = this.getClass().getResource("/mappings");
 
         // TODO dbTypeInComponentSetting exist for tjdbcinput, how to pass it?
         DBType dbTypeInComponentSetting = null;
@@ -535,7 +535,7 @@ public class JDBCService implements Serializable {
     public Schema guessSchemaByTable(@Option final JDBCTableDataSet dataSet) throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
-        URL mappingFileDir = null;
+        URL mappingFileDir = this.getClass().getResource("/mappings");
 
         // TODO dbTypeInComponentSetting exist for tjdbcinput, how to pass it?
         DBType dbTypeInComponentSetting = null;
