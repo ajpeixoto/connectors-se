@@ -27,11 +27,12 @@ final String branchName = BRANCH_NAME.startsWith("PR-")
 String branch_user
 String branch_ticket
 String branch_description
-GString pomVersion
+String pomVersion
+String qualifiedVersion
 String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
-GString nexus_qualifier
+
 
 final String escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
@@ -196,7 +197,15 @@ pipeline {
                         branch_ticket,
                         branch_description)= extract_branch_info("$env.BRANCH_NAME")
 
-                        nexus_qualifier = create_qualifier_name(
+                        if(branch_user.equals("")){
+                            println """
+                            ERROR: The branch name doesn't comply with the format: user/JIRA-1234-Description
+                            It is MANDATORY for artifact management."""
+                            currentBuild.description = ("ERROR: The branch name is not correct")
+                            sh """exit 1"""
+                        }
+
+                        qualifiedVersion = add_qualifier_to_version(
                           pomVersion,
                           "$branch_ticket",
                           "$params.NEXUS_QUALIFIER")
@@ -205,7 +214,7 @@ pipeline {
                           Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME
                           requested qualifier: $params.NEXUS_QUALIFIER
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
-                          nexus_qualifier = $nexus_qualifier"""
+                          Qualified Version = $qualifiedVersion"""
                     }
 
                     echo 'Processing parameters'
@@ -247,7 +256,7 @@ pipeline {
                       $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
                       Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
                       Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING
-                      Nexus_qualifier = $nexus_qualifier""".stripIndent()
+                      Qualified Version = $qualifiedVersion""".stripIndent()
                     )
                 }
             }
@@ -454,27 +463,32 @@ pipeline {
     }
 }
 
-private static GString create_qualifier_name(GString version, GString ticket, GString input_qualifier) {
-   GString nexus_qualifier
+private static String add_qualifier_to_version(String version, GString ticket, GString input_qualifier) {
+   String new_version
 
     if (input_qualifier.contains("DEFAULT")) {
         if(version.contains("-SNAPSHOT")){
-            //nexus_qualifier = version.replaceAll("-SNAPSHOT", "-$ticket-SNAPSHOT")
-            nexus_qualifier = "-$ticket-SNAPSHOT"
+            new_version = version.replace("-SNAPSHOT", "-$ticket-SNAPSHOT")
         }else {
-            nexus_qualifier = "$version-$ticket"
+            new_version = "$version-$ticket".toString()
         }
     } else {
-        nexus_qualifier = input_qualifier
+        new_version = input_qualifier.toString()
     }
-    return nexus_qualifier
+    return new_version
 }
 
 private static ArrayList<String> extract_branch_info(GString branch_name) {
 
     String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
     java.util.regex.Matcher branchMatcher = branch_name =~ branchRegex
-    assert branchMatcher.matches()
+
+    try{
+        assert branchMatcher.matches()
+    }
+    catch (AssertionError ignored) {
+        return ["", "", ""]
+    }
 
     String user = branchMatcher.group("user")
     String ticket = branchMatcher.group("ticket")
