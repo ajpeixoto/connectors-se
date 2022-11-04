@@ -185,9 +185,9 @@ pipeline {
                     }
 
 
-                    echo 'Manage the DEV_NEXUS_REPOSITORY storage'
+                    echo 'Manage the version qualifier'
                     if (isOnMasterOrMaintenanceBranch) {
-                        echo 'No DEV_NEXUS_REPOSITORY use for a Master or Maintenance branch'
+                        echo 'No need to add qualifier on Master or Maintenance branch'
                     }
                     else {
                         // Validate the branch name
@@ -203,13 +203,14 @@ pipeline {
                             sh """exit 1"""
                         }
 
+                        // Get the qualifier version
                         qualifiedVersion = add_qualifier_to_version(
                           pomVersion,
                           "$branch_ticket",
                           "$params.NEXUS_QUALIFIER")
 
                         echo """
-                          Configure the DEV_NEXUS_REPOSITORY for the curent branche: $env.BRANCH_NAME
+                          Configure the version qualifier for the curent branche: $env.BRANCH_NAME
                           requested qualifier: $params.NEXUS_QUALIFIER
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
                           Qualified Version = $qualifiedVersion"""
@@ -254,7 +255,8 @@ pipeline {
                       $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
                       Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
                       Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING
-                      Qualified Version = $qualifiedVersion""".stripIndent()
+                      Nexus repository: $params.DEV_NEXUS_REPOSITORY
+                      Qualified Version: $qualifiedVersion""".stripIndent()
                     )
                 }
             }
@@ -284,6 +286,13 @@ pipeline {
                                     "\${ARTIFACTORY_LOGIN}" \
                                     "\${ARTIFACTORY_PASSWORD}"
                             """
+                        }
+
+                        // On development branches the connector version shall be edited for deployment
+                        if (! isOnMasterOrMaintenanceBranch) {
+
+                            echo 'Edit version on dev branches'
+                            // TODO
                         }
                     }
                 }
