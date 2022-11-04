@@ -1,15 +1,15 @@
-//============================================================================
-//
-// Copyright (C) 2006-2022 Talend Inc. - www.talend.com
-//
-// This source code is available under agreement available at
-// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
-//
-// You should have received a copy of the agreement
-// along with this program; if not, write to Talend SA
-// 9 rue Pages 92150 Suresnes, France
-//
-//============================================================================
+/*
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.jdbc;
 
 import org.junit.jupiter.api.*;
@@ -28,8 +28,11 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.output.Branches;
 
+import javax.json.bind.Jsonb;
+import javax.json.bind.spi.JsonbProvider;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,8 +64,9 @@ public class JDBCRowTestIT {
         dataStore = DBTestUtils.createDataStore(false);
 
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                service.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.createTestTable(conn, tableName);
         }
     }
@@ -70,8 +74,9 @@ public class JDBCRowTestIT {
     @AfterAll
     public void afterAll() throws Exception {
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                service.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.dropTestTable(conn, tableName);
         } finally {
             DBTestUtils.shutdownDBIfNecessary();
@@ -80,8 +85,9 @@ public class JDBCRowTestIT {
 
     @BeforeEach
     public void before() throws Exception {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                jdbcService.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.truncateTable(conn, tableName);
             DBTestUtils.loadTestData(conn, tableName);
         }
@@ -100,7 +106,8 @@ public class JDBCRowTestIT {
 
         DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
 
-        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
+        List<Record> result =
+                DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(4, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -123,7 +130,8 @@ public class JDBCRowTestIT {
 
         DBTestUtils.runProcessorWithoutInput(componentsHandler, config, Arrays.asList(4, "momo"));
 
-        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
+        List<Record> result =
+                DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(4, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -144,13 +152,13 @@ public class JDBCRowTestIT {
         try {
             DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
             fail();
-        } catch(Exception e) {
+        } catch (Exception e) {
 
         }
     }
 
     @Test
-    public void test_basic_as_input() {
+    public void test_basic_as_input() throws SQLException {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -162,15 +170,20 @@ public class JDBCRowTestIT {
         randomCommit(config);
 
         config.setPropagateRecordSet(true);// the field is the unique reason to use the component as a input
-                                                          // component
+                                           // component
         config.setRecordSetColumn("RESULTSET");
 
-        //this is not valid usage for cloud platform as jdbcrow is processor component in fact, only valid for studio platform,
+        // this is not valid usage for cloud platform as jdbcrow is processor component in fact, only valid for studio
+        // platform,
         // so can't call common api to run it here
         Map<String, List<?>> outputs = DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
         List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
-        assertTrue(jdbcResultSetObject!=null && ResultSet.class.isInstance(jdbcResultSetObject));
+        assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
+
+        final Jsonb jsonb = JsonbProvider.provider().create().build();
+        String ser = jsonb.toJson(result);
+        ResultSet resultSet = (ResultSet) jsonb.fromJson(ser, jdbcResultSetObject.getClass());
     }
 
     @Test
@@ -192,12 +205,14 @@ public class JDBCRowTestIT {
         config.setUsePreparedStatement(true);
         config.setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 1)));
 
-        //this is not valid usage for cloud platform as jdbcrow is processor component in fact, only valid for studio platform,
+        // this is not valid usage for cloud platform as jdbcrow is processor component in fact, only valid for studio
+        // platform,
         // so can't call common api to run it here
-        Map<String, List<?>> outputs = DBTestUtils.runProcessorWithoutInput(componentsHandler, config, Arrays.asList(1));
+        Map<String, List<?>> outputs =
+                DBTestUtils.runProcessorWithoutInput(componentsHandler, config, Arrays.asList(1));
         List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
-        assertTrue(jdbcResultSetObject!=null && ResultSet.class.isInstance(jdbcResultSetObject));
+        assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
     }
 
     @Test
@@ -219,7 +234,7 @@ public class JDBCRowTestIT {
         try {
             DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
             fail();
-        } catch(Exception e) {
+        } catch (Exception e) {
 
         }
     }
@@ -242,14 +257,18 @@ public class JDBCRowTestIT {
 
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "xiaobai").build());
 
-        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(4, "momo"));
+        BaseComponentsHandler.Outputs outputs =
+                DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(4, "momo"));
         assertEquals(2, outputs.get(Record.class, Branches.DEFAULT_BRANCH).size());
         assertNull(outputs.get(Record.class, "reject"));
 
-        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
+        List<Record> result =
+                DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(5, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -257,7 +276,7 @@ public class JDBCRowTestIT {
         assertEquals(new Integer(4), getValueByIndex(result.get(4), 0));
         assertEquals("momo", getValueByIndex(result.get(4), 1));
     }
-    
+
     @Test
     public void test_basic_not_use_prepared_statement_as_output() {
         JDBCRowConfig config = new JDBCRowConfig();
@@ -272,14 +291,17 @@ public class JDBCRowTestIT {
 
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "xiaobai").build());
 
         BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, null);
         assertEquals(2, outputs.get(Record.class, Branches.DEFAULT_BRANCH).size());
         assertNull(outputs.get(Record.class, "reject"));
 
-        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
+        List<Record> result =
+                DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(5, result.size());
         assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
@@ -306,14 +328,18 @@ public class JDBCRowTestIT {
 
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
 
-        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(4, "a too long value"));
+        BaseComponentsHandler.Outputs outputs =
+                DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(4, "a too long value"));
         assertNull(outputs.get(Record.class, Branches.DEFAULT_BRANCH));
         assertEquals(2, outputs.get(Record.class, "reject").size());
 
-        List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
+        List<Record> result =
+                DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(3, result.size());
     }
@@ -336,13 +362,15 @@ public class JDBCRowTestIT {
 
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
 
         try {
             DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(4, "a too long value"));
             fail();
-        } catch(Exception e) {
+        } catch (Exception e) {
 
         }
     }
@@ -367,15 +395,18 @@ public class JDBCRowTestIT {
 
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
 
-        BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(3));
+        BaseComponentsHandler.Outputs outputs =
+                DBTestUtils.runProcessor(records, componentsHandler, config, Arrays.asList(3));
         List<Record> result = outputs.get(Record.class, Branches.DEFAULT_BRANCH);
         assertEquals(2, result.size());
         assertNull(outputs.get(Record.class, "reject"));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
-        assertTrue(jdbcResultSetObject!=null && ResultSet.class.isInstance(jdbcResultSetObject));
+        assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
     }
 
     private String randomCommit(JDBCRowConfig config) {

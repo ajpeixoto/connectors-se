@@ -79,9 +79,9 @@ public class JDBCRowProcessor implements Serializable {
                     dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                             configuration.getDataSet().getDataStore(), context, false);
 
-                    if(configuration.getCommitEvery()!=0) {
+                    if (configuration.getCommitEvery() != 0) {
                         java.sql.Connection connection = dataSource.getConnection();
-                        if(connection.getAutoCommit()) {
+                        if (connection.getAutoCommit()) {
                             connection.setAutoCommit(false);
                         }
                     }

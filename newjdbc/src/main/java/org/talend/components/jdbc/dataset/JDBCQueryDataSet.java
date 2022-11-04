@@ -70,7 +70,7 @@ public class JDBCQueryDataSet implements Serializable {
     // Schema object,
     // and here is List<SchemaInfo>, it also works
     // but for cloud, how cloud platform convert Schema to List<SchemaInfo>? no idea, guess it not work, will test it
-    @Structure(type = Structure.Type.OUT, discoverSchema = "JDBCQueryDataSet")
+    @Structure(type = Structure.Type.OUT, discoverSchema = "jdbcquerydataset")
     @Documentation("schema")
     private List<SchemaInfo> schema;
 

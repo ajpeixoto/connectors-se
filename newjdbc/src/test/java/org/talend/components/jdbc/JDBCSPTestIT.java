@@ -1,15 +1,15 @@
-//============================================================================
-//
-// Copyright (C) 2006-2022 Talend Inc. - www.talend.com
-//
-// This source code is available under agreement available at
-// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
-//
-// You should have received a copy of the agreement
-// along with this program; if not, write to Talend SA
-// 9 rue Pages 92150 Suresnes, France
-//
-//============================================================================
+/*
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.jdbc;
 
 import org.junit.jupiter.api.*;
@@ -58,8 +58,9 @@ public class JDBCSPTestIT {
         dataStore = DBTestUtils.createDataStore(false);
 
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                service.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.createTestTable(conn, tableName);
         }
     }
@@ -67,8 +68,9 @@ public class JDBCSPTestIT {
     @AfterAll
     public void afterAll() throws Exception {
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                service.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.dropTestTable(conn, tableName);
         } finally {
             DBTestUtils.shutdownDBIfNecessary();
@@ -77,8 +79,9 @@ public class JDBCSPTestIT {
 
     @BeforeEach
     public void before() throws Exception {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                jdbcService.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.truncateTable(conn, tableName);
             DBTestUtils.loadTestData(conn, tableName);
         }
@@ -121,11 +124,11 @@ public class JDBCSPTestIT {
 
         Schema schema = DBTestUtils.createSPSchema1(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("PARAMETER",0).build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("PARAMETER", 0).build());
 
         DBTestUtils.runProcessor(records, componentsHandler, config);
     }
-    
+
     @Test
     public void test_basic_as_output_and_input() {
         JDBCSPConfig config = new JDBCSPConfig();
@@ -137,7 +140,10 @@ public class JDBCSPTestIT {
 
         Schema schema = DBTestUtils.createSPSchema3(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("PARAMETER1",0).withString("PARAMETER2", "wangwei").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema)
+                .withInt("PARAMETER1", 0)
+                .withString("PARAMETER2", "wangwei")
+                .build());
 
         BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
         List<Record> result = outputs.get(Record.class, Branches.DEFAULT_BRANCH);

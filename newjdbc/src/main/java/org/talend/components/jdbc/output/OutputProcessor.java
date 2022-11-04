@@ -89,7 +89,7 @@ public class OutputProcessor implements Serializable {
                     dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                             configuration.getDataSet().getDataStore(), context, false);
 
-                    if(configuration.getCommitEvery()!=0) {
+                    if (configuration.getCommitEvery() != 0) {
                         dataSource.getConnection().setAutoCommit(false);
                     }
                 } catch (SQLException e) {

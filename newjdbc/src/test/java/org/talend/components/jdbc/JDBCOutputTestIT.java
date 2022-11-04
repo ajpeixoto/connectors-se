@@ -1,17 +1,16 @@
-//============================================================================
-//
-// Copyright (C) 2006-2022 Talend Inc. - www.talend.com
-//
-// This source code is available under agreement available at
-// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
-//
-// You should have received a copy of the agreement
-// along with this program; if not, write to Talend SA
-// 9 rue Pages 92150 Suresnes, France
-//
-//============================================================================
+/*
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.jdbc;
-
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -68,8 +67,9 @@ public class JDBCOutputTestIT {
         dataStore = DBTestUtils.createDataStore(false);
 
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                service.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.createTestTable(conn, tableName);
         }
     }
@@ -77,8 +77,9 @@ public class JDBCOutputTestIT {
     @AfterAll
     public void afterAll() throws Exception {
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                service.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.dropTestTable(conn, tableName);
         } finally {
             DBTestUtils.shutdownDBIfNecessary();
@@ -87,8 +88,9 @@ public class JDBCOutputTestIT {
 
     @BeforeEach
     public void before() throws Exception {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(DBTestUtils.createDataStore(true));
-             Connection conn = dataSourceWrapper.getConnection()) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper =
+                jdbcService.createConnection(DBTestUtils.createDataStore(true));
+                Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.truncateTable(conn, tableName);
             DBTestUtils.loadTestData(conn, tableName);
         }
@@ -98,10 +100,12 @@ public class JDBCOutputTestIT {
     public void testDynamicInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
 
-        //TODO no design schema here for dynamic?
+        // TODO no design schema here for dynamic?
         List<SchemaInfo> schemaInfos = new ArrayList<>();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
@@ -131,8 +135,10 @@ public class JDBCOutputTestIT {
     public void testInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -164,11 +170,16 @@ public class JDBCOutputTestIT {
     public void testBatch() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",6).withString("NAME", "xiaohong").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",7).withString("NAME", "xiaored").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",8).withString("NAME", "xiaohei").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 6).withString("NAME", "xiaohong").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 7).withString("NAME", "xiaored").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 8).withString("NAME", "xiaohei").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -207,11 +218,19 @@ public class JDBCOutputTestIT {
     public void testInsertReject() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "wangwei").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "the line should be rejected as it's too long").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",6).withString("NAME", "gaoyan").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",7).withString("NAME", "the line should be rejected as it's too long").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",8).withString("NAME", "dabao").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "wangwei").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema)
+                .withInt("ID", 5)
+                .withString("NAME", "the line should be rejected as it's too long")
+                .build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 6).withString("NAME", "gaoyan").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema)
+                .withInt("ID", 7)
+                .withString("NAME", "the line should be rejected as it's too long")
+                .build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 8).withString("NAME", "dabao").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -227,7 +246,8 @@ public class JDBCOutputTestIT {
         config.setCommitEvery(DBTestUtils.randomInt());
 
         BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
-        assertEquals(Arrays.asList(records.get(0), records.get(2), records.get(4)), outputs.get(Record.class, Branches.DEFAULT_BRANCH));
+        assertEquals(Arrays.asList(records.get(0), records.get(2), records.get(4)),
+                outputs.get(Record.class, Branches.DEFAULT_BRANCH));
         assertEquals(2, outputs.get(Record.class, "reject").size());
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
@@ -241,14 +261,21 @@ public class JDBCOutputTestIT {
         assertEquals("dabao", getValueByIndex(result.get(5), 1));
     }
 
+    // TODO update action need key info, but that info only can get from input record now,
+    // can't get from current component design schema as studio don't pass any schema info when dynamic column exists,
+    // is right?
+    // image, input component not set key info, but current output component set it, then no key info, then error, not a
+    // bug?
     @Test
     public void testDynamicUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "wangwei1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
 
-        //TODO no design schema here for dynamic?
+        // TODO no design schema here for dynamic?
         List<SchemaInfo> schemaInfos = new ArrayList<>();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
@@ -280,8 +307,10 @@ public class JDBCOutputTestIT {
     public void testUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "wangwei1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -315,11 +344,21 @@ public class JDBCOutputTestIT {
     public void testUpdateReject() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "the line should be rejected as it's too long").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "newkey").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "the line is not rejected though it's too long as key not matched when update action").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",3).withString("NAME", "dabao1").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema)
+                .withInt("ID", 1)
+                .withString("NAME", "the line should be rejected as it's too long")
+                .build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "newkey").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema)
+                .withInt("ID", 5)
+                .withString("NAME",
+                        "the line is not rejected though it's too long as key not matched when update action")
+                .build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 3).withString("NAME", "dabao1").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -335,8 +374,9 @@ public class JDBCOutputTestIT {
         config.setCommitEvery(DBTestUtils.randomInt());
 
         BaseComponentsHandler.Outputs outputs = DBTestUtils.runProcessor(records, componentsHandler, config);
-        //if not update that row, the jdbc not throw exception? TODO check it, it depend on jdbc implement
-        assertEquals(Arrays.asList(records.get(1), records.get(2), records.get(3),records.get(4)), outputs.get(Record.class, Branches.DEFAULT_BRANCH));
+        // if not update that row, the jdbc not throw exception? TODO check it, it depend on jdbc implement
+        assertEquals(Arrays.asList(records.get(1), records.get(2), records.get(3), records.get(4)),
+                outputs.get(Record.class, Branches.DEFAULT_BRANCH));
         assertEquals(1, outputs.get(Record.class, "reject").size());
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
@@ -354,10 +394,10 @@ public class JDBCOutputTestIT {
     public void testDynamicDelete() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).build());
 
-        //TODO no design schema here for dynamic?
+        // TODO no design schema here for dynamic?
         List<SchemaInfo> schemaInfos = new ArrayList<>();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
@@ -385,8 +425,8 @@ public class JDBCOutputTestIT {
     public void testDelete() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -416,11 +456,19 @@ public class JDBCOutputTestIT {
     public void testDeleteReject() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "newkey").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "the line is not rejected though it's too long as only key is used by deleting action").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",3).withString("NAME", "dabao1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "wangwei1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "newkey").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema)
+                .withInt("ID", 5)
+                .withString("NAME",
+                        "the line is not rejected though it's too long as only key is used by deleting action")
+                .build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 3).withString("NAME", "dabao1").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -448,9 +496,12 @@ public class JDBCOutputTestIT {
     public void testDynamicInsertOrUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "new one").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "wangwei1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "new one").build());
 
         List<SchemaInfo> schemaInfos = new ArrayList<>();
 
@@ -485,9 +536,12 @@ public class JDBCOutputTestIT {
     public void testInsertOrUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "new one").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "wangwei1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "new one").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -522,9 +576,12 @@ public class JDBCOutputTestIT {
     public void testDynamicUpdateOrInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "new one").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "wangwei1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "new one").build());
 
         List<SchemaInfo> schemaInfos = new ArrayList<>();
 
@@ -556,12 +613,15 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testUpdateOrInsert()  {
+    public void testUpdateOrInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",1).withString("NAME", "wangwei1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",2).withString("NAME", "gaoyan1").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "new one").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).withString("NAME", "wangwei1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "new one").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -596,8 +656,10 @@ public class JDBCOutputTestIT {
     public void testClearDataInTable() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "xiaobai").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -620,7 +682,8 @@ public class JDBCOutputTestIT {
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
-        if (action == DataAction.INSERT || action == DataAction.INSERT_OR_UPDATE || action == DataAction.UPDATE_OR_INSERT) {
+        if (action == DataAction.INSERT || action == DataAction.INSERT_OR_UPDATE
+                || action == DataAction.UPDATE_OR_INSERT) {
             assertEquals(2, result.size());
             assertEquals(new Integer(4), getValueByIndex(result.get(0), 0));
             assertEquals("xiaoming", getValueByIndex(result.get(0), 1));
@@ -635,8 +698,12 @@ public class JDBCOutputTestIT {
         config.setUseBatch(DBTestUtils.randomBoolean());
         config.setBatchSize(DBTestUtils.randomInt());
         config.setCommitEvery(DBTestUtils.randomInt());
-        return new StringBuilder().append("useBatch: ").append(config.isUseBatch()).append(", batchSize: ")
-                .append(config.getBatchSize()).append(", commitEvery:").append(config.getCommitEvery())
+        return new StringBuilder().append("useBatch: ")
+                .append(config.isUseBatch())
+                .append(", batchSize: ")
+                .append(config.getBatchSize())
+                .append(", commitEvery:")
+                .append(config.getCommitEvery())
                 .toString();
     }
 
@@ -644,8 +711,12 @@ public class JDBCOutputTestIT {
     public void testDieOnError() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",4).withString("NAME", "xiaoming").build());
-        records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID",5).withString("NAME", "too long value").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(recordBuilderFactory.newRecordBuilder(schema)
+                .withInt("ID", 5)
+                .withString("NAME", "too long value")
+                .build());
 
         List<SchemaInfo> schemaInfos = createTestSchemaInfos();
 
@@ -664,9 +735,11 @@ public class JDBCOutputTestIT {
         config.setBatchSize(DBTestUtils.randomInt());
 
         // we set it like this to avoid the dead lock when this case :
-        // when die on error and not auto commit mode, we throw the exception, but not call commit or rollback in the finally
+        // when die on error and not auto commit mode, we throw the exception, but not call commit or rollback in the
+        // finally
         // part, it may make the dead lock for derby
-        // in all the javajet db components, we have this issue too, but different db, different result, in my view, we should
+        // in all the javajet db components, we have this issue too, but different db, different result, in my view, we
+        // should
         // process
         // it, will create another test to show the dead lock issue for derby
         config.setCommitEvery(0);// or set value to 0 mean use the default commit mode
@@ -675,7 +748,7 @@ public class JDBCOutputTestIT {
             DBTestUtils.runOutput(records, componentsHandler, config);
             log.info("assert fail for data action : " + config.getDataAction());
             fail();
-        } catch(Exception e) {
+        } catch (Exception e) {
         }
     }
 

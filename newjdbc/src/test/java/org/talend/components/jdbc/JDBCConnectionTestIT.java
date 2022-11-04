@@ -1,15 +1,15 @@
-//============================================================================
-//
-// Copyright (C) 2006-2022 Talend Inc. - www.talend.com
-//
-// This source code is available under agreement available at
-// %InstallDIR%\features\org.talend.rcp.branding.%PRODUCTNAME%\%PRODUCTNAME%license.txt
-//
-// You should have received a copy of the agreement
-// along with this program; if not, write to Talend SA
-// 9 rue Pages 92150 Suresnes, France
-//
-//============================================================================
+/*
+ * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
 package org.talend.components.jdbc;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -53,31 +53,31 @@ public class JDBCConnectionTestIT {
 
     @Test
     public void testConnection() throws SQLException {
-        try(JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
 
         }
     }
-    
+
     @Test
     public void testConnectionWithEmptyJDBCURL() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setJdbcUrl("");
 
-        try(JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
             fail();
         } catch (Exception e) {
 
         }
     }
-    
+
     @Test
     public void testConnectionWithEmptyDriver() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setJdbcClass(null);
 
-        try(JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
             fail();
         } catch (Exception e) {
 
@@ -90,7 +90,7 @@ public class JDBCConnectionTestIT {
 
         dataStore.setJdbcClass("wrongDriver");
 
-        try(JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
             fail();
         } catch (Exception e) {
 
@@ -103,7 +103,7 @@ public class JDBCConnectionTestIT {
 
         dataStore.setJdbcUrl("wrongUrl");
 
-        try(JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
             fail();
         } catch (Exception e) {
 
@@ -137,7 +137,7 @@ public class JDBCConnectionTestIT {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Test
     public void testEliminateSpaceURL() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);

@@ -62,21 +62,25 @@ public class DBTestUtils {
     static List<SchemaInfo> createTestSchemaInfosWithResultSet() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
         schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
-        schemaInfos.add(new SchemaInfo("RESULTSET", null, false, null, "id_Object", true, null, null, null, null, null));
+        schemaInfos
+                .add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        schemaInfos
+                .add(new SchemaInfo("RESULTSET", null, false, null, "id_Object", true, null, null, null, null, null));
         return schemaInfos;
     }
 
     static List<SchemaInfo> createTestSchemaInfos() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
         schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
+        schemaInfos
+                .add(new SchemaInfo("NAME", "NAME", false, "VARCHAR", "id_String", true, null, 64, null, null, null));
         return schemaInfos;
     }
 
     static List<SchemaInfo> createTestSchemaInfos4RowResultSet() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("RESULTSET", null, false, null, "id_Object", true, null, null, null, null, null));
+        schemaInfos
+                .add(new SchemaInfo("RESULTSET", null, false, null, "id_Object", true, null, null, null, null, null));
         return schemaInfos;
     }
 
@@ -84,7 +88,8 @@ public class DBTestUtils {
         return record.get(Object.class, record.getSchema().getEntries().get(index));
     }
 
-    static List<Record> runInput(BaseComponentsHandler componentsHandler, JDBCDataStore dataStore, String tableName, List<SchemaInfo> schemaInfos) {
+    static List<Record> runInput(BaseComponentsHandler componentsHandler, JDBCDataStore dataStore, String tableName,
+            List<SchemaInfo> schemaInfos) {
         JDBCInputConfig inputConfig = new JDBCInputConfig();
         JDBCQueryDataSet dataset4Input = new JDBCQueryDataSet();
         dataset4Input.setDataStore(dataStore);
@@ -96,7 +101,8 @@ public class DBTestUtils {
         return result;
     }
 
-    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler, JDBCRowConfig config, List<Object> preparedValues) {
+    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler,
+            JDBCRowConfig config, List<Object> preparedValues) {
         final Processor processor = componentsHandler.createProcessor(JDBCRowProcessor.class, config);
 
         fillPreparedValues(preparedValues, processor);
@@ -108,26 +114,28 @@ public class DBTestUtils {
     }
 
     private static void fillPreparedValues(List<Object> preparedValues, Processor processor) {
-        if(preparedValues == null || preparedValues.isEmpty()) return;
+        if (preparedValues == null || preparedValues.isEmpty())
+            return;
 
         JDBCRowProcessor delegated = JDBCRowProcessor.class.cast(Delegated.class.cast(processor).getDelegate());
         try {
             Field field = delegated.getClass().getDeclaredField("configuration");
             field.setAccessible(true);
             JDBCRowConfig deser_config = JDBCRowConfig.class.cast(field.get(delegated));
-            if(deser_config.isUsePreparedStatement()) {
+            if (deser_config.isUsePreparedStatement()) {
                 List<PreparedStatementParameter> list = deser_config.getPreparedStatementParameters();
-                for(int i=0;i<list.size(); i++) {
+                for (int i = 0; i < list.size(); i++) {
                     PreparedStatementParameter p = list.get(i);
                     p.setDataValue(preparedValues.get(i));
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.warn(e.getMessage());
         }
     }
 
-    static Map<String, List<?>> runProcessorWithoutInput(BaseComponentsHandler componentsHandler, JDBCRowConfig config, List<Object> preparedValues) {
+    static Map<String, List<?>> runProcessorWithoutInput(BaseComponentsHandler componentsHandler, JDBCRowConfig config,
+            List<Object> preparedValues) {
         final Processor processor = componentsHandler.createProcessor(JDBCRowProcessor.class, config);
 
         fillPreparedValues(preparedValues, processor);
@@ -153,7 +161,7 @@ public class DBTestUtils {
         Map<String, List<?>> data = new HashMap<>();
         OutputFactory outputFactory = (name) -> {
             return (value) -> {
-                List aggregator = (List)data.computeIfAbsent(name, (n) -> {
+                List aggregator = (List) data.computeIfAbsent(name, (n) -> {
                     return new ArrayList();
                 });
                 aggregator.add(value);
@@ -200,7 +208,8 @@ public class DBTestUtils {
         componentsHandler.resetState();
     }
 
-    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler, JDBCOutputConfig config) {
+    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler,
+            JDBCOutputConfig config) {
         final Processor processor = componentsHandler.createProcessor(OutputProcessor.class, config);
         final BaseComponentsHandler.Outputs outputs =
                 componentsHandler.collect(processor, new MainInputFactory(input.iterator()));
@@ -208,7 +217,8 @@ public class DBTestUtils {
         return outputs;
     }
 
-    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler, JDBCSPConfig config) {
+    static BaseComponentsHandler.Outputs runProcessor(List<Record> input, BaseComponentsHandler componentsHandler,
+            JDBCSPConfig config) {
         final Processor processor = componentsHandler.createProcessor(JDBCSPProcessor.class, config);
         final BaseComponentsHandler.Outputs outputs =
                 componentsHandler.collect(processor, new MainInputFactory(input.iterator()));
@@ -266,6 +276,7 @@ public class DBTestUtils {
                         .withName("ID")
                         .withType(Schema.Type.INT)
                         .withNullable(true)
+                        .withProp("talend.studio.key", "true")
                         .build())
                 .withEntry(recordBuilderFactory.newEntryBuilder()
                         .withName("NAME")
@@ -882,7 +893,8 @@ public class DBTestUtils {
 
     public static List<SchemaInfo> createSPSchemaInfo1() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("PARAMETER", "PARAMETER", false, "INT", "id_Integer", true, null, 10, null, null, null));
+        schemaInfos.add(
+                new SchemaInfo("PARAMETER", "PARAMETER", false, "INT", "id_Integer", true, null, 10, null, null, null));
         return schemaInfos;
     }
 
@@ -898,7 +910,8 @@ public class DBTestUtils {
 
     public static List<SchemaInfo> createSPSchemaInfo2() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("PARAMETER", "PARAMETER", false, "VARCHAR", "id_String", true, null, 10, null, null, null));
+        schemaInfos.add(new SchemaInfo("PARAMETER", "PARAMETER", false, "VARCHAR", "id_String", true, null, 10, null,
+                null, null));
         return schemaInfos;
     }
 
@@ -914,8 +927,10 @@ public class DBTestUtils {
 
     public static List<SchemaInfo> createSPSchemaInfo3() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
-        schemaInfos.add(new SchemaInfo("PARAMETER1", "PARAMETER1", false, "INT", "id_Integer", true, null, 10, null, null, null));
-        schemaInfos.add(new SchemaInfo("PARAMETER2", "PARAMETER2", false, "VARCHAR", "id_String", true, null, 10, null, null, null));
+        schemaInfos.add(new SchemaInfo("PARAMETER1", "PARAMETER1", false, "INT", "id_Integer", true, null, 10, null,
+                null, null));
+        schemaInfos.add(new SchemaInfo("PARAMETER2", "PARAMETER2", false, "VARCHAR", "id_String", true, null, 10, null,
+                null, null));
         return schemaInfos;
     }
 

@@ -207,6 +207,30 @@ public class JDBCInputTestIT {
     public void testReader() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+        dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
+
+        JDBCInputConfig config = new JDBCInputConfig();
+        config.setDataSet(dataSet);
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+
+        assertEquals(3, data.size());
+
+        assertEquals(1, getValueByIndex(data.get(0), 0));
+        assertEquals("wangwei", getValueByIndex(data.get(0), 1));
+
+        assertEquals(2, getValueByIndex(data.get(1), 0));
+        assertEquals(" gaoyan ", getValueByIndex(data.get(1), 1));
+
+        assertEquals(3, getValueByIndex(data.get(2), 0));
+        assertEquals("dabao", getValueByIndex(data.get(2), 1));
+    }
+
+    @Test
+    public void testReaderDynamic() {
+        JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
+        dataSet.setDataStore(dataStore);
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
 
         JDBCInputConfig config = new JDBCInputConfig();
@@ -333,13 +357,13 @@ public class JDBCInputTestIT {
         config.setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 2147483647),
                 new PreparedStatementParameter(2, Type.String, "abcdefg")));
 
-        //skip parameter ser, as PreparedStatementParameter use object to store value, and the function only for studio
+        // skip parameter ser, as PreparedStatementParameter use object to store value, and the function only for studio
         List<Record> records = new ArrayList<>();
         QueryEmitter qe = new QueryEmitter(config, jdbcService, recordBuilderFactory);
         try {
             qe.init();
             Record r;
-            while((r = qe.next())!=null) {
+            while ((r = qe.next()) != null) {
                 records.add(r);
             }
         } finally {

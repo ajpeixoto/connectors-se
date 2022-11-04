@@ -68,10 +68,11 @@ public class JDBCInputReader {
 
         trimAll = config.isTrimAllStringOrCharColumns();
 
-        if(!trimAll) {
+        if (!trimAll) {
             List<ColumnTrim> columnTrimList = config.getColumnTrims();
-            //TODO now if studio design schema have dynamic type column, this fields will be empty as not pass
-            //here must use SchemaInfo.label to search in columnTrimList, can't use entry name and origin db name(right?)
+            // TODO now if studio design schema have dynamic type column, this fields will be empty as not pass
+            // here must use SchemaInfo.label to search in columnTrimList, can't use entry name and origin db
+            // name(right?)
             List<SchemaInfo> fields = config.getDataSet().getSchema();
         }
     }

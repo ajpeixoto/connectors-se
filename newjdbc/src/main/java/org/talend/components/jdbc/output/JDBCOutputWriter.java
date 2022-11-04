@@ -130,8 +130,9 @@ abstract public class JDBCOutputWriter {
         // "errorMessage" columns base on componentSchema
         rejectSchema = SchemaInferer.getRejectSchema(config.getDataSet().getSchema(), recordBuilderFactory);
 
-        // TODO check if talend dynamic column exists in component schema
-        isDynamic = false;
+        // TODO now studio pass empty design schema if any dynamic column exists in studio component schema
+        // not sure that meet every case
+        isDynamic = componentSchema.getEntries().isEmpty();
 
         // if not dynamic, we can computer it now for "fail soon" way, not fail in main part if fail
         if (!isDynamic) {

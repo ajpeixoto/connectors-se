@@ -63,8 +63,10 @@ public class JDBCBulkFileWriter {
         }
 
         this.designSchema = SchemaInferer.convertSchemaInfoList2TckSchema(schema, recordBuilderFactory);
-        // TODO check dynamic column exists
-        isDynamic = false;
+
+        // TODO now studio pass empty design schema if any dynamic column exists in studio component schema
+        // not sure that meet every case
+        isDynamic = this.designSchema.getEntries().isEmpty();
     }
 
     public void open() throws IOException {

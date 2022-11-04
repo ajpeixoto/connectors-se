@@ -439,17 +439,17 @@ public class SchemaInferer {
                     .withProp("talend.studio.type", info.getTalendType())
                     .withProp("talend.studio.key", String.valueOf(info.isKey()));
 
-                    if(info.getPattern()!=null) {
-                        entryBuilder.withProp("talend.studio.pattern", info.getPattern());
-                    }
+            if (info.getPattern() != null) {
+                entryBuilder.withProp("talend.studio.pattern", info.getPattern());
+            }
 
-                    if(info.getLength()!=null) {
-                        entryBuilder.withProp("talend.studio.length", String.valueOf(info.getLength()));
-                    }
+            if (info.getLength() != null) {
+                entryBuilder.withProp("talend.studio.length", String.valueOf(info.getLength()));
+            }
 
-                    if(info.getPrecision()!=null) {
-                        entryBuilder.withProp("talend.studio.precision", String.valueOf(info.getPrecision()));
-                    }
+            if (info.getPrecision() != null) {
+                entryBuilder.withProp("talend.studio.precision", String.valueOf(info.getPrecision()));
+            }
 
             schemaBuilder.withEntry(entryBuilder.build());
         });

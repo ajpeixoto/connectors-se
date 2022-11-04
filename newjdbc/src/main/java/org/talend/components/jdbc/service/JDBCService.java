@@ -182,9 +182,10 @@ public class JDBCService implements Serializable {
     @CreateConnection
     public DataSourceWrapper createConnection(@Option("configuration") final JDBCDataStore dataStore)
             throws SQLException {
-        DataSourceWrapper dataSourceWrapper = createConnectionOrGetFromSharedConnectionPoolOrDataSource(dataStore, context, false);
-        //not call this in HikariDataSource wrapper as worry HikariDataSource implement
-        if(dataStore.isUseAutoCommit()) {
+        DataSourceWrapper dataSourceWrapper =
+                createConnectionOrGetFromSharedConnectionPoolOrDataSource(dataStore, context, false);
+        // not call this in HikariDataSource wrapper as worry HikariDataSource implement
+        if (dataStore.isUseAutoCommit()) {
             dataSourceWrapper.getConnection().setAutoCommit(dataStore.isAutoCommit());
         }
         return dataSourceWrapper;
