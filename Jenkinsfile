@@ -238,9 +238,9 @@ pipeline {
                     // updating build description
                     currentBuild.description = ("""
                       $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
+                      Version: $qualifiedVersion
                       Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
-                      Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING
-                      Qualified Version: $qualifiedVersion""".stripIndent()
+                      Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING""".stripIndent()
                     )
                 }
             }
