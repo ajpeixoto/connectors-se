@@ -291,7 +291,7 @@ pipeline {
 
                             sh """
                               echo "Edit version on dev branches, new version is ${qualifiedVersion}"
-                              mvn versions:set DnewVersion=${qualifiedVersion}
+                              mvn versions:set --define newVersion=${qualifiedVersion}
                             """
                         }
                     }
