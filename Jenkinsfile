@@ -21,6 +21,7 @@ def sonarCredentials = usernamePassword(
 final String slackChannel = 'components-ci'
 final String PRODUCTION_DEPLOY_REPOSITORY = "TalendOpenSourceSnapshot"
 final String DEVELOPMENT_DEPLOY_REPOSITORY = "dev_branch_snapshots"
+final String NEXUS_SNAPSHOTS_PULL_BASE_URL = "https://artifacts-zl.talend.com/nexus/content/repositories"
 
 // Job variables declaration
 String branch_user
@@ -222,7 +223,7 @@ pipeline {
                         // Properties documented in the pom.
                         buildParamsAsArray.addAll([
                                 '--define', "nexus_snapshots_repository=${params.DEV_NEXUS_REPOSITORY}",
-                                '--define', 'nexus_snapshots_pull_base_url=https://nexus-smart-branch.datapwn.com/nexus/content/repositories'
+                                '--define', "nexus_snapshots_pull_base_url=${NEXUS_SNAPSHOTS_PULL_BASE_URL}"
                         ])
                     }
 
