@@ -290,7 +290,7 @@ pipeline {
                         if (! isOnMasterOrMaintenanceBranch) {
 
                             sh """
-                              echo 'Edit version on dev branches'
+                              echo "Edit version on dev branches, new version is ${qualifiedVersion}"
                               mvn versions:set DnewVersion=${qualifiedVersion}
                             """
                         }
