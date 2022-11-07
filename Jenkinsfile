@@ -162,9 +162,6 @@ pipeline {
         string(name: 'POST_LOGIN_SCRIPT',
           defaultValue: "",
           description: 'Execute a shell command after login. Useful for maintenance.')
-        string(name: 'DEV_NEXUS_REPOSITORY',
-          defaultValue: devNexusRepository,
-          description: 'The Nexus repositories where maven snapshots are deployed.')
         booleanParam(name: 'DEBUG_BEFORE_EXITING',
           defaultValue: false,
           description: 'Add an extra step to the pipeline allowing to keep the pod alive for debug purposes')
@@ -222,7 +219,7 @@ pipeline {
                     if (!isOnMasterOrMaintenanceBranch) {
                         // Properties documented in the pom.
                         buildParamsAsArray.addAll([
-                                '--define', "nexus_snapshots_repository=${params.DEV_NEXUS_REPOSITORY}",
+                                '--define', "nexus_snapshots_repository=${devNexusRepository}",
                                 '--define', "nexus_snapshots_pull_base_url=${NEXUS_SNAPSHOTS_PULL_BASE_URL}"
                         ])
                     }
@@ -256,7 +253,7 @@ pipeline {
                       $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
                       Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
                       Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING
-                      Nexus repository: $params.DEV_NEXUS_REPOSITORY
+                      Nexus repository: $devNexusRepository
                       Qualified Version: $qualifiedVersion""".stripIndent()
                     )
                 }
