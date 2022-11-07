@@ -19,9 +19,6 @@ def sonarCredentials = usernamePassword(
 
 // Job config
 final String slackChannel = 'components-ci'
-final String PRODUCTION_DEPLOY_REPOSITORY = "TalendOpenSourceSnapshot"
-final String DEVELOPMENT_DEPLOY_REPOSITORY = "dev_branch_snapshots"
-final String NEXUS_SNAPSHOTS_PULL_BASE_URL = "https://artifacts-zl.talend.com/nexus/content/repositories"
 
 // Job variables declaration
 String branch_user
@@ -35,9 +32,6 @@ Boolean fail_at_end = false
 
 // Job constant config creation
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
-final String devNexusRepository = isOnMasterOrMaintenanceBranch
-        ? PRODUCTION_DEPLOY_REPOSITORY
-        : DEVELOPMENT_DEPLOY_REPOSITORY
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
 final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
@@ -135,7 +129,7 @@ pipeline {
             RELEASE : Build release, deploy to the Nexus for master/maintenance branches
             DEPLOY : Build snapshot, deploy it to the Nexus for any branch''')
         string(
-          name: 'NEXUS_QUALIFIER',
+          name: 'VERSION_QUALIFIER',
           defaultValue: 'DEFAULT',
           description: '''
             For branches, used qualifier to store dependencies in the nexus.
@@ -205,24 +199,17 @@ pipeline {
                         qualifiedVersion = add_qualifier_to_version(
                           pomVersion,
                           "$branch_ticket",
-                          "$params.NEXUS_QUALIFIER")
+                          "$params.VERSION_QUALIFIER")
 
                         echo """
                           Configure the version qualifier for the curent branche: $env.BRANCH_NAME
-                          requested qualifier: $params.NEXUS_QUALIFIER
+                          requested qualifier: $params.VERSION_QUALIFIER
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
                           Qualified Version = $qualifiedVersion"""
                     }
 
                     echo 'Processing parameters'
                     final ArrayList buildParamsAsArray = ['--settings', env.MAVEN_SETTINGS, env.DECRYPTER_ARG]
-                    if (!isOnMasterOrMaintenanceBranch) {
-                        // Properties documented in the pom.
-                        buildParamsAsArray.addAll([
-                                '--define', "nexus_snapshots_repository=${devNexusRepository}",
-                                '--define', "nexus_snapshots_pull_base_url=${NEXUS_SNAPSHOTS_PULL_BASE_URL}"
-                        ])
-                    }
 
                     // Manage the failed at-end-option
                     if( (isOnMasterOrMaintenanceBranch && params.FAIL_AT_END != 'NO') ||
@@ -253,7 +240,6 @@ pipeline {
                       $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
                       Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
                       Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING
-                      Nexus repository: $devNexusRepository
                       Qualified Version: $qualifiedVersion""".stripIndent()
                     )
                 }

@@ -60,7 +60,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>talend_nexus_deployment</id>
-            <url>${talend_oss_snapshots}</url>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</url>
         </snapshotRepository>
         <repository>
             <id>talend_nexus_deployment</id>
@@ -119,9 +119,6 @@
         <jersey-common.version>2.33</jersey-common.version>
 
         <json-smart.version>2.4.7</json-smart.version>
-
-        <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/
-        </talend_oss_snapshots>
 
         <frontend.version>1.7.5</frontend.version>
         <node.version>v12.13.1</node.version>
@@ -692,7 +689,7 @@
     <repositories>
         <repository>
             <id>talend.oss.snapshots</id>
-            <url>${talend_oss_snapshots}</url>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -724,7 +721,7 @@
     <pluginRepositories>
         <pluginRepository>
             <id>talend.oss.snapshots</id>
-            <url>${talend_oss_snapshots}</url>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
