@@ -291,8 +291,10 @@ pipeline {
                         // On development branches the connector version shall be edited for deployment
                         if (! isOnMasterOrMaintenanceBranch) {
 
-                            echo 'Edit version on dev branches'
-                            // TODO
+                            sh """
+                              echo 'Edit version on dev branches'
+                              mvn versions:set DnewVersion=${qualifiedVersion}
+                            """
                         }
                     }
                 }
@@ -481,14 +483,14 @@ private static String add_qualifier_to_version(String version, GString ticket, G
             new_version = "$version-$ticket".toString()
         }
     } else {
-        new_version = input_qualifier.toString()
+        new_version = version.replace("-SNAPSHOT", "-$input_qualifier-SNAPSHOT")
     }
     return new_version
 }
 
 private static ArrayList<String> extract_branch_info(GString branch_name) {
 
-    String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})_(?<description>.*)/
+    String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,4}-\d{1,6})[_-](?<description>.*)/
     java.util.regex.Matcher branchMatcher = branch_name =~ branchRegex
 
     try{
