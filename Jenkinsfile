@@ -19,6 +19,9 @@ def sonarCredentials = usernamePassword(
 
 // Job config
 final String slackChannel = 'components-ci'
+final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
+final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
+final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
 // Job variables declaration
 String branch_user
@@ -29,11 +32,6 @@ String qualifiedVersion
 String releaseVersion = ''
 String extraBuildParams = ''
 Boolean fail_at_end = false
-
-// Job constant config creation
-final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
-final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
-final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
 // Pod config
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
@@ -132,11 +130,10 @@ pipeline {
           name: 'VERSION_QUALIFIER',
           defaultValue: 'DEFAULT',
           description: '''
-            For branches, used qualifier to store dependencies in the nexus.
-            DEFAULT is {x.y.z}-SNAPSHOT-{jira-id} with:
-              - {x.y.z} the version read form pom.xml
-              - {jira-id} taken from branch name that has to be in the format: user/TDI-XXXXX_Custom_description
-              example: 1.38.0-SNAPSHOT-TDI-48419''')
+            Only for dev branches. It will build/deploy jars with the given version qualifier.
+             - DEFAULT means the qualifier will be the Jira id extracted from the branch name.
+            From "user/JIRA-12345_some_information" the qualifier will be 'JIRA-12345'.
+            Before the build, the maven version will be set to: x.y.z-JIRA-12345-SNAPSHOT''')
         choice(
           name: 'FAIL_AT_END',
           choices: ['DEFAULT', 'YES', 'NO'],
@@ -176,13 +173,12 @@ pipeline {
                         error('Can only release from a maintenance branch, exiting.')
                     }
 
-
                     echo 'Manage the version qualifier'
                     if (isOnMasterOrMaintenanceBranch) {
                         echo 'No need to add qualifier on Master or Maintenance branch'
                     }
                     else {
-                        // Validate the branch name
+                        echo "Validate the branch name"
                         (branch_user,
                         branch_ticket,
                         branch_description)= extract_branch_info("$env.BRANCH_NAME")
@@ -195,7 +191,7 @@ pipeline {
                             sh """exit 1"""
                         }
 
-                        // Get the qualifier version
+                        echo "Insert a qualifier in pom version..."
                         qualifiedVersion = add_qualifier_to_version(
                           pomVersion,
                           "$branch_ticket",
@@ -221,7 +217,6 @@ pipeline {
                     // Manage the EXTRA_BUILD_PARAMS
                     buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
                     extraBuildParams = buildParamsAsArray.join(' ')
-
                     releaseVersion = pomVersion.split('-')[0]
                 }
                 ///////////////////////////////////////////
