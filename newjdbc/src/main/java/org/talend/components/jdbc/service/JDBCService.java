@@ -26,6 +26,7 @@ import org.talend.components.jdbc.schema.JDBCTableMetadata;
 import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
@@ -68,7 +69,7 @@ public class JDBCService implements Serializable {
     // this should be used in @CreateConnection and @CloseConnection action method,
     // that method should not be code called outside of JDBCService
     @RuntimeContext
-    private transient Map<String, Object> context;
+    private transient RuntimeContextHolder context;
 
     @Service
     private RecordBuilderFactory recordBuilderFactory;
@@ -309,13 +310,13 @@ public class JDBCService implements Serializable {
     private static final String KEY_DB_DATASOURCES_RAW = "KEY_DB_DATASOURCES_RAW";
 
     public DataSourceWrapper createConnectionOrGetFromSharedConnectionPoolOrDataSource(final JDBCDataStore dataStore,
-            final Map<String, Object> context, final boolean readonly) throws SQLException {
+            final RuntimeContextHolder context, final boolean readonly) throws SQLException {
         Connection conn = null;
         log.debug("Connection attempt to '{}' with the username '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
 
         if (dataStore.isUseSharedDBConnection()) {
             SharedConnectionsPool sharedConnectionPool = (SharedConnectionsPool) context
-                    .get(GLOBAL_CONNECTION_POOL_KEY);
+                    .getGlobal(GLOBAL_CONNECTION_POOL_KEY);
             log.debug("Uses shared connection with name: '{}'", dataStore.getSharedDBConnectionName());
             log.debug("Connection URL: '{}', User name: '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
             try {
@@ -328,7 +329,7 @@ public class JDBCService implements Serializable {
             }
         } else if (dataStore.isUseDataSource()) {
             java.util.Map<String, DataSource> dataSources = (java.util.Map<String, javax.sql.DataSource>) context
-                    .get(KEY_DB_DATASOURCES_RAW);
+                    .getGlobal(KEY_DB_DATASOURCES_RAW);
             if (dataSources != null) {
                 DataSource datasource = dataSources.get(dataStore.getDataSourceAlias());
                 if (datasource == null) {

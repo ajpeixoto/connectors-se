@@ -18,6 +18,7 @@ import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -29,7 +30,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.util.Map;
 
 @Slf4j
 @Version(1)
@@ -48,7 +48,7 @@ public class QueryEmitter implements Serializable {
     private final JDBCService jdbcService;
 
     @RuntimeContext
-    private transient Map<String, Object> context;
+    private transient RuntimeContextHolder context;
 
     @Connection
     private transient JDBCService.DataSourceWrapper dataSource;

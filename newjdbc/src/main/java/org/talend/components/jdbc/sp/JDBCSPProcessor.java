@@ -18,6 +18,7 @@ import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.*;
 import org.talend.sdk.component.api.record.Record;
@@ -29,7 +30,6 @@ import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Version(1)
@@ -52,7 +52,7 @@ public class JDBCSPProcessor implements Serializable {
     private transient JDBCService.DataSourceWrapper dataSource;
 
     @RuntimeContext
-    private transient Map<String, Object> context;
+    private transient RuntimeContextHolder context;
 
     private final RecordBuilderFactory recordBuilderFactory;
 

@@ -19,6 +19,7 @@ import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.JDBCService;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -27,7 +28,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.sql.*;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -54,12 +54,12 @@ public class JDBCInputReader {
 
     private long totalCount;
 
-    private transient Map<String, Object> context;
+    private transient RuntimeContextHolder context;
 
     private final boolean trimAll;
 
     public JDBCInputReader(JDBCInputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
-            RecordBuilderFactory recordBuilderFactory, final Map<String, Object> context) {
+            RecordBuilderFactory recordBuilderFactory, final RuntimeContextHolder context) {
         this.config = config;
         this.useExistedConnection = useExistedConnection;
         this.conn = conn;
@@ -90,7 +90,7 @@ public class JDBCInputReader {
                 URL mappingFileDir = null;
                 if (context != null) {
                     // TODO set and init it in common javajet
-                    Object value = context.get(CommonUtils.MAPPING_URL_SUBFIX);
+                    Object value = context.getGlobal(CommonUtils.MAPPING_URL_SUBFIX);
                     if (value != null) {
                         mappingFileDir = URL.class.cast(value);
                     }

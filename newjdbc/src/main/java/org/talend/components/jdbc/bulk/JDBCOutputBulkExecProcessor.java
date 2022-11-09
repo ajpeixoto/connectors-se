@@ -19,6 +19,7 @@ import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.*;
 import org.talend.sdk.component.api.record.Record;
@@ -30,7 +31,6 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.util.Map;
 
 @Slf4j
 @Getter
@@ -58,7 +58,7 @@ public class JDBCOutputBulkExecProcessor implements Serializable {
     private transient JDBCService.DataSourceWrapper dataSource;
 
     @RuntimeContext
-    private transient Map<String, Object> context;
+    private transient RuntimeContextHolder context;
 
     // private final I18nMessage i18n;
 

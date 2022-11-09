@@ -183,7 +183,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_use_preparedstatement_as_input() {
+    public void test_use_preparedstatement_as_input() throws SQLException {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -209,6 +209,13 @@ public class JDBCRowTestIT {
         List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
         assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
+
+        // System.out.println("===>" + ResultSet.class.cast(jdbcResultSetObject).next());
+        // System.out.println("===>" + ResultSet.class.cast(jdbcResultSetObject).getString(1));
+
+        // final Jsonb jsonb = JsonbProvider.provider().create().build();
+        // String ser = jsonb.toJson(jdbcResultSetObject);
+        // ResultSet resultSet = ResultSet.class.cast(jsonb.fromJson(ser, jdbcResultSetObject.getClass()));
     }
 
     @Test
