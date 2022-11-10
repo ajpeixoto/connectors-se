@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
+import org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
@@ -32,9 +33,16 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
+import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable.AVAILABILITY.AFTER;
+
 @Slf4j
 @Getter
 @Version(1)
+@ReturnVariable(value = "NB_LINE_INSERTED", availability = AFTER, type = Integer.class)
+@ReturnVariable(value = "NB_LINE_UPDATED", availability = AFTER, type = Integer.class)
+@ReturnVariable(value = "NB_LINE_DELETED", availability = AFTER, type = Integer.class)
+@ReturnVariable(value = "NB_LINE_REJECTED", availability = AFTER, type = Integer.class)
+@ReturnVariable(value = "QUERY", availability = AFTER, type = String.class)
 @Processor(name = "Output") // TODO remove "New"
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @Documentation("JDBC Output component")
@@ -101,23 +109,23 @@ public class OutputProcessor implements Serializable {
             switch (configuration.getDataAction()) {
             case INSERT:
                 writer = new JDBCOutputInsertWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory);
+                        recordBuilderFactory, context);
                 break;
             case UPDATE:
                 writer = new JDBCOutputUpdateWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory);
+                        recordBuilderFactory, context);
                 break;
             case INSERT_OR_UPDATE:
                 writer = new JDBCOutputInsertOrUpdateWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory);
+                        recordBuilderFactory, context);
                 break;
             case UPDATE_OR_INSERT:
                 writer = new JDBCOutputUpdateOrInsertWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory);
+                        recordBuilderFactory, context);
                 break;
             case DELETE:
                 writer = new JDBCOutputDeleteWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory);
+                        recordBuilderFactory, context);
                 break;
             }
 

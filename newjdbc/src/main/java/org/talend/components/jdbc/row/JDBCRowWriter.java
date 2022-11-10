@@ -349,19 +349,6 @@ public class JDBCRowWriter {
     }
 
     private void constructResult() {
-        /*
-         * if (runtime != null) {
-         * runtime.setComponentData(runtime.getCurrentComponentId(),
-         * CommonUtils.getStudioNameFromProperty(ComponentConstants.RETURN_DELETE_RECORD_COUNT), deleteCount);
-         * runtime.setComponentData(runtime.getCurrentComponentId(),
-         * CommonUtils.getStudioNameFromProperty(ComponentConstants.RETURN_INSERT_RECORD_COUNT), insertCount);
-         * runtime.setComponentData(runtime.getCurrentComponentId(),
-         * CommonUtils.getStudioNameFromProperty(ComponentConstants.RETURN_UPDATE_RECORD_COUNT), updateCount);
-         * }
-         */
-
-        // successCount = successCount;
-        // rejectCount = rejectCount;
     }
 
 }

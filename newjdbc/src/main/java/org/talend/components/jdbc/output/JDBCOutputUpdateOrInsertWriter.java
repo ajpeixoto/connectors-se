@@ -14,6 +14,7 @@ package org.talend.components.jdbc.output;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.service.JDBCService;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -37,8 +38,8 @@ public class JDBCOutputUpdateOrInsertWriter extends JDBCOutputWriter {
 
     public JDBCOutputUpdateOrInsertWriter(JDBCOutputConfig config, boolean useExistedConnection,
             JDBCService.DataSourceWrapper conn,
-            RecordBuilderFactory recordBuilderFactory) {
-        super(config, useExistedConnection, conn, recordBuilderFactory);
+            RecordBuilderFactory recordBuilderFactory, RuntimeContextHolder context) {
+        super(config, useExistedConnection, conn, recordBuilderFactory, context);
     }
 
     @Override
@@ -146,7 +147,7 @@ public class JDBCOutputUpdateOrInsertWriter extends JDBCOutputWriter {
         try {
             String updateSql_fact = rowWriter4Update.write(input);
             if (updateSql_fact != null) {
-                // runtime.setComponentData(runtime.getCurrentComponentId(), QUERY_KEY, updateSql_fact);
+                context.set("QUERY", updateSql_fact);
             }
             if (config.isDebugQuery()) {
                 log.debug("'" + updateSql_fact.trim() + "'.");
@@ -164,7 +165,7 @@ public class JDBCOutputUpdateOrInsertWriter extends JDBCOutputWriter {
             if (noDataUpdate) {
                 String insertSql_fact = rowWriter4Insert.write(input);
                 if (insertSql_fact != null) {
-                    // runtime.setComponentData(runtime.getCurrentComponentId(), QUERY_KEY, insertSql_fact);
+                    context.set("QUERY", insertSql_fact);
                 }
 
                 if (config.isDebugQuery()) {

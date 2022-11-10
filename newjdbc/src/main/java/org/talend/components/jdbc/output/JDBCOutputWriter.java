@@ -15,6 +15,7 @@ package org.talend.components.jdbc.output;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.JDBCService;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -81,14 +82,17 @@ abstract public class JDBCOutputWriter {
 
     protected final RecordBuilderFactory recordBuilderFactory;
 
+    protected final RuntimeContextHolder context;
+
     protected long totalCount;
 
     public JDBCOutputWriter(JDBCOutputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
-            RecordBuilderFactory recordBuilderFactory) {
+            RecordBuilderFactory recordBuilderFactory, RuntimeContextHolder context) {
         this.config = config;
         this.useExistedConnection = useExistedConnection;
         this.conn = conn;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.context = context;
 
         // TODO
         if (false) {
@@ -361,10 +365,12 @@ abstract public class JDBCOutputWriter {
     }
 
     protected void constructResult() {
-        // pass them TODO
-        // deleteCount insertCount updateCount rejectCount
-        // successCount;
-        // rejectCount;
+        if (context != null) {
+            context.set("NB_LINE_DELETED", deleteCount);
+            context.set("NB_LINE_INSERTED", insertCount);
+            context.set("NB_LINE_UPDATED", updateCount);
+            context.set("NB_LINE_REJECTED", rejectCount);
+        }
     }
 
     protected int executeBatchAtLast() throws SQLException {

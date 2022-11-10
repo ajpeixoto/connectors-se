@@ -15,6 +15,7 @@ package org.talend.components.jdbc.input;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
+import org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
@@ -31,9 +32,12 @@ import javax.annotation.PreDestroy;
 import java.io.Serializable;
 import java.sql.SQLException;
 
+import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable.AVAILABILITY.AFTER;
+
 @Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
+@ReturnVariable(value = "QUERY", availability = AFTER, type = String.class)
 @Emitter(name = "Input")
 @Documentation("JDBC query input")
 public class QueryEmitter implements Serializable {
@@ -67,6 +71,10 @@ public class QueryEmitter implements Serializable {
 
     @PostConstruct
     public void init() throws SQLException {
+        if (context != null) {
+            context.set("QUERY", configuration.getDataSet().getSqlQuery());
+        }
+
         boolean useExistedConnection = false;
         if (dataSource == null) {
             try {

@@ -15,6 +15,7 @@ package org.talend.components.jdbc.row;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
+import org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
@@ -31,9 +32,12 @@ import java.io.Serializable;
 import java.sql.SQLException;
 import java.util.List;
 
+import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable.AVAILABILITY.FLOW;
+
 @Slf4j
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
+@ReturnVariable(value = "QUERY", availability = FLOW, type = String.class)
 @Processor(name = "Row")
 @Documentation("JDBC Row component.")
 public class JDBCRowProcessor implements Serializable {
@@ -71,6 +75,10 @@ public class JDBCRowProcessor implements Serializable {
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
             @Output("reject") final OutputEmitter<Record>/* OutputEmitter<Reject> */ reject) throws SQLException {
+        if (context != null) {
+            context.set("QUERY", configuration.getDataSet().getSqlQuery());
+        }
+
         if (!init) {
             boolean useExistedConnection = false;
 
