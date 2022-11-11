@@ -96,16 +96,15 @@ public class JDBCInputReader {
                     }
                 }
 
-                // use the connector nested mapping file
-                if (mappingFileDir == null) {
-                    mappingFileDir = this.getClass().getResource("/mappings");
-                }
-
                 DBType dbTypeInComponentSetting = config.isEnableMapping() ? config.getMapping() : null;
 
                 Dbms mapping = null;
                 if (mappingFileDir != null) {
                     mapping = CommonUtils.getMapping(mappingFileDir, config.getDataSet().getDataStore(), null,
+                            dbTypeInComponentSetting);
+                } else {
+                    // use the connector nested mapping file
+                    mapping = CommonUtils.getMapping("/mappings", config.getDataSet().getDataStore(), null,
                             dbTypeInComponentSetting);
                 }
 

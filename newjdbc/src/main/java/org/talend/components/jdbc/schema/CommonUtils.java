@@ -86,24 +86,35 @@ public class CommonUtils {
 
     public static final String MAPPING_URL_SUBFIX = "MAPPINGS_URL";
 
+    public static Dbms getMapping(String mappingFilesDir, JDBCDataStore dataStore,
+            String dbTypeByComponentType,
+            DBType dbTypeInComponentSetting) {
+        String mappingFileSubfix = guessMappingFile(dataStore, dbTypeByComponentType, dbTypeInComponentSetting);
+
+        InputStream is = CommonUtils.class
+                .getResourceAsStream(String.format("%s/mapping_%s.xml", mappingFilesDir, mappingFileSubfix));
+        if (is == null) {
+            is = CommonUtils.class.getResourceAsStream(
+                    String.format("%s/mapping_%s.xml", mappingFilesDir, mappingFileSubfix.toLowerCase()));
+        }
+
+        if (is == null) {
+            return null;
+        }
+
+        MappingFileLoader fileLoader = new MappingFileLoader();
+        Dbms dbms = fileLoader.load(is).get(0);
+
+        return dbms;
+    }
+
     public static Dbms getMapping(URL mappingFilesDir, JDBCDataStore dataStore,
             String dbTypeByComponentType/*
                                          * for example, if tjdbcxxx, the type is "General JDBC", if tmysqlxxx, the type
                                          * is "MySQL"
                                          */,
             DBType dbTypeInComponentSetting/* in tjdbcinput, can choose the db type in advanced setting */) {
-        final String realDbType = getRealDBType(dataStore, dbTypeByComponentType);
-        final String product = EDatabaseTypeName.getTypeFromDisplayName(realDbType).getProduct();
-
-        String mappingFileSubfix = productValue2DefaultMappingFileSubfix.get(product);
-
-        if ((dbTypeInComponentSetting != null) && (mappingFileSubfix == null)) {
-            mappingFileSubfix = dbType2MappingFileSubfix.get(dbTypeInComponentSetting);
-        }
-
-        if (mappingFileSubfix == null) {
-            mappingFileSubfix = "Mysql";
-        }
+        String mappingFileSubfix = guessMappingFile(dataStore, dbTypeByComponentType, dbTypeInComponentSetting);
 
         MappingFileLoader fileLoader = new MappingFileLoader();
         Dbms dbms = null;
@@ -117,6 +128,23 @@ public class CommonUtils {
         }
 
         return dbms;
+    }
+
+    private static String guessMappingFile(JDBCDataStore dataStore, String dbTypeByComponentType,
+            DBType dbTypeInComponentSetting) {
+        final String realDbType = getRealDBType(dataStore, dbTypeByComponentType);
+        final String product = EDatabaseTypeName.getTypeFromDisplayName(realDbType).getProduct();
+
+        String mappingFileSubfix = productValue2DefaultMappingFileSubfix.get(product);
+
+        if ((dbTypeInComponentSetting != null) && (mappingFileSubfix == null)) {
+            mappingFileSubfix = dbType2MappingFileSubfix.get(dbTypeInComponentSetting);
+        }
+
+        if (mappingFileSubfix == null) {
+            mappingFileSubfix = "Mysql";
+        }
+        return mappingFileSubfix;
     }
 
     private static Dbms loadFromFile(final MappingFileLoader fileLoader, final URL mappingFilesDir,
@@ -168,19 +196,6 @@ public class CommonUtils {
             mappingStream = mappingFileFullUrl.openStream();
         }
         return mappingStream;
-    }
-
-    public static Dbms getMapping(String mappingFilesDir, JDBCDataStore dataStore,
-            String dbTypeByComponentType/*
-                                         * for example, if tjdbcxxx, the type is "General JDBC", if tmysqlxxx, the type
-                                         * is "MySQL"
-                                         */,
-            DBType dbTypeInComponentSetting/* in tjdbcinput, can choose the db type in advanced setting */) {
-        try {
-            return getMapping(new URL(mappingFilesDir), dataStore, dbTypeByComponentType, dbTypeInComponentSetting);
-        } catch (MalformedURLException e) {
-            throw new RuntimeException("can't find the mapping file dir : " + mappingFilesDir);
-        }
     }
 
     // now we use a inside mapping to do the mapping file search, not good and easy to break, TODO should load all the

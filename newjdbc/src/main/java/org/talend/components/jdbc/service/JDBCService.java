@@ -511,7 +511,7 @@ public class JDBCService implements Serializable {
     public Schema guessSchemaByQuery(@Option final JDBCQueryDataSet dataSet) throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
-        URL mappingFileDir = this.getClass().getResource("/mappings");
+        URL mappingFileDir = null;
 
         // TODO dbTypeInComponentSetting exist for tjdbcinput, how to pass it?
         DBType dbTypeInComponentSetting = null;
@@ -519,6 +519,10 @@ public class JDBCService implements Serializable {
         Dbms mapping = null;
         if (mappingFileDir != null) {
             mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting);
+        } else {
+            // use the connector nested mapping file
+            mapping = CommonUtils.getMapping("/mappings", dataSet.getDataStore(), null,
+                    dbTypeInComponentSetting);
         }
 
         try (final DataSourceWrapper dataSource = createConnection(dataSet.getDataStore(), false);
@@ -536,7 +540,7 @@ public class JDBCService implements Serializable {
     public Schema guessSchemaByTable(@Option final JDBCTableDataSet dataSet) throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
-        URL mappingFileDir = this.getClass().getResource("/mappings");
+        URL mappingFileDir = null;
 
         // TODO dbTypeInComponentSetting exist for tjdbcinput, how to pass it?
         DBType dbTypeInComponentSetting = null;
@@ -544,6 +548,10 @@ public class JDBCService implements Serializable {
         Dbms mapping = null;
         if (mappingFileDir != null) {
             mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting);
+        } else {
+            // use the connector nested mapping file
+            mapping = CommonUtils.getMapping("/mappings", dataSet.getDataStore(), null,
+                    dbTypeInComponentSetting);
         }
 
         try (final DataSourceWrapper dataSource = createConnection(dataSet.getDataStore(), false);
