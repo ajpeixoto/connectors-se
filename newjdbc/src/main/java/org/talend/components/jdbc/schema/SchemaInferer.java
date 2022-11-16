@@ -20,10 +20,8 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import java.sql.*;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.talend.sdk.component.api.record.Schema.Type.*;
@@ -305,12 +303,16 @@ public class SchemaInferer {
         entryBuilder.withProp("talend.studio.precision", String.valueOf(scale));
     }
 
-    public static void fillValue(final Record.Builder builder, final Schema schema, final ResultSet resultSet)
+    public static void fillValue(final Record.Builder builder, final Schema schema, final ResultSet resultSet,
+            final boolean isTrimAll, Map<Integer, Boolean> trimMap)
             throws SQLException {
         List<Schema.Entry> entries = schema.getEntries();
         for (int index = 0; index < entries.size(); index++) {
             Schema.Entry entry = entries.get(index);
-            Object value = resultSet.getObject(index + 1);
+
+            int jdbcIndex = index + 1;
+
+            Object value = resultSet.getObject(jdbcIndex);
 
             if (value == null)
                 continue;
@@ -321,40 +323,44 @@ public class SchemaInferer {
             String detail_type = entry.getProp("talend.studio.type");
             switch (type) {
             case STRING:
-                builder.withString(entry, String.valueOf(value));
+                Boolean isTrim = trimMap.get(jdbcIndex);
+                builder.withString(entry, (isTrimAll || (isTrim != null && isTrim)) ? String.valueOf(value).trim()
+                        : String.valueOf(value));
                 break;
             case DECIMAL:
-                builder.withDecimal(entry, resultSet.getBigDecimal(index + 1));
+                builder.withDecimal(entry, resultSet.getBigDecimal(jdbcIndex));
                 break;
             case INT:
-                builder.withInt(entry, resultSet.getInt(index + 1));
+                builder.withInt(entry, resultSet.getInt(jdbcIndex));
                 break;
             case LONG:
-                builder.withLong(entry, resultSet.getLong(index + 1));
+                builder.withLong(entry, resultSet.getLong(jdbcIndex));
                 break;
             case FLOAT:
-                builder.withFloat(entry, resultSet.getFloat(index + 1));
+                builder.withFloat(entry, resultSet.getFloat(jdbcIndex));
                 break;
             case DOUBLE:
-                builder.withDouble(entry, resultSet.getDouble(index + 1));
+                builder.withDouble(entry, resultSet.getDouble(jdbcIndex));
                 break;
             case BOOLEAN:
-                builder.withBoolean(entry, resultSet.getBoolean(index + 1));
+                builder.withBoolean(entry, resultSet.getBoolean(jdbcIndex));
                 break;
             case DATETIME:
                 Date date;
                 try {
-                    date = resultSet.getTimestamp(index + 1);
+                    date = resultSet.getTimestamp(jdbcIndex);
                 } catch (Exception e) {
-                    date = resultSet.getDate(index + 1);
+                    date = resultSet.getDate(jdbcIndex);
                 }
                 builder.withTimestamp(entry, date.getTime());
                 break;
             case BYTES:
-                builder.withBytes(entry, resultSet.getBytes(index + 1));
+                builder.withBytes(entry, resultSet.getBytes(jdbcIndex));
                 break;
             default:
-                builder.with(entry, String.valueOf(value));
+                isTrim = trimMap.get(jdbcIndex);
+                builder.with(entry, (isTrimAll || (isTrim != null && isTrim)) ? String.valueOf(value).trim()
+                        : String.valueOf(value));
                 break;
             }
         }
@@ -428,36 +434,94 @@ public class SchemaInferer {
             return;
 
         infos.stream().forEach(info -> {
-            Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-            // TODO consider the valid name convert
-            entryBuilder.withName(info.getLabel())
-                    .withRawName(info.getOriginalDbColumnName())
-                    .withNullable(info.isNullable())
-                    .withComment(info.getComment())
-                    .withDefaultValue(info.getDefaultValue())
-                    // in studio, we use talend type firstly, not tck type, but in cloud, no talend type, only tck type,
-                    // need to use this
-                    // but only studio have the design schema which with raw db type and talend type, so no need to
-                    // convert here as we will not use getType method
-                    .withType(convertTalendType2TckType(TalendType.get(info.getTalendType())))
-                    // TODO also define a pro for origin db type like VARCHAR? info.getType()
-                    .withProp("talend.studio.type", info.getTalendType())
-                    .withProp("talend.studio.key", String.valueOf(info.isKey()));
-
-            if (info.getPattern() != null) {
-                entryBuilder.withProp("talend.studio.pattern", info.getPattern());
-            }
-
-            if (info.getLength() != null) {
-                entryBuilder.withProp("talend.studio.length", String.valueOf(info.getLength()));
-            }
-
-            if (info.getPrecision() != null) {
-                entryBuilder.withProp("talend.studio.precision", String.valueOf(info.getPrecision()));
-            }
-
-            schemaBuilder.withEntry(entryBuilder.build());
+            Schema.Entry entry = convertSchemaInfo2Entry(info, recordBuilderFactory);
+            schemaBuilder.withEntry(entry);
         });
+    }
+
+    private static Schema.Entry convertSchemaInfo2Entry(SchemaInfo info, RecordBuilderFactory recordBuilderFactory) {
+        Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
+
+        // TODO consider the valid name convert
+        entryBuilder.withName(info.getLabel())
+                .withRawName(info.getOriginalDbColumnName())
+                .withNullable(info.isNullable())
+                .withComment(info.getComment())
+                .withDefaultValue(info.getDefaultValue())
+                // in studio, we use talend type firstly, not tck type, but in cloud, no talend type, only tck type,
+                // need to use this
+                // but only studio have the design schema which with raw db type and talend type, so no need to
+                // convert here as we will not use getType method
+                .withType(convertTalendType2TckType(TalendType.get(info.getTalendType())))
+                // TODO also define a pro for origin db type like VARCHAR? info.getType()
+                .withProp("talend.studio.type", info.getTalendType())
+                .withProp("talend.studio.key", String.valueOf(info.isKey()));
+
+        if (info.getPattern() != null) {
+            entryBuilder.withProp("talend.studio.pattern", info.getPattern());
+        }
+
+        if (info.getLength() != null) {
+            entryBuilder.withProp("talend.studio.length", String.valueOf(info.getLength()));
+        }
+
+        if (info.getPrecision() != null) {
+            entryBuilder.withProp("talend.studio.precision", String.valueOf(info.getPrecision()));
+        }
+
+        return entryBuilder.build();
+    }
+
+    public static Schema mergeRuntimeSchemaAndDesignSchema4Dynamic(List<SchemaInfo> designSchema, Schema runtimeSchema,
+            RecordBuilderFactory recordBuilderFactory) {
+        Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
+
+        List<Schema.Entry> runtimeFields = runtimeSchema.getEntries();
+
+        Set<String> designFieldSet = new HashSet<>();
+        for (SchemaInfo designField : designSchema) {
+            String oname = designField.getOriginalDbColumnName();
+            designFieldSet.add(oname);
+        }
+
+        for (int i = 0; i < designSchema.size(); i++) {
+            SchemaInfo designColumn = designSchema.get(i);
+
+            if ("id_Dynamic".equals(designColumn.getTalendType())) {
+                int dynamicSize = runtimeFields.size() - (designSchema.size() - 1);
+                for (int j = 0; j < dynamicSize; j++) {
+                    Schema.Entry runtimeEntry = runtimeFields.get(i + j);
+                    String oname = runtimeEntry.getOriginalFieldName();
+                    if (!designFieldSet.contains(oname)) {
+                        schemaBuilder.withEntry(runtimeEntry);
+                    }
+                }
+            } else {
+                schemaBuilder.withEntry(convertSchemaInfo2Entry(designColumn, recordBuilderFactory));
+            }
+        }
+
+        return schemaBuilder.build();
+    }
+
+    public static boolean containDynamic(List<SchemaInfo> designSchema) {
+        for (SchemaInfo info : designSchema) {
+            if ("id_Dynamic".equals(info.getTalendType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int getDynamicIndex(List<SchemaInfo> designSchema) {
+        int i = 0;
+        for (SchemaInfo info : designSchema) {
+            if ("id_Dynamic".equals(info.getTalendType())) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
     }
 
 }

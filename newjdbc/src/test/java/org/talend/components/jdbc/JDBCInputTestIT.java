@@ -254,6 +254,7 @@ public class JDBCInputTestIT {
     public void testTrimAll() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
 
         JDBCInputConfig config = new JDBCInputConfig();
@@ -276,11 +277,58 @@ public class JDBCInputTestIT {
     public void testTrimField() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
         config.setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("NAME", true)));
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+
+        assertEquals(1, getValueByIndex(data.get(0), 0));
+        assertEquals("wangwei", getValueByIndex(data.get(0), 1));
+
+        assertEquals(2, getValueByIndex(data.get(1), 0));
+        assertEquals("gaoyan", getValueByIndex(data.get(1), 1));
+
+        assertEquals(3, getValueByIndex(data.get(2), 0));
+        assertEquals("dabao", getValueByIndex(data.get(2), 1));
+    }
+
+    @Test
+    public void testTrimFieldWithDynamicColumnOnly() {
+        JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
+        dataSet.setDataStore(dataStore);
+        dataSet.setSchema(DBTestUtils.createTestDynamicSchemaInfos());
+        dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
+
+        JDBCInputConfig config = new JDBCInputConfig();
+        config.setDataSet(dataSet);
+        config.setColumnTrims(Arrays.asList(new ColumnTrim("DYN", true)));
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+
+        assertEquals(1, getValueByIndex(data.get(0), 0));
+        assertEquals("wangwei", getValueByIndex(data.get(0), 1));
+
+        assertEquals(2, getValueByIndex(data.get(1), 0));
+        assertEquals("gaoyan", getValueByIndex(data.get(1), 1));
+
+        assertEquals(3, getValueByIndex(data.get(2), 0));
+        assertEquals("dabao", getValueByIndex(data.get(2), 1));
+    }
+
+    @Test
+    public void testTrimFieldWithDynamicColumnMix() {
+        JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
+        dataSet.setDataStore(dataStore);
+        dataSet.setSchema(DBTestUtils.createTestDynamicMixSchemaInfos());
+        dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
+
+        JDBCInputConfig config = new JDBCInputConfig();
+        config.setDataSet(dataSet);
+        config.setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("DYN", true)));
 
         List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 

@@ -59,6 +59,19 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 @Slf4j
 public class DBTestUtils {
 
+    static List<SchemaInfo> createTestDynamicSchemaInfos() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("DYN", null, true, "VARCHAR", "id_Dynamic", true, null, null, null, null, null));
+        return schemaInfos;
+    }
+
+    static List<SchemaInfo> createTestDynamicMixSchemaInfos() {
+        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));
+        schemaInfos.add(new SchemaInfo("DYN", null, true, "VARCHAR", "id_Dynamic", true, null, null, null, null, null));
+        return schemaInfos;
+    }
+
     static List<SchemaInfo> createTestSchemaInfosWithResultSet() {
         List<SchemaInfo> schemaInfos = new ArrayList<>();
         schemaInfos.add(new SchemaInfo("ID", "ID", true, "INT", "id_Integer", false, null, 10, null, null, null));

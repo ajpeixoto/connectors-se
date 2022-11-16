@@ -27,7 +27,9 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.sql.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 /**
@@ -56,7 +58,9 @@ public class JDBCInputReader {
 
     private transient RuntimeContextHolder context;
 
-    private final boolean trimAll;
+    private boolean isTrimAll;
+
+    private Map<Integer, Boolean> trimMap = new HashMap<>();
 
     public JDBCInputReader(JDBCInputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
             RecordBuilderFactory recordBuilderFactory, final RuntimeContextHolder context) {
@@ -65,70 +69,84 @@ public class JDBCInputReader {
         this.conn = conn;
         this.recordBuilderFactory = recordBuilderFactory;
         this.context = context;
-
-        trimAll = config.isTrimAllStringOrCharColumns();
-
-        if (!trimAll) {
-            List<ColumnTrim> columnTrimList = config.getColumnTrims();
-            // TODO now if studio design schema have dynamic type column, this fields will be empty as not pass
-            // here must use SchemaInfo.label to search in columnTrimList, can't use entry name and origin db
-            // name(right?)
-            List<SchemaInfo> fields = config.getDataSet().getSchema();
-        }
     }
 
     private Schema getSchema() throws SQLException {
         if (querySchema == null) {
-            // TODO need to adjust studio common javajet as it don't pass value for "config.getDataSet().getSchema()" if
-            // dynamic column exists in studio, even basic column also exist.
-            // TODO solution 1: pass nondynamic columns, solution 2: pass all columns info which contain dynamic columns
-            querySchema = SchemaInferer.convertSchemaInfoList2TckSchema(config.getDataSet().getSchema(),
-                    recordBuilderFactory);
+            List<SchemaInfo> designSchema = config.getDataSet().getSchema();
 
-            // no set schema for cloud platform, or use dynamic in studio platform
-            if (querySchema == null || querySchema.getEntries().isEmpty()) {
-                URL mappingFileDir = null;
-                if (context != null) {
-                    // TODO set and init it in common javajet
-                    Object value = context.getGlobal(CommonUtils.MAPPING_URL_SUBFIX);
-                    if (value != null) {
-                        mappingFileDir = URL.class.cast(value);
+            int dynamicIndex = -1;
+
+            if (designSchema == null || designSchema.isEmpty()) {// no set schema for cloud platform or studio platform
+                querySchema = getRuntimeSchema();
+            } else {
+                dynamicIndex = SchemaInferer.getDynamicIndex(designSchema);
+                if (dynamicIndex > -1) {
+                    Schema runtimeSchema = getRuntimeSchema();
+                    querySchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(designSchema, runtimeSchema,
+                            recordBuilderFactory);
+                } else {
+                    querySchema = SchemaInferer.convertSchemaInfoList2TckSchema(config.getDataSet().getSchema(),
+                            recordBuilderFactory);
+                }
+            }
+
+            if (config.isTrimAllStringOrCharColumns()) {
+                isTrimAll = true;
+                return querySchema;
+            }
+
+            List<ColumnTrim> columnTrims = config.getColumnTrims();
+            if (columnTrims != null && !columnTrims.isEmpty()) {
+                boolean defaultTrim =
+                        ((dynamicIndex > -1) && !columnTrims.isEmpty()) ? columnTrims.get(dynamicIndex).isTrim()
+                                : false;
+
+                int i = 0;
+                for (Schema.Entry entry : querySchema.getEntries()) {
+                    i++;
+                    trimMap.put(i, defaultTrim);
+
+                    for (ColumnTrim columnTrim : columnTrims) {
+                        if (columnTrim.getColumn().equals(entry.getName())) {
+                            trimMap.put(i, columnTrim.isTrim());
+                            break;
+                        }
                     }
                 }
-
-                DBType dbTypeInComponentSetting = config.isEnableMapping() ? config.getMapping() : null;
-
-                Dbms mapping = null;
-                if (mappingFileDir != null) {
-                    mapping = CommonUtils.getMapping(mappingFileDir, config.getDataSet().getDataStore(), null,
-                            dbTypeInComponentSetting);
-                } else {
-                    // use the connector nested mapping file
-                    mapping = CommonUtils.getMapping("/mappings", config.getDataSet().getDataStore(), null,
-                            dbTypeInComponentSetting);
-                }
-
-                querySchema = SchemaInferer.infer(recordBuilderFactory, resultSet.getMetaData(), mapping);
-            }
-
-            boolean includeDynamic = false;// TODO process the case for dynamic column and basic column exists both,
-                                           // need to merge runtime schema with design schema, not sure
-            if (includeDynamic) {
-                // querySchema = CommonUtils.mergeRuntimeSchema2DesignSchema4Dynamic(querySchema,
-                // runtimeSchema4ResultSet);
             }
         }
-
-        // this toString cost performance a lot
-        // log.debug("QuerySchema: " + querySchema.toString());
 
         return querySchema;
     }
 
+    private Schema getRuntimeSchema() throws SQLException {
+        URL mappingFileDir = null;
+        if (context != null) {
+            // TODO set and init it in common javajet
+            Object value = context.getGlobal(CommonUtils.MAPPING_URL_SUBFIX);
+            if (value != null) {
+                mappingFileDir = URL.class.cast(value);
+            }
+        }
+
+        DBType dbTypeInComponentSetting = config.isEnableMapping() ? config.getMapping() : null;
+
+        Dbms mapping = null;
+        if (mappingFileDir != null) {
+            mapping = CommonUtils.getMapping(mappingFileDir, config.getDataSet().getDataStore(), null,
+                    dbTypeInComponentSetting);
+        } else {
+            // use the connector nested mapping file
+            mapping = CommonUtils.getMapping("/mappings", config.getDataSet().getDataStore(), null,
+                    dbTypeInComponentSetting);
+        }
+
+        return SchemaInferer.infer(recordBuilderFactory, resultSet.getMetaData(), mapping);
+    }
+
     public void open() throws SQLException {
         log.debug("JDBCInputReader start.");
-
-        // TODO pass QUERY var
 
         boolean usePreparedStatement = config.isUsePreparedStatement();
         try {
@@ -154,8 +172,6 @@ public class JDBCInputReader {
                         method.invoke(statement);
                     }
                 } catch (Exception e) {
-                    // TODO
-                    // throw new RuntimeException(e);
                     log.info("can't find method : enableStreamingResults");
                 }
             } else {
@@ -204,7 +220,7 @@ public class JDBCInputReader {
             // final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder();// test prove this is low
             // performance
 
-            SchemaInferer.fillValue(recordBuilder, getSchema(), resultSet);
+            SchemaInferer.fillValue(recordBuilder, getSchema(), resultSet, isTrimAll, trimMap);
 
             currentRecord = recordBuilder.build();
         }
