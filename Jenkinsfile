@@ -19,20 +19,20 @@ def sonarCredentials = usernamePassword(
 
 // Job config
 final String slackChannel = 'components-ci'
-final String PRODUCTION_DEPLOYMENT_REPOSITORY = "TalendOpenSourceSnapshot"
-final String branchName = BRANCH_NAME.startsWith("PR-")
-        ? env.CHANGE_BRANCH
-        : env.BRANCH_NAME
-String releaseVersion = ''
-String extraBuildParams = ''
-Boolean fail_at_end = false
-final String escapedBranch = branchName.toLowerCase().replaceAll("/", "_")
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
-final GString devNexusRepository = isOnMasterOrMaintenanceBranch
-        ? "${PRODUCTION_DEPLOYMENT_REPOSITORY}"
-        : "dev_branch_snapshots/branch_${escapedBranch}"
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
 final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
+
+// Job variables declaration
+String branch_user
+String branch_ticket
+String branch_description
+String pomVersion
+String qualifiedVersion
+String releaseVersion = ''
+String extraBuildParams = ''
+String job_description
+Boolean fail_at_end = false
 
 // Pod config
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
@@ -107,7 +107,7 @@ pipeline {
         buildDiscarder(
                 logRotator(
                         artifactNumToKeepStr: '5',
-                        numToKeepStr: isOnMasterOrMaintenanceBranch ? '10' : '2'
+                        numToKeepStr: isOnMasterOrMaintenanceBranch ? '10' : '7'
                 )
         )
         timeout(time: 60, unit: 'MINUTES')
@@ -120,13 +120,25 @@ pipeline {
 
     parameters {
         choice(
-          name: 'Action',
-          choices: ['STANDARD', 'RELEASE', 'DEPLOY'],
+          name: 'ACTION',
+          choices: ['STANDARD', 'RELEASE'],
           description: '''
-            Kind of run:
-            STANDARD : (default) classical CI
-            RELEASE : Build release, deploy to the Nexus for master/maintenance branches
-            DEPLOY : Build snapshot, deploy it to the Nexus for any branch''')
+            Kind of run: 
+            - STANDARD : (default) classic CI build
+            - RELEASE : Build release, deploy to the Nexus for master/maintenance branches''')
+        booleanParam(
+          name: 'DEPLOY',
+          defaultValue: true,
+          description: '''
+            DEPLOY : Build release, deploy A build to the Nexus''')
+        string(
+          name: 'VERSION_QUALIFIER',
+          defaultValue: 'DEFAULT',
+          description: '''
+            Only for dev branches. It will build/deploy jars with the given version qualifier.
+             - DEFAULT means the qualifier will be the Jira id extracted from the branch name.
+            From "user/JIRA-12345_some_information" the qualifier will be 'JIRA-12345'.
+            Before the build, the maven version will be set to: x.y.z-JIRA-12345-SNAPSHOT''')
         choice(
           name: 'FAIL_AT_END',
           choices: ['DEFAULT', 'YES', 'NO'],
@@ -146,10 +158,7 @@ pipeline {
         string(name: 'POST_LOGIN_SCRIPT',
           defaultValue: "",
           description: 'Execute a shell command after login. Useful for maintenance.')
-        string(name: 'DEV_NEXUS_REPOSITORY',
-          defaultValue: devNexusRepository,
-          description: 'The Nexus repositories where maven snapshots are deployed.')
-        booleanParam(name: 'DEBUG_BEFORE_EXITING',
+        booleanParam(name: 'DEBUG',
           defaultValue: false,
           description: 'Add an extra step to the pipeline allowing to keep the pod alive for debug purposes')
     }
@@ -159,14 +168,45 @@ pipeline {
             steps {
                 script {
                     final def pom = readMavenPom file: 'pom.xml'
-                    final String pomVersion = pom.version
+                    pomVersion = pom.version
 
-                    if (params.Action == 'RELEASE' && !pomVersion.endsWith('-SNAPSHOT')) {
+                    if (params.ACTION == 'RELEASE' && !pomVersion.endsWith('-SNAPSHOT')) {
                         error('Cannot release from a non SNAPSHOT, exiting.')
                     }
 
-                    if (params.Action == 'RELEASE' && !((String) env.BRANCH_NAME).startsWith('maintenance/')) {
+                    if (params.ACTION == 'RELEASE' && !((String) env.BRANCH_NAME).startsWith('maintenance/')) {
                         error('Can only release from a maintenance branch, exiting.')
+                    }
+
+                    echo 'Manage the version qualifier'
+                    if (isOnMasterOrMaintenanceBranch) {
+                        echo 'No need to add qualifier on Master or Maintenance branch'
+                    }
+                    else {
+                        echo "Validate the branch name"
+                        (branch_user,
+                        branch_ticket,
+                        branch_description)= extract_branch_info("$env.BRANCH_NAME")
+
+                        if(branch_user.equals("")){
+                            println """
+                            ERROR: The branch name doesn't comply with the format: user/JIRA-1234-Description
+                            It is MANDATORY for artifact management."""
+                            currentBuild.description = ("ERROR: The branch name is not correct")
+                            sh """exit 1"""
+                        }
+
+                        echo "Insert a qualifier in pom version..."
+                        qualifiedVersion = add_qualifier_to_version(
+                          pomVersion,
+                          "$branch_ticket",
+                          "$params.VERSION_QUALIFIER")
+
+                        echo """
+                          Configure the version qualifier for the curent branche: $env.BRANCH_NAME
+                          requested qualifier: $params.VERSION_QUALIFIER
+                          with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
+                          Qualified Version = $qualifiedVersion"""
                     }
 
                     echo 'Processing parameters'
@@ -189,7 +229,6 @@ pipeline {
                     // Manage the EXTRA_BUILD_PARAMS
                     buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
                     extraBuildParams = buildParamsAsArray.join(' ')
-
                     releaseVersion = pomVersion.split('-')[0]
                 }
                 ///////////////////////////////////////////
@@ -200,15 +239,16 @@ pipeline {
                     if ( user_name == null) { user_name = "auto" }
 
                     currentBuild.displayName = (
-                      "#$currentBuild.number-$params.Action: $user_name"
+                      "#$currentBuild.number-$params.ACTION: $user_name"
                     )
 
                     // updating build description
-                    currentBuild.description = ("""
-                      $params.Action Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
-                      Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
-                      Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG_BEFORE_EXITING""".stripIndent()
-                    )
+                    job_description =
+                      """$params.ACTION Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
+                          Version: $qualifiedVersion
+                          Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
+                          Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG""".stripIndent()
+                    currentBuild.description = job_description
                 }
             }
         }
@@ -238,6 +278,15 @@ pipeline {
                                     "\${ARTIFACTORY_PASSWORD}"
                             """
                         }
+
+                        // On development branches the connector version shall be edited for deployment
+                        if (! isOnMasterOrMaintenanceBranch) {
+
+                            sh """
+                              echo "Edit version on dev branches, new version is ${qualifiedVersion}"
+                              mvn versions:set --define newVersion=${qualifiedVersion}
+                            """
+                        }
                     }
                 }
             }
@@ -264,9 +313,10 @@ pipeline {
                 }
             }
         }
+
         stage('Build') {
             when {
-                expression { params.Action == 'STANDARD' }
+                expression { params.ACTION == 'STANDARD' }
             }
             steps {
                 container(tsbiImage) {
@@ -275,7 +325,7 @@ pipeline {
                                          , sonarCredentials]) {
                             sh """
                                 bash .jenkins/build.sh \
-                                    '${params.Action}' \
+                                    '${params.ACTION}' \
                                     '${isOnMasterOrMaintenanceBranch}' \
                                     '${params.SONAR_ANALYSIS}' \
                                     '${env.BRANCH_NAME}' \
@@ -302,6 +352,25 @@ pipeline {
             }
         }
 
+        stage('Deploy') {
+            when {
+                expression { params.ACTION == 'STANDARD' && params.DEPLOY == true }
+            }
+            steps {
+                withCredentials([nexusCredentials]) {
+                    container(tsbiImage) {
+                        script {
+                            sh """
+                                bash .jenkins/deploy.sh \
+                                    '${params.ACTION}' \
+                                    ${extraBuildParams}
+                            """
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Release') {
             when {
                 expression { params.Action == 'RELEASE' }
@@ -322,30 +391,6 @@ pipeline {
                     }
                 }
             }
-        }
-
-        stage('Deploy') {
-            when {
-                expression { params.Action == 'DEPLOY' }
-            }
-            steps {
-                withCredentials([nexusCredentials]) {
-                    container(tsbiImage) {
-                        script {
-                            sh """
-                                bash .jenkins/deploy.sh \
-                                    '${params.Action}' \
-                                    ${extraBuildParams}
-                            """
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Debug') {
-            when { expression { return params.DEBUG_BEFORE_EXITING } }
-            steps { script { input message: 'Finish the job?', ok: 'Yes' } }
         }
     }
     post {
@@ -388,8 +433,8 @@ pipeline {
                         script {
                             // Create the jenkins log file
                             def logContent = Jenkins.getInstance().getItemByFullName(env.JOB_NAME)
-                                    .getBuildByNumber(env.BUILD_NUMBER.toInteger())
-                                    .logFile.text
+                              .getBuildByNumber(env.BUILD_NUMBER.toInteger())
+                              .logFile.text
 
                             // copy the log in the job's own workspace
                             writeFile file: "raw_log.txt", text: logContent
@@ -428,23 +473,51 @@ pipeline {
                     archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
                 }
             }
+
+            script {
+                if (params.DEBUG) {
+                    // updating build description
+                    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description}"
+                    // Request user action
+                    input message: 'Finish the job?', ok: 'Yes'
+                    // updating build description
+                    currentBuild.description = "$job_description"
+                }
+            }
         }
     }
 }
 
-//TODO: https://jira.talendforge.org/browse/TDI-48913 Centralize script for Jenkins M2 Corruption clean
-private void CleanM2Corruption(logContent) {
-    //Clean M2 corruptions - TDI-48532
-    echo 'Checking for Malformed encoding error'
-    if (logContent.contains("Malformed \\uxxxx encoding")) {
-        echo 'Malformed encoding detected: Cleaning M2 corruptions'
-        try {
-            sh """
-                grep --recursive --word-regexp --files-with-matches --regexp '\\u0000' ~/.m2/repository | xargs -I % rm %
-            """
+private static String add_qualifier_to_version(String version, GString ticket, GString input_qualifier) {
+   String new_version
+
+    if (input_qualifier.contains("DEFAULT")) {
+        if(version.contains("-SNAPSHOT")){
+            new_version = version.replace("-SNAPSHOT", "-$ticket-SNAPSHOT")
+        }else {
+            new_version = "$version-$ticket".toString()
         }
-        catch (ignored) {
-            // The stage must not fail if grep returns no lines.
-        }
+    } else {
+        new_version = version.replace("-SNAPSHOT", "-$input_qualifier-SNAPSHOT")
     }
+    return new_version
+}
+
+private static ArrayList<String> extract_branch_info(GString branch_name) {
+
+    String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,6}-\d{1,6})[_-](?<description>.*)/
+    java.util.regex.Matcher branchMatcher = branch_name =~ branchRegex
+
+    try{
+        assert branchMatcher.matches()
+    }
+    catch (AssertionError ignored) {
+        return ["", "", ""]
+    }
+
+    String user = branchMatcher.group("user")
+    String ticket = branchMatcher.group("ticket")
+    String description = branchMatcher.group("description")
+
+    return [user, ticket, description]
 }
