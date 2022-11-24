@@ -394,6 +394,46 @@ pipeline {
         }
     }
     post {
+        always {
+            container(tsbiImage) {
+                recordIssues(
+                  enabledForFailure: true,
+                  tools: [
+                    taskScanner(
+                      id: 'disabled',
+                      name: '@Disabled',
+                      includePattern: '**/src/**/*.java',
+                      ignoreCase: true,
+                      normalTags: '@Disabled'
+                    ),
+                    taskScanner(
+                      id: 'todo',
+                      name: 'Todo(low)/Fixme(high)',
+                      includePattern: '**/src/**/*.java',
+                      ignoreCase: true,
+                      highTags: 'FIX_ME, FIXME',
+                      lowTags: 'TO_DO, TODO'
+                    )
+                  ]
+                )
+                script {
+                    println '====== Archive artifacts'
+                    println "Artifact 1: ${_ARTIFACT_COVERAGE}\\n"
+                    archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
+                }
+            }
+
+            script {
+                if (params.DEBUG) {
+                    // updating build description
+                    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description}"
+                    // Request user action
+                    input message: 'Finish the job?', ok: 'Yes'
+                    // updating build description
+                    currentBuild.description = "$job_description"
+                }
+            }
+        }
         success {
             script {
                 //Only post results to Slack for Master and Maintenance branches
@@ -445,45 +485,22 @@ pipeline {
                 }
             }
         }
-        always {
-            container(tsbiImage) {
-                recordIssues(
-                    enabledForFailure: true,
-                    tools: [
-                        taskScanner(
-                            id: 'disabled',
-                            name: '@Disabled',
-                            includePattern: '**/src/**/*.java',
-                            ignoreCase: true,
-                            normalTags: '@Disabled'
-                        ),
-                        taskScanner(
-                            id: 'todo',
-                            name: 'Todo(low)/Fixme(high)',
-                            includePattern: '**/src/**/*.java',
-                            ignoreCase: true,
-                            highTags: 'FIX_ME, FIXME',
-                            lowTags: 'TO_DO, TODO'
-                        )
-                    ]
-                )
-                script {
-                    println '====== Archive artifacts'
-                    println "Artifact 1: ${_ARTIFACT_COVERAGE}\\n"
-                    archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
-                }
-            }
+    }
+}
 
-            script {
-                if (params.DEBUG) {
-                    // updating build description
-                    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description}"
-                    // Request user action
-                    input message: 'Finish the job?', ok: 'Yes'
-                    // updating build description
-                    currentBuild.description = "$job_description"
-                }
-            }
+//TODO: https://jira.talendforge.org/browse/TDI-48913 Centralize script for Jenkins M2 Corruption clean
+private void CleanM2Corruption(logContent) {
+    //Clean M2 corruptions - TDI-48532
+    echo 'Checking for Malformed encoding error'
+    if (logContent.contains("Malformed \\uxxxx encoding")) {
+        echo 'Malformed encoding detected: Cleaning M2 corruptions'
+        try {
+            sh """
+                grep --recursive --word-regexp --files-with-matches --regexp '\\u0000' ~/.m2/repository | xargs -I % rm %
+            """
+        }
+        catch (ignored) {
+            // The stage must not fail if grep returns no lines.
         }
     }
 }
