@@ -93,6 +93,7 @@
 
     <beam.version>2.32.0</beam.version>
     <spark.version>3.2.2</spark.version>
+    <ivy.version>2.5.1</ivy.version>
     <shrinkwrap.version>3.1.4</shrinkwrap.version>
     <avro.version>1.8.2</avro.version>
     <jackson.version>2.13.4</jackson.version>
@@ -520,6 +521,11 @@
         <groupId>org.talend.sdk.component</groupId>
         <artifactId>component-runtime-testing-spark</artifactId>
         <version>${component-runtime.version}</version>
+      </dependency>
+      <dependency>
+          <groupId>org.apache.ivy</groupId>
+          <artifactId>ivy</artifactId>
+          <version>${ivy.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.spark</groupId>
