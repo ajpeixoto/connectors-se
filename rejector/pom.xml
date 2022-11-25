@@ -9,21 +9,7 @@
     </parent>
 
     <artifactId>rejector</artifactId>
-    <version>1.35.5</version>
-
-    <properties>
-        <validation.placeholder>true</validation.placeholder>
-        <validation.documentation>true</validation.documentation>
-        <validation.wording>true</validation.wording>
-    </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.talend.sdk.component</groupId>
-            <artifactId>component-runtime-impl</artifactId>
-            <version>${component-runtime.version}</version>
-        </dependency>
-    </dependencies>
+    <version>1.36.0</version>
 
     <build>
         <plugins>
@@ -39,6 +25,7 @@
                             <goal>validate</goal>
                         </goals>
                         <configuration>
+                            <validateActions>true</validateActions>
                             <validateModel>true</validateModel>
                             <validatePlaceholder>true</validatePlaceholder>
                             <validateDocumentation>true</validateDocumentation>

@@ -36,7 +36,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@PartitionMapper(name = "RejectorInfiniteStoppableSource", infinite = true, stoppable = true)
+@PartitionMapper(name = "InfiniteStoppableSource", infinite = true, stoppable = true)
 @Icon(value = IconType.CUSTOM, custom = "rejector")
 @Version(1)
 @Documentation("Mapper for Rejector.")

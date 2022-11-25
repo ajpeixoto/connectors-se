@@ -50,7 +50,7 @@ public class UiServices {
         final String infos = configuration.getDataSet().getInformations();
         final String url = configuration.getDataSet().getDataStore().getUrl();
         outgoingSchema.withEntry(factory.newEntryBuilder()
-                .withName("code")
+                .withName("RejectorProcessorSchema")
                 .withType(Type.STRING)
                 .withComment(infos)
                 .withProp("talend.studio.key", "true")
@@ -73,9 +73,53 @@ public class UiServices {
         return outgoingSchema.build();
     }
 
-    @DiscoverSchema("RejectorDataSet")
+    @DiscoverSchemaExtended("RejectorDataSet")
+    public Schema discoverInputSchema(final Schema incomingSchema,
+            @Option final RejectorProcessorConfiguration configuration, final String branch) {
+        log.warn("[discoverProcessorSchema]branch: {}, incoming: {}, conf: {}.", branch, incomingSchema, configuration);
+        final Schema.Builder outgoingSchema = factory.newSchemaBuilder(incomingSchema);
+        final String code = configuration.getCode();
+        final String infos = configuration.getDataSet().getInformations();
+        final String url = configuration.getDataSet().getDataStore().getUrl();
+        outgoingSchema.withEntry(factory.newEntryBuilder()
+                .withName("RejectorDataSet")
+                .withType(Type.STRING)
+                .withComment(infos)
+                .withProp("talend.studio.key", "true")
+                .build());
+        outgoingSchema.withEntry(factory.newEntryBuilder()
+                .withName(branch)
+                .withType(Type.FLOAT)
+                .withComment(infos)
+                .withProp("talend.studio.length", "10")
+                .withProp("talend.studio.precision", "3")
+                .build());
+        if ("REJECT".equals(branch.toUpperCase())) {
+            outgoingSchema.withEntry(factory.newEntryBuilder()
+                    .withName("ERROR_MESSAGE")
+                    .withType(Type.STRING)
+                    .withComment(url)
+                    .withDefaultValue(code)
+                    .build());
+        }
+        return outgoingSchema.build();
+    }
+
+    @DiscoverSchema("RejectorDataSetor")
     public Schema guessSchema(@Option final RejectorDataSet dataset) {
         Schema schema = factory.newSchemaBuilder(Schema.Type.RECORD)
+                .withEntry(factory.newEntryBuilder()
+                        .withName("RejectorDataSetor")
+                        .withType(Schema.Type.STRING)
+                        .withNullable(true)
+                        .withComment("comment - " + dataset.getDataStore().getUrl())
+                        .build())
+                .withEntry(factory.newEntryBuilder()
+                        .withName("dataset_" + dataset.getInformations())
+                        .withType(Schema.Type.STRING)
+                        .withNullable(true)
+                        .withComment("comment - " + dataset.getDataStore().getUrl())
+                        .build())
                 .withEntry(factory.newEntryBuilder()
                         .withName("nullStr")
                         .withType(Schema.Type.STRING)

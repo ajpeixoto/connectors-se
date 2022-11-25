@@ -64,7 +64,7 @@ public class RejectorTest {
         configURI += "&configuration.$maxDurationMs=2000&configuration.$maxRecords=5";
         Job
                 .components()
-                .component("rejector", "Rejector://RejectorInfiniteSource?" + configURI)
+                .component("rejector", "Rejector://InfiniteSource?" + configURI)
                 .component("collector", "test://collector")
                 .connections()
                 .from("rejector")
@@ -78,7 +78,7 @@ public class RejectorTest {
     @Test
     void testConfig() {
         Mapper mapper = handler.asManager()
-                .findMapper("Rejector", "RejectorInfiniteStoppableSource", 1, new HashMap<String, String>() {
+                .findMapper("Rejector", "InfiniteStoppableSource", 1, new HashMap<String, String>() {
 
                     {
                         put("configuration.dataSet.dataStore.anInteger", "200");

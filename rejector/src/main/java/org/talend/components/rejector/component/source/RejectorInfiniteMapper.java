@@ -33,7 +33,7 @@ import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-@PartitionMapper(name = "RejectorInfiniteSource", infinite = true)
+@PartitionMapper(name = "InfiniteSource", infinite = true)
 @Icon(value = IconType.CUSTOM, custom = "rejector")
 @Version(1)
 @Documentation("Mapper for Rejector.")

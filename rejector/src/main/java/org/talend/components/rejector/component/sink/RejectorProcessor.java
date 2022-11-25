@@ -40,7 +40,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Processor(name = "RejectorProcessor")
+@Processor(name = "Processor")
 @Icon(value = IconType.CUSTOM, custom = "rejector")
 @Version(1)
 @Documentation("A connector for testing rejects in Studio.")
