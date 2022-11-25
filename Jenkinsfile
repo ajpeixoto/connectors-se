@@ -21,7 +21,6 @@ def sonarCredentials = usernamePassword(
 final String slackChannel = 'components-ci'
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
-final Boolean hasExtraBuildArgs = params.EXTRA_BUILD_PARAMS != ""
 
 // Job variables declaration
 String branch_user
@@ -33,17 +32,21 @@ String releaseVersion = ''
 String extraBuildParams = ''
 String job_description
 Boolean fail_at_end = false
+String logContent
 
 // Pod config
 final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
 final String tsbiImage = 'jdk11-svc-springboot-builder'
 final String tsbiVersion = '2.9.18-2.4-20220104141654'
+final String _STAGE_DEFAULT_CONTAINER = tsbiImage
 
 // Files and folder definition
 final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
 
 // Artifacts paths
 final String _ARTIFACT_COVERAGE = '**/target/site/**/*.*'
+final String _ARTIFACT_LOGS1 = '**/build_log.txt'
+final String _ARTIFACT_LOGS2 = '**/raw_log.txt'
 
 // Pod definition
 final String podDefinition = """\
@@ -82,6 +85,7 @@ pipeline {
         kubernetes {
             label podLabel
             yaml podDefinition
+            defaultContainer _STAGE_DEFAULT_CONTAINER
         }
     }
 
@@ -209,27 +213,16 @@ pipeline {
                           Qualified Version = $qualifiedVersion"""
                     }
 
-                    echo 'Processing parameters'
-                    final ArrayList buildParamsAsArray = ['--settings', env.MAVEN_SETTINGS, env.DECRYPTER_ARG]
-                    if (!isOnMasterOrMaintenanceBranch) {
-                        // Properties documented in the pom.
-                        buildParamsAsArray.addAll([
-                                '--define', "nexus_snapshots_repository=${params.DEV_NEXUS_REPOSITORY}",
-                                '--define', 'nexus_snapshots_pull_base_url=https://nexus-smart-branch.datapwn.com/nexus/content/repositories'
-                        ])
-                    }
-
-                    // Manage the failed at-end-option
-                    if( (isOnMasterOrMaintenanceBranch && params.FAIL_AT_END != 'NO') ||
+                    println 'Manage the FAIL_AT_END parameter'
+                    if ((isOnMasterOrMaintenanceBranch && params.FAIL_AT_END != 'NO') ||
                       (params.FAIL_AT_END == 'YES')) {
-                        buildParamsAsArray.add('--fail-at-end')
                         fail_at_end = true
                     }
 
-                    // Manage the EXTRA_BUILD_PARAMS
-                    buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
-                    extraBuildParams = buildParamsAsArray.join(' ')
+                    extraBuildParams = extraBuildParams_assembly(fail_at_end)
+                    println "extraBuildParams: $extraBuildParams"
                     releaseVersion = pomVersion.split('-')[0]
+                    println "releaseVersion: $releaseVersion"
                 }
                 ///////////////////////////////////////////
                 // Updating build displayName and description
@@ -256,38 +249,36 @@ pipeline {
 
         stage('Prepare build') {
             steps {
-                container(tsbiImage) {
-                    script {
-                        echo 'Git login'
-                        withCredentials([gitCredentials]) {
-                            sh """
-                                bash .jenkins/git-login.sh \
-                                    "\${GITHUB_LOGIN}" \
-                                    "\${GITHUB_TOKEN}"
-                            """
-                        }
+                script {
+                    echo 'Git login'
+                    withCredentials([gitCredentials]) {
+                        sh """
+                            bash .jenkins/git-login.sh \
+                                "\${GITHUB_LOGIN}" \
+                                "\${GITHUB_TOKEN}"
+                        """
+                    }
 
-                        echo 'Docker login'
-                        withCredentials([artifactoryCredentials]) {
-                            /* In following sh step, '${ARTIFACTORY_REGISTRY}' will be replaced by groovy */
-                            /* but the next two ones, "\${ARTIFACTORY_LOGIN}" and "\${ARTIFACTORY_PASSWORD}", */
-                            /* will be replaced by the bash process. */
-                            sh """
-                                bash .jenkins/docker-login.sh \
-                                    '${env.TALEND_REGISTRY}' \
-                                    "\${ARTIFACTORY_LOGIN}" \
-                                    "\${ARTIFACTORY_PASSWORD}"
-                            """
-                        }
+                    echo 'Docker login'
+                    withCredentials([artifactoryCredentials]) {
+                        /* In following sh step, '${ARTIFACTORY_REGISTRY}' will be replaced by groovy */
+                        /* but the next two ones, "\${ARTIFACTORY_LOGIN}" and "\${ARTIFACTORY_PASSWORD}", */
+                        /* will be replaced by the bash process. */
+                        sh """
+                            bash .jenkins/docker-login.sh \
+                                '${env.TALEND_REGISTRY}' \
+                                "\${ARTIFACTORY_LOGIN}" \
+                                "\${ARTIFACTORY_PASSWORD}"
+                        """
+                    }
 
-                        // On development branches the connector version shall be edited for deployment
-                        if (! isOnMasterOrMaintenanceBranch) {
+                    // On development branches the connector version shall be edited for deployment
+                    if (! isOnMasterOrMaintenanceBranch) {
 
-                            sh """
-                              echo "Edit version on dev branches, new version is ${qualifiedVersion}"
-                              mvn versions:set --define newVersion=${qualifiedVersion}
-                            """
-                        }
+                        sh """
+                          echo "Edit version on dev branches, new version is ${qualifiedVersion}"
+                          mvn versions:set --define newVersion=${qualifiedVersion}
+                        """
                     }
                 }
             }
@@ -297,18 +288,16 @@ pipeline {
             // FIXME: this step is an aberration and a gaping security hole.
             //        As soon as the build is stable enough not to rely on this crutch, let's get rid of it.
             steps {
-                container(tsbiImage) {
-                    withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
-                        script {
-                            try {
-                                //Execute content of Post Login Script parameter
-                                if (params.POST_LOGIN_SCRIPT?.trim()) {
-                                    sh "bash -c '${params.POST_LOGIN_SCRIPT}'"
-                                }
+                withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
+                    script {
+                        try {
+                            //Execute content of Post Login Script parameter
+                            if (params.POST_LOGIN_SCRIPT?.trim()) {
+                                sh "bash -c '${params.POST_LOGIN_SCRIPT}'"
                             }
-                            catch (ignored) {
-                                // The job must not fail if the script fails
-                            }
+                        }
+                        catch (ignored) {
+                            // The job must not fail if the script fails
                         }
                     }
                 }
@@ -320,19 +309,17 @@ pipeline {
                 expression { params.ACTION == 'STANDARD' }
             }
             steps {
-                container(tsbiImage) {
-                    script {
-                        withCredentials([nexusCredentials
-                                         , sonarCredentials]) {
-                            sh """
-                                bash .jenkins/build.sh \
-                                    '${params.ACTION}' \
-                                    '${isOnMasterOrMaintenanceBranch}' \
-                                    '${params.SONAR_ANALYSIS}' \
-                                    '${env.BRANCH_NAME}' \
-                                    ${extraBuildParams}
-                            """
-                        }
+                script {
+                    withCredentials([nexusCredentials
+                                     , sonarCredentials]) {
+                        sh """
+                            bash .jenkins/build.sh \
+                                '${params.ACTION}' \
+                                '${isOnMasterOrMaintenanceBranch}' \
+                                '${params.SONAR_ANALYSIS}' \
+                                '${env.BRANCH_NAME}' \
+                                ${extraBuildParams}
+                        """
                     }
                 }
             }
@@ -359,14 +346,12 @@ pipeline {
             }
             steps {
                 withCredentials([nexusCredentials]) {
-                    container(tsbiImage) {
-                        script {
-                            sh """
-                                bash .jenkins/deploy.sh \
-                                    '${params.ACTION}' \
-                                    ${extraBuildParams}
-                            """
-                        }
+                    script {
+                        sh """
+                            bash .jenkins/deploy.sh \
+                                '${params.ACTION}' \
+                                ${extraBuildParams}
+                        """
                     }
                 }
             }
@@ -380,15 +365,13 @@ pipeline {
                 withCredentials([gitCredentials,
                                  nexusCredentials,
                                  artifactoryCredentials]) {
-                    container(tsbiImage) {
-                        script {
-                            sh """
-                                bash .jenkins/release.sh \
-                                    '${params.Action}' \
-                                    '${releaseVersion}' \
-                                    ${extraBuildParams}
-                            """
-                        }
+                    script {
+                        sh """
+                            bash .jenkins/release.sh \
+                                '${params.Action}' \
+                                '${releaseVersion}' \
+                                ${extraBuildParams}
+                        """
                     }
                 }
             }
@@ -396,42 +379,43 @@ pipeline {
     }
     post {
         always {
-            container(tsbiImage) {
-                recordIssues(
-                  enabledForFailure: true,
-                  tools: [
-                    taskScanner(
-                      id: 'disabled',
-                      name: '@Disabled',
-                      includePattern: '**/src/**/*.java',
-                      ignoreCase: true,
-                      normalTags: '@Disabled'
-                    ),
-                    taskScanner(
-                      id: 'todo',
-                      name: 'Todo(low)/Fixme(high)',
-                      includePattern: '**/src/**/*.java',
-                      ignoreCase: true,
-                      highTags: 'FIX_ME, FIXME',
-                      lowTags: 'TO_DO, TODO'
-                    )
-                  ]
+            script{
+                logContent = extractJenkinsLog()
+            }
+
+            recordIssues(
+              enabledForFailure: true,
+              tools: [
+                taskScanner(
+                  id: 'disabled',
+                  name: '@Disabled',
+                  includePattern: '**/src/**/*.java',
+                  ignoreCase: true,
+                  normalTags: '@Disabled'
+                ),
+                taskScanner(
+                  id: 'todo',
+                  name: 'Todo(low)/Fixme(high)',
+                  includePattern: '**/src/**/*.java',
+                  ignoreCase: true,
+                  highTags: 'FIX_ME, FIXME',
+                  lowTags: 'TO_DO, TODO'
                 )
-                script {
-                    println '====== Archive artifacts'
-                    println "Artifact 1: ${_ARTIFACT_COVERAGE}\\n"
-                    archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
-                }
+              ]
+            )
+            script {
+                println '====== Archive artifacts'
+                println "Artifact 1: ${_ARTIFACT_COVERAGE}\\n"
+                archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
+                println "Artifact 2: ${_ARTIFACT_LOGS1}"
+                archiveArtifacts artifacts: "${_ARTIFACT_LOGS1}", allowEmptyArchive: true, onlyIfSuccessful: false
+                println "Artifact 3: ${_ARTIFACT_LOGS2}"
+                archiveArtifacts artifacts: "${_ARTIFACT_LOGS2}", allowEmptyArchive: true, onlyIfSuccessful: false
             }
 
             script {
                 if (params.DEBUG) {
-                    // updating build description
-                    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description}"
-                    // Request user action
-                    input message: 'Finish the job?', ok: 'Yes'
-                    // updating build description
-                    currentBuild.description = "$job_description"
+                    jenkinsBreakpoint(job_description)
                 }
             }
         }
@@ -457,48 +441,87 @@ pipeline {
                     //if previous build was a success, ping channel in the Slack message
                     if ("SUCCESS".equals(currentBuild.previousBuild.result)) {
                         slackSend(
-                            color: '#FF0000',
-                            message: "@here : NEW FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
-                            channel: "${slackChannel}")
+                          color: '#FF0000',
+                          message: "@here : NEW FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
+                          channel: "${slackChannel}")
                     } else {
                         //else send notification without pinging channel
                         slackSend(
-                            color: '#FF0000',
-                            message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
-                            channel: "${slackChannel}")
+                          color: '#FF0000',
+                          message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
+                          channel: "${slackChannel}")
                     }
                 }
+            }
 
-                container(tsbiImage) {
-                    withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
-                        script {
-                            // Create the jenkins log file
-                            String logContent = Jenkins.getInstance().getItemByFullName(env.JOB_NAME)
-                              .getBuildByNumber(env.BUILD_NUMBER.toInteger())
-                              .logFile.text
-
-                            // copy the log in the job's own workspace
-                            writeFile file: "raw_log.txt", text: logContent
-
-                            CleanM2Corruption(logContent)
-                        }
-                    }
-                }
+            script {
+                CleanM2Corruption(logContent)
             }
         }
     }
 }
 
-//TODO: https://jira.talendforge.org/browse/TDI-48913 Centralize script for Jenkins M2 Corruption clean
+/**
+ * Implement a simple breakpoint to stop actual job
+ * Change and restore the job description to be more visible
+ *
+ * @param job_description_to_backup
+ * @return void
+ */
+private void jenkinsBreakpoint(String job_description_to_backup) {
+    // updating build description
+    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description_to_backup}"
+    // Request user action
+    input message: 'Finish the job?', ok: 'Yes'
+    // updating build description
+    currentBuild.description = "$job_description_to_backup"
+}
+
+/**
+ * Extract actual jenkins job log content, store it in:
+ *   - global variable "logContent"
+ *   - "raw_log.txt" file
+ *   - cleaned in "build_log.txt"
+ *   *
+ * @param None
+ * @return logContent as string
+ */
+private String extractJenkinsLog() {
+
+    println "Extract the jenkins log file"
+    String newLog = Jenkins.getInstance().getItemByFullName(env.JOB_NAME)
+      .getBuildByNumber(env.BUILD_NUMBER.toInteger())
+      .logFile.text
+    // copy the log in the job's own workspace
+    writeFile file: "raw_log.txt", text: newLog
+
+    // Clean jenkins log file, could do better with a "ansi2txt < raw_log.txt" instead of "cat raw_log.txt"
+    sh """
+      cat raw_log.txt | col -b | sed 's;ha:////[[:print:]]*AAAA[=]*;;g' > build_log.txt
+      sleep 1
+      """
+
+    return newLog
+
+}
+
+/**
+ * Clean m2 folder from corrupted file if needed.
+ * Created after ticket TDI-48532
+ * TODO: https://jira.talendforge.org/browse/TDI-48913 Centralize script for Jenkins M2 Corruption clean
+ * @param String logContent
+ *
+ * @return void
+ */
 private void CleanM2Corruption(String logContent) {
-    //Clean M2 corruptions - TDI-48532
-    echo 'Checking for Malformed encoding error'
+
+    println 'Checking for Malformed encoding error'
     if (logContent.contains("Malformed \\uxxxx encoding")) {
-        echo 'Malformed encoding detected: Cleaning M2 corruptions'
+        println 'Malformed encoding detected: Cleaning M2 corruptions'
         try {
             sh """
-                grep --recursive --word-regexp --files-with-matches --regexp '\\u0000' ~/.m2/repository | xargs -I % rm %
-            """
+            grep --recursive --word-regexp --files-with-matches --regexp '\\u0000' ~/.m2/repository | xargs -I % rm %
+        """
         }
         catch (ignored) {
             // The stage must not fail if grep returns no lines.
@@ -506,27 +529,78 @@ private void CleanM2Corruption(String logContent) {
     }
 }
 
-private static String add_qualifier_to_version(String version, GString ticket, GString input_qualifier) {
-   String new_version
+/**
+ * Assembly all needed items to put inside extraBuildParams
+ *
+ * @param boolean fail_at_end, if set to true, --fail-at-end will be added
+ *
+ * @return extraBuildParams as a string ready for mvn cmd
+ */
+private String extraBuildParams_assembly(boolean fail_at_end) {
+    String extraBuildParams
 
-    if (input_qualifier.contains("DEFAULT")) {
-        if(version.contains("-SNAPSHOT")){
+    println 'Processing extraBuildParams'
+    println 'Manage the env.MAVEN_SETTINGS and env.DECRYPTER_ARG'
+    final List<String> buildParamsAsArray = ['--settings',
+                                             env.MAVEN_SETTINGS,
+                                             env.DECRYPTER_ARG]
+    println 'Manage the EXTRA_BUILD_PARAMS'
+    buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
+    println 'Manage the failed at-end-option'
+    if (fail_at_end) {
+        buildParamsAsArray.add('--fail-at-end')
+    }
+    println 'Construct extraBuildParams:'
+    extraBuildParams = buildParamsAsArray.join(' ')
+
+    return extraBuildParams
+}
+
+/**
+ * create a new version from actual one and given jira ticket or user qualifier
+ * Priority to user qualifier
+ *
+ * The branch name has comply with the format: user/JIRA-1234-Description
+ * It is MANDATORY for artifact management.
+ *
+ * @param String version actual version to edit
+ * @param GString ticket
+ * @param GString user_qualifier to be checked as priority qualifier
+ *
+ * @return String new_version with added qualifier
+ */
+private static String add_qualifier_to_version(String version, GString ticket, GString user_qualifier) {
+    String new_version
+
+    if (user_qualifier.contains("DEFAULT")) {
+        if (version.contains("-SNAPSHOT")) {
             new_version = version.replace("-SNAPSHOT", "-$ticket-SNAPSHOT")
-        }else {
+        } else {
             new_version = "$version-$ticket".toString()
         }
     } else {
-        new_version = version.replace("-SNAPSHOT", "-$input_qualifier-SNAPSHOT")
+        new_version = version.replace("-SNAPSHOT", "-$user_qualifier-SNAPSHOT")
     }
     return new_version
 }
 
+/**
+ * extract given branch information
+ *
+ * The branch name has comply with the format: user/JIRA-1234-Description
+ * It is MANDATORY for artifact management.
+ *
+ * @param branch_name row name of the branch
+ *
+ * @return A list containing the extracted: [user, ticket, description]
+ * The method also raise an assert exception in case of wrong branch name
+ */
 private static ArrayList<String> extract_branch_info(GString branch_name) {
 
-    String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,6}-\d{1,6})[_-](?<description>.*)/
+    String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,8}-\d{1,6})[_-](?<description>.*)/
     java.util.regex.Matcher branchMatcher = branch_name =~ branchRegex
 
-    try{
+    try {
         assert branchMatcher.matches()
     }
     catch (AssertionError ignored) {
