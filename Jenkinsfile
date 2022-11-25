@@ -1,4 +1,5 @@
-//----------------- Credentials
+
+// Credentials
 final def nexusCredentials = usernamePassword(
         credentialsId: 'nexus-artifact-zl-credentials',
         usernameVariable: 'NEXUS_USER',
@@ -203,8 +204,8 @@ pipeline {
                         echo "Insert a qualifier in pom version..."
                         qualifiedVersion = add_qualifier_to_version(
                           pomVersion,
-                          "$branch_ticket",
-                          "$params.VERSION_QUALIFIER")
+                          branch_ticket,
+                          "$params.VERSION_QUALIFIER" as String)
 
                         echo """
                           Configure the version qualifier for the curent branche: $env.BRANCH_NAME
@@ -223,6 +224,10 @@ pipeline {
                     println "extraBuildParams: $extraBuildParams"
                     releaseVersion = pomVersion.split('-')[0]
                     println "releaseVersion: $releaseVersion"
+
+                    if (!isOnMasterOrMaintenanceBranch) {
+                        pom_project_property_edit()
+                    }
                 }
                 ///////////////////////////////////////////
                 // Updating build displayName and description
@@ -273,10 +278,11 @@ pipeline {
                     }
 
                     // On development branches the connector version shall be edited for deployment
-                    if (! isOnMasterOrMaintenanceBranch) {
-
+                    if (!isOnMasterOrMaintenanceBranch) {
+                        // Maven documentation about maven_version:
+                        // https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm
+                        println "Edit version on dev branches, new version is ${qualifiedVersion}"
                         sh """
-                          echo "Edit version on dev branches, new version is ${qualifiedVersion}"
                           mvn versions:set --define newVersion=${qualifiedVersion}
                         """
                     }
@@ -288,17 +294,20 @@ pipeline {
             // FIXME: this step is an aberration and a gaping security hole.
             //        As soon as the build is stable enough not to rely on this crutch, let's get rid of it.
             steps {
-                withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
+                withCredentials([nexusCredentials,
+                                 gitCredentials,
+                                 artifactoryCredentials]) {
                     script {
                         try {
                             //Execute content of Post Login Script parameter
                             if (params.POST_LOGIN_SCRIPT?.trim()) {
                                 sh "bash -c '${params.POST_LOGIN_SCRIPT}'"
                             }
-                        }
-                        catch (ignored) {
+                        } catch (ignored) {
                             // The job must not fail if the script fails
+                            echo 'Failure caught during Post Login and ignored'
                         }
+                        echo 'End of post login scripts'
                     }
                 }
             }
@@ -310,8 +319,8 @@ pipeline {
             }
             steps {
                 script {
-                    withCredentials([nexusCredentials
-                                     , sonarCredentials]) {
+                    withCredentials([nexusCredentials,
+                                     sonarCredentials]) {
                         sh """
                             bash .jenkins/build.sh \
                                 '${params.ACTION}' \
@@ -461,6 +470,7 @@ pipeline {
     }
 }
 
+
 /**
  * Implement a simple breakpoint to stop actual job
  * Change and restore the job description to be more visible
@@ -498,11 +508,9 @@ private String extractJenkinsLog() {
     // Clean jenkins log file, could do better with a "ansi2txt < raw_log.txt" instead of "cat raw_log.txt"
     sh """
       cat raw_log.txt | col -b | sed 's;ha:////[[:print:]]*AAAA[=]*;;g' > build_log.txt
-      sleep 1
-      """
+    """
 
     return newLog
-
 }
 
 /**
@@ -557,6 +565,22 @@ private String extraBuildParams_assembly(boolean fail_at_end) {
 }
 
 /**
+ * Edit properties in the pom to allow maven to choose between qualifier version or normal one
+ *
+ * @param String pomVersion,
+ * @param String qualifiedVersion
+ *
+ * @return nothing
+ * it will edit local pom on specific properties
+ */
+private void pom_project_property_edit() {
+
+    println 'No property to change'
+
+    // This step is a reminder of where to put this action if needed, to be like in se and cc job.
+}
+
+/**
  * create a new version from actual one and given jira ticket or user qualifier
  * Priority to user qualifier
  *
@@ -569,17 +593,17 @@ private String extraBuildParams_assembly(boolean fail_at_end) {
  *
  * @return String new_version with added qualifier
  */
-private static String add_qualifier_to_version(String version, GString ticket, GString user_qualifier) {
+private static String add_qualifier_to_version(String version, String ticket, String user_qualifier) {
     String new_version
 
     if (user_qualifier.contains("DEFAULT")) {
         if (version.contains("-SNAPSHOT")) {
-            new_version = version.replace("-SNAPSHOT", "-$ticket-SNAPSHOT")
+            new_version = version.replace("-SNAPSHOT", "-$ticket-SNAPSHOT" as String)
         } else {
             new_version = "$version-$ticket".toString()
         }
     } else {
-        new_version = version.replace("-SNAPSHOT", "-$user_qualifier-SNAPSHOT")
+        new_version = version.replace("-SNAPSHOT", "-$user_qualifier-SNAPSHOT" as String)
     }
     return new_version
 }
