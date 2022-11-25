@@ -243,11 +243,12 @@ pipeline {
                     )
 
                     // updating build description
-                    job_description =
-                      """$params.ACTION Build - fail_at_end: $fail_at_end ($params.FAIL_AT_END)
-                          Version: $qualifiedVersion
-                          Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
-                          Extra args: $hasExtraBuildArgs - Debug: $params.DEBUG""".stripIndent()
+                    job_description ="""
+                      $qualifiedVersion - $params.ACTION
+                      fail_at_end: $fail_at_end ($params.FAIL_AT_END)
+                      Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
+                      Debug: $params.DEBUG Extra args: $params.EXTRA_BUILD_PARAMS
+                     """.stripIndent()
                     currentBuild.description = job_description
                 }
             }
@@ -472,7 +473,7 @@ pipeline {
                     withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
                         script {
                             // Create the jenkins log file
-                            def logContent = Jenkins.getInstance().getItemByFullName(env.JOB_NAME)
+                            String logContent = Jenkins.getInstance().getItemByFullName(env.JOB_NAME)
                               .getBuildByNumber(env.BUILD_NUMBER.toInteger())
                               .logFile.text
 
@@ -489,7 +490,7 @@ pipeline {
 }
 
 //TODO: https://jira.talendforge.org/browse/TDI-48913 Centralize script for Jenkins M2 Corruption clean
-private void CleanM2Corruption(logContent) {
+private void CleanM2Corruption(String logContent) {
     //Clean M2 corruptions - TDI-48532
     echo 'Checking for Malformed encoding error'
     if (logContent.contains("Malformed \\uxxxx encoding")) {
