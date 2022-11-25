@@ -21,6 +21,9 @@ main() (
     mavenPhase='deploy'
   fi
 
+  # check for format violations. You shall not pass!
+  mvn spotless:check
+
   # Real task
   # ITs profile is added for jdbc
   mvn "${mavenPhase}" \
