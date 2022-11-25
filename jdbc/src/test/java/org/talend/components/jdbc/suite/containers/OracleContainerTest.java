@@ -20,7 +20,8 @@ import org.talend.components.jdbc.suite.JDBCBaseContainerTest;
 
 @Tag("IT")
 @Disabled
-//TODO https://jira.talendforge.org/browse/TDI-48743 ([internal] Oracle integration tests are failing to initialize test container)
+// TODO https://jira.talendforge.org/browse/TDI-48743 ([internal] Oracle integration tests are failing to initialize
+// test container)
 public class OracleContainerTest extends JDBCBaseContainerTest {
 
     @Override
