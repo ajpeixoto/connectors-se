@@ -13,15 +13,6 @@
 
     <name>Connectors SE :: Testing Dependencies</name>
 
-    <dependencyManagement>
-      <dependencies>
-        <dependency>
-          <groupId>com.google.protobuf</groupId>
-          <artifactId>protobuf-java</artifactId>
-          <version>3.4.0</version>
-        </dependency>
-      </dependencies>
-    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.talend.sdk.component</groupId>
