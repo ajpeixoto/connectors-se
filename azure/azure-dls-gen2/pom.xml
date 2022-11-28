@@ -20,13 +20,6 @@
   </properties>
 
   <dependencies>
-    <!-- traductions -->
-    <dependency>
-      <groupId>org.talend.components</groupId>
-      <artifactId>azure-dls-gen2-locales</artifactId>
-      <version>${locales.version}</version>
-    </dependency>
-
     <!-- file formats -->
     <dependency>
       <groupId>org.talend.components</groupId>

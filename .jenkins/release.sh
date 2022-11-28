@@ -63,7 +63,7 @@ if [[ ${BRANCH_NAME} == 'master' ]]; then
 
   # apply bump
   mvn -B -s .jenkins/settings.xml versions:set -DnewVersion=${next_master_version}
-  mvn versions:set-property -Dproperty=locales.version -DnewVersion="[${major}.${minor},)"
+  mvn versions:set-property -DnewVersion="[${major}.${minor},)"
   mvn versions:set-property -Dproperty=common.version -DnewVersion=${next_master_version}
   mvn versions:set-property -Dproperty=connectors-test-bom.version -DnewVersion=${next_master_version}
   git add -u
