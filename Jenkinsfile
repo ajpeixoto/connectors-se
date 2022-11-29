@@ -1,21 +1,21 @@
 
 // Credentials
 final def nexusCredentials = usernamePassword(
-        credentialsId: 'nexus-artifact-zl-credentials',
-        usernameVariable: 'NEXUS_USER',
-        passwordVariable: 'NEXUS_PASSWORD')
+  credentialsId: 'nexus-artifact-zl-credentials',
+  usernameVariable: 'NEXUS_USER',
+  passwordVariable: 'NEXUS_PASSWORD')
 final def gitCredentials = usernamePassword(
-        credentialsId: 'github-credentials',
-        usernameVariable: 'GITHUB_LOGIN',
-        passwordVariable: 'GITHUB_TOKEN')
+  credentialsId: 'github-credentials',
+  usernameVariable: 'GITHUB_LOGIN',
+  passwordVariable: 'GITHUB_TOKEN')
 final def artifactoryCredentials = usernamePassword(
-        credentialsId: 'artifactory-datapwn-credentials',
-        passwordVariable: 'ARTIFACTORY_PASSWORD',
-        usernameVariable: 'ARTIFACTORY_LOGIN')
+  credentialsId: 'artifactory-datapwn-credentials',
+  passwordVariable: 'ARTIFACTORY_PASSWORD',
+  usernameVariable: 'ARTIFACTORY_LOGIN')
 def sonarCredentials = usernamePassword(
-        credentialsId: 'sonar-credentials',
-        passwordVariable: 'SONAR_PASSWORD',
-        usernameVariable: 'SONAR_LOGIN')
+  credentialsId: 'sonar-credentials',
+  passwordVariable: 'SONAR_PASSWORD',
+  usernameVariable: 'SONAR_LOGIN')
 
 
 // Job config
@@ -28,6 +28,7 @@ String branch_user
 String branch_ticket
 String branch_description
 String pomVersion
+String componentRuntimeVersion
 String qualifiedVersion
 String releaseVersion = ''
 String extraBuildParams = ''
@@ -94,10 +95,10 @@ pipeline {
         MAVEN_SETTINGS = "${WORKSPACE}/.jenkins/settings.xml"
         DECRYPTER_ARG = "-Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/"
         MAVEN_OPTS = [
-                "-Dmaven.artifact.threads=128",
-                "-Dorg.slf4j.simpleLogger.showDateTime=true",
-                "-Dorg.slf4j.simpleLogger.showThreadName=true",
-                "-Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss"
+          "-Dmaven.artifact.threads=128",
+          "-Dorg.slf4j.simpleLogger.showDateTime=true",
+          "-Dorg.slf4j.simpleLogger.showThreadName=true",
+          "-Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss"
         ].join(' ')
         VERACODE_APP_NAME = 'Talend Component Kit'
         VERACODE_SANDBOX = 'connectors-se'
@@ -110,10 +111,10 @@ pipeline {
 
     options {
         buildDiscarder(
-                logRotator(
-                        artifactNumToKeepStr: '5',
-                        numToKeepStr: isOnMasterOrMaintenanceBranch ? '10' : '7'
-                )
+          logRotator(
+            artifactNumToKeepStr: '5',
+            numToKeepStr: isOnMasterOrMaintenanceBranch ? '10' : '7'
+          )
         )
         timeout(time: 60, unit: 'MINUTES')
         skipStagesAfterUnstable()
@@ -174,6 +175,7 @@ pipeline {
                 script {
                     final def pom = readMavenPom file: 'pom.xml'
                     pomVersion = pom.version
+                    componentRuntimeVersion = pom.properties['component-runtime.version']
 
                     if (params.ACTION == 'RELEASE' && !pomVersion.endsWith('-SNAPSHOT')) {
                         error('Cannot release from a non SNAPSHOT, exiting.')
@@ -243,9 +245,10 @@ pipeline {
                     // updating build description
                     job_description ="""
                       $qualifiedVersion - $params.ACTION
-                      fail_at_end: $fail_at_end ($params.FAIL_AT_END)
+                      Component-runtime Version: $componentRuntimeVersion
                       Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
                       Debug: $params.DEBUG Extra args: $params.EXTRA_BUILD_PARAMS
+                      fail_at_end: $fail_at_end ($params.FAIL_AT_END)
                      """.stripIndent()
                     currentBuild.description = job_description
                 }
@@ -336,14 +339,14 @@ pipeline {
             post {
                 always {
                     recordIssues(
-                        enabledForFailure: true,
-                        tools: [
-                            junitParser(
-                                id: 'unit-test',
-                                name: 'Unit Test',
-                                pattern: '**/target/surefire-reports/*.xml'
-                            )
-                        ]
+                      enabledForFailure: true,
+                      tools: [
+                        junitParser(
+                          id: 'unit-test',
+                          name: 'Unit Test',
+                          pattern: '**/target/surefire-reports/*.xml'
+                        )
+                      ]
                     )
                 }
             }
@@ -433,9 +436,9 @@ pipeline {
                 //Only post results to Slack for Master and Maintenance branches
                 if (isOnMasterOrMaintenanceBranch) {
                     slackSend(
-                        color: '#00FF00',
-                        message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
-                        channel: "${slackChannel}")
+                      color: '#00FF00',
+                      message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
+                      channel: "${slackChannel}")
                 }
             }
             script {
