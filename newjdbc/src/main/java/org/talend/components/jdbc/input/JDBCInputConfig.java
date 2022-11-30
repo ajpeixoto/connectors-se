@@ -49,9 +49,6 @@ public class JDBCInputConfig implements Serializable {
     @Documentation("SQL query dataset")
     private JDBCQueryDataSet dataSet;
 
-    // TODO studio will add schema field and guess schema button auto
-    // TODO but how to make guess schema works for tjdbcinput, which should guess from query, not table
-
     // advanced setting
 
     @Option

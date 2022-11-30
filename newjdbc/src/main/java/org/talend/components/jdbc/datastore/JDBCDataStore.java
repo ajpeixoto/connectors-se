@@ -60,16 +60,10 @@ public class JDBCDataStore implements Serializable {
     @Documentation("jdbc url")
     private String jdbcUrl = "jdbc:";
 
-    // TODO how to map to studio right ui widget
-    // TODO how to use the right runtime to load jar or register jar path and pass it to studio or cloud by api
-    // TODO need to support in cloud too? or how to hide it in cloud
-    // TODO new Driver bean class?
-    // TODO maybe change it to List<Bean> object
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @Documentation("jdbc driver table")
-    private List<Driver> jdbcDriver = Collections.emptyList();// TODO can't use Driver bean class as not editable if
-                                                              // that in ui
+    private List<Driver> jdbcDriver = Collections.emptyList();
 
     @Option
     @Required
@@ -86,56 +80,43 @@ public class JDBCDataStore implements Serializable {
     @Documentation("database password")
     private String password;
 
-    // TODO how to hide it in cloud, as sure no meaning for pipeline designer job
-    // TODO how to hide it for tjdbcinput? expect only appear in tjdbcconnection
-    // TODO hot to hide it for studio metadata as sure no meaning for studio metadata
     @Option
-    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
+    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE })
     @Documentation("use or register a shared DB connection")
     private boolean useSharedDBConnection;
 
-    // TODO how to pass or get the shared connection in tck runtime?
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "useSharedDBConnection", value = { "true" }),
-            @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE }) })
+            @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE }) })
     @Documentation("shared DB connection name for register or fetch")
     private String sharedDBConnectionName;
 
     @Option
-    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
+    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_COMPONENT_SCOPE })
     @Documentation("use data source")
     private boolean useDataSource;
 
-    // TODO how to pass or get the shared connection in tck runtime?
-    // TODO how to hide it in cloud as sure no meaning for cloud
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "useDataSource", value = { "true" }),
-            @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE }) })
+            @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_COMPONENT_SCOPE }) })
     @Documentation("data source alias for fetch")
     private String dataSourceAlias;
 
-    // TODO how to make it only appear in studio metadata?
-    // TODO even can set it to studio component, but no meaning for tjdbcrow, how to explain this to user?
-    // TODO: tcompv0 use this mapping before : "widget.type.mappingType":"MAPPING_TYPE", but clearly, that doesn't
-    // appear for
-    // cloud
-    // about runtime, that only works for studio metadata to fetch schema part, not for component button runtime/job
-    // runtime
     @Option
-    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
+    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_METADATA_SCOPE })
     @Documentation("select db mapping file for type convert")
     private String dbMapping;
 
     // advanced setting
 
-    // TODO how to hide it for studio metadata
-    // TODO how to hide it for components like tjdbcinput/tjdbcrow
     @Option
+    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE })
     @Documentation("decide if call auto commit method")
     private boolean useAutoCommit = true;
 
     @Option
-    @ActiveIf(target = "useAutoCommit", value = { "true" })
+    @ActiveIfs(operator = AND, value = { @ActiveIf(target = "useAutoCommit", value = { "true" }),
+            @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE }) })
     @Documentation("if true, mean auto commit, else disable auto commit, as different database, default auto commit value is different")
     private boolean autoCommit;
 

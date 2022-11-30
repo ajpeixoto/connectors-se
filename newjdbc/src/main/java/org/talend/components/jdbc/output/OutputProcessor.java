@@ -43,7 +43,7 @@ import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVaria
 @ReturnVariable(value = "NB_LINE_DELETED", availability = AFTER, type = Integer.class)
 @ReturnVariable(value = "NB_LINE_REJECTED", availability = AFTER, type = Integer.class)
 @ReturnVariable(value = "QUERY", availability = AFTER, type = String.class)
-@Processor(name = "Output") // TODO remove "New"
+@Processor(name = "Output")
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @Documentation("JDBC Output component")
 public class OutputProcessor implements Serializable {

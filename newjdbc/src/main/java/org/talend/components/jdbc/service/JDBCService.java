@@ -20,6 +20,7 @@ import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.schema.JDBCTableMetadata;
@@ -28,6 +29,7 @@ import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.context.RuntimeContext;
 import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
@@ -39,6 +41,7 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.api.service.schema.DiscoverSchema;
+import org.talend.sdk.component.api.service.schema.DiscoverSchemaExtended;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -602,6 +605,29 @@ public class JDBCService implements Serializable {
 
         builder.withProp("talend.studio.precision", String.valueOf(scale));
         return builder;
+    }
+
+    @DiscoverSchemaExtended("Output")
+    public Schema discoverProcessorSchema(final Schema incomingSchema,
+            @Option("configuration") final JDBCOutputConfig config, final String branch) throws SQLException {
+        Schema result = guessSchemaByTable(config.getDataSet());
+        if ("reject".equalsIgnoreCase(branch)) {
+            Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(result);
+            schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
+                    .withName("errorCode")
+                    .withType(Schema.Type.STRING)
+                    .withNullable(false)
+                    .withProp(SchemaProperty.SIZE, "255")
+                    .build());
+            schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
+                    .withName("errorMessage")
+                    .withType(Schema.Type.STRING)
+                    .withNullable(false)
+                    .withProp(SchemaProperty.SIZE, "255")
+                    .build());
+            result = schemaBuilder.build();
+        }
+        return result;
     }
 
 }

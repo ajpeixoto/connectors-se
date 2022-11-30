@@ -32,8 +32,7 @@ import java.util.List;
         @GridLayout.Row("tableName")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataStore")// TODO we should remove this as the settings in datastore advanced setting no
-                                    // meaning for input component?
+        @GridLayout.Row("dataStore")
 })
 @DataSet("JDBCTableDataSet")
 @Documentation("A table dataset")
@@ -49,9 +48,6 @@ public class JDBCTableDataSet implements Serializable {
     private String tableName;
 
     @Option
-    // no need Suggestable if a table widget instead of a multi selected list, this for cloud platform
-    // @Suggestable(value = "FETCH_COLUMN_NAMES", parameters = { "dataStore", "tableName" })
-    // TODO Structure.Type.IN
     @Structure(type = Structure.Type.OUT, discoverSchema = "JDBCTableDataSet")
     @Documentation("schema")
     private List<SchemaInfo> schema;

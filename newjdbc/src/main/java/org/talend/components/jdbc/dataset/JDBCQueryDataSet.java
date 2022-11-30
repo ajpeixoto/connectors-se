@@ -28,48 +28,28 @@ import java.util.List;
 
 @Data
 @GridLayout({
-        @GridLayout.Row("schema"), // TODO need this?
+        @GridLayout.Row("schema"),
         @GridLayout.Row("dataStore"),
         @GridLayout.Row("tableName"),
         @GridLayout.Row("sqlQuery")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
-        @GridLayout.Row("dataStore")// TODO we should remove this as the settings in datastore advanced setting no
-                                    // meaning for input component?
+        @GridLayout.Row("dataStore")
 })
 @DataSet("JDBCQueryDataSet")
 @Documentation("A query dataset")
 public class JDBCQueryDataSet implements Serializable {
-    // TODO consider the questions below:
-    // dataset is not so generic for standard alone component,
-    // dataset is even not so generic for output component which works as sink in pipeline designer sometimes, so we
-    // need two datasets sometimes
-    // dataset show in ui as :
-    // 1. cloud data catalog / dataprep, pipeline designer ref
-    // 2. studio component ui like tjdbcinput/tjdbcoutput
-    // but no meaning for tjdbcrow/tjdbcsp/tjdbccommit/tjdbcrollback/tjdbcoutputbulk/tjdbcbulkexec/tjdbcoutputbulkexec
-    // so that's why allow config link to datastore directly, skip dataset
-
-    // TODO now dataset not appear in studio metadata, but it may appear in future?
 
     @Option
     @Documentation("The connection information to execute")
     private JDBCDataStore dataStore;
 
-    // TODO for jdbcinpput, it works for help generate sql only by a button: Guess Query, not works for job runtime
-    // TODO for tjdbcrow and something, it works for runtime, so right place?
     @Option
     @Suggestable(value = "FETCH_TABLES", parameters = { "dataStore" })
     @Documentation("The table name")
     private String tableName;
 
     @Option
-    // no need Suggestable if a table widget instead of a multi selected list, this for cloud platform
-    // @Suggestable(value = "FETCH_COLUMN_NAMES", parameters = { "dataStore", "sqlQuery" })
-    // studio call guess schema action at different time, and runtime get schema at another time, so even action return
-    // Schema object,
-    // and here is List<SchemaInfo>, it also works
-    // but for cloud, how cloud platform convert Schema to List<SchemaInfo>? no idea, guess it not work, will test it
     @Structure(type = Structure.Type.OUT, discoverSchema = "JDBCQueryDataSet")
     @Documentation("schema")
     private List<SchemaInfo> schema;
