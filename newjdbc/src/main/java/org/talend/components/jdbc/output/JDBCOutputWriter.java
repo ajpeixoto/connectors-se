@@ -94,10 +94,8 @@ abstract public class JDBCOutputWriter {
         this.recordBuilderFactory = recordBuilderFactory;
         this.context = context;
 
-        // TODO
-        if (false) {
-            String currentComponentId = null;
-            bufferSizeKey4Parallelize = "buffersSizeKey_" + currentComponentId + "_"
+        if (context!=null) {
+            bufferSizeKey4Parallelize = "buffersSizeKey_" + context.getConnectorId() + "_"
                     + Thread.currentThread().getId();
         }
 
@@ -127,16 +125,13 @@ abstract public class JDBCOutputWriter {
 
     public void open() throws SQLException {
         log.debug("JDBCOutputWriter start.");
-        // TODO consider it for cloud too
         componentSchema =
                 SchemaInferer.convertSchemaInfoList2TckSchema(config.getDataSet().getSchema(), recordBuilderFactory);
         // no way to fetch reject schema, but workaround : add columns here as reject schema add "errorCode" and
         // "errorMessage" columns base on componentSchema
         rejectSchema = SchemaInferer.getRejectSchema(config.getDataSet().getSchema(), recordBuilderFactory);
 
-        // TODO now studio pass empty design schema if any dynamic column exists in studio component schema
-        // not sure that meet every case
-        isDynamic = componentSchema.getEntries().isEmpty();
+        isDynamic = componentSchema.getEntries().isEmpty() || SchemaInferer.containDynamic(config.getDataSet().getSchema());
 
         // if not dynamic, we can computer it now for "fail soon" way, not fail in main part if fail
         if (!isDynamic) {
@@ -165,8 +160,8 @@ abstract public class JDBCOutputWriter {
     private String bufferSizeKey4Parallelize;
 
     public void write(Record record) throws SQLException {
-        if (false) {// TODO slow?
-            Object bufferSizeObject = null;
+        if (context != null) {
+            Object bufferSizeObject = context.getGlobal(bufferSizeKey4Parallelize);
             if (bufferSizeObject != null) {
                 int bufferSize = (int) bufferSizeObject;
                 commitEvery = bufferSize;

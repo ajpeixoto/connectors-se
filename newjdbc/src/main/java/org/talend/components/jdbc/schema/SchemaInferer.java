@@ -474,6 +474,8 @@ public class SchemaInferer {
 
     public static Schema mergeRuntimeSchemaAndDesignSchema4Dynamic(List<SchemaInfo> designSchema, Schema runtimeSchema,
             RecordBuilderFactory recordBuilderFactory) {
+        if(designSchema == null) return runtimeSchema;
+
         Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
 
         List<Schema.Entry> runtimeFields = runtimeSchema.getEntries();

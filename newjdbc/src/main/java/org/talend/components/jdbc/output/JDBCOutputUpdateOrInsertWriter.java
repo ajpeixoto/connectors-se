@@ -13,6 +13,7 @@
 package org.talend.components.jdbc.output;
 
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Record;
@@ -74,9 +75,8 @@ public class JDBCOutputUpdateOrInsertWriter extends JDBCOutputWriter {
             currentSchema = componentSchema;
             if (isDynamic) {
                 try {
-                    // TODO currentSchema = CommonUtils.mergeRuntimeSchema2DesignSchema4Dynamic(componentSchema,
-                    // inputSchema);
-                    currentSchema = inputSchema;
+                    currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(config.getDataSet().getSchema(), inputSchema,
+                            recordBuilderFactory);
                     columnList = JDBCSQLBuilder.getInstance().createColumnList(config, currentSchema);
                     sqlInsert = JDBCSQLBuilder.getInstance()
                             .generateSQL4Insert(config.getDataSet().getTableName(), columnList);

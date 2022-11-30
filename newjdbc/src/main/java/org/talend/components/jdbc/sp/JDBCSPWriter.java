@@ -116,8 +116,6 @@ public class JDBCSPWriter {
     private JDBCSPRecordCreator recordCreator;
 
     public void write(Record inputRecord) throws SQLException {
-        // TODO process inputRecord is null case
-
         totalCount++;
 
         cleanWrites();

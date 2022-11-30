@@ -65,7 +65,6 @@ public class JDBCSPProcessor implements Serializable {
 
     @PostConstruct
     public void init() {
-        // TODO now can't fetch design schema, only can get input record's schema
     }
 
     @ElementListener

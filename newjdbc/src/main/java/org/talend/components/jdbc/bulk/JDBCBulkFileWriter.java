@@ -52,6 +52,8 @@ public class JDBCBulkFileWriter {
 
     private int totalCount;
 
+    private transient List<SchemaInfo> schema;
+
     public JDBCBulkFileWriter(List<SchemaInfo> schema, JDBCBulkCommonConfig bulkCommonConfig, boolean isAppend,
             RecordBuilderFactory recordBuilderFactory) {
         this.bulkCommonConfig = bulkCommonConfig;
@@ -62,11 +64,11 @@ public class JDBCBulkFileWriter {
             this.nullValue = bulkCommonConfig.getNullValue();
         }
 
+        this.schema = schema;
+
         this.designSchema = SchemaInferer.convertSchemaInfoList2TckSchema(schema, recordBuilderFactory);
 
-        // TODO now studio pass empty design schema if any dynamic column exists in studio component schema
-        // not sure that meet every case
-        isDynamic = this.designSchema.getEntries().isEmpty();
+        isDynamic = this.designSchema.getEntries().isEmpty() || SchemaInferer.containDynamic(schema);
     }
 
     public void open() throws IOException {
@@ -118,7 +120,7 @@ public class JDBCBulkFileWriter {
             Schema inputSchema = input.getSchema();
 
             if (isDynamic) {
-                // TODO merge design schema and input schema
+                currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(schema, inputSchema, recordBuilderFactory);
             }
 
             bulkFormatter =

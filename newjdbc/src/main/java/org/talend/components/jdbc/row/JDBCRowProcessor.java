@@ -69,7 +69,6 @@ public class JDBCRowProcessor implements Serializable {
 
     @PostConstruct
     public void init() {
-        // TODO now can't fetch design schema, only can get input record's schema
     }
 
     @ElementListener
@@ -117,16 +116,8 @@ public class JDBCRowProcessor implements Serializable {
             success.emit(r);
         }
 
-        // TODO correct this
         List<Record> rejectedWrites = writer.getRejectedWrites();
         for (Record r : rejectedWrites) {
-            /*
-             * Reject rt = new Reject();
-             * rt.setRecord(r);
-             * // TODO, this is right?
-             * rt.setErrorCode("");
-             * rt.setErrorMessage("");
-             */
             reject.emit(r);
         }
     }

@@ -86,7 +86,7 @@ public class OutputProcessor implements Serializable {
 
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
-            @Output("reject") final OutputEmitter<Record>/* OutputEmitter<Reject> */ reject)
+            @Output("reject") final OutputEmitter<Record> reject)
             throws SQLException {
         if (!init) {
             boolean useExistedConnection = false;
@@ -146,16 +146,8 @@ public class OutputProcessor implements Serializable {
             success.emit(r);
         }
 
-        // TODO correct this
         List<Record> rejectedWrites = writer.getRejectedWrites();
         for (Record r : rejectedWrites) {
-            /*
-             * Reject rt = new Reject();
-             * rt.setRecord(r);
-             * // TODO, this is right? reject's record contains error info, reject self also contains it?
-             * rt.setErrorCode(rt.getErrorCode());
-             * rt.setErrorMessage(rt.getErrorMessage());
-             */
             reject.emit(r);
         }
     }
@@ -166,7 +158,6 @@ public class OutputProcessor implements Serializable {
 
     @PostConstruct
     public void init() {
-        // TODO now can't fetch design schema, only can get input record's schema
     }
 
     @PreDestroy

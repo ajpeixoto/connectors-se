@@ -78,7 +78,7 @@ public class JDBCRowWriter {
 
     private int totalCount;
 
-    // TODO support this
+    //TODO support this
     private boolean detectErrorOnMultipleSQL;
 
     public JDBCRowWriter(JDBCRowConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
@@ -241,8 +241,6 @@ public class JDBCRowWriter {
     }
 
     private void handleSuccess(Record input) {
-        // TODO process input record is null case
-
         successCount++;
 
         Record.Builder builder = recordBuilderFactory.newRecordBuilder(outSchema);
@@ -281,8 +279,6 @@ public class JDBCRowWriter {
     }
 
     private void handleReject(Record input, SQLException e) throws SQLException {
-        // TODO process input record is null case
-
         rejectCount++;
 
         Record.Builder builder = recordBuilderFactory.newRecordBuilder(rejectSchema);
