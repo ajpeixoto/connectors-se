@@ -364,7 +364,7 @@ pipeline {
 
         stage('Deploy') {
             when {
-                expression { jenkins_action == 'STANDARD' && params.DEPLOY == true }
+                expression { params.ACTION == 'STANDARD' && params.DEPLOY == true }
             }
             steps {
                 withCredentials([nexusCredentials]) {
@@ -381,7 +381,7 @@ pipeline {
 
         stage('Release') {
             when {
-                expression { jenkins_action == 'RELEASE' }
+                expression { params.ACTION == 'RELEASE' }
             }
             steps {
                 withCredentials([gitCredentials,
