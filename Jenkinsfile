@@ -21,7 +21,6 @@ def sonarCredentials = usernamePassword(
 // Job config
 final String slackChannel = 'components-ci'
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
-final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
 
 // Job variables declaration
 String jenkins_action
