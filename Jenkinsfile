@@ -24,6 +24,7 @@ final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env
 final Boolean hasPostLoginScript = params.POST_LOGIN_SCRIPT != ""
 
 // Job variables declaration
+String jenkins_action
 String branch_user
 String branch_ticket
 String branch_description
@@ -238,18 +239,28 @@ pipeline {
                     String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
                     if ( user_name == null) { user_name = "auto" }
 
+                    if(params.DEPLOY) {
+                        jenkins_action = 'DEPLOY'
+                    }
+                    else {
+                        jenkins_action = params.ACTION
+                    }
+
                     currentBuild.displayName = (
-                      "#$currentBuild.number-$params.ACTION: $user_name"
+                      "#$currentBuild.number-$jenkins_action: $user_name"
                     )
 
                     // updating build description
-                    job_description ="""
-                      $qualifiedVersion - $params.ACTION
-                      Component-runtime Version: $componentRuntimeVersion
-                      Sonar: $params.SONAR_ANALYSIS - Script: $hasPostLoginScript
-                      Debug: $params.DEBUG Extra args: $params.EXTRA_BUILD_PARAMS
-                      fail_at_end: $fail_at_end ($params.FAIL_AT_END)
-                     """.stripIndent()
+                    // REM This is MARKDOWN, do not forget double space at the end of line
+                    job_description = """
+                      $qualifiedVersion - $jenkins_action 
+                      Component-runtime Version: $componentRuntimeVersion  
+                      Sonar: $params.SONAR_ANALYSIS  
+                      Extra args:  `$params.EXTRA_BUILD_PARAMS`  
+                      Post login script: ```$params.POST_LOGIN_SCRIPT```  
+                      Maven fail at end activation: $fail_at_end ($params.FAIL_AT_END)  
+                      Debug: $params.DEBUG  
+                    """.stripIndent()
                     currentBuild.description = job_description
                 }
             }
@@ -326,7 +337,7 @@ pipeline {
                                      sonarCredentials]) {
                         sh """
                             bash .jenkins/build.sh \
-                                '${params.ACTION}' \
+                                '${jenkins_action}' \
                                 '${isOnMasterOrMaintenanceBranch}' \
                                 '${params.SONAR_ANALYSIS}' \
                                 '${env.BRANCH_NAME}' \
@@ -354,14 +365,14 @@ pipeline {
 
         stage('Deploy') {
             when {
-                expression { params.ACTION == 'STANDARD' && params.DEPLOY == true }
+                expression { jenkins_action == 'STANDARD' && params.DEPLOY == true }
             }
             steps {
                 withCredentials([nexusCredentials]) {
                     script {
                         sh """
                             bash .jenkins/deploy.sh \
-                                '${params.ACTION}' \
+                                '${jenkins_action}' \
                                 ${extraBuildParams}
                         """
                     }
@@ -371,7 +382,7 @@ pipeline {
 
         stage('Release') {
             when {
-                expression { params.Action == 'RELEASE' }
+                expression { jenkins_action == 'RELEASE' }
             }
             steps {
                 withCredentials([gitCredentials,
@@ -380,7 +391,7 @@ pipeline {
                     script {
                         sh """
                             bash .jenkins/release.sh \
-                                '${params.Action}' \
+                                '${jenkins_action}' \
                                 '${releaseVersion}' \
                                 ${extraBuildParams}
                         """
