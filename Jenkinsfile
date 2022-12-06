@@ -297,7 +297,7 @@ pipeline {
                     job_description_append("`$extraBuildParams`")
 
                     if (!isOnMasterOrMaintenanceBranch) {
-                        pom_project_property_edit(pomVersion, qualifiedVersion)
+                        pom_project_property_edit()
                     }
                 }
             }
