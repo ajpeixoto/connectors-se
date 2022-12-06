@@ -32,7 +32,6 @@ String componentRuntimeVersion
 String qualifiedVersion
 String releaseVersion = ''
 String extraBuildParams = ''
-String job_description
 Boolean fail_at_end = false
 String logContent
 
@@ -222,14 +221,8 @@ pipeline {
                         fail_at_end = true
                     }
 
-                    extraBuildParams = extraBuildParams_assembly(fail_at_end)
-                    println "extraBuildParams: $extraBuildParams"
                     releaseVersion = pomVersion.split('-')[0]
                     println "releaseVersion: $releaseVersion"
-
-                    if (!isOnMasterOrMaintenanceBranch) {
-                        pom_project_property_edit()
-                    }
                 }
                 ///////////////////////////////////////////
                 // Updating build displayName and description
@@ -250,17 +243,16 @@ pipeline {
                     )
 
                     // updating build description
-                    // REM This is MARKDOWN, do not forget double space at the end of line
-                    job_description = """
+                    String description = """
                       $qualifiedVersion - $jenkins_action 
                       Component-runtime Version: $componentRuntimeVersion  
                       Sonar: $params.SONAR_ANALYSIS  
-                      Extra args:  `$params.EXTRA_BUILD_PARAMS`  
+                      Extra user maven args:  `$params.EXTRA_BUILD_PARAMS`  
                       Post login script: ```$params.POST_LOGIN_SCRIPT```  
-                      Maven fail at end activation: $fail_at_end ($params.FAIL_AT_END)  
+                      Maven fail-at-end activation: $fail_at_end ($params.FAIL_AT_END)  
                       Debug: $params.DEBUG  
-                    """.stripIndent()
-                    currentBuild.description = job_description
+                      """.stripIndent()
+                    job_description_append(description)
                 }
             }
         }
@@ -298,6 +290,14 @@ pipeline {
                         sh """
                           mvn versions:set --define newVersion=${qualifiedVersion}
                         """
+                    }
+
+                    extraBuildParams = extraBuildParams_assembly(fail_at_end, false)
+                    job_description_append("Final parameters used for maven:  ")
+                    job_description_append("`$extraBuildParams`")
+
+                    if (!isOnMasterOrMaintenanceBranch) {
+                        pom_project_property_edit(pomVersion, qualifiedVersion)
                     }
                 }
             }
@@ -437,7 +437,7 @@ pipeline {
 
             script {
                 if (params.DEBUG) {
-                    jenkinsBreakpoint(job_description)
+                    jenkinsBreakpoint()
                 }
             }
         }
@@ -485,19 +485,38 @@ pipeline {
 
 
 /**
+ * Append a new line to job description
+ * REM This is MARKDOWN, do not forget double space at the end of line
+ *
+ * @param new line
+ * @return void
+ */
+private void job_description_append(String new_line) {
+    if (currentBuild.description == null) {
+        println "Create the job description with: \n$new_line"
+        currentBuild.description = new_line
+    } else {
+        println "Edit the job description adding: $new_line"
+        currentBuild.description = currentBuild.description + '\n' + new_line
+    }
+}
+
+/**
  * Implement a simple breakpoint to stop actual job
  * Change and restore the job description to be more visible
  *
- * @param job_description_to_backup
+ * @param none
  * @return void
  */
-private void jenkinsBreakpoint(String job_description_to_backup) {
+private void jenkinsBreakpoint() {
+    // Backup the description
+    String job_description_backup = currentBuild.description
     // updating build description
-    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description_to_backup}"
+    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description_backup}"
     // Request user action
     input message: 'Finish the job?', ok: 'Yes'
     // updating build description
-    currentBuild.description = "$job_description_to_backup"
+    currentBuild.description = "$job_description_backup"
 }
 
 /**
@@ -553,11 +572,12 @@ private void CleanM2Corruption(String logContent) {
 /**
  * Assembly all needed items to put inside extraBuildParams
  *
- * @param boolean fail_at_end, if set to true, --fail-at-end will be added
+ * @param Boolean fail_at_end, if set to true, --fail-at-end will be added
+ * @param Boolean snapshot_update, if set to true, --update-snapshots will be added
  *
  * @return extraBuildParams as a string ready for mvn cmd
  */
-private String extraBuildParams_assembly(boolean fail_at_end) {
+private String extraBuildParams_assembly(Boolean fail_at_end, Boolean snapshot_update) {
     String extraBuildParams
 
     println 'Processing extraBuildParams'
@@ -567,12 +587,19 @@ private String extraBuildParams_assembly(boolean fail_at_end) {
                                              env.DECRYPTER_ARG]
     println 'Manage the EXTRA_BUILD_PARAMS'
     buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
-    println 'Manage the failed at-end-option'
+    println 'Manage the failed-at-end option'
     if (fail_at_end) {
         buildParamsAsArray.add('--fail-at-end')
     }
-    println 'Construct extraBuildParams:'
+    println 'Manage the --update-snapshots option'
+    if (snapshot_update) {
+        buildParamsAsArray.add('--update-snapshots')
+    }
+
+    println 'Construct extraBuildParams'
+
     extraBuildParams = buildParamsAsArray.join(' ')
+    println "extraBuildParams: $extraBuildParams"
 
     return extraBuildParams
 }
