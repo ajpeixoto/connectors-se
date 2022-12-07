@@ -9,7 +9,6 @@ set -xe
 # $3: Sonar analyzed branch
 # $@: the extra parameters to be used in the maven commands
 main() (
-  jenkinsAction="${1?Missing Jenkins action}"; shift
   sonar="${1?Missing sonar option}"; shift
   branch="${1?Missing branch name}"; shift
   extraBuildParams=("$@")
