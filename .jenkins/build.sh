@@ -30,8 +30,10 @@ main() (
   mvn clean install \
       --errors \
       --batch-mode \
-      --activate-profiles 'STANDARD, ITs' # FIXME Explain ITs, apparently for JDBC
+      --activate-profiles 'STANDARD, ITs'
       "${extraBuildParams[@]}"
+
+  # FIXME Explain ITs is added here, apparently for JDBC
 
   if [[ "${sonar}" == 'true' ]]; then
     declare -a LIST_FILE_ARRAY=( $(find $(pwd) -type f -name 'jacoco.xml') )
