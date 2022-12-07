@@ -29,7 +29,7 @@ main() (
   mvn clean install \
       --errors \
       --batch-mode \
-      --activate-profiles 'STANDARD, ITs'
+      --activate-profiles 'STANDARD, ITs'\
       "${extraBuildParams[@]}"
 
   # FIXME Explain ITs is added here, apparently for JDBC
