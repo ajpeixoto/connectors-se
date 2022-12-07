@@ -337,7 +337,6 @@ pipeline {
                         sh """
                             bash .jenkins/build.sh \
                                 '${jenkins_action}' \
-                                '${isOnMasterOrMaintenanceBranch}' \
                                 '${params.SONAR_ANALYSIS}' \
                                 '${env.BRANCH_NAME}' \
                                 ${extraBuildParams}

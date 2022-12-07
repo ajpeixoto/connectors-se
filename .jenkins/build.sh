@@ -3,23 +3,18 @@
 set -xe
 
 # Builds the components with tests, Docker image and spotBugs enabled
-# Also generates the Talend components uispec
+# Also generates the Talend components ui spec
 # $1: the Jenkinsfile's params.Action
-# $2: Execute maven verify or deploy whether the branch is maintenance or master.
-# $3: Execute sonar anlaysis or not, from jenkinsfile's params.SONAR_ANALYSIS
-# $4: Sonar analyzed branch
+# $2: Execute sonar analysis or not, from jenkinsfile's params.SONAR_ANALYSIS
+# $3: Sonar analyzed branch
 # $@: the extra parameters to be used in the maven commands
 main() (
   jenkinsAction="${1?Missing Jenkins action}"; shift
-  isOnMasterOrMaintenanceBranch="${1?Missing is on master or a maintenance branch}"; shift
   sonar="${1?Missing sonar option}"; shift
   branch="${1?Missing branch name}"; shift
   extraBuildParams=("$@")
 
   mavenPhase='verify'
-  if [[ "${isOnMasterOrMaintenanceBranch}" == 'true' ]]; then
-    mavenPhase='deploy'
-  fi
 
   # check for format violations. You shall not pass!
   mvn spotless:check
