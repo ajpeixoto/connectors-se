@@ -336,7 +336,6 @@ pipeline {
                                      sonarCredentials]) {
                         sh """
                             bash .jenkins/build.sh \
-                                '${jenkins_action}' \
                                 '${params.SONAR_ANALYSIS}' \
                                 '${env.BRANCH_NAME}' \
                                 ${extraBuildParams}
@@ -370,7 +369,6 @@ pipeline {
                     script {
                         sh """
                             bash .jenkins/deploy.sh \
-                                '${jenkins_action}' \
                                 ${extraBuildParams}
                         """
                     }
