@@ -18,6 +18,7 @@ import org.apache.avro.LogicalTypes;
 import org.talend.components.common.stream.AvroHelper;
 import org.talend.components.common.stream.Constants;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -80,9 +81,9 @@ public class AvroToSchema {
                 LogicalTypes.Decimal decimalType =
                         ((LogicalTypes.Decimal) AvroHelper.nonNullableType(field.schema()).getLogicalType());
                 builder.withType(Schema.Type.STRING)
-                        .withProp(Constants.STUDIO_TYPE, BIGDECIMAL)
-                        .withProp(Constants.STUDIO_LENGTH, String.valueOf(decimalType.getPrecision()))
-                        .withProp(Constants.STUDIO_PRECISION, String.valueOf(decimalType.getScale()));
+                        .withProp(SchemaProperty.STUDIO_TYPE, BIGDECIMAL)
+                        .withProp(SchemaProperty.SIZE, String.valueOf(decimalType.getPrecision()))
+                        .withProp(SchemaProperty.SCALE, String.valueOf(decimalType.getScale()));
             } else {
                 builder.withType(Schema.Type.BYTES);
             }

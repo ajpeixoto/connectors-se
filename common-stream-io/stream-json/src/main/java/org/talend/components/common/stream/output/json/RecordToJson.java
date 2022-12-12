@@ -39,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RecordToJson implements RecordConverter<JsonObject, Void> {
 
+    private boolean useOriginColumnName = false;
+
     @Override
     public JsonObject fromRecord(Record record) {
 
@@ -46,6 +48,14 @@ public class RecordToJson implements RecordConverter<JsonObject, Void> {
             return null;
         }
         return convertRecordToJsonObject(record);
+    }
+
+    public void setUseOriginColumnName(boolean useOriginColumnName) {
+        this.useOriginColumnName = useOriginColumnName;
+    }
+
+    public boolean isUseOriginColumnName() {
+        return useOriginColumnName;
     }
 
     @Override
@@ -61,7 +71,7 @@ public class RecordToJson implements RecordConverter<JsonObject, Void> {
             Object val = record.get(Object.class, fieldName);
             log.debug("[convertRecordToJsonObject] entry: {}; type: {}; value: {}.", fieldName, entry.getType(), val);
             if (null == val) {
-                json.addNull(fieldName);
+                json.addNull(useOriginColumnName ? entry.getOriginalFieldName() : fieldName);
             } else {
                 this.addField(json, record, entry);
             }
@@ -95,52 +105,54 @@ public class RecordToJson implements RecordConverter<JsonObject, Void> {
 
     private void addField(final JsonObjectBuilder json, final Record record, final Entry entry) {
         final String fieldName = entry.getName();
+        final String outputFieldName = useOriginColumnName ? entry.getOriginalFieldName() : fieldName;
+
         switch (entry.getType()) {
         case RECORD:
             final Record subRecord = record.getRecord(fieldName);
-            json.add(fieldName, convertRecordToJsonObject(subRecord));
+            json.add(outputFieldName, convertRecordToJsonObject(subRecord));
             break;
         case ARRAY:
             final Collection<Object> array = record.getArray(Object.class, fieldName);
             final JsonArray jarray = toJsonArray(array);
-            json.add(fieldName, jarray);
+            json.add(outputFieldName, jarray);
             break;
         case STRING:
-            json.add(fieldName, record.getString(fieldName));
+            json.add(outputFieldName, record.getString(fieldName));
             break;
         case BYTES:
-            json.add(fieldName, new String(record.getBytes(fieldName), Charset.defaultCharset()));
+            json.add(outputFieldName, new String(record.getBytes(fieldName), Charset.defaultCharset()));
             break;
         case INT:
-            json.add(fieldName, record.getInt(fieldName));
+            json.add(outputFieldName, record.getInt(fieldName));
             break;
         case LONG:
-            json.add(fieldName, record.getLong(fieldName));
+            json.add(outputFieldName, record.getLong(fieldName));
             break;
         case DECIMAL:
             // worry json ser/desr lose precision for decimal, also here keep like before for safe
             BigDecimal decimal = record.getDecimal(fieldName);
             if (decimal != null) {
-                json.add(fieldName, decimal.toString());
+                json.add(outputFieldName, decimal.toString());
             } else {
-                json.addNull(fieldName);
+                json.addNull(outputFieldName);
             }
             break;
         case FLOAT:
-            json.add(fieldName, record.getFloat(fieldName));
+            json.add(outputFieldName, record.getFloat(fieldName));
             break;
         case DOUBLE:
-            json.add(fieldName, record.getDouble(fieldName));
+            json.add(outputFieldName, record.getDouble(fieldName));
             break;
         case BOOLEAN:
-            json.add(fieldName, record.getBoolean(fieldName));
+            json.add(outputFieldName, record.getBoolean(fieldName));
             break;
         case DATETIME:
             final ZonedDateTime dateTime = record.getDateTime(fieldName);
             if (dateTime != null) {
-                json.add(fieldName, dateTime.toString());
+                json.add(outputFieldName, dateTime.toString());
             } else {
-                json.addNull(fieldName);
+                json.addNull(outputFieldName);
             }
             break;
         default:

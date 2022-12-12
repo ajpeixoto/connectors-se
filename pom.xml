@@ -18,7 +18,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.39.0-SNAPSHOT</version>
+    <version>1.41.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Connectors SE</name>
@@ -77,7 +77,7 @@
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <component-runtime.version>1.51.0-SNAPSHOT</component-runtime.version>
+        <component-runtime.version>1.51.2</component-runtime.version>
 
         <slf4j.version>1.7.36</slf4j.version>
         <log4j-api.version>2.17.2</log4j-api.version>
@@ -85,17 +85,18 @@
 
         <beanutils.version>1.9.4</beanutils.version>
 
-        <beam.version>2.36.0</beam.version>
+        <beam.version>2.37.0</beam.version>
         <spark.version>3.2.2</spark.version>
+        <ivy.version>2.5.1</ivy.version>
         <shrinkwrap.version>3.1.4</shrinkwrap.version>
         <avro.version>1.8.2</avro.version>
-        <jackson-bom.version>2.13.2.20220328</jackson-bom.version>
-        <jackson.version>2.13.2</jackson.version> <!--in most cases should be equal to jackson-bom-->
-        <jackson-databind.version>2.13.2.2</jackson-databind.version> <!--in most cases should be equal to jackson-bom-->
+        <jackson-bom.version>2.13.4.20221013</jackson-bom.version>
+        <jackson.version>2.13.4</jackson.version> <!--in most cases should be equal to jackson-bom-->
+        <jackson-databind.version>2.13.4.2</jackson-databind.version> <!--in most cases should be equal to jackson-bom-->
         <jackson-codehaus.version>1.9.16-TALEND</jackson-codehaus.version>
 
         <jsoup.version>1.14.3</jsoup.version>
-        <protobuf-java.version>3.19.2</protobuf-java.version>
+        <protobuf-java.version>3.19.6</protobuf-java.version>
 
         <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
         <daikon.version>0.31.0</daikon.version>
@@ -569,6 +570,11 @@
                 </exclusions>
             </dependency>
             <dependency>
+                <groupId>org.apache.ivy</groupId>
+                <artifactId>ivy</artifactId>
+                <version>${ivy.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-streaming_2.12</artifactId>
                 <version>${spark.version}</version>
@@ -648,6 +654,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-text</artifactId>
                 <version>${commons-text.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codehaus.jettison</groupId>
+                <artifactId>jettison</artifactId>
+                <version>1.5.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
