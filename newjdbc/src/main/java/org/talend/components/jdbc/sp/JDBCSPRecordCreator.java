@@ -16,6 +16,7 @@ import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.components.jdbc.schema.TalendType;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.CallableStatement;
@@ -160,7 +161,7 @@ public class JDBCSPRecordCreator {
     private JDBCSPConverter getSPConverter(Schema.Entry f, final int index) {
         Schema.Type type = f.getType();
         // TODO by talend type?
-        String talendType = f.getProp("talend.studio.type");
+        String talendType = f.getProp(SchemaProperty.STUDIO_TYPE);
         if (type == Schema.Type.STRING) {
             if (talendType == null || TalendType.STRING.getName().equals(talendType)) {
                 return new JDBCSPConverter() {

@@ -75,7 +75,8 @@ public class JDBCOutputUpdateOrInsertWriter extends JDBCOutputWriter {
             currentSchema = componentSchema;
             if (isDynamic) {
                 try {
-                    currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(config.getDataSet().getSchema(), inputSchema,
+                    currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
+                            config.getDataSet().getSchema(), inputSchema,
                             recordBuilderFactory);
                     columnList = JDBCSQLBuilder.getInstance().createColumnList(config, currentSchema);
                     sqlInsert = JDBCSQLBuilder.getInstance()

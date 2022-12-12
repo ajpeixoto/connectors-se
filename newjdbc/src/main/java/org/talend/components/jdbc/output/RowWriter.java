@@ -15,6 +15,7 @@ package org.talend.components.jdbc.output;
 import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -55,14 +56,14 @@ public class RowWriter {
 
             Schema.Entry componentField = CommonUtils.getField(currentSchema, column.columnLabel);
             final String inputValueName = inputField.getName();
-            String pattern = componentField.getProp("talend.studio.pattern");
+            String pattern = componentField.getProp(SchemaProperty.PATTERN);
             statementIndex++;
 
             Schema.Type type = componentField.getType();
-            String talendType = componentField.getProp("talend.studio.type");
+            String talendType = componentField.getProp(SchemaProperty.STUDIO_TYPE);
 
             // TODO any difference for nullable
-            // boolean nullable = Boolean.valueOf(componentField.getProp("talend.studio.key"));
+            // boolean nullable = Boolean.valueOf(componentField.getProp(SchemaProperty.IS_KEY));
 
             TypeWriter writer = null;
 

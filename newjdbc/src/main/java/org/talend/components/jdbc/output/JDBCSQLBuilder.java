@@ -13,6 +13,7 @@
 package org.talend.components.jdbc.output;
 
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -128,7 +129,7 @@ public class JDBCSQLBuilder {
             String originName = field.getRawName();
             column.dbColumnName = originName != null ? originName : field.getName();
 
-            boolean isKey = Boolean.valueOf(field.getProp("talend.studio.key"));
+            boolean isKey = Boolean.valueOf(field.getProp(SchemaProperty.IS_KEY));
             if (isKey) {
                 column.updateKey = true;
                 column.deletionKey = true;

@@ -30,6 +30,7 @@ import org.talend.components.jdbc.sp.JDBCSPConfig;
 import org.talend.components.jdbc.sp.JDBCSPProcessor;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.ControllableInputFactory;
@@ -289,7 +290,7 @@ public class DBTestUtils {
                         .withName("ID")
                         .withType(Schema.Type.INT)
                         .withNullable(true)
-                        .withProp("talend.studio.key", "true")
+                        .withProp(SchemaProperty.IS_KEY, "true")
                         .build())
                 .withEntry(recordBuilderFactory.newEntryBuilder()
                         .withName("NAME")
@@ -851,9 +852,9 @@ public class DBTestUtils {
         assertEquals("ID", field.getOriginalFieldName());
         assertEquals(Schema.Type.INT, field.getType());
         // assertEquals("INTEGER", field.getProp(""));//TODO origin db type
-        assertEquals(null, field.getProp("talend.studio.length"));
-        assertEquals(null, field.getProp("talend.studio.precision"));// TODO scale
-        assertEquals(null, field.getProp("talend.studio.pattern"));// TODO pattern
+        assertEquals(null, field.getProp(SchemaProperty.SIZE));
+        assertEquals(null, field.getProp(SchemaProperty.SCALE));// TODO scale
+        assertEquals(null, field.getProp(SchemaProperty.PATTERN));// TODO pattern
         assertEquals(null, field.getProp(""));// TODO default
 
         field = columns.get(1);
@@ -861,9 +862,9 @@ public class DBTestUtils {
         assertEquals("NAME", field.getOriginalFieldName());
         assertEquals(Schema.Type.STRING, field.getType());
         // assertEquals("VARCHAR", field.getProp(""));//TODO origin db type
-        assertEquals("8", field.getProp("talend.studio.length"));
-        assertEquals(null, field.getProp("talend.studio.precision"));
-        assertEquals(null, field.getProp("talend.studio.pattern"));// TODO pattern
+        assertEquals("8", field.getProp(SchemaProperty.SIZE));
+        assertEquals(null, field.getProp(SchemaProperty.SCALE));
+        assertEquals(null, field.getProp(SchemaProperty.PATTERN));// TODO pattern
         assertEquals(null, field.getProp(""));// TODO default
     }
 

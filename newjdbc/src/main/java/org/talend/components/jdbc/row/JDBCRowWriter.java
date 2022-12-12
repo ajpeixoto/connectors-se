@@ -78,7 +78,7 @@ public class JDBCRowWriter {
 
     private int totalCount;
 
-    //TODO support this
+    // TODO support this
     private boolean detectErrorOnMultipleSQL;
 
     public JDBCRowWriter(JDBCRowConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,

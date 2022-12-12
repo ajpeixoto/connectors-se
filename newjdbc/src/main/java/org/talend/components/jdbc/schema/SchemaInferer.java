@@ -15,6 +15,7 @@ package org.talend.components.jdbc.schema;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.*;
@@ -126,7 +127,7 @@ public class SchemaInferer {
                 .withName(name)
                 .withRawName(dbColumnName)
                 .withNullable(nullable)
-                .withProp("talend.studio.key", String.valueOf(isKey));
+                .withProp(SchemaProperty.IS_KEY, String.valueOf(isKey));
 
         boolean isIgnoreLength = false;
         boolean isIgnorePrecision = false;
@@ -151,50 +152,50 @@ public class SchemaInferer {
             case java.sql.Types.SMALLINT:
             case java.sql.Types.TINYINT:
             case java.sql.Types.INTEGER:
-                entryBuilder.withType(INT).withProp("talend.studio.type", "id_Integer");
+                entryBuilder.withType(INT).withProp(SchemaProperty.STUDIO_TYPE, "id_Integer");
                 // TODO process LONG by this : if (javaType.equals(Integer.class.getName()) ||
                 // Short.class.getName().equals(javaType))
                 break;
             case java.sql.Types.FLOAT:
             case java.sql.Types.REAL:
-                entryBuilder.withType(FLOAT).withProp("talend.studio.type", "id_Float");
+                entryBuilder.withType(FLOAT).withProp(SchemaProperty.STUDIO_TYPE, "id_Float");
                 break;
             case java.sql.Types.DOUBLE:
-                entryBuilder.withType(DOUBLE).withProp("talend.studio.type", "id_Double");
+                entryBuilder.withType(DOUBLE).withProp(SchemaProperty.STUDIO_TYPE, "id_Double");
                 break;
             case java.sql.Types.BOOLEAN:
-                entryBuilder.withType(BOOLEAN).withProp("talend.studio.type", "id_Boolean");
+                entryBuilder.withType(BOOLEAN).withProp(SchemaProperty.STUDIO_TYPE, "id_Boolean");
                 break;
             case java.sql.Types.TIME:
                 entryBuilder.withType(DATETIME)
-                        .withProp("talend.studio.type", "id_Date");
+                        .withProp(SchemaProperty.STUDIO_TYPE, "id_Date");
                 break;
             case java.sql.Types.DATE:
                 entryBuilder.withType(DATETIME)
-                        .withProp("talend.studio.type", "id_Date");
+                        .withProp(SchemaProperty.STUDIO_TYPE, "id_Date");
                 break;
             case java.sql.Types.TIMESTAMP:
                 entryBuilder.withType(DATETIME)
-                        .withProp("talend.studio.type", "id_Date");
+                        .withProp(SchemaProperty.STUDIO_TYPE, "id_Date");
                 break;
             case java.sql.Types.BINARY:
             case java.sql.Types.VARBINARY:
             case java.sql.Types.LONGVARBINARY:
-                entryBuilder.withType(BYTES).withProp("talend.studio.type", "id_byte[]");
+                entryBuilder.withType(BYTES).withProp(SchemaProperty.STUDIO_TYPE, "id_byte[]");
                 break;
             case java.sql.Types.BIGINT:
             case java.sql.Types.DECIMAL:
             case java.sql.Types.NUMERIC:
-                entryBuilder.withType(DECIMAL).withProp("talend.studio.type", "id_BigDecimal");
+                entryBuilder.withType(DECIMAL).withProp(SchemaProperty.STUDIO_TYPE, "id_BigDecimal");
                 break;
             case java.sql.Types.CHAR:
-                entryBuilder.withType(STRING).withProp("talend.studio.type", "id_Character");
+                entryBuilder.withType(STRING).withProp(SchemaProperty.STUDIO_TYPE, "id_Character");
                 break;
             case java.sql.Types.VARCHAR:
             case java.sql.Types.LONGVARCHAR:
-                entryBuilder.withType(STRING).withProp("talend.studio.type", "id_String");
+                entryBuilder.withType(STRING).withProp(SchemaProperty.STUDIO_TYPE, "id_String");
             default:
-                entryBuilder.withType(STRING).withProp("talend.studio.type", "id_String");
+                entryBuilder.withType(STRING).withProp(SchemaProperty.STUDIO_TYPE, "id_String");
                 break;
             }
         } else {
@@ -213,7 +214,7 @@ public class SchemaInferer {
                 talendType = TalendType.STRING;
             }
 
-            entryBuilder.withProp("talend.studio.type", talendType.getName());
+            entryBuilder.withProp(SchemaProperty.STUDIO_TYPE, talendType.getName());
 
             entryBuilder.withType(convertTalendType2TckType(talendType));
         }
@@ -251,17 +252,17 @@ public class SchemaInferer {
         case java.sql.Types.DATE:
             setPrecision(entryBuilder, isIgnoreLength, size);
             setScale(entryBuilder, isIgnorePrecision, scale);
-            entryBuilder.withProp("talend.studio.pattern", "yyyy-MM-dd");
+            entryBuilder.withProp(SchemaProperty.PATTERN, "yyyy-MM-dd");
             break;
         case java.sql.Types.TIME:
             setPrecision(entryBuilder, isIgnoreLength, size);
             setScale(entryBuilder, isIgnorePrecision, scale);
-            entryBuilder.withProp("talend.studio.pattern", "HH:mm:ss");
+            entryBuilder.withProp(SchemaProperty.PATTERN, "HH:mm:ss");
             break;
         case java.sql.Types.TIMESTAMP:
             setPrecision(entryBuilder, isIgnoreLength, size);
             setScale(entryBuilder, isIgnorePrecision, scale);
-            entryBuilder.withProp("talend.studio.pattern", "yyyy-MM-dd HH:mm:ss.SSS");
+            entryBuilder.withProp(SchemaProperty.PATTERN, "yyyy-MM-dd HH:mm:ss.SSS");
             break;
         case java.sql.Types.BOOLEAN:
             break;
@@ -292,7 +293,7 @@ public class SchemaInferer {
             return;
         }
 
-        entryBuilder.withProp("talend.studio.length", String.valueOf(precision));
+        entryBuilder.withProp(SchemaProperty.SIZE, String.valueOf(precision));
     }
 
     private static void setScale(Schema.Entry.Builder entryBuilder, boolean ignoreScale, int scale) {
@@ -300,7 +301,7 @@ public class SchemaInferer {
             return;
         }
 
-        entryBuilder.withProp("talend.studio.precision", String.valueOf(scale));
+        entryBuilder.withProp(SchemaProperty.SCALE, String.valueOf(scale));
     }
 
     public static void fillValue(final Record.Builder builder, final Schema schema, final ResultSet resultSet,
@@ -320,7 +321,7 @@ public class SchemaInferer {
             Schema.Type type = entry.getType();
             // though this works for studio schema fill, but also works for cloud as infer method will be executed
             // before this one
-            String detail_type = entry.getProp("talend.studio.type");
+            String detail_type = entry.getProp(SchemaProperty.STUDIO_TYPE);
             switch (type) {
             case STRING:
                 Boolean isTrim = trimMap.get(jdbcIndex);
@@ -417,12 +418,12 @@ public class SchemaInferer {
         schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
                 .withName("errorCode")
                 .withType(STRING)
-                .withProp("talend.studio.length", "255")
+                .withProp(SchemaProperty.SIZE, "255")
                 .build());
         schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
                 .withName("errorMessage")
                 .withType(STRING)
-                .withProp("talend.studio.length", "255")
+                .withProp(SchemaProperty.SIZE, "255")
                 .build());
 
         return schemaBuilder.build();
@@ -454,19 +455,19 @@ public class SchemaInferer {
                 // convert here as we will not use getType method
                 .withType(convertTalendType2TckType(TalendType.get(info.getTalendType())))
                 // TODO also define a pro for origin db type like VARCHAR? info.getType()
-                .withProp("talend.studio.type", info.getTalendType())
-                .withProp("talend.studio.key", String.valueOf(info.isKey()));
+                .withProp(SchemaProperty.STUDIO_TYPE, info.getTalendType())
+                .withProp(SchemaProperty.IS_KEY, String.valueOf(info.isKey()));
 
         if (info.getPattern() != null) {
-            entryBuilder.withProp("talend.studio.pattern", info.getPattern());
+            entryBuilder.withProp(SchemaProperty.PATTERN, info.getPattern());
         }
 
         if (info.getLength() != null) {
-            entryBuilder.withProp("talend.studio.length", String.valueOf(info.getLength()));
+            entryBuilder.withProp(SchemaProperty.SIZE, String.valueOf(info.getLength()));
         }
 
         if (info.getPrecision() != null) {
-            entryBuilder.withProp("talend.studio.precision", String.valueOf(info.getPrecision()));
+            entryBuilder.withProp(SchemaProperty.SCALE, String.valueOf(info.getPrecision()));
         }
 
         return entryBuilder.build();
@@ -474,7 +475,8 @@ public class SchemaInferer {
 
     public static Schema mergeRuntimeSchemaAndDesignSchema4Dynamic(List<SchemaInfo> designSchema, Schema runtimeSchema,
             RecordBuilderFactory recordBuilderFactory) {
-        if(designSchema == null) return runtimeSchema;
+        if (designSchema == null)
+            return runtimeSchema;
 
         Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
 

@@ -94,7 +94,7 @@ abstract public class JDBCOutputWriter {
         this.recordBuilderFactory = recordBuilderFactory;
         this.context = context;
 
-        if (context!=null) {
+        if (context != null) {
             bufferSizeKey4Parallelize = "buffersSizeKey_" + context.getConnectorId() + "_"
                     + Thread.currentThread().getId();
         }
@@ -131,7 +131,8 @@ abstract public class JDBCOutputWriter {
         // "errorMessage" columns base on componentSchema
         rejectSchema = SchemaInferer.getRejectSchema(config.getDataSet().getSchema(), recordBuilderFactory);
 
-        isDynamic = componentSchema.getEntries().isEmpty() || SchemaInferer.containDynamic(config.getDataSet().getSchema());
+        isDynamic =
+                componentSchema.getEntries().isEmpty() || SchemaInferer.containDynamic(config.getDataSet().getSchema());
 
         // if not dynamic, we can computer it now for "fail soon" way, not fail in main part if fail
         if (!isDynamic) {

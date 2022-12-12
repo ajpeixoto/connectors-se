@@ -593,7 +593,7 @@ public class JDBCService implements Serializable {
             return builder;
         }
 
-        builder.withProp("talend.studio.length", String.valueOf(precision));
+        builder.withProp(SchemaProperty.SIZE, String.valueOf(precision));
 
         return builder;
     }
@@ -603,7 +603,7 @@ public class JDBCService implements Serializable {
             return builder;
         }
 
-        builder.withProp("talend.studio.precision", String.valueOf(scale));
+        builder.withProp(SchemaProperty.SCALE, String.valueOf(scale));
         return builder;
     }
 

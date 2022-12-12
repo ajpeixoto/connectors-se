@@ -120,7 +120,8 @@ public class JDBCBulkFileWriter {
             Schema inputSchema = input.getSchema();
 
             if (isDynamic) {
-                currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(schema, inputSchema, recordBuilderFactory);
+                currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(schema, inputSchema,
+                        recordBuilderFactory);
             }
 
             bulkFormatter =

@@ -16,6 +16,7 @@ import com.talend.csv.CSVWriter;
 import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -38,7 +39,7 @@ public class BulkFormatter {
 
             Schema.Entry componentField = CommonUtils.getField(currentSchema, field.getName());
             String inputValueName = inputField.getName();
-            String pattern = componentField.getProp("talend.studio.pattern");
+            String pattern = componentField.getProp(SchemaProperty.PATTERN);
 
             Schema.Type type = componentField.getType();
 
