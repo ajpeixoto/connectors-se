@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>rejector</artifactId>
-    <version>1.36.0</version>
+    <version>1.36.1</version>
 
     <build>
         <plugins>

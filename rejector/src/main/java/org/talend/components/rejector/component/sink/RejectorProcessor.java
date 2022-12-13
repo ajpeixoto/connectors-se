@@ -77,7 +77,7 @@ public class RejectorProcessor implements Serializable {
             @Output("REJECT") OutputEmitter<Record> reject,
             @Output OutputEmitter<Record> unknown) {
         if (configuration.getDisplayRowStuct()) {
-            log.warn("[bufferize] {} - (schema {}).", data, data.getSchema()
+            log.debug("[bufferize] {} - (schema {}).", data, data.getSchema()
                     .getAllEntries()
                     .map(e -> String.format("\nschema for %s\t\t%s", e.getName(), e))
                     .collect(Collectors.joining(",")));
@@ -113,19 +113,6 @@ public class RejectorProcessor implements Serializable {
         main.emit(flowData);
         reject.emit(rejectData);
         unknown.emit(data);
-        // data.getSchema()
-        // .getEntries()
-        // .stream()
-        // .filter(e -> e.getType().equals(Type.BYTES))
-        // .forEach(e -> {
-        // final byte[] b = data.getBytes(e.getName());
-        // List<Byte> f = new ArrayList();
-        // for (int i = 0; i < b.length; i++) {
-        // f.add(b[i]);
-        // }
-        // log.warn("==========> {} is BYTES {}.", e.getName(), f);
-        //
-        // });
     }
 
     @AfterGroup

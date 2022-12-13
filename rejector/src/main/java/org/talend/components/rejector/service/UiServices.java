@@ -44,7 +44,8 @@ public class UiServices {
     @DiscoverSchemaExtended("RejectorProcessorSchema")
     public Schema discoverProcessorSchema(final Schema incomingSchema,
             @Option final RejectorProcessorConfiguration configuration, final String branch) {
-        log.warn("[discoverProcessorSchema]branch: {}, incoming: {}, conf: {}.", branch, incomingSchema, configuration);
+        log.debug("[discoverProcessorSchema]branch: {}, incoming: {}, conf: {}.", branch, incomingSchema,
+                configuration);
         final Schema.Builder outgoingSchema = factory.newSchemaBuilder(incomingSchema);
         final String code = configuration.getCode();
         final String infos = configuration.getDataSet().getInformations();
@@ -76,7 +77,8 @@ public class UiServices {
     @DiscoverSchemaExtended("RejectorDataSet")
     public Schema discoverInputSchema(final Schema incomingSchema,
             @Option final RejectorProcessorConfiguration configuration, final String branch) {
-        log.warn("[discoverProcessorSchema]branch: {}, incoming: {}, conf: {}.", branch, incomingSchema, configuration);
+        log.debug("[discoverProcessorSchema]branch: {}, incoming: {}, conf: {}.", branch, incomingSchema,
+                configuration);
         final Schema.Builder outgoingSchema = factory.newSchemaBuilder(incomingSchema);
         final String code = configuration.getCode();
         final String infos = configuration.getDataSet().getInformations();
