@@ -436,11 +436,17 @@ public class SchemaInferer {
 
         infos.stream().forEach(info -> {
             Schema.Entry entry = convertSchemaInfo2Entry(info, recordBuilderFactory);
-            schemaBuilder.withEntry(entry);
+            if (entry != null) {
+                schemaBuilder.withEntry(entry);
+            }
         });
     }
 
     private static Schema.Entry convertSchemaInfo2Entry(SchemaInfo info, RecordBuilderFactory recordBuilderFactory) {
+        if ("id_Dynamic".equals(info.getTalendType())) {
+            return null;
+        }
+
         Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
 
         // TODO consider the valid name convert

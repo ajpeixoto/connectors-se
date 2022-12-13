@@ -105,8 +105,7 @@ public class JDBCOutputTestIT {
         records.add(
                 recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
 
-        // TODO no design schema here for dynamic?
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        List<SchemaInfo> schemaInfos = DBTestUtils.createTestDynamicSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -275,8 +274,7 @@ public class JDBCOutputTestIT {
         records.add(
                 recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).withString("NAME", "gaoyan1").build());
 
-        // TODO no design schema here for dynamic?
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        List<SchemaInfo> schemaInfos = DBTestUtils.createTestDynamicMixSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -397,8 +395,7 @@ public class JDBCOutputTestIT {
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).build());
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 2).build());
 
-        // TODO no design schema here for dynamic?
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        List<SchemaInfo> schemaInfos = DBTestUtils.createTestDynamicMixSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -503,7 +500,7 @@ public class JDBCOutputTestIT {
         records.add(
                 recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "new one").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        List<SchemaInfo> schemaInfos = DBTestUtils.createTestDynamicMixSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
@@ -583,7 +580,7 @@ public class JDBCOutputTestIT {
         records.add(
                 recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "new one").build());
 
-        List<SchemaInfo> schemaInfos = new ArrayList<>();
+        List<SchemaInfo> schemaInfos = DBTestUtils.createTestDynamicMixSchemaInfos();
 
         JDBCOutputConfig config = new JDBCOutputConfig();
         JDBCTableDataSet dataSet4Output = new JDBCTableDataSet();
