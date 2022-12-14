@@ -133,7 +133,7 @@ pipeline {
             - RELEASE : Build release, deploy to the Nexus for master/maintenance branches''')
         booleanParam(
           name: 'DEPLOY',
-          defaultValue: true,
+          defaultValue: false,
           description: '''
             DEPLOY : Build release, deploy A build to the Nexus''')
         string(
