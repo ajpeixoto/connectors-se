@@ -13,8 +13,9 @@
 package org.talend.components.common.text;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,14 +25,29 @@ import org.junit.jupiter.params.provider.CsvSource;
 class SubstitutorTest {
 
     @ParameterizedTest
-    @CsvSource(value = { "${,},This is a simple ${place_holder}.,This is a simple P_L_A_C_E_H_O_L_D_E_R.",
-            "((,)),A more ((complex)) example with ((two)) place holders.,A more C_O_M_P_L_E_X example with T_W_O place holders.",
-            "${,},Example ${three} with \\${escape} ${place_holder}.,Example 3 with ${escape} P_L_A_C_E_H_O_L_D_E_R.",
-            "[,],[one] key with [unknown:-MY_DEFAULT] value,O_N_E key with MY_DEFAULT value",
-            "${,},${one} ${two} ${three},O_N_E T_W_O 3", "${,},${aaa:-AAA} ${bbb:-BBB} ${ccc:-CCC},AAA BBB CCC",
-            "[START[,]STOP],[START[START]STOP] [START[STOP]STOP],begin end", "[[,]],[[START]] [[STOP]],begin end",
-            "[[,]],example without substitution,example without substitution" })
-    void testSubstitutor(final String prefix, final String suffix, final String value, final String expected) {
+    @CsvSource(value = {
+            "${,},'',No placeholder in the sentence.,No placeholder in the sentence.",
+            "${,},'',This is a simple ${place_holder}.,This is a simple P_L_A_C_E_H_O_L_D_E_R.",
+            "((,)),'',A more ((complex)) example with ((two)) place holders.,A more C_O_M_P_L_E_X example with T_W_O place holders.",
+            "${,},'',Example ${three} with \\${escape} ${place_holder}.,Example 3 with ${escape} P_L_A_C_E_H_O_L_D_E_R.",
+            "[,],'',[one] key with [unknown:-MY_DEFAULT] value,O_N_E key with MY_DEFAULT value",
+            "${,},'',${one} ${two} ${three},O_N_E T_W_O 3",
+            "${,},'',${aaa:-AAA} ${bbb:-BBB} ${ccc:-CCC},AAA BBB CCC",
+            "[START[,]STOP],'',[START[START]STOP] [START[STOP]STOP],begin end",
+            "[[,]],'',[[START]] [[STOP]],begin end",
+            "[[,]],'',example without substitution,example without substitution",
+            "{,},'',This is dssl {.record.user{age > 40}},This is dssl a_user",
+            "${,}$,'',This is dssl ${.record.user{age > 40}}$,This is dssl a_user",
+            "${,}$,'',This is dssl ${.record.user${age > 40}$}$,This is dssl another_user",
+            "${,}$,'',This is dssl ${.record.user${age > 40}$}$ end.,This is dssl another_user end.",
+            "${,}$,.input,This is dssl ${.input.record.user${age > 40}$}$ end.,This is dssl another_user end.",
+            "{,},.input,This is dssl {.input.record.user{age > 40}} end.,This is dssl a_user end.",
+            "{,},.input,This is dssl {.input.record.xuserx{age > 40}:-no_user} end.,This is dssl no_user end.",
+            "${,}$,'',a,a",
+            "${,}$,'',,null",
+    })
+    void testSubstitutor(final String prefix, final String suffix, final String keyPrefix, final String value,
+            final String expected) {
         final Map<String, String> store = new HashMap<>();
         store.put("place_holder", "P_L_A_C_E_H_O_L_D_E_R");
         store.put("complex", "C_O_M_P_L_E_X");
@@ -41,28 +57,20 @@ class SubstitutorTest {
         store.put("three", "3");
         store.put("START", "begin");
         store.put("STOP", "end");
+        store.put(".record.user{age > 40}", "a_user");
+        store.put(".record.user${age > 40}$", "another_user");
 
-        Substitutor.KeyFinder kf = new Substitutor.KeyFinder(prefix, suffix);
+        Substitutor.KeyFinder kf = new Substitutor.KeyFinder(prefix, suffix, keyPrefix);
         final Substitutor substitutor = new Substitutor(kf, store::get);
 
         final String transformed = substitutor.replace(value);
-        Assertions.assertEquals(expected, transformed);
 
-    }
+        if ("null".equals(expected)) {
+            Assertions.assertNull(transformed);
+        } else {
+            Assertions.assertEquals(expected, transformed);
+        }
 
-    @Test
-    public void testFinder() {
-        Substitutor.KeyFinder finder = new Substitutor.KeyFinder("${", "}");
-        Iterator<Substitutor.FindResult> res = finder.search("${hello} ${world:-tdi}");
-        Assertions.assertTrue(res.hasNext());
-        Assertions.assertTrue(res.hasNext());
-        Assertions.assertTrue(res.hasNext());
-        Assertions.assertTrue(res.hasNext());
-        Substitutor.FindResult r1 = res.next();
-        Substitutor.FindResult r2 = res.next();
-        Assertions.assertEquals("hello", r1.key);
-        Assertions.assertEquals("world:-tdi", r2.key);
-        Assertions.assertFalse(res.hasNext());
     }
 
 }

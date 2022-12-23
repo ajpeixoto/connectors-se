@@ -13,195 +13,182 @@
 package org.talend.components.common.text;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-/**
- * Convenient class to replace placeholders in a String giving a Function<String, String>.
- * Replace in String "${hello} ${world:-tdi}" with "hi tdi" with a function that convert 'hello' to 'hi'.
- * you choose delimiters (prefix / suffix) with limitations due to regexp usage :
- * suffix can't start with ':' or '-' (':-' separate key and default value. (can't translate "[:hello:]")
- * a word can't contains first symbole of a suffix, means that a suffix can't start with letter [Starthelloend] is not
- * possible.
- * 
- * this class doesn't treat embraced substitution '${word${number}}' isn't translate to 'third'
- * with a function that give '3' for 'number' and 'third' for 'word3'
- * 
- * it doesn't treat recursive replacement: '${greeting}' with a function
- * 'greeting' -> '${hello} ${world:-tdi}" and 'hello' -> 'hi' will render '${hello} ${world:-tdi}'.
- */
 public class Substitutor {
 
     private static final char ESCAPE = '\\';
 
-    /** delimiter to separate a key and a default value or a variable ( ${key:-default} */
-    private static final Pattern DELIMITER = Pattern.compile("([^:]*):-(.*)");
+    private static final String DEFAULT_SEPARATOR = ":-";
 
     /**
-     * Define a result for a search in a string.
+     * given place holder (dictionnary)
      */
-    public static class FindResult {
-
-        /** start position of a key in search string */
-        public final int start;
-
-        /** end position of a key in search string */
-        public final int end;
-
-        /** key finded */
-        public final String key;
-
-        public FindResult(int start, int end, String key) {
-            this.start = start;
-            this.end = end;
-            this.key = key;
-        }
-    }
-
-    /** key finder for a String */
-    public static class KeyFinder {
-
-        /** regular expression for search. */
-        private final Pattern pattern;
-
-        public KeyFinder(String prefix, String suffix) {
-            String aPrefix = escapeChars(prefix);
-            String aSuffix = escapeChars(suffix);
-            String exp = aPrefix + "([^" + escapeChars(suffix.substring(0, 1)) + "]*)" + aSuffix;
-            pattern = Pattern.compile(exp);
-        }
-
-        /**
-         * Search all result to find in a string.
-         * ex : "${hello} ${world:-tdi}" will produce 2 result as (0,8,hello), (9, 22, world:-tdi)
-         * 
-         * @param source
-         * @return
-         */
-        public Iterator<FindResult> search(String source) {
-            final Matcher matcher = pattern.matcher(source);
-            return new Iterator<FindResult>() {
-
-                private boolean hasNext = matcher.find();
-
-                @Override
-                public boolean hasNext() {
-                    return this.hasNext;
-                }
-
-                @Override
-                public FindResult next() {
-                    if (hasNext) {
-                        FindResult result = new FindResult(matcher.start(), matcher.end(), matcher.group(1));
-                        this.hasNext = matcher.find();
-                        return result;
-                    }
-                    return null;
-                }
-            };
-        }
-
-        /**
-         * Refine prefix and suffix for regular expression.
-         * 
-         * @param val : prefix of suffix expression.
-         * @return expression with reg exp compatibility.
-         */
-        private String escapeChars(String val) {
-            val = val
-                    .replace("{", "\\{")
-                    .replace("}", "\\}")
-                    .replace("(", "\\(")
-                    .replace(")", "\\)")
-                    .replace("[", "\\[")
-                    .replace("]", "\\]")
-                    .replace("$", "\\$");
-
-            return val;
-        }
-    }
-
-    /** given place holder (dictionnary) */
     private final UnaryOperator<String> placeholderProvider;
 
-    /** key finder with defined prefix / suffix */
-    private final KeyFinder finder;
+    /**
+     * key finder with defined prefix / suffix
+     */
+    private final Substitutor.KeyFinder finder;
 
     /**
      * Constructor
-     * 
+     *
      * @param finder : finder;
      * @param placeholderProvider Function used to replace the string
      */
-    public Substitutor(KeyFinder finder, UnaryOperator<String> placeholderProvider) {
+    public Substitutor(Substitutor.KeyFinder finder, UnaryOperator<String> placeholderProvider) {
         this.finder = finder;
-        if (placeholderProvider instanceof CachedPlaceHolder) {
+        if (placeholderProvider instanceof Substitutor.CachedPlaceHolder) {
             this.placeholderProvider = placeholderProvider;
         } else {
-            this.placeholderProvider = new CachedPlaceHolder(placeholderProvider);
+            this.placeholderProvider = new Substitutor.CachedPlaceHolder(placeholderProvider);
         }
     }
 
-    public UnaryOperator<String> getPlaceholderProvider() {
-        return placeholderProvider;
-    }
-
-    /**
-     * Replace all the placeholders
-     * 
-     * @param source String to be parsed
-     * @return new string with placeholders replaced
-     */
     public String replace(final String source) {
         if (source == null) {
-            return null;
+            return source;
         }
 
-        final Iterator<FindResult> results = this.finder.search(source);
+        if (source.trim().isEmpty()) {
+            return source;
+        }
 
-        StringBuilder sb = new StringBuilder();
-        int curr = 0;
-        while (results.hasNext()) {
-            final FindResult result = results.next();
+        int prefixLength = this.finder.getPrefix().length();
+        int suffixLength = this.finder.getSuffix().length();
 
-            if (result.start == 0 || source.charAt(result.start - 1) != ESCAPE) {
-                sb.append(source.substring(curr, result.start)).append(findOrDefault(result.key));
-                curr = result.end;
-            } else { // escaped placeholder
-                sb.append(source.substring(curr, result.start - 1));
-                curr = result.start;
+        if (source.length() < prefixLength + suffixLength) {
+            return source;
+        }
+
+        StringBuilder output = new StringBuilder();
+
+        int cursor = 0;
+
+        boolean foundKey = false;
+        int indSuffix = 0;
+        do {
+            foundKey = false;
+
+            // Found given prefix from current position in source (cursor)
+            int indPrefix = source.indexOf(this.finder.getPrefix(), cursor);
+
+            // If no new prefix found, concatenate until the end of source
+            if (indPrefix < 0) {
+                output.append(source.substring(cursor, source.length()));
+                continue;
             }
-        }
 
-        if (curr < source.length()) {
-            sb.append(source.substring(curr));
-        }
+            // Is the found prefix escaped ?
+            boolean escaped = false;
+            if (indPrefix > 0) {
+                char previous = source.charAt(indPrefix - 1);
+                escaped = previous == ESCAPE;
+            }
 
-        return sb.toString();
+            // If escaped, skip the escape char \ add the prefix and continue
+            if (escaped) {
+                output.append(source.substring(cursor, indPrefix - 1))
+                        .append(this.finder.prefix);
+                cursor = indPrefix + prefixLength;
+                foundKey = true;
+                continue;
+            }
+
+            int indIntermediatePrefix = indPrefix;
+            boolean hasPrefixIntermediate = false;
+
+            // Search for suffix
+            // If there are intermediate prefix/suffix skip them
+            do {
+                hasPrefixIntermediate = false;
+                indSuffix = source.indexOf(this.finder.getSuffix(), indIntermediatePrefix);
+                if (indSuffix < 0) {
+                    continue;
+                }
+
+                // Is there another prefix between 1st prefix and suffix ?
+                // Needed for such case: "xxx {.aaa.zzz{attr < 10}} yyy"
+                indIntermediatePrefix = source.indexOf(this.finder.getPrefix(), indIntermediatePrefix + 1);
+                hasPrefixIntermediate = indIntermediatePrefix >= 0 && indIntermediatePrefix < indSuffix;
+                if (hasPrefixIntermediate) {
+                    indIntermediatePrefix = indSuffix + 1;
+                }
+            } while (hasPrefixIntermediate);
+
+            // Concatenate from cursor until found prefix
+            output.append(source.substring(cursor, indPrefix));
+
+            // Extract the key to replace
+            String key = source.substring(indPrefix + prefixLength, indSuffix);
+            foundKey = true;
+
+            // Get the value or the given default
+            output.append(getValue(this.finder.getPrefixToRemoveFromKey(), key));
+
+            // Move the position
+            cursor = indSuffix + suffixLength;
+
+        } while (foundKey);
+
+        return output.toString();
     }
 
-    /**
-     * Find value for key in place holder or give default.
-     * 
-     * @param key : simple key 'hello' or with default 'hello:-hi'
-     * @return give value for key with function or default if it's unknown for function.
-     */
-    private String findOrDefault(String key) {
-        String defaultValue = "";
-
-        Matcher matcher = DELIMITER.matcher(key);
-        if (matcher.matches()) {
-            // there's a default value.
-            key = matcher.group(1);
-            defaultValue = matcher.group(2);
+    private String getValue(String prefixToRemoveFromKey, String key) {
+        if (prefixToRemoveFromKey != null && !"".equals(prefixToRemoveFromKey.trim())
+                && key.startsWith(prefixToRemoveFromKey)) {
+            key = key.substring(prefixToRemoveFromKey.length());
         }
 
-        final String s = placeholderProvider.apply(key);
-        return Optional.ofNullable(s).orElse(defaultValue);
+        String[] split = key.split(DEFAULT_SEPARATOR);
+        String value = this.placeholderProvider.apply(split[0]);
+
+        if (value == null && split.length > 1) {
+            return split[1];
+        }
+        return value;
+    }
+
+    public static class KeyFinder {
+
+        private final String prefix;
+
+        private final String suffix;
+
+        private final String prefixToRemoveFromKey;
+
+        public KeyFinder(String prefix, String suffix) {
+            this(prefix, suffix, null);
+        }
+
+        /**
+         *
+         * @param prefix The placeholder prefix.
+         * @param suffix The placeholder suffix.
+         * @param prefixToRemoveFromKey If the extracted key start by this key it will be removed, can be useful to have
+         * a prefix in keys.
+         */
+        public KeyFinder(String prefix, String suffix, String prefixToRemoveFromKey) {
+            this.prefix = prefix;
+            this.suffix = suffix;
+            this.prefixToRemoveFromKey = prefixToRemoveFromKey;
+        }
+
+        public String getPrefix() {
+            return this.prefix;
+        }
+
+        public String getSuffix() {
+            return this.suffix;
+        }
+
+        public String getPrefixToRemoveFromKey() {
+            return this.prefixToRemoveFromKey;
+        }
+
     }
 
     /**
@@ -209,10 +196,14 @@ public class Substitutor {
      */
     static class CachedPlaceHolder implements UnaryOperator<String> {
 
-        /** original place holder function. */
+        /**
+         * original place holder function.
+         */
         private final UnaryOperator<String> originalFunction;
 
-        /** cache for function */
+        /**
+         * cache for function
+         */
         private final Map<String, Optional<String>> cache = new HashMap<>();
 
         public CachedPlaceHolder(UnaryOperator<String> originalFunction) {
@@ -225,4 +216,5 @@ public class Substitutor {
             return cache.computeIfAbsent(varName, k -> Optional.ofNullable(originalFunction.apply(k))).orElse(null);
         }
     }
+
 }
