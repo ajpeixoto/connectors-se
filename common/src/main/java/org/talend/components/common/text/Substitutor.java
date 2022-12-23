@@ -138,9 +138,15 @@ public class Substitutor {
     }
 
     private String getValue(String prefixToRemoveFromKey, String key) {
-        if (prefixToRemoveFromKey != null && !"".equals(prefixToRemoveFromKey.trim())
-                && key.startsWith(prefixToRemoveFromKey)) {
-            key = key.substring(prefixToRemoveFromKey.length());
+        if (prefixToRemoveFromKey != null && !"".equals(prefixToRemoveFromKey.trim())) {
+            if (key.startsWith(prefixToRemoveFromKey)) {
+                key = key.substring(prefixToRemoveFromKey.length());
+            } else {
+                return new StringBuilder(this.finder.getPrefix())
+                        .append(key)
+                        .append(this.finder.getSuffix())
+                        .toString();
+            }
         }
 
         String[] split = key.split(DEFAULT_SEPARATOR);

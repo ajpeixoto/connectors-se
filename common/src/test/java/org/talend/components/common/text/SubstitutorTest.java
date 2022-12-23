@@ -45,6 +45,7 @@ class SubstitutorTest {
             "{,},.input,This is dssl {.input.record.xuserx{age > 40}:-no_user} end.,This is dssl no_user end.",
             "${,}$,'',a,a",
             "${,}$,'',,null",
+            "{,},.response,This is an input {.input.aaa.bbb} and a response {.response.aaa.bbb}.,This is an input {.input.aaa.bbb} and a response ok."
     })
     void testSubstitutor(final String prefix, final String suffix, final String keyPrefix, final String value,
             final String expected) {
@@ -59,6 +60,7 @@ class SubstitutorTest {
         store.put("STOP", "end");
         store.put(".record.user{age > 40}", "a_user");
         store.put(".record.user${age > 40}$", "another_user");
+        store.put(".aaa.bbb", "ok");
 
         Substitutor.KeyFinder kf = new Substitutor.KeyFinder(prefix, suffix, keyPrefix);
         final Substitutor substitutor = new Substitutor(kf, store::get);
