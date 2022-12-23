@@ -114,6 +114,7 @@
     <httpcore.version>4.4.13</httpcore.version> <!-- update this with httpclient -->
     <compress.version>1.21</compress.version>
     <commons-codec.version>1.14</commons-codec.version>
+    <woodstox.version>6.4.0</woodstox.version>
     <commons-io.version>2.8.0</commons-io.version>
     <mockito.version>1.10.19</mockito.version>
     <testcontainers.version>1.15.1</testcontainers.version>
@@ -454,6 +455,11 @@
         <groupId>commons-codec</groupId>
         <artifactId>commons-codec</artifactId>
         <version>${commons-codec.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.fasterxml.woodstox</groupId>
+        <artifactId>woodstox-core</artifactId>
+        <version>${woodstox.version}</version>
       </dependency>
       <dependency>
         <groupId>commons-io</groupId>
