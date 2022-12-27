@@ -1,0 +1,13 @@
+{
+  "book": {
+    "title": "MyBook",
+    "price": 20.50,
+    "author": "The author",
+    "meta": {
+      "ids": {
+        "ID": 12345,
+        "ISBN": "ISBN123456789"
+      }
+    }
+  }
+}

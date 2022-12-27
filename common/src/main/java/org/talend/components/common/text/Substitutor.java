@@ -57,7 +57,7 @@ public class Substitutor {
             return source;
         }
 
-        int prefixLength = this.finder.getPrefix().length();
+        int prefixLength = this.finder.getPrefixWithKeyPrefix().length();
         int suffixLength = this.finder.getSuffix().length();
 
         if (source.length() < prefixLength + suffixLength) {
@@ -74,7 +74,7 @@ public class Substitutor {
             foundKey = false;
 
             // Found given prefix from current position in source (cursor)
-            int indPrefix = source.indexOf(this.finder.getPrefix(), cursor);
+            int indPrefix = source.indexOf(this.finder.getPrefixWithKeyPrefix(), cursor);
 
             // If no new prefix found, concatenate until the end of source
             if (indPrefix < 0) {
@@ -92,7 +92,7 @@ public class Substitutor {
             // If escaped, skip the escape char \ add the prefix and continue
             if (escaped) {
                 output.append(source.substring(cursor, indPrefix - 1))
-                        .append(this.finder.prefix);
+                        .append(this.finder.getPrefixWithKeyPrefix());
                 cursor = indPrefix + prefixLength;
                 foundKey = true;
                 continue;
@@ -127,7 +127,7 @@ public class Substitutor {
             foundKey = true;
 
             // Get the value or the given default
-            output.append(getValue(this.finder.getPrefixToRemoveFromKey(), key));
+            output.append(getValue(key));
 
             // Move the position
             cursor = indSuffix + suffixLength;
@@ -137,18 +137,7 @@ public class Substitutor {
         return output.toString();
     }
 
-    private String getValue(String prefixToRemoveFromKey, String key) {
-        if (prefixToRemoveFromKey != null && !"".equals(prefixToRemoveFromKey.trim())) {
-            if (key.startsWith(prefixToRemoveFromKey)) {
-                key = key.substring(prefixToRemoveFromKey.length());
-            } else {
-                return new StringBuilder(this.finder.getPrefix())
-                        .append(key)
-                        .append(this.finder.getSuffix())
-                        .toString();
-            }
-        }
-
+    private String getValue(String key) {
         String[] split = key.split(DEFAULT_SEPARATOR);
         String value = this.placeholderProvider.apply(split[0]);
 
@@ -164,35 +153,43 @@ public class Substitutor {
 
         private final String suffix;
 
-        private final String prefixToRemoveFromKey;
+        private final String keyPrefix;
+
+        private final String prefixWithKeyPrefix;
 
         public KeyFinder(String prefix, String suffix) {
             this(prefix, suffix, null);
         }
 
         /**
+         * The keyprefix can be usefull to distinguish several dictionaries.
+         * For instance {.input.user.name} and {.response.user.name} in HTTPClient connector.
          *
          * @param prefix The placeholder prefix.
          * @param suffix The placeholder suffix.
-         * @param prefixToRemoveFromKey If the extracted key start by this key it will be removed, can be useful to have
-         * a prefix in keys.
+         * @param keyPrefix If the extracted key start by this key it will be removed.
          */
-        public KeyFinder(String prefix, String suffix, String prefixToRemoveFromKey) {
+        public KeyFinder(String prefix, String suffix, String keyPrefix) {
             this.prefix = prefix;
             this.suffix = suffix;
-            this.prefixToRemoveFromKey = prefixToRemoveFromKey;
+            this.keyPrefix = keyPrefix;
+            this.prefixWithKeyPrefix = prefix + keyPrefix;
         }
 
         public String getPrefix() {
             return this.prefix;
         }
 
+        public String getPrefixWithKeyPrefix() {
+            return this.prefixWithKeyPrefix;
+        }
+
         public String getSuffix() {
             return this.suffix;
         }
 
-        public String getPrefixToRemoveFromKey() {
-            return this.prefixToRemoveFromKey;
+        public String getKeyPrefix() {
+            return this.keyPrefix;
         }
 
     }

@@ -12,6 +12,10 @@
  */
 package org.talend.components.common.text;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -45,7 +49,8 @@ class SubstitutorTest {
             "{,},.input,This is dssl {.input.record.xuserx{age > 40}:-no_user} end.,This is dssl no_user end.",
             "${,}$,'',a,a",
             "${,}$,'',,null",
-            "{,},.response,This is an input {.input.aaa.bbb} and a response {.response.aaa.bbb}.,This is an input {.input.aaa.bbb} and a response ok."
+            "{,},.response,This is an input {.input.aaa.bbb} and a response {.response.aaa.bbb}.,This is an input {.input.aaa.bbb} and a response ok.",
+            "{,},.input,This is an input {.input.record.user{age > 40}} with dssl {.input.record.user{age > 40}} twice.,This is an input a_user with dssl a_user twice."
     })
     void testSubstitutor(final String prefix, final String suffix, final String keyPrefix, final String value,
             final String expected) {
@@ -72,7 +77,27 @@ class SubstitutorTest {
         } else {
             Assertions.assertEquals(expected, transformed);
         }
+    }
 
+    @Test
+    void testSubstitutorWithJSON() throws URISyntaxException, IOException {
+        String fileContent = new String(Files.readAllBytes(Paths.get(getClass().getResource("/book.json").toURI())));
+        String fileContentExpected =
+                new String(Files.readAllBytes(Paths.get(getClass().getResource("/bookExpected.json").toURI())));
+
+        final Map<String, String> store = new HashMap<>();
+        store.put(".book.title", "MyBook");
+        store.put(".book.market.price", "20.50");
+        store.put(".book.identification.id", "12345");
+        store.put(".book.identification.isbn", "ISBN123456789");
+        store.put(".book.author${id = 1234}", "The author");
+
+        Substitutor.KeyFinder kf = new Substitutor.KeyFinder("{", "}", ".input");
+        final Substitutor substitutor = new Substitutor(kf, store::get);
+
+        final String transformed = substitutor.replace(fileContent);
+
+        Assertions.assertEquals(fileContentExpected, transformed);
     }
 
 }
