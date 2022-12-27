@@ -173,7 +173,7 @@ public class Substitutor {
             this.prefix = prefix;
             this.suffix = suffix;
             this.keyPrefix = keyPrefix;
-            this.prefixWithKeyPrefix = prefix + keyPrefix;
+            this.prefixWithKeyPrefix = prefix + Optional.ofNullable(keyPrefix).orElse("");
         }
 
         public String getPrefix() {

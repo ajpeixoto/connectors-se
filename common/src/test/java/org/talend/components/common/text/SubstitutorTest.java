@@ -50,7 +50,8 @@ class SubstitutorTest {
             "${,}$,'',a,a",
             "${,}$,'',,null",
             "{,},.response,This is an input {.input.aaa.bbb} and a response {.response.aaa.bbb}.,This is an input {.input.aaa.bbb} and a response ok.",
-            "{,},.input,This is an input {.input.record.user{age > 40}} with dssl {.input.record.user{age > 40}} twice.,This is an input a_user with dssl a_user twice."
+            "{,},.input,This is an input {.input.record.user{age > 40}} with dssl {.input.record.user{age > 40}} twice.,This is an input a_user with dssl a_user twice.",
+            "{,},,http://localhost:35069/post/{module}/{id},http://localhost:35069/post/module_1/1"
     })
     void testSubstitutor(final String prefix, final String suffix, final String keyPrefix, final String value,
             final String expected) {
@@ -66,6 +67,8 @@ class SubstitutorTest {
         store.put(".record.user{age > 40}", "a_user");
         store.put(".record.user${age > 40}$", "another_user");
         store.put(".aaa.bbb", "ok");
+        store.put("module", "module_1");
+        store.put("id", "1");
 
         Substitutor.KeyFinder kf = new Substitutor.KeyFinder(prefix, suffix, keyPrefix);
         final Substitutor substitutor = new Substitutor(kf, store::get);
@@ -90,7 +93,7 @@ class SubstitutorTest {
         store.put(".book.market.price", "20.50");
         store.put(".book.identification.id", "12345");
         store.put(".book.identification.isbn", "ISBN123456789");
-        store.put(".book.author${id = 1234}", "The author");
+        store.put(".book.author{id = 1234}", "The author");
 
         Substitutor.KeyFinder kf = new Substitutor.KeyFinder("{", "}", ".input");
         final Substitutor substitutor = new Substitutor(kf, store::get);
