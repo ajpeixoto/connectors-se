@@ -10,42 +10,41 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.datastore;
+package org.talend.components.jdbc.migration;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.talend.sdk.component.api.component.MigrationHandler;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class JdbcConnectionMigrationHandler implements MigrationHandler {
-
-    private final static String migration_log = "JDBC Connection migration : ";
+public class JdbcOutputMigrationHandler implements MigrationHandler {
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
-        Map<String, String> migrated = new HashMap<>(incomingData);
+        log.debug("Starting JDBC sink component migration " + incomingVersion);
 
-        if (incomingVersion < 2) {
-            to_2(migrated);
+        if (incomingVersion == 1) {
+            final String old_property_path_prefix = "configuration.keys[";
+            final String new_property_path_prefix = "configuration.keys.keys[";
+
+            Map<String, String> correct_config = new HashMap<>();
+            incomingData.forEach((k, v) -> {
+                if (k.startsWith(old_property_path_prefix)) {
+                    correct_config.put(k.replace(old_property_path_prefix, new_property_path_prefix), v);
+                } else {
+                    correct_config.put(k, v);
+                }
+            });
+
+            return correct_config;
         }
 
         if (incomingVersion < 3) {
-            to_3(migrated);
+            incomingData.putIfAbsent("configuration.useOriginColumnName", "false");
         }
-
-        return migrated;
+        return incomingData;
     }
-
-    private void to_2(Map<String, String> incomingData) {
-        incomingData.putIfAbsent("authenticationType", AuthenticationType.BASIC.name());
-    }
-
-    private void to_3(final Map<String, String> incomingData) {
-        incomingData.putIfAbsent("setRawUrl", "true");
-    }
-
 }

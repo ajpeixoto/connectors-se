@@ -12,17 +12,41 @@
  */
 package org.talend.components.jdbc.migration;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import org.talend.components.jdbc.datastore.AuthenticationType;
 import org.talend.sdk.component.api.component.MigrationHandler;
 
-public class JDBCOutputConfigMigration implements MigrationHandler {
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class JdbcConnectionMigrationHandler implements MigrationHandler {
+
+    private final static String migration_log = "JDBC Connection migration : ";
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
+        log.debug(migration_log + incomingVersion);
+        Map<String, String> migrated = new HashMap<>(incomingData);
+
         if (incomingVersion < 2) {
-            incomingData.put("OutputConfig.useOriginColumnName", "false");
+            to_2(migrated);
         }
-        return incomingData;
+
+        if (incomingVersion < 3) {
+            to_3(migrated);
+        }
+
+        return migrated;
     }
+
+    private void to_2(Map<String, String> incomingData) {
+        incomingData.putIfAbsent("authenticationType", AuthenticationType.BASIC.name());
+    }
+
+    private void to_3(final Map<String, String> incomingData) {
+        incomingData.putIfAbsent("setRawUrl", "true");
+    }
+
 }
