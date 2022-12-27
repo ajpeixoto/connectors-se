@@ -123,8 +123,7 @@ public class JDBCInputReader {
     private Schema getRuntimeSchema() throws SQLException {
         URL mappingFileDir = null;
         if (context != null) {
-            // TODO set and init it in common javajet
-            Object value = context.getGlobal(CommonUtils.MAPPING_URL_SUBFIX);
+            Object value = context.get(CommonUtils.MAPPING_URL_SUBFIX);
             if (value != null) {
                 mappingFileDir = URL.class.cast(value);
             }

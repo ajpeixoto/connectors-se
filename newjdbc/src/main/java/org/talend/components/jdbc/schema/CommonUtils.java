@@ -83,7 +83,11 @@ public class CommonUtils {
         return dbType;
     }
 
+    // connector job runtime key
     public static final String MAPPING_URL_SUBFIX = "MAPPINGS_URL";
+
+    // studio button trigger key
+    public static final String MAPPING_LOCATION = "MAPPING_LOCATION";
 
     public static Dbms getMapping(String mappingFilesDir, JDBCDataStore dataStore,
             String dbTypeByComponentType,

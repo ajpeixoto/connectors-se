@@ -514,7 +514,8 @@ public class JDBCService implements Serializable {
     public Schema guessSchemaByQuery(@Option final JDBCQueryDataSet dataSet) throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
-        URL mappingFileDir = null;
+        // now have to use system prop to get it, TODO studio should set it to component server jvm
+        String mappingFileDir = System.getProperty(CommonUtils.MAPPING_LOCATION);
 
         // TODO dbTypeInComponentSetting exist for tjdbcinput, how to pass it?
         DBType dbTypeInComponentSetting = null;
@@ -539,11 +540,12 @@ public class JDBCService implements Serializable {
         }
     }
 
-    @DiscoverSchema(value = "JDBCTableDataSet")
+    // @DiscoverSchema(value = "JDBCTableDataSet")
     public Schema guessSchemaByTable(@Option final JDBCTableDataSet dataSet) throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
-        URL mappingFileDir = null;
+        // now have to use system prop to get it, TODO studio should set it to component server jvm
+        String mappingFileDir = System.getProperty(CommonUtils.MAPPING_LOCATION);
 
         // TODO dbTypeInComponentSetting exist for tjdbcinput, how to pass it?
         DBType dbTypeInComponentSetting = null;
@@ -608,7 +610,7 @@ public class JDBCService implements Serializable {
     }
 
     @DiscoverSchemaExtended("Output")
-    public Schema discoverProcessorSchema(final Schema incomingSchema,
+    public Schema discoverProcessorSchema(/* final Schema incomingSchema, */
             @Option("configuration") final JDBCOutputConfig config, final String branch) throws SQLException {
         Schema result = guessSchemaByTable(config.getDataSet());
         if ("reject".equalsIgnoreCase(branch)) {

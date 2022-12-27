@@ -47,8 +47,9 @@ public class JDBCTableDataSet implements Serializable {
     @Documentation("The table name")
     private String tableName;
 
+    // use new DiscoverSchemaExtended
     @Option
-    @Structure(type = Structure.Type.OUT, discoverSchema = "JDBCTableDataSet")
+    @Structure(type = Structure.Type.OUT/* , discoverSchema = "JDBCTableDataSet" */)
     @Documentation("schema")
     private List<SchemaInfo> schema;
 
