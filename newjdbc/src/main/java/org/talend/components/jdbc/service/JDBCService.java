@@ -21,6 +21,7 @@ import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.row.JDBCRowConfig;
 import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.schema.JDBCTableMetadata;
@@ -610,26 +611,41 @@ public class JDBCService implements Serializable {
     }
 
     @DiscoverSchemaExtended("Output")
-    public Schema discoverProcessorSchema(/* final Schema incomingSchema, */
-            @Option("configuration") final JDBCOutputConfig config, final String branch) throws SQLException {
+    public Schema discoverOutputSchema(@Option("configuration") final JDBCOutputConfig config, final String branch)
+            throws SQLException {
         Schema result = guessSchemaByTable(config.getDataSet());
         if ("reject".equalsIgnoreCase(branch)) {
-            Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(result);
-            schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
-                    .withName("errorCode")
-                    .withType(Schema.Type.STRING)
-                    .withNullable(false)
-                    .withProp(SchemaProperty.SIZE, "255")
-                    .build());
-            schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
-                    .withName("errorMessage")
-                    .withType(Schema.Type.STRING)
-                    .withNullable(false)
-                    .withProp(SchemaProperty.SIZE, "255")
-                    .build());
-            result = schemaBuilder.build();
+            result = extendSchemaWithRejectColumns(result);
         }
         return result;
+    }
+
+    @DiscoverSchemaExtended("Row")
+    public Schema discoverRowSchema(final Schema incomingSchema, @Option("configuration") final JDBCRowConfig config,
+            final String branch) {
+        Schema result = incomingSchema != null ? incomingSchema
+                : recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD).build();
+        if ("reject".equalsIgnoreCase(branch)) {
+            result = extendSchemaWithRejectColumns(result);
+        }
+        return result;
+    }
+
+    public Schema extendSchemaWithRejectColumns(Schema origin) {
+        Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(origin);
+        schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
+                .withName("errorCode")
+                .withType(Schema.Type.STRING)
+                .withNullable(false)
+                .withProp(SchemaProperty.SIZE, "255")
+                .build());
+        schemaBuilder.withEntry(recordBuilderFactory.newEntryBuilder()
+                .withName("errorMessage")
+                .withType(Schema.Type.STRING)
+                .withNullable(false)
+                .withProp(SchemaProperty.SIZE, "255")
+                .build());
+        return schemaBuilder.build();
     }
 
 }

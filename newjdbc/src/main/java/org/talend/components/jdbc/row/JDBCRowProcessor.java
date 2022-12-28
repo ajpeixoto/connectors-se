@@ -73,7 +73,7 @@ public class JDBCRowProcessor implements Serializable {
 
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
-            @Output("reject") final OutputEmitter<Record>/* OutputEmitter<Reject> */ reject) throws SQLException {
+            @Output("reject") final OutputEmitter<Record> reject) throws SQLException {
         if (context != null) {
             context.set("QUERY", configuration.getDataSet().getSqlQuery());
         }
