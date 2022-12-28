@@ -309,8 +309,6 @@ public class JDBCService implements Serializable {
         return new DataSourceWrapper(dataSource, conn);
     }
 
-    private static final String GLOBAL_CONNECTION_POOL_KEY = "GLOBAL_CONNECTION_POOL";
-
     private static final String KEY_DB_DATASOURCES_RAW = "KEY_DB_DATASOURCES_RAW";
 
     public DataSourceWrapper createConnectionOrGetFromSharedConnectionPoolOrDataSource(final JDBCDataStore dataStore,
@@ -319,17 +317,23 @@ public class JDBCService implements Serializable {
         log.debug("Connection attempt to '{}' with the username '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
 
         if (dataStore.isUseSharedDBConnection()) {
-            SharedConnectionsPool sharedConnectionPool = (SharedConnectionsPool) context
-                    .getGlobal(GLOBAL_CONNECTION_POOL_KEY);
             log.debug("Uses shared connection with name: '{}'", dataStore.getSharedDBConnectionName());
             log.debug("Connection URL: '{}', User name: '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
             try {
-                conn = sharedConnectionPool.getDBConnection(dataStore.getJdbcClass(), dataStore.getJdbcUrl(),
+                // can't use interface as classloader issue, so use reflect here
+                Method method = Class.forName("routines.system.SharedDBConnection")
+                        .getMethod("getDBConnection", String.class, String.class, String.class, String.class,
+                                String.class);
+                conn = Connection.class.cast(method.invoke(null, dataStore.getJdbcClass(), dataStore.getJdbcUrl(),
                         dataStore.getUserId(),
-                        dataStore.getPassword(), dataStore.getSharedDBConnectionName());
+                        dataStore.getPassword(), dataStore.getSharedDBConnectionName()));
                 return new DataSourceWrapper(null, conn);
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException("class not found: " + e.getMessage());
+            } catch (NoSuchMethodException e) {
+                throw new RuntimeException("method not found: " + e.getMessage());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         } else if (dataStore.isUseDataSource()) {
             java.util.Map<String, DataSource> dataSources = (java.util.Map<String, javax.sql.DataSource>) context
