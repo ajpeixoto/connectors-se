@@ -79,11 +79,6 @@ public class OutputProcessor implements Serializable {
         // this.i18n = i18nMessage;
     }
 
-    @BeforeGroup
-    public void beforeGroup() {
-
-    }
-
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
             @Output("reject") final OutputEmitter<Record> reject)
@@ -150,10 +145,6 @@ public class OutputProcessor implements Serializable {
         for (Record r : rejectedWrites) {
             reject.emit(r);
         }
-    }
-
-    @AfterGroup
-    public void afterGroup() throws SQLException {
     }
 
     @PostConstruct

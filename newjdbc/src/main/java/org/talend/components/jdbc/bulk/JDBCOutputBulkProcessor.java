@@ -59,21 +59,12 @@ public class JDBCOutputBulkProcessor implements Serializable {
         this.recordBuilderFactory = recordBuilderFactory;
     }
 
-    @BeforeGroup
-    public void beforeGroup() {
-
-    }
-
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success)
             throws IOException {
         writer.write(record);
 
         success.emit(record);
-    }
-
-    @AfterGroup
-    public void afterGroup() throws SQLException {
     }
 
     @PostConstruct

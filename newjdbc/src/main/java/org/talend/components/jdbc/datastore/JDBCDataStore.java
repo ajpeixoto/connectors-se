@@ -102,6 +102,7 @@ public class JDBCDataStore implements Serializable {
     @Documentation("data source alias for fetch")
     private String dataSourceAlias;
 
+    // TODO map to studio "widget.type.mappingType" like tcompv0
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_METADATA_SCOPE })
     @Documentation("select db mapping file for type convert")

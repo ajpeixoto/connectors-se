@@ -15,10 +15,7 @@ package org.talend.components.jdbc.output;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * SQL build tool for only runtime, for design time, we use another one : QueryUtils which consider the context.var and
@@ -117,6 +114,9 @@ public class JDBCSQLBuilder {
     }
 
     public List<Column> createColumnList(JDBCOutputConfig config, Schema schema) {
+        boolean missUpdateKey = true;
+        boolean missDeleteKey = true;
+
         Map<String, Column> columnMap = new HashMap<>();
         List<Column> columnList = new ArrayList<>();
 
@@ -134,6 +134,9 @@ public class JDBCSQLBuilder {
                 column.updateKey = true;
                 column.deletionKey = true;
                 column.updatable = false;
+
+                missUpdateKey = false;
+                missDeleteKey = false;
             } else {
                 column.updateKey = false;
                 column.deletionKey = false;
@@ -154,7 +157,7 @@ public class JDBCSQLBuilder {
             // but user may not know the column label as it may be different with db column name as valid in java and
             // studio.
             // So here, we don't change anything, also as no much meaning for customer except making complex code
-            List<FieldOption> fieldOptions = config.getFieldOptions();
+            List<FieldOption> fieldOptions = Optional.of(config.getFieldOptions()).orElse(Collections.emptyList());
 
             int i = 0;
             for (FieldOption fieldOption : fieldOptions) {
@@ -168,14 +171,41 @@ public class JDBCSQLBuilder {
                 column.updatable = fieldOption.isUpdatable();
                 column.insertable = fieldOption.isInsertable();
 
+                if (column.updateKey) {
+                    missUpdateKey = false;
+                } else if (column.deletionKey) {
+                    missDeleteKey = false;
+                }
+
                 i++;
             }
         }
 
+        switch (config.getDataAction()) {
+        case UPDATE:
+        case INSERT_OR_UPDATE:
+        case UPDATE_OR_INSERT: {
+            if (missUpdateKey) {
+                throw new RuntimeException("Miss key for update action");
+            }
+            break;
+        }
+        case DELETE: {
+            if (missDeleteKey) {
+                throw new RuntimeException("Miss key for delete action");
+            }
+            break;
+        }
+        default: {
+            break;
+        }
+        }
+
         List<AdditionalColumn> additionalColumns = config.getAdditionalColumns();
 
-        if (additionalColumns == null)
+        if (additionalColumns == null) {
             return columnList;
+        }
 
         // here is a closed list in UI, even can't choose dynamic column, so no need to consider dynamic here
         int i = 0;
@@ -230,6 +260,7 @@ public class JDBCSQLBuilder {
 
             i++;
         }
+
         return columnList;
     }
 

@@ -36,7 +36,7 @@ import java.util.List;
         @GridLayout.Row("columnTrims"),
         @GridLayout.Row("enableMapping"),
         @GridLayout.Row("mapping"),
-        @GridLayout.Row("allowSpecialChar"),
+        // @GridLayout.Row("allowSpecialChar"),
         @GridLayout.Row("usePreparedStatement"),
         @GridLayout.Row("preparedStatementParameters"),
         @GridLayout.Row("useQueryTimeout"),
@@ -82,9 +82,12 @@ public class JDBCInputConfig implements Serializable {
     private DBType mapping = DBType.MYSQL;
 
     // TODO what's this for runtime?
-    @Option
-    @Documentation("")
-    private boolean allowSpecialChar = true;
+    /*
+     * @Option
+     * 
+     * @Documentation("")
+     * private boolean allowSpecialChar = true;
+     */
 
     @Option
     @Documentation("")

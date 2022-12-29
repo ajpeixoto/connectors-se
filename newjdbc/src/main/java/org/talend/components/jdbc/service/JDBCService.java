@@ -181,7 +181,7 @@ public class JDBCService implements Serializable {
         } catch (Exception e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, e.getMessage());
         }
-        return new HealthCheckStatus(HealthCheckStatus.Status.OK, "success message, TODO, i18n");
+        return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection successful");
     }
 
     @CreateConnection
@@ -317,6 +317,11 @@ public class JDBCService implements Serializable {
         log.debug("Connection attempt to '{}' with the username '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
 
         if (dataStore.isUseSharedDBConnection()) {
+            if (dataStore.isUseDataSource()) {
+                throw new RuntimeException(
+                        "\"Use or register a shared DB Connection\" can't work with \"Specify a data source alias\" together, please uncheck one");
+            }
+
             log.debug("Uses shared connection with name: '{}'", dataStore.getSharedDBConnectionName());
             log.debug("Connection URL: '{}', User name: '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
             try {
