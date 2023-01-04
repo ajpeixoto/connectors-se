@@ -20,6 +20,7 @@ import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.input.JDBCInputConfig;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.row.JDBCRowConfig;
 import org.talend.components.jdbc.schema.CommonUtils;
@@ -522,13 +523,14 @@ public class JDBCService implements Serializable {
 
     @DiscoverSchema(value = "JDBCQueryDataSet")
     public Schema guessSchemaByQuery(@Option final JDBCQueryDataSet dataSet) throws SQLException {
+        return guessSchemaByQuery(dataSet, null);
+    }
+
+    private Schema guessSchemaByQuery(final JDBCQueryDataSet dataSet, final DBType dbTypeInComponentSetting) throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
         // now have to use system prop to get it, TODO studio should set it to component server jvm
         String mappingFileDir = System.getProperty(CommonUtils.MAPPING_LOCATION);
-
-        // TODO dbTypeInComponentSetting exist for tjdbcinput, how to pass it?
-        DBType dbTypeInComponentSetting = null;
 
         Dbms mapping = null;
         if (mappingFileDir != null) {
@@ -617,6 +619,13 @@ public class JDBCService implements Serializable {
 
         builder.withProp(SchemaProperty.SCALE, String.valueOf(scale));
         return builder;
+    }
+
+    @DiscoverSchemaExtended("Input")
+    public Schema discoverInputSchema(@Option("configuration") final JDBCInputConfig config, final String branch)
+            throws SQLException {
+        Schema result = guessSchemaByQuery(config.getDataSet(), config.isEnableMapping() ? config.getMapping() : null);
+        return result;
     }
 
     @DiscoverSchemaExtended("Output")
