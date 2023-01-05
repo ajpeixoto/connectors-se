@@ -50,7 +50,7 @@ public class JDBCQueryDataSet implements Serializable {
     private String tableName;
 
     @Option
-    @Structure(type = Structure.Type.OUT, discoverSchema = "JDBCQueryDataSet")
+    @Structure(type = Structure.Type.OUT/*, discoverSchema = "JDBCQueryDataSet"*/)
     @Documentation("schema")
     private List<SchemaInfo> schema;
 

@@ -521,7 +521,8 @@ public class JDBCService implements Serializable {
 
     }
 
-    @DiscoverSchema(value = "JDBCQueryDataSet")
+    //TODO add it back when apply to cloud platform or adjust the order for search DiscoverSchema and DiscoverSchemaExtended
+    //@DiscoverSchema(value = "JDBCQueryDataSet")
     public Schema guessSchemaByQuery(@Option final JDBCQueryDataSet dataSet) throws SQLException {
         return guessSchemaByQuery(dataSet, null);
     }
@@ -621,13 +622,15 @@ public class JDBCService implements Serializable {
         return builder;
     }
 
-    @DiscoverSchemaExtended("Input")
-    public Schema discoverInputSchema(@Option("configuration") final JDBCInputConfig config, final String branch)
+    //here use dataset name link for input
+    @DiscoverSchemaExtended("JDBCQueryDataSet")
+    public Schema discoverInputSchema(@Option("configuration") final JDBCInputConfig config)
             throws SQLException {
         Schema result = guessSchemaByQuery(config.getDataSet(), config.isEnableMapping() ? config.getMapping() : null);
         return result;
     }
 
+    //here use component name link for processor
     @DiscoverSchemaExtended("Output")
     public Schema discoverOutputSchema(@Option("configuration") final JDBCOutputConfig config, final String branch)
             throws SQLException {
@@ -638,6 +641,7 @@ public class JDBCService implements Serializable {
         return result;
     }
 
+    //here use component name link for processor
     @DiscoverSchemaExtended("Row")
     public Schema discoverRowSchema(final Schema incomingSchema, @Option("configuration") final JDBCRowConfig config,
             final String branch) {
