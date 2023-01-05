@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -521,13 +521,15 @@ public class JDBCService implements Serializable {
 
     }
 
-    //TODO add it back when apply to cloud platform or adjust the order for search DiscoverSchema and DiscoverSchemaExtended
-    //@DiscoverSchema(value = "JDBCQueryDataSet")
+    // TODO add it back when apply to cloud platform or adjust the order for search DiscoverSchema and
+    // DiscoverSchemaExtended
+    // @DiscoverSchema(value = "JDBCQueryDataSet")
     public Schema guessSchemaByQuery(@Option final JDBCQueryDataSet dataSet) throws SQLException {
         return guessSchemaByQuery(dataSet, null);
     }
 
-    private Schema guessSchemaByQuery(final JDBCQueryDataSet dataSet, final DBType dbTypeInComponentSetting) throws SQLException {
+    private Schema guessSchemaByQuery(final JDBCQueryDataSet dataSet, final DBType dbTypeInComponentSetting)
+            throws SQLException {
         // TODO provide a way to get the mapping files in studio platform, also this should work for cloud platform
         // no this for cloud platform
         // now have to use system prop to get it, TODO studio should set it to component server jvm
@@ -622,7 +624,7 @@ public class JDBCService implements Serializable {
         return builder;
     }
 
-    //here use dataset name link for input
+    // here use dataset name link for input
     @DiscoverSchemaExtended("JDBCQueryDataSet")
     public Schema discoverInputSchema(@Option("configuration") final JDBCInputConfig config)
             throws SQLException {
@@ -630,7 +632,7 @@ public class JDBCService implements Serializable {
         return result;
     }
 
-    //here use component name link for processor
+    // here use component name link for processor
     @DiscoverSchemaExtended("Output")
     public Schema discoverOutputSchema(@Option("configuration") final JDBCOutputConfig config, final String branch)
             throws SQLException {
@@ -641,7 +643,7 @@ public class JDBCService implements Serializable {
         return result;
     }
 
-    //here use component name link for processor
+    // here use component name link for processor
     @DiscoverSchemaExtended("Row")
     public Schema discoverRowSchema(final Schema incomingSchema, @Option("configuration") final JDBCRowConfig config,
             final String branch) {
