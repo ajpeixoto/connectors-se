@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -69,6 +69,7 @@ import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -412,6 +413,25 @@ public abstract class JDBCBaseContainerTest {
                             .asList("id", "email", "t_text", "t_long", "t_double", "t_float", "t_date", "t_datetime",
                                     "t_time"),
                     guessed.getEntries().stream().map(e -> e.getName()).collect(toList()));
+
+            guessed.getEntries().stream().forEach(e -> assertNotNull(e.getProp(SchemaProperty.ORIGIN_TYPE)));
+
+            // TODO size and scale are not easy to assert, as different database, different result
+
+            assertEquals(
+                    Arrays
+                            .asList("true", "true", null, null, null, null, null, null, null),
+                    guessed.getEntries().stream().map(e -> e.getProp(SchemaProperty.IS_KEY)).collect(toList()));
+
+            assertEquals(
+                    Arrays
+                            .asList(null, null, null, null, null, null, null, null, null),
+                    guessed.getEntries().stream().map(e -> e.getProp(SchemaProperty.IS_UNIQUE)).collect(toList()));
+
+            assertEquals(
+                    Arrays
+                            .asList(null, null, null, null, null, null, null, null, null),
+                    guessed.getEntries().stream().map(e -> e.getProp(SchemaProperty.IS_FOREIGN_KEY)).collect(toList()));
         }
 
         @Test

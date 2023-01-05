@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -83,6 +83,41 @@ class RecordToJsonTest {
         final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
         DatasetGenerator<JsonObject> generator = new DatasetGenerator<>(factory, valueBuilder);
         return generator.generate(40);
+    }
+
+    @Test
+    void fromRecordSpecialCharactor() {
+        final RecordToJson toJson = new RecordToJson();
+
+        final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
+        final Record record1 = factory
+                .newRecordBuilder()
+                .withDateTime("时间", ZonedDateTime.of(2020, 10, 10, 23, 25, 10, 0, ZoneId.systemDefault()))
+                .withDecimal("Prénom?", new BigDecimal("123.123"))
+                .withString("&", "special charactor")
+                .build();
+        toJson.setUseOriginColumnName(true);
+        final JsonObject jsonObject1 = toJson.fromRecord(record1);
+        Assertions.assertNotNull(jsonObject1);
+        final String fieldDateTime = jsonObject1.getString("时间");
+        Assertions.assertNotNull(fieldDateTime);
+        Assertions.assertTrue(fieldDateTime.startsWith("2020-10-10"));
+        final String fieldDecimal = jsonObject1.getString("Prénom?");
+        Assertions.assertNotNull(fieldDecimal);
+        Assertions.assertTrue(new BigDecimal(fieldDecimal).equals(new BigDecimal("123.123")));
+        final String string = jsonObject1.getString("&");
+        Assertions.assertNotNull(string);
+        Assertions.assertTrue(string.equals("special charactor"));
+
+        final Record record2 = factory.newRecordBuilder()
+                .withDateTime("时间", (ZonedDateTime) null)
+                .withDecimal("Prénom?", null)
+                .build();
+
+        final JsonObject jsonObject2 = toJson.fromRecord(record2);
+        Assertions.assertNotNull(jsonObject2);
+        Assertions.assertTrue(jsonObject2.isNull("时间"));
+        Assertions.assertTrue(jsonObject2.isNull("Prénom?"));
     }
 
 }

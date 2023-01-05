@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -30,11 +30,6 @@ public class Constants {
 
     public static final String ERROR_UNDEFINED_TYPE = "Undefined type %s.";
 
-    public static final String STUDIO_LENGTH = "talend.studio.length";
-
-    public static final String STUDIO_PRECISION = "talend.studio.precision";
-
     public static final String BIGDECIMAL = "id_BigDecimal";
 
-    public static final String STUDIO_TYPE = "talend.studio.type";
 }

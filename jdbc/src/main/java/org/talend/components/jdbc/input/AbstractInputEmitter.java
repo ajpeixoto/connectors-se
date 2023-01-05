@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,16 +13,11 @@
 package org.talend.components.jdbc.input;
 
 import static org.talend.components.jdbc.ErrorFactory.toIllegalStateException;
-import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 
 import java.io.Serializable;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -32,6 +27,7 @@ import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.ParserException;
 import org.talend.components.jdbc.configuration.InputConfig;
 import org.talend.components.jdbc.dataset.BaseDataSet;
+import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.input.Producer;
@@ -62,8 +58,6 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     private transient Schema schema;
 
-    private transient JdbcService.ColumnInfo[] columnInfoList;
-
     AbstractInputEmitter(final InputConfig inputConfig, final JdbcService jdbcDriversService,
             final RecordBuilderFactory recordBuilderFactory, final I18nMessage i18nMessage) {
         this.inputConfig = inputConfig;
@@ -74,9 +68,9 @@ public abstract class AbstractInputEmitter implements Serializable {
 
     @PostConstruct
     public void init() {
-        BaseDataSet dataSet = inputConfig.getDataSet();
-        String query = dataSet.getQuery(
-                jdbcDriversService.getPlatformService().getPlatform(dataSet.getConnection()));
+        final BaseDataSet dataSet = inputConfig.getDataSet();
+        final Platform platform = jdbcDriversService.getPlatformService().getPlatform(dataSet.getConnection());
+        final String query = dataSet.getQuery(platform);
         if (query == null || query.trim().isEmpty()) {
             throw new IllegalArgumentException(i18n.errorEmptyQuery());
         }
@@ -96,16 +90,13 @@ public abstract class AbstractInputEmitter implements Serializable {
             statement.setFetchSize(dataSet.getFetchSize());
             resultSet = statement.executeQuery(query);
 
-            ResultSetMetaData metaData = resultSet.getMetaData();
-            Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
-            columnInfoList = IntStream.rangeClosed(1, metaData.getColumnCount())
-                    .mapToObj(index -> jdbcDriversService.addField(schemaBuilder, metaData, index))
-                    .toArray(JdbcService.ColumnInfo[]::new);
-            schema = schemaBuilder.build();
+            schema = jdbcDriversService.createSchema(dataSet, connection, resultSet, recordBuilderFactory);
 
             log.debug("Input schema: {}", schema);
-            log.debug("SchemaRaw: {}",
-                    schema.getEntries().stream().map(Schema.Entry::getRawName).collect(Collectors.joining(",")));
+            if (log.isDebugEnabled()) {
+                log.debug("SchemaRaw: {}",
+                        schema.getEntries().stream().map(Schema.Entry::getRawName).collect(Collectors.joining(",")));
+            }
         } catch (final SQLException e) {
             throw toIllegalStateException(e);
         }
@@ -118,8 +109,9 @@ public abstract class AbstractInputEmitter implements Serializable {
                 return null;
             }
             final Record.Builder recordBuilder = recordBuilderFactory.newRecordBuilder(schema);
-            for (int index = 0; index < columnInfoList.length; index++) {
-                jdbcDriversService.addColumn(recordBuilder, columnInfoList[index], resultSet.getObject(index + 1));
+            final List<Schema.Entry> columns = Optional.ofNullable(schema.getEntries()).orElse(Collections.emptyList());
+            for (int index = 0; index < columns.size(); index++) {
+                jdbcDriversService.addColumn(recordBuilder, columns.get(index), resultSet.getObject(index + 1));
             }
             return recordBuilder.build();
         } catch (final SQLException e) {

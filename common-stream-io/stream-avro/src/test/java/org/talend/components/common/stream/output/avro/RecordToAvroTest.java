@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -41,6 +41,7 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
 import org.talend.sdk.component.api.record.Schema.Type;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroRecord;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
@@ -377,9 +378,9 @@ class RecordToAvroTest {
                 .withType(Type.ARRAY)
                 .withElementSchema(factory.newSchemaBuilder(Type.ARRAY)
                         .withType(Type.STRING)
-                        .withProp(STUDIO_TYPE, "id_BigDecimal")
-                        .withProp(STUDIO_LENGTH, "10")
-                        .withProp(STUDIO_PRECISION, "5")
+                        .withProp(SchemaProperty.STUDIO_TYPE, "id_BigDecimal")
+                        .withProp(SchemaProperty.SIZE, "10")
+                        .withProp(SchemaProperty.SCALE, "5")
                         .build())
                 .build();
         decimalRecord = factory
@@ -388,9 +389,9 @@ class RecordToAvroTest {
                 .withString(factory.newEntryBuilder()
                         .withName("big_decimal")
                         .withType(Type.STRING)
-                        .withProp(STUDIO_TYPE, "id_BigDecimal")
-                        .withProp(STUDIO_LENGTH, "10")
-                        .withProp(STUDIO_PRECISION, "5")
+                        .withProp(SchemaProperty.STUDIO_TYPE, "id_BigDecimal")
+                        .withProp(SchemaProperty.SIZE, "10")
+                        .withProp(SchemaProperty.SCALE, "5")
                         .build(), "12345.67890")
                 .withArray(decimalArray, Arrays.asList(new BigDecimal("12.34567"), new BigDecimal("21.76543")))
                 .build();

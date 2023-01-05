@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,9 +16,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.talend.components.jdbc.dataset.TableNameDataset;
-import org.talend.components.jdbc.migration.JDBCOutputConfigMigration;
 import org.talend.components.jdbc.service.I18nMessage;
-import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.action.Validable;
@@ -46,7 +44,6 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
         @GridLayout.Row("distributionStrategy"), @GridLayout.Row("distributionKeys"), @GridLayout.Row("ignoreUpdate") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("dataset"),
         @GridLayout.Row("rewriteBatchedStatements"), @GridLayout.Row("useOriginColumnName") })
-@Version(value = 2, migrationHandler = JDBCOutputConfigMigration.class)
 @Documentation("Those properties define an output data set for the JDBC output component")
 public class OutputConfig implements Serializable {
 

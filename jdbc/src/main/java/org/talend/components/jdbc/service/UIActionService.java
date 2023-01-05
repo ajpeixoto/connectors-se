@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -16,15 +16,12 @@ import static java.util.Collections.emptyList;
 import static java.util.Comparator.comparingInt;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.talend.sdk.component.api.record.Schema.Type.RECORD;
 
 import org.talend.sdk.component.api.service.update.Update;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -282,6 +279,7 @@ public class UIActionService {
         return new ValidationResult(ValidationResult.Status.OK, "");
     }
 
+    // TODO this method never been used in jdbc connector inside code, but seems called by platform?
     @DiscoverSchema(value = ACTION_DISCOVER_SCHEMA)
     public Schema guessSchema(@Option final TableNameDataset dataset) {
         try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(dataset.getConnection());
@@ -292,12 +290,7 @@ public class UIActionService {
             try (final ResultSet result = statement
                     .executeQuery(
                             dataset.getQuery(jdbcService.getPlatformService().getPlatform(dataset.getConnection())))) {
-                final ResultSetMetaData meta = result.getMetaData();
-                final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
-                IntStream
-                        .rangeClosed(1, meta.getColumnCount())
-                        .forEach(index -> jdbcService.addField(schemaBuilder, meta, index));
-                return schemaBuilder.build();
+                return jdbcService.createSchema(dataset, conn, result, recordBuilderFactory);
             }
         } catch (final Exception unexpected) {
             log.error("[guessSchema]", unexpected);
