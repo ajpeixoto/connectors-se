@@ -413,8 +413,9 @@ public class JDBCService implements Serializable {
                 // mysql special property?
                 dataSource.addDataSourceProperty("rewriteBatchedStatements", "true");
                 // Security Issues with LOAD DATA LOCAL https://jira.talendforge.org/browse/TDI-42001
-                dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
-                dataSource.addDataSourceProperty("allowLocalInfile", "false"); // MariaDB
+                // TODO add them back for cloud platform
+                // dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
+                // dataSource.addDataSourceProperty("allowLocalInfile", "false"); // MariaDB
             } finally {
                 thread.setContextClassLoader(prev);
             }
