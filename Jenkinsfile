@@ -48,6 +48,7 @@ final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
 final String _ARTIFACT_COVERAGE = '**/target/site/**/*.*'
 final String _ARTIFACT_LOGS1 = '**/build_log.txt'
 final String _ARTIFACT_LOGS2 = '**/raw_log.txt'
+final String _ARTIFACT_POMS = '**/*pom.*' // FIXME remove after debug ?
 
 // Pod definition
 final String podDefinition = """\
@@ -133,7 +134,7 @@ pipeline {
             - RELEASE : Build release, deploy to the Nexus for master/maintenance branches''')
         booleanParam(
           name: 'DEPLOY',
-          defaultValue: false,
+          defaultValue: true,
           description: '''
             DEPLOY : Build release, deploy A build to the Nexus''')
         string(
@@ -430,6 +431,8 @@ pipeline {
                 archiveArtifacts artifacts: "${_ARTIFACT_LOGS1}", allowEmptyArchive: true, onlyIfSuccessful: false
                 println "Artifact 3: ${_ARTIFACT_LOGS2}"
                 archiveArtifacts artifacts: "${_ARTIFACT_LOGS2}", allowEmptyArchive: true, onlyIfSuccessful: false
+                println "Artifact 4: ${_ARTIFACT_POMS}" // FIXME not for release
+                archiveArtifacts artifacts: "${_ARTIFACT_POMS}", allowEmptyArchive: false, onlyIfSuccessful: false
             }
 
             script {
