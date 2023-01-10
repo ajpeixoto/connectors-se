@@ -293,7 +293,9 @@ pipeline {
                         """
                     }
 
+                    // No need to use snapshot update because se don't have dependencies to others Talend snapshot
                     extraBuildParams = extraBuildParams_assembly(fail_at_end, false)
+
                     job_description_append("Final parameters used for maven:  ")
                     job_description_append("`$extraBuildParams`")
 
