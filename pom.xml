@@ -1310,47 +1310,49 @@
         <profile>
             <id>STANDARD</id>
             <!--
-                This is the build phase, that execute followings maven phase:
+                This is the phase, that execute followings maven phase:
                 -> validate - validate the project is correct
                 -> compile - compile the source code of the project
                 -> test - test the compiled source code using a suitable unit testing framework
                 -> package - take the compiled code and package it in its distributable format, such as a JAR
                 -> verify - run any checks on results of integration tests to ensure quality criteria are met
-                -x install - install the package into the local repository, for use as a dependency in other projects locally
+                -> install - install the package into the local repository, for use as a dependency in other projects locally
                 -x deploy - done in the build environment, copies the final package to the remote repository for sharing with other developers and projects.
              -->
             <properties>
-                <!-- Skips javadoc FIXME Explain why, not done in cc -->
+                <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
             </properties>
         </profile>
         <profile>
             <id>DEPLOY</id>
             <!--
-                This is the build phase, that execute followings maven phase:
+                This is the phase, that execute followings maven phase:
                 -x validate - validate the project is correct
                 -x compile - compile the source code of the project
                 -x test - test the compiled source code using a suitable unit testing framework
                 -x package - take the compiled code and package it in its distributable format, such as a JAR
                 -x verify - run any checks on results of integration tests to ensure quality criteria are met
-                -> install - install the package into the local repository
+                -x install - install the package into the local repository
                 -> deploy - copies the final package to the remote repository
              -->
             <properties>
-                <!-- Skips javadoc FIXME Explain why -->
+                <!-- Skips enforcer, already executed during build.sh -->
+                <enforcer.skip>true</enforcer.skip>
+                <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
-                <!-- Skips phases already executed in the ci build phase -->
+                <!-- Skips phases already executed in the ci BUILD jenkins STAGE -->
                 <maven.validate.skip>true</maven.validate.skip>
                 <maven.compile.skip>true</maven.compile.skip>
                 <maven.package.skip>true</maven.package.skip>
                 <maven.verify.skip>true</maven.verify.skip>
-                <!-- Skips enforcer, already executed during build.sh -->
-                <enforcer.skip>true</enforcer.skip>
+                <maven.install.skip>true</maven.install.skip>
             </properties>
         </profile>
         <profile>
             <id>RELEASE</id>
             <properties>
+                <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
             </properties>
         </profile>

@@ -17,22 +17,20 @@ main() (
   mvn spotless:check
 
   # Maven phases:
-  # validate - validate the project is correct and all necessary information is available
-  # compile - compile the source code of the project
-  # test - test the compiled source code using a suitable unit testing framework
-  # package - take the compiled code and package it in its distributable format, such as a JAR
+  # >>> validate - validate the project is correct and all necessary information is available
+  # >>> compile - compile the source code of the project
+  # >>> test - test the compiled source code using a suitable unit testing framework
+  # >>> package - take the compiled code and package it in its distributable format, such as a JAR
   # >>> verify - run any checks on results of integration tests to ensure quality criteria are met
-  # xxx install - install the package into the local repository
+  # >>> install - install the package into the local repository
   # xxx deploy - copies the final package to the remote repository
 
   # Real task
-  mvn clean verify \
+  mvn clean install \
       --errors \
       --batch-mode \
       --activate-profiles 'STANDARD, ITs'\
       "${extraBuildParams[@]}"
-
-  # FIXME Explain ITs is added here, apparently for JDBC
 
   if [[ "${sonar}" == 'true' ]]; then
     declare -a LIST_FILE_ARRAY=( $(find $(pwd) -type f -name 'jacoco.xml') )

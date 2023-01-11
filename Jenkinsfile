@@ -48,7 +48,7 @@ final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
 final String _ARTIFACT_COVERAGE = '**/target/site/**/*.*'
 final String _ARTIFACT_LOGS1 = '**/build_log.txt'
 final String _ARTIFACT_LOGS2 = '**/raw_log.txt'
-final String _ARTIFACT_POMS = '**/*pom.*' // FIXME remove after debug ?
+final String _ARTIFACT_POMS = '**/*pom.*'
 
 // Pod definition
 final String podDefinition = """\
