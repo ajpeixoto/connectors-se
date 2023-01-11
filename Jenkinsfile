@@ -433,7 +433,7 @@ pipeline {
                 archiveArtifacts artifacts: "${_ARTIFACT_LOGS1}", allowEmptyArchive: true, onlyIfSuccessful: false
                 println "Artifact 3: ${_ARTIFACT_LOGS2}"
                 archiveArtifacts artifacts: "${_ARTIFACT_LOGS2}", allowEmptyArchive: true, onlyIfSuccessful: false
-                println "Artifact 4: ${_ARTIFACT_POMS}" // FIXME not for release
+                println "Artifact 4: ${_ARTIFACT_POMS}"
                 archiveArtifacts artifacts: "${_ARTIFACT_POMS}", allowEmptyArchive: false, onlyIfSuccessful: false
             }
 
