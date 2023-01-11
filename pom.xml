@@ -95,7 +95,7 @@
         <jackson-databind.version>2.13.4.2</jackson-databind.version> <!--in most cases should be equal to jackson-bom-->
         <jackson-codehaus.version>1.9.16-TALEND</jackson-codehaus.version>
 
-        <jsoup.version>1.14.3</jsoup.version>
+        <jsoup.version>1.15.3</jsoup.version>
         <protobuf-java.version>3.19.6</protobuf-java.version>
 
         <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
@@ -169,6 +169,7 @@
         <surefire.version>3.0.0-M6</surefire.version>
         <maven.enforcer.version>3.0.0-M3</maven.enforcer.version>
         <jacoco.version>0.8.8</jacoco.version>
+        <jettison.version>1.5.3</jettison.version>
     </properties>
 
     <dependencyManagement>
@@ -655,7 +656,7 @@
             <dependency>
                 <groupId>org.codehaus.jettison</groupId>
                 <artifactId>jettison</artifactId>
-                <version>1.5.1</version>
+                <version>${jettison.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
