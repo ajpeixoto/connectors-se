@@ -1345,6 +1345,7 @@
                 <!-- Skips phases already executed in the ci BUILD jenkins STAGE -->
                 <maven.validate.skip>true</maven.validate.skip>
                 <maven.compile.skip>true</maven.compile.skip>
+                <maven.test.skip>true</maven.test.skip>
                 <maven.package.skip>true</maven.package.skip>
                 <maven.verify.skip>true</maven.verify.skip>
                 <maven.install.skip>true</maven.install.skip>
