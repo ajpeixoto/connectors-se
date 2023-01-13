@@ -342,10 +342,8 @@ pipeline {
 
                         println 'Debug step to resolve pom file and analysis'
                         sh """
-                            mvn help:effective-pom --file pom.xml > \
-                                                   effective-pom-se.txt
-                            mvn dependency:tree --file pom.xml > \
-                                                dependency-tree-se.txt
+                            mvn help:effective-pom --file pom.xml > effective-pom-se.txt
+                            mvn dependency:tree --file pom.xml > dependency-tree-se.txt
                             exit 0 # maven in success generate an exit(x) which is caught as error by jenkins
                             """
                         println "Artifact effective-pom"
