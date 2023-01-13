@@ -48,7 +48,6 @@ final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
 final String _ARTIFACT_COVERAGE = '**/target/site/**/*.*'
 final String _ARTIFACT_LOGS1 = '**/build_log.txt'
 final String _ARTIFACT_LOGS2 = '**/raw_log.txt'
-final String _ARTIFACT_POMS = '**/*pom.*'
 
 // Pod definition
 final String podDefinition = """\
@@ -133,10 +132,11 @@ pipeline {
             - STANDARD : (default) classic CI build
             - RELEASE : Build release, deploy to the Nexus for master/maintenance branches''')
         booleanParam(
-          name: 'DEPLOY',
+          name: 'MAVEN_DEPLOY',
           defaultValue: true,
           description: '''
-            DEPLOY : Build release, deploy A build to the Nexus''')
+            Deploy A build to the Nexus after the build''')
+
         string(
           name: 'VERSION_QUALIFIER',
           defaultValue: 'DEFAULT',
@@ -232,7 +232,7 @@ pipeline {
                     String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
                     if ( user_name == null) { user_name = "auto" }
 
-                    if(params.DEPLOY) {
+                    if(params.MAVEN_DEPLOY) {
                         jenkins_action = 'DEPLOY'
                     }
                     else {
@@ -301,6 +301,10 @@ pipeline {
 
                     if (!isOnMasterOrMaintenanceBranch) {
                         pom_project_property_edit()
+
+                        final String _ARTIFACT_POMS = '**/*pom.*'
+                        println "Artifact Poms files after edition: ${_ARTIFACT_POMS}"
+                        archiveArtifacts artifacts: "${_ARTIFACT_POMS}", allowEmptyArchive: false, onlyIfSuccessful: false
                     }
                 }
             }
@@ -329,7 +333,30 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Maven dependencies analysis') {
+            // For analysis purposes
+            steps {
+                withCredentials([nexusCredentials,
+                                 artifactoryCredentials]) {
+                    script {
+
+                        println 'Debug step to resolve pom file and analysis'
+                        sh """
+                            mvn help:effective-pom --file pom.xml > \
+                                                   effective-pom-se.txt
+                            mvn dependency:tree --file pom.xml > \
+                                                dependency-tree-se.txt
+                            exit 0 # maven in success generate an exit(x) which is caught as error by jenkins
+                            """
+                        println "Artifact effective-pom"
+                        archiveArtifacts artifacts: "effective-pom-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
+                        archiveArtifacts artifacts: "dependency-tree-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
+                    }
+                }
+            }
+        }
+
+        stage('Maven validate to install') {
             when {
                 expression { params.ACTION == 'STANDARD' }
             }
@@ -363,9 +390,9 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Maven deploy') {
             when {
-                expression { params.ACTION == 'STANDARD' && params.DEPLOY == true }
+                expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY == true }
             }
             steps {
                 withCredentials([nexusCredentials]) {
@@ -433,8 +460,6 @@ pipeline {
                 archiveArtifacts artifacts: "${_ARTIFACT_LOGS1}", allowEmptyArchive: true, onlyIfSuccessful: false
                 println "Artifact 3: ${_ARTIFACT_LOGS2}"
                 archiveArtifacts artifacts: "${_ARTIFACT_LOGS2}", allowEmptyArchive: true, onlyIfSuccessful: false
-                println "Artifact 4: ${_ARTIFACT_POMS}"
-                archiveArtifacts artifacts: "${_ARTIFACT_POMS}", allowEmptyArchive: false, onlyIfSuccessful: false
             }
 
             script {
