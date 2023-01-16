@@ -301,11 +301,13 @@ pipeline {
 
                     if (!isOnMasterOrMaintenanceBranch) {
                         pom_project_property_edit()
-
-                        final String _ARTIFACT_POMS = '**/*pom.*'
-                        println "Artifact Poms files after edition: ${_ARTIFACT_POMS}"
-                        archiveArtifacts artifacts: "${_ARTIFACT_POMS}", allowEmptyArchive: false, onlyIfSuccessful: false
                     }
+                }
+            }
+            post {
+                always {
+                    println "Artifact Poms files after edition"
+                    archiveArtifacts artifacts: '**/*pom.*', allowEmptyArchive: false, onlyIfSuccessful: false
                 }
             }
         }
@@ -334,7 +336,9 @@ pipeline {
         }
 
         stage('Maven dependencies analysis') {
-            // For analysis purposes
+            when {
+                expression { params.DEBUG }
+            }
             steps {
                 withCredentials([nexusCredentials,
                                  artifactoryCredentials]) {
