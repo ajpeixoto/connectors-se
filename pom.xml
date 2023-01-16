@@ -141,7 +141,7 @@
         <zookeeper.version>3.4.14</zookeeper.version>
         <guava.version>30.0-jre</guava.version>
         <hadoop.version>3.2.4</hadoop.version>
-        <axis2.version>1.8.0</axis2.version>
+        <axis2.version>1.8.2</axis2.version>
         <lombok.version>1.18.24</lombok.version>
         <woodstox.version>6.4.0</woodstox.version>
         <commons-configuration2.version>2.8.0</commons-configuration2.version>
@@ -595,16 +595,6 @@
                         <artifactId>log4j</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>axis2-xmlbeans</artifactId>
-                <version>${axis2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.axis2</groupId>
-                <artifactId>axis2-transport-http</artifactId>
-                <version>${axis2.version}</version>
             </dependency>
             <dependency>
                <groupId>com.google.protobuf</groupId>
