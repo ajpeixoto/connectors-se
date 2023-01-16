@@ -349,9 +349,11 @@ pipeline {
                 }
             }
             post {
-                println "Artifact effective-pom and dependency:tree"
-                archiveArtifacts artifacts: "effective-pom-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
-                archiveArtifacts artifacts: "dependency-tree-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
+                always {
+                    println "Artifact effective-pom and dependency:tree"
+                    archiveArtifacts artifacts: "effective-pom-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
+                    archiveArtifacts artifacts: "dependency-tree-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
+                }
             }
         }
 
