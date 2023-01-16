@@ -339,18 +339,19 @@ pipeline {
                 withCredentials([nexusCredentials,
                                  artifactoryCredentials]) {
                     script {
-
                         println 'Debug step to resolve pom file and analysis'
                         sh """
-                            mvn help:effective-pom --file pom.xml > effective-pom-se.txt
-                            mvn dependency:tree --file pom.xml > dependency-tree-se.txt
+                            mvn help:effective-pom | tee effective-pom-se.txt
+                            mvn dependency:tree | tee dependency-tree-se.txt
                             exit 0 # maven in success generate an exit(x) which is caught as error by jenkins
-                            """
-                        println "Artifact effective-pom"
-                        archiveArtifacts artifacts: "effective-pom-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
-                        archiveArtifacts artifacts: "dependency-tree-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
+                        """
                     }
                 }
+            }
+            post {
+                println "Artifact effective-pom and dependency:tree"
+                archiveArtifacts artifacts: "*/effective-pom-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
+                archiveArtifacts artifacts: "*/dependency-tree-se.txt", allowEmptyArchive: false, onlyIfSuccessful: false
             }
         }
 
