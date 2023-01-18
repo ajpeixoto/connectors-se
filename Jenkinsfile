@@ -36,7 +36,6 @@ Boolean fail_at_end = false
 String logContent
 
 // Pod config
-final String podLabel = "connectors-se-${UUID.randomUUID().toString()}".take(53)
 final String tsbiImage = 'jdk11-svc-springboot-builder'
 final String tsbiVersion = '2.9.18-2.4-20220104141654'
 final String _STAGE_DEFAULT_CONTAINER = tsbiImage
@@ -46,8 +45,8 @@ final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
 
 // Artifacts paths
 final String _ARTIFACT_COVERAGE = '**/target/site/**/*.*'
-final String _ARTIFACT_LOGS1 = '**/build_log.txt'
-final String _ARTIFACT_LOGS2 = '**/raw_log.txt'
+final String _ARTIFACT_BUILD_LOGS  = '**/build_log.txt'
+final String _ARTIFACT_RAW_LOGS   = '**/raw_log.txt'
 
 // Pod definition
 final String podDefinition = """\
@@ -84,7 +83,6 @@ final String podDefinition = """\
 pipeline {
     agent {
         kubernetes {
-            label podLabel
             yaml podDefinition
             defaultContainer _STAGE_DEFAULT_CONTAINER
         }
@@ -459,12 +457,12 @@ pipeline {
             )
             script {
                 println '====== Archive artifacts'
-                println "Artifact 1: ${_ARTIFACT_COVERAGE}\\n"
+                println "Coverage reports: ${_ARTIFACT_COVERAGE}"
                 archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
-                println "Artifact 2: ${_ARTIFACT_LOGS1}"
-                archiveArtifacts artifacts: "${_ARTIFACT_LOGS1}", allowEmptyArchive: true, onlyIfSuccessful: false
-                println "Artifact 3: ${_ARTIFACT_LOGS2}"
-                archiveArtifacts artifacts: "${_ARTIFACT_LOGS2}", allowEmptyArchive: true, onlyIfSuccessful: false
+                println "Build logs: ${_ARTIFACT_BUILD_LOGS}"
+                archiveArtifacts artifacts: "${_ARTIFACT_BUILD_LOGS}", allowEmptyArchive: true, onlyIfSuccessful: false
+                println "Build raw logs: ${_ARTIFACT_RAW_LOGS}"
+                archiveArtifacts artifacts: "${_ARTIFACT_RAW_LOGS}", allowEmptyArchive: true, onlyIfSuccessful: false
             }
 
             script {
@@ -518,7 +516,7 @@ pipeline {
 
 /**
  * Append a new line to job description
- * REM This is MARKDOWN, do not forget double space at the end of line
+ * Reminder: this is MARKDOWN, do not forget double space at the end of line
  *
  * @param new line
  * @return void
@@ -535,6 +533,7 @@ private void job_description_append(String new_line) {
 
 /**
  * Implement a simple breakpoint to stop actual job
+ * Use the method anywhere you need to stop
  * Change and restore the job description to be more visible
  *
  * @param none
@@ -649,7 +648,9 @@ private void pom_project_property_edit() {
 
     println 'No property to change'
 
-    // This step is a reminder of where to put this action if needed, to be like in se and cc job.
+    // This step is a reminder of where to put this action if needed
+    // It is not needed in se for now but in ee and cc job.
+    // We keep the method to avoid copy past issues
 }
 
 /**

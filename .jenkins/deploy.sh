@@ -13,8 +13,10 @@ main() {
   # xxx test - test the compiled source code using a suitable unit testing framework
   # xxx package - take the compiled code and package it in its distributable format, such as a JAR
   # xxx verify - run any checks on results of integration tests to ensure quality criteria are met
-  # >>> install - install the package into the local repository
+  # xxx install - install the package into the local repository
   # >>> deploy - copies the final package to the remote repository
+
+  # Maven phases validate to install are skipped with DEPLOY profile in pom
 
   mvn deploy \
     --errors \

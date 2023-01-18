@@ -4,9 +4,8 @@ set -xe
 
 # Builds the components with tests, Docker image and spotBugs enabled
 # Also generates the Talend components ui spec
-# $1: the Jenkinsfile's params.Action
-# $2: Execute sonar analysis or not, from jenkinsfile's params.SONAR_ANALYSIS
-# $3: Sonar analyzed branch
+# $1: Execute sonar analysis or not
+# $2: Sonar analyzed branch
 # $@: the extra parameters to be used in the maven commands
 main() (
   sonar="${1?Missing sonar option}"; shift
@@ -25,7 +24,6 @@ main() (
   # >>> install - install the package into the local repository
   # xxx deploy - copies the final package to the remote repository
 
-  # Real task
   mvn clean install \
       --errors \
       --batch-mode \
