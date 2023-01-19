@@ -2,7 +2,7 @@
 
 set -xe
 
-# Builds the components with tests, Docker image and spotBugs enabled
+# Builds the components with tests
 # Also generates the Talend components ui spec
 # $1: Execute sonar analysis or not
 # $2: Sonar analyzed branch

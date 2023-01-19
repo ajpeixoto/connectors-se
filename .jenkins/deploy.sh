@@ -2,7 +2,8 @@
 
 set -xe
 
-# Builds the components and deploys them on Nexus, SKIPPING TESTS!
+# Deploys them on Nexus
+# Maven phases validate to install are skipped with DEPLOY profile in pom
 # $@: the extra parameters to be used in the maven command
 main() {
   local extraBuildParams=("$@")
@@ -15,8 +16,6 @@ main() {
   # xxx verify - run any checks on results of integration tests to ensure quality criteria are met
   # xxx install - install the package into the local repository
   # >>> deploy - copies the final package to the remote repository
-
-  # Maven phases validate to install are skipped with DEPLOY profile in pom
 
   mvn deploy \
     --errors \
