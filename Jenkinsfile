@@ -38,7 +38,6 @@ String logContent
 // Pod config
 final String tsbiImage = 'jdk11-svc-springboot-builder'
 final String tsbiVersion = '2.9.18-2.4-20220104141654'
-final String _STAGE_DEFAULT_CONTAINER = tsbiImage
 
 // Files and folder definition
 final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
@@ -84,7 +83,7 @@ pipeline {
     agent {
         kubernetes {
             yaml podDefinition
-            defaultContainer _STAGE_DEFAULT_CONTAINER
+            defaultContainer tsbiImage
         }
     }
 
@@ -193,6 +192,7 @@ pipeline {
                         branch_ticket,
                         branch_description)= extract_branch_info("$env.BRANCH_NAME")
 
+                        // Check only branch_use, because if there is an error all three params are empty.
                         if(branch_user.equals("")){
                             println """
                             ERROR: The branch name doesn't comply with the format: user/JIRA-1234-Description
@@ -230,7 +230,7 @@ pipeline {
                     String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
                     if ( user_name == null) { user_name = "auto" }
 
-                    if(params.MAVEN_DEPLOY) {
+                    if(params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY) {
                         jenkins_action = 'DEPLOY'
                     }
                     else {
@@ -343,9 +343,8 @@ pipeline {
                     script {
                         println 'Debug step to resolve pom file and analysis'
                         sh """
-                            mvn help:effective-pom | tee effective-pom-se.txt
-                            mvn dependency:tree | tee dependency-tree-se.txt
-                            exit 0 # maven in success generate an exit(x) which is caught as error by jenkins
+                            (mvn help:effective-pom | tee effective-pom-se.txt) &&\
+                            (mvn dependency:tree | tee dependency-tree-se.txt)
                         """
                     }
                 }
@@ -395,7 +394,7 @@ pipeline {
 
         stage('Maven deploy') {
             when {
-                expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY == true }
+                expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY }
             }
             steps {
                 withCredentials([nexusCredentials]) {
@@ -461,6 +460,7 @@ pipeline {
                 archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
                 println "Build logs: ${_ARTIFACT_BUILD_LOGS}"
                 archiveArtifacts artifacts: "${_ARTIFACT_BUILD_LOGS}", allowEmptyArchive: true, onlyIfSuccessful: false
+                // TODO When log will be safe, remove the row version (which just have extra ANSI escape codes)
                 println "Build raw logs: ${_ARTIFACT_RAW_LOGS}"
                 archiveArtifacts artifacts: "${_ARTIFACT_RAW_LOGS}", allowEmptyArchive: true, onlyIfSuccessful: false
             }
@@ -534,6 +534,7 @@ private void job_description_append(String new_line) {
 /**
  * Implement a simple breakpoint to stop actual job
  * Use the method anywhere you need to stop
+ * The first usage is to keep the pod alive on post stage.
  * Change and restore the job description to be more visible
  *
  * @param none
@@ -569,6 +570,7 @@ private String extractJenkinsLog() {
     writeFile file: "raw_log.txt", text: newLog
 
     // Clean jenkins log file, could do better with a "ansi2txt < raw_log.txt" instead of "cat raw_log.txt"
+    // https://en.wikipedia.org/wiki/ANSI_escape_code
     sh """
       cat raw_log.txt | col -b | sed 's;ha:////[[:print:]]*AAAA[=]*;;g' > build_log.txt
     """
@@ -646,11 +648,10 @@ private String extraBuildParams_assembly(Boolean fail_at_end, Boolean snapshot_u
  */
 private void pom_project_property_edit() {
 
-    println 'No property to change'
+    println 'No maven property to update'
 
     // This step is a reminder of where to put this action if needed
-    // It is not needed in se for now but in ee and cc job.
-    // We keep the method to avoid copy past issues
+    // It is not needed in connectors-se for now but in connectors-ee and cloud-components jobs.
 }
 
 /**
