@@ -161,9 +161,13 @@ pipeline {
         string(name: 'POST_LOGIN_SCRIPT',
           defaultValue: "",
           description: 'Execute a shell command after login. Useful for maintenance.')
-        booleanParam(name: 'DEBUG',
+        booleanParam(
+          name: 'JENKINS_DEBUG',
           defaultValue: false,
-          description: 'Add an extra step to the pipeline allowing to keep the pod alive for debug purposes')
+          description: '''
+            Add an extra comportment to the job allowing to extra analysis:
+              - keep the pod alive for debug purposes at the end
+              - activate the Maven dependencies analysis stage''')
     }
 
     stages {
@@ -249,7 +253,7 @@ pipeline {
                       Extra user maven args:  `$params.EXTRA_BUILD_PARAMS`  
                       Post login script: ```$params.POST_LOGIN_SCRIPT```  
                       Maven fail-at-end activation: $fail_at_end ($params.FAIL_AT_END)  
-                      Debug: $params.DEBUG  
+                      Debug: $params.JENKINS_DEBUG  
                       """.stripIndent()
                     job_description_append(description)
                 }
@@ -335,7 +339,7 @@ pipeline {
 
         stage('Maven dependencies analysis') {
             when {
-                expression { params.DEBUG }
+                expression { params.JENKINS_DEBUG }
             }
             steps {
                 withCredentials([nexusCredentials,
@@ -466,7 +470,7 @@ pipeline {
             }
 
             script {
-                if (params.DEBUG) {
+                if (params.JENKINS_DEBUG) {
                     jenkinsBreakpoint()
                 }
             }
