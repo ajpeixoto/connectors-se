@@ -23,7 +23,7 @@ final String slackChannel = 'components-ci'
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
 
 // Job variables declaration
-String jenkins_action
+String jenkins_action // Only used for job description
 String branch_user
 String branch_ticket
 String branch_description
@@ -420,7 +420,7 @@ pipeline {
                     script {
                         sh """
                             bash .jenkins/release.sh \
-                                '${jenkins_action}' \
+                                'RELEASE' \
                                 '${releaseVersion}' \
                                 ${extraBuildParams}
                         """

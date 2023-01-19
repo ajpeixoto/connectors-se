@@ -15,15 +15,6 @@ main() (
   # check for format violations. You shall not pass!
   mvn spotless:check
 
-  # Maven phases:
-  # >>> validate - validate the project is correct and all necessary information is available
-  # >>> compile - compile the source code of the project
-  # >>> test - test the compiled source code using a suitable unit testing framework
-  # >>> package - take the compiled code and package it in its distributable format, such as a JAR
-  # >>> verify - run any checks on results of integration tests to ensure quality criteria are met
-  # >>> install - install the package into the local repository
-  # xxx deploy - copies the final package to the remote repository
-
   mvn clean install \
       --errors \
       --batch-mode \
