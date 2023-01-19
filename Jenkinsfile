@@ -575,6 +575,7 @@ private String extractJenkinsLog() {
 
     // Clean jenkins log file, could do better with a "ansi2txt < raw_log.txt" instead of "cat raw_log.txt"
     // https://en.wikipedia.org/wiki/ANSI_escape_code
+    // Also could be good to replace '8m0m' by '' when common lib will be in place
     sh """
       cat raw_log.txt | col -b | sed 's;ha:////[[:print:]]*AAAA[=]*;;g' > build_log.txt
     """
