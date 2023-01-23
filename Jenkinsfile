@@ -196,7 +196,7 @@ pipeline {
                         branch_ticket,
                         branch_description)= extract_branch_info("$env.BRANCH_NAME")
 
-                        // Check only branch_use, because if there is an error all three params are empty.
+                        // Check only branch_user, because if there is an error all three params are empty.
                         if(branch_user.equals("")){
                             println """
                             ERROR: The branch name doesn't comply with the format: user/JIRA-1234-Description
