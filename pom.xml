@@ -18,7 +18,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.41.0-SNAPSHOT</version>
+    <version>1.42.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Connectors SE</name>
@@ -60,7 +60,7 @@
     <distributionManagement>
         <snapshotRepository>
             <id>talend_nexus_deployment</id>
-            <url>${talend_oss_snapshots}</url>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</url>
         </snapshotRepository>
         <repository>
             <id>talend_nexus_deployment</id>
@@ -77,7 +77,7 @@
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <component-runtime.version>1.52.0</component-runtime.version>
+        <component-runtime.version>1.52.1</component-runtime.version>
 
         <slf4j.version>1.7.36</slf4j.version>
         <log4j-api.version>2.17.2</log4j-api.version>
@@ -95,7 +95,7 @@
         <jackson-databind.version>2.13.4.2</jackson-databind.version> <!--in most cases should be equal to jackson-bom-->
         <jackson-codehaus.version>1.9.16-TALEND</jackson-codehaus.version>
 
-        <jsoup.version>1.14.3</jsoup.version>
+        <jsoup.version>1.15.3</jsoup.version>
         <protobuf-java.version>3.19.6</protobuf-java.version>
 
         <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
@@ -120,9 +120,6 @@
         <jersey-common.version>2.33</jersey-common.version>
 
         <json-smart.version>2.4.7</json-smart.version>
-
-        <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/
-        </talend_oss_snapshots>
 
         <frontend.version>1.7.5</frontend.version>
         <node.version>v12.13.1</node.version>
@@ -172,6 +169,7 @@
         <surefire.version>3.0.0-M6</surefire.version>
         <maven.enforcer.version>3.0.0-M3</maven.enforcer.version>
         <jacoco.version>0.8.8</jacoco.version>
+        <jettison.version>1.5.3</jettison.version>
     </properties>
 
     <dependencyManagement>
@@ -658,7 +656,7 @@
             <dependency>
                 <groupId>org.codehaus.jettison</groupId>
                 <artifactId>jettison</artifactId>
-                <version>1.5.1</version>
+                <version>${jettison.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -703,7 +701,7 @@
     <repositories>
         <repository>
             <id>talend.oss.snapshots</id>
-            <url>${talend_oss_snapshots}</url>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -735,7 +733,7 @@
     <pluginRepositories>
         <pluginRepository>
             <id>talend.oss.snapshots</id>
-            <url>${talend_oss_snapshots}</url>
+            <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/</url>
             <releases>
                 <enabled>false</enabled>
             </releases>
@@ -1306,23 +1304,58 @@
     </reporting>
 
     <profiles>
+        <!--
+            BEGIN: CI profiles to optimize builds
+            Mapped on Jenkinsfile's step
+         -->
         <profile>
             <id>STANDARD</id>
+            <!--
+                This is the phase, that execute followings maven phase:
+                -> validate - validate the project is correct
+                -> compile - compile the source code of the project
+                -> test - test the compiled source code using a suitable unit testing framework
+                -> package - take the compiled code and package it in its distributable format, such as a JAR
+                -> verify - run any checks on results of integration tests to ensure quality criteria are met
+                -> install - install the package into the local repository, for use as a dependency in other projects locally
+                -x deploy - done in the build environment, copies the final package to the remote repository for sharing with other developers and projects.
+             -->
             <properties>
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>RELEASE</id>
-            <properties>
+                <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
             </properties>
         </profile>
         <profile>
             <id>DEPLOY</id>
+            <!--
+                This is the phase, that execute followings maven phase:
+                -x validate - validate the project is correct
+                -x compile - compile the source code of the project
+                -x test - test the compiled source code using a suitable unit testing framework
+                -x package - take the compiled code and package it in its distributable format, such as a JAR
+                -x verify - run any checks on results of integration tests to ensure quality criteria are met
+                -x install - install the package into the local repository
+                -> deploy - copies the final package to the remote repository
+             -->
             <properties>
-                <skipTests>true</skipTests>
+                <!-- Skips enforcer, already executed during build.sh -->
                 <enforcer.skip>true</enforcer.skip>
+                <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <!-- Skips phases already executed in the ci BUILD jenkins STAGE -->
+                <maven.validate.skip>true</maven.validate.skip>
+                <maven.compile.skip>true</maven.compile.skip>
+                <maven.test.skip>true</maven.test.skip>
+                <maven.package.skip>true</maven.package.skip>
+                <maven.verify.skip>true</maven.verify.skip>
+                <maven.install.skip>true</maven.install.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>RELEASE</id>
+            <properties>
+                <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
             </properties>
         </profile>
         <profile>
@@ -1338,6 +1371,10 @@
             <properties>
             </properties>
         </profile>
+        <!--
+        END: CI profiles to optimize builds
+        -->
+
         <profile>
             <id>documentation</id>
             <build>
