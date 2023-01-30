@@ -5,10 +5,10 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.41.0-SNAPSHOT</version>
+        <version>1.42.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>jdbc</artifactId>
+    <artifactId>newjdbc</artifactId>
 
     <name>Connectors SE :: JDBC</name>
     <description>Suite of JDBC component</description>
@@ -19,17 +19,15 @@
         <bouncycastle.version>1.69</bouncycastle.version>
         <!-- test version -->
         <derby.version>10.12.1.1</derby.version>
-        <snowflake.version>3.13.1</snowflake.version>
         <!-- To run ITs test give the following option to mvn : -Dtest.excluded="" -->
         <test.excluded>IT</test.excluded>
     </properties>
 
     <dependencies>
-        <!-- traductions -->
         <!--
         <dependency>
             <groupId>org.talend.components</groupId>
-            <artifactId>jdbc-locales</artifactId>
+            <artifactId>newjdbc-locales</artifactId>
             <version>${locales.version}</version>
         </dependency>
         -->
@@ -87,72 +85,7 @@
             <version>3.1.3</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mysql</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>oracle-xe</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mariadb</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>mssqlserver</artifactId>
-            <version>${testcontainers.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.2.14</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.18</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.ojdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>19.3.0.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>2.5.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.microsoft.sqlserver</groupId>
-            <artifactId>mssql-jdbc</artifactId>
-            <version>7.0.0.jre8</version>
-            <scope>test</scope>
-        </dependency>
+        
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcmail-jdk15on</artifactId>
@@ -191,71 +124,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>ITs</id>
-            <properties>
-                <jdbc.it>true</jdbc.it>
-                <test.excluded />
-            </properties>
-            <dependencies>
-                <dependency>
-                    <groupId>mysql</groupId>
-                    <artifactId>mysql-connector-java</artifactId>
-                    <version>8.0.18</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.postgresql</groupId>
-                    <artifactId>postgresql</artifactId>
-                    <version>42.2.14</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.oracle.ojdbc</groupId>
-                    <artifactId>ojdbc8</artifactId>
-                    <version>19.3.0.0</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>org.mariadb.jdbc</groupId>
-                    <artifactId>mariadb-java-client</artifactId>
-                    <version>2.5.3</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.microsoft.sqlserver</groupId>
-                    <artifactId>mssql-jdbc</artifactId>
-                    <version>7.0.0.jre8</version>
-                    <scope>provided</scope>
-                </dependency>
-                <dependency>
-                    <groupId>com.amazon.redshift</groupId>
-                    <artifactId>redshift-jdbc42</artifactId>
-                    <version>1.2.37.1061</version>
-                    <scope>provided</scope>
-                </dependency>
-            </dependencies>
-
-            <repositories>
-                <repository>
-                    <!-- repository for oracle driver-->
-                    <id>hand-china</id>
-                    <name>nexus.saas.hand-china</name>
-                    <url>http://nexus.saas.hand-china.com/content/repositories/rdc/</url>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-                <repository>
-                    <id>redshift</id>
-                    <url>http://s3.amazonaws.com/redshift-maven-repository/release</url>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                </repository>
-            </repositories>
-        </profile>
-    </profiles>
 </project>
