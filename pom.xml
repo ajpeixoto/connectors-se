@@ -140,8 +140,8 @@
     <xtm.api.url>https://www.xtm-cloud.com/rest-api</xtm.api.url>
 
     <!-- CVE fix -->
-    <netty-codec.version>4.1.68.Final</netty-codec.version>
-    <netty-tcnative-boringssl-static.version>2.0.46.Final</netty-tcnative-boringssl-static.version>
+    <netty-codec.version>4.1.86.Final</netty-codec.version>
+    <netty-tcnative-boringssl-static.version>2.0.56.Final</netty-tcnative-boringssl-static.version>
 
     <jetty.version>9.4.38.v20210224</jetty.version>
     <nimbus-jose-jwt.version>9.22</nimbus-jose-jwt.version>
