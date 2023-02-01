@@ -13,7 +13,6 @@
 package org.talend.components.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
@@ -168,7 +167,6 @@ public class DBTestUtils {
         return data;
     }
 
-    @NotNull
     private static Map<String, List<?>> execute(Processor processor) {
         MainInputFactory inputs = new MainInputFactory(Collections.emptyIterator());
         AutoChunkProcessor autoChunkProcessor = new AutoChunkProcessor(10, processor);

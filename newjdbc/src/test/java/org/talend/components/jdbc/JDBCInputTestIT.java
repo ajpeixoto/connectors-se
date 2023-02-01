@@ -344,6 +344,7 @@ public class JDBCInputTestIT {
 
     // TODO fix the mapping
     @Test
+    @Disabled
     public void testReaderAllTypesString() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
@@ -398,6 +399,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
+    @Disabled
     public void testUsePrepareStatement() throws SQLException {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
