@@ -34,6 +34,7 @@
 
     <modules>
         <module>jdbc</module>
+        <module>newjdbc</module>
         <module>salesforce</module>
         <module>couchbase</module>
         <module>azure</module>
