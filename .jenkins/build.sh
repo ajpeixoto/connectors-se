@@ -21,6 +21,9 @@ main() (
     mavenPhase='deploy'
   fi
 
+  # check for format violations. You shall not pass!
+  mvn spotless:check
+
   # Real task
   # ITs profile is added for jdbc
   mvn "${mavenPhase}" \
@@ -33,12 +36,14 @@ main() (
     declare -a LIST_FILE_ARRAY=( $(find $(pwd) -type f -name 'jacoco.xml') )
     LIST_FILE=$(IFS=, ; echo "${LIST_FILE_ARRAY[*]}")
     # Why sonar plugin is not declared in pom.xml: https://blog.sonarsource.com/we-had-a-dream-mvn-sonarsonar
+    # TODO https://jira.talendforge.org/browse/TDI-48980 (CI: Reactivate Sonar cache)
     mvn sonar:sonar \
         --define 'sonar.host.url=https://sonar-eks.datapwn.com' \
         --define "sonar.login=${SONAR_LOGIN}" \
         --define "sonar.password=${SONAR_PASSWORD}" \
         --define "sonar.branch.name=${branch}" \
         --define "sonar.coverage.jacoco.xmlReportPaths='${LIST_FILE}'" \
+        --define "sonar.analysisCache.enabled=false" \
         --activate-profiles SONAR \
         "${extraBuildParams[@]}"
   fi

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.apache.avro.LogicalTypes;
 import org.apache.avro.SchemaBuilder;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 
 import static org.talend.components.common.stream.Constants.*;
 
@@ -48,12 +49,12 @@ public class SchemaToAvro {
 
             org.apache.avro.Schema builder = null;
             if (isDecimalType(e.getProps())) {
-                builder = createDecimalSchema(name, e.getProp(STUDIO_LENGTH), e.getProp(STUDIO_PRECISION));
+                builder = createDecimalSchema(name, e.getProp(SchemaProperty.SIZE), e.getProp(SchemaProperty.SCALE));
             } else if (Schema.Type.ARRAY.equals(e.getType())
                     && isDecimalType(e.getElementSchema().getProps())) {
                 Schema elementSchema = e.getElementSchema();
                 builder = org.apache.avro.Schema.createArray(createDecimalSchema(null,
-                        elementSchema.getProp(STUDIO_LENGTH), elementSchema.getProp(STUDIO_PRECISION)));
+                        elementSchema.getProp(SchemaProperty.SIZE), elementSchema.getProp(SchemaProperty.SCALE)));
             } else {
                 builder = this.extractSchema(name, e.getType(), e.getElementSchema());
             }
@@ -89,7 +90,8 @@ public class SchemaToAvro {
     }
 
     private boolean isDecimalType(Map<String, String> props) {
-        return props != null && props.get(STUDIO_TYPE) != null && BIGDECIMAL.equals(props.get(STUDIO_TYPE));
+        return props != null && props.get(SchemaProperty.STUDIO_TYPE) != null
+                && BIGDECIMAL.equals(props.get(SchemaProperty.STUDIO_TYPE));
     }
 
     private org.apache.avro.Schema extractSchema(

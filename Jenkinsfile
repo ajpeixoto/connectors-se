@@ -250,12 +250,14 @@ pipeline {
                 container(tsbiImage) {
                     withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
                         script {
-                            if (params.POST_LOGIN_SCRIPT?.trim()) {
-                                try {
+                            try {
+                                //Execute content of Post Login Script parameter
+                                if (params.POST_LOGIN_SCRIPT?.trim()) {
                                     sh "bash -c '${params.POST_LOGIN_SCRIPT}'"
-                                } catch (ignored) {
-                                    // The job must not fail if the script fails
                                 }
+                            }
+                            catch (ignored) {
+                                // The job must not fail if the script fails
                             }
                         }
                     }
@@ -380,6 +382,22 @@ pipeline {
                             channel: "${slackChannel}")
                     }
                 }
+
+                container(tsbiImage) {
+                    withCredentials([nexusCredentials, gitCredentials, artifactoryCredentials]) {
+                        script {
+                            // Create the jenkins log file
+                            def logContent = Jenkins.getInstance().getItemByFullName(env.JOB_NAME)
+                                    .getBuildByNumber(env.BUILD_NUMBER.toInteger())
+                                    .logFile.text
+
+                            // copy the log in the job's own workspace
+                            writeFile file: "raw_log.txt", text: logContent
+
+                            CleanM2Corruption(logContent)
+                        }
+                    }
+                }
             }
         }
         always {
@@ -410,6 +428,23 @@ pipeline {
                     archiveArtifacts artifacts: "${_ARTIFACT_COVERAGE}", allowEmptyArchive: true, onlyIfSuccessful: false
                 }
             }
+        }
+    }
+}
+
+//TODO: https://jira.talendforge.org/browse/TDI-48913 Centralize script for Jenkins M2 Corruption clean
+private void CleanM2Corruption(logContent) {
+    //Clean M2 corruptions - TDI-48532
+    echo 'Checking for Malformed encoding error'
+    if (logContent.contains("Malformed \\uxxxx encoding")) {
+        echo 'Malformed encoding detected: Cleaning M2 corruptions'
+        try {
+            sh """
+                grep --recursive --word-regexp --files-with-matches --regexp '\\u0000' ~/.m2/repository | xargs -I % rm %
+            """
+        }
+        catch (ignored) {
+            // The stage must not fail if grep returns no lines.
         }
     }
 }

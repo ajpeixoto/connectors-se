@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,40 +14,32 @@ package org.talend.components.jdbc.service;
 
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
-import static org.talend.components.jdbc.ErrorFactory.toIllegalStateException;
-import static org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
-import static org.talend.sdk.component.api.record.Schema.Type.BYTES;
-import static org.talend.sdk.component.api.record.Schema.Type.DATETIME;
-import static org.talend.sdk.component.api.record.Schema.Type.DOUBLE;
-import static org.talend.sdk.component.api.record.Schema.Type.FLOAT;
-import static org.talend.sdk.component.api.record.Schema.Type.INT;
-import static org.talend.sdk.component.api.record.Schema.Type.LONG;
-import static org.talend.sdk.component.api.record.Schema.Type.STRING;
+import static org.talend.sdk.component.api.record.Schema.Type.*;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import com.zaxxer.hikari.HikariDataSource;
 
+import lombok.Data;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.configuration.JdbcConfiguration.Driver;
+import org.talend.components.jdbc.dataset.BaseDataSet;
+import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.components.jdbc.datastore.AuthenticationType;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.platforms.PlatformService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.dependency.Resolver;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -306,146 +298,306 @@ public class JdbcService {
         return schema;
     }
 
-    /**
-     * To avoid accessing {@link ResultSetMetaData} object for each cell of a table in
-     * {@link JdbcService#addColumn(Record.Builder, ColumnInfo, Object)}, the required information for each column
-     * is kept in this class.
-     * <p>
-     * Accessing {@link ResultSetMetaData} object requires Class Loader switching, which is a source of high performance
-     * overhead.
-     *
-     * @see JdbcDatasource.ContextualDelegate#invoke(Object, Method, Object[])
-     */
-    @Getter
+    @Data
     @AllArgsConstructor
-    public static class ColumnInfo {
+    private static class ColumnMetadata {
 
-        private final String columnName;
+        int size;
 
-        private final int sqlType;
+        int scale;
 
-        private final boolean isNullable;
+        int sqlType;
+
+        boolean nullable;
+
+        String columnLabel;// consider "select as" case
+
+        String columnName;
+
+        Object defaultValue;
+
+        boolean isKey;
+
+        boolean isUnique;
+
+        boolean isForeignKey;
+
+        String columnTypeName;
+
+        String javaType;
     }
 
-    public ColumnInfo addField(final Schema.Builder builder, final ResultSetMetaData metaData, final int columnIndex) {
-        try {
-            final String javaType = metaData.getColumnClassName(columnIndex);
-            final int sqlType = metaData.getColumnType(columnIndex);
-            final String columnName = metaData.getColumnName(columnIndex);
-            final boolean isNullable = metaData.isNullable(columnIndex) != ResultSetMetaData.columnNoNulls;
-            final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder()
-                    .withName(columnName)
-                    .withNullable(isNullable);
-            switch (sqlType) {
-            case java.sql.Types.SMALLINT:
-            case java.sql.Types.TINYINT:
-            case java.sql.Types.INTEGER:
-                if (javaType.equals(Integer.class.getName()) || Short.class.getName().equals(javaType)) {
-                    builder.withEntry(entryBuilder.withType(INT).build());
-                } else {
-                    builder.withEntry(entryBuilder.withType(LONG).build());
+    public Schema createSchema(BaseDataSet dataSet, Connection connection, ResultSet resultSet,
+            RecordBuilderFactory recordBuilderFactory) throws SQLException {
+        final Map<String, ColumnMetadata> columnMetadata = new HashMap<>();
+        if (TableNameDataset.class.isInstance(dataSet)) {
+            String catalog = null;
+            String dbSchema = null;
+            // when we generate sql for table fetch, we wrap table name auto like : [select * from `Company`], table
+            // name setting is [Company] in ui.
+            // and user may set table name in ui like this : [catalog.schema1.Company], then generate the expected sql
+            // like this : [select * from `catalog.schema1.Company`], that's wrong.
+            // but if current database no wrap character, then generate the sql like this : [select * from
+            // catalog.schema1.Company], then that works for query,
+            // but will fail for the code below for table metadata fetch as table name is expected : [Company] without
+            // the full name prefix [catalog.schema1.].
+            String tableName = TableNameDataset.class.cast(dataSet).getTableName();
+            try {
+                catalog = connection.getCatalog();
+                dbSchema = JdbcService.getSchema(connection);
+
+                final DatabaseMetaData databaseMetadata = connection.getMetaData();
+
+                final Set<String> keys = getPrimaryKeys(databaseMetadata, catalog, dbSchema, tableName);
+                final Set<String> uniqueColumns = getUniqueColumns(databaseMetadata, catalog, dbSchema, tableName);
+                final Set<String> foreignKeys = getForeignKeys(databaseMetadata, catalog, dbSchema, tableName);
+
+                try (ResultSet tableMetadata = databaseMetadata.getColumns(catalog, dbSchema, tableName, null)) {
+                    while (tableMetadata.next()) {
+                        String columnName = tableMetadata.getString("COLUMN_NAME");
+
+                        int size = tableMetadata.getInt("COLUMN_SIZE");
+                        int scale = tableMetadata.getInt("DECIMAL_DIGITS");
+                        int sqlType = tableMetadata.getInt("DATA_TYPE");
+                        boolean nullable = DatabaseMetaData.columnNullable == tableMetadata.getInt("NULLABLE");
+
+                        boolean isKey = keys.contains(columnName);
+
+                        // primary key also create unique index, so exclude it here
+                        boolean isUniqueColumn = isKey ? false : uniqueColumns.contains(columnName);
+
+                        boolean isForeignKey = foreignKeys.contains(columnName);
+
+                        String columnTypeName = tableMetadata.getString("TYPE_NAME");
+
+                        columnMetadata.put(columnName,
+                                new ColumnMetadata(size, scale, sqlType, nullable, columnName, columnName, null, isKey,
+                                        isUniqueColumn, isForeignKey, columnTypeName, null));
+                    }
                 }
-                break;
-            case java.sql.Types.FLOAT:
-            case java.sql.Types.REAL:
-                builder.withEntry(entryBuilder.withType(FLOAT).build());
-                break;
-            case java.sql.Types.DOUBLE:
-                builder.withEntry(entryBuilder.withType(DOUBLE).build());
-                break;
-            case java.sql.Types.BOOLEAN:
-                builder.withEntry(entryBuilder.withType(BOOLEAN).build());
-                break;
-            case java.sql.Types.TIME:
-            case java.sql.Types.DATE:
-            case java.sql.Types.TIMESTAMP:
-                builder.withEntry(entryBuilder.withType(DATETIME).build());
-                break;
-            case java.sql.Types.BINARY:
-            case java.sql.Types.VARBINARY:
-            case java.sql.Types.LONGVARBINARY:
-                builder.withEntry(entryBuilder.withType(BYTES).build());
-                break;
-            case java.sql.Types.BIGINT:
-            case java.sql.Types.DECIMAL:
-            case java.sql.Types.NUMERIC:
-            case java.sql.Types.VARCHAR:
-            case java.sql.Types.LONGVARCHAR:
-            case java.sql.Types.CHAR:
-            default:
-                builder.withEntry(entryBuilder.withType(STRING).build());
-                break;
+            } catch (Exception e) {
+                log.error("[catalog,db schema,table] {} {} {}.", catalog, dbSchema, tableName);
+                log.error("can't fetch table metadata : ", e);
             }
-
-            log.warn("[addField] {} {} {}.", columnName, javaType, sqlType);
-            return new ColumnInfo(columnName, sqlType, isNullable);
-        } catch (final SQLException e) {
-            throw toIllegalStateException(e);
         }
+
+        final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
+        final ResultSetMetaData resultSetMetadata = resultSet.getMetaData();
+
+        for (int i = 1; i <= resultSetMetadata.getColumnCount(); i++) {
+            String columnName = resultSetMetadata.getColumnName(i);
+
+            String javaType = resultSetMetadata.getColumnClassName(i);
+
+            // need to correct the metadata when use table fetch with/without column list instead of query
+            ColumnMetadata column = columnMetadata.get(columnName);
+            if (column != null) {
+                column.setJavaType(javaType);
+                addField(schemaBuilder, column);
+            } else {
+                String columnLabel = resultSetMetadata.getColumnLabel(i);
+
+                int size = resultSetMetadata.getPrecision(i);
+                int scale = resultSetMetadata.getScale(i);
+                boolean nullable = ResultSetMetaData.columnNullable == resultSetMetadata.isNullable(i);
+
+                int sqlType = resultSetMetadata.getColumnType(i);
+
+                // not necessary for the result schema from the query statement
+                boolean isKey = false;
+                boolean isUniqueColumn = false;
+                boolean isForeignKey = false;
+
+                String columnTypeName = resultSetMetadata.getColumnTypeName(i).toUpperCase();
+
+                addField(schemaBuilder,
+                        new ColumnMetadata(size, scale, sqlType, nullable, columnLabel, columnName, null, isKey,
+                                isUniqueColumn, isForeignKey, columnTypeName, javaType));
+            }
+        }
+
+        return schemaBuilder.build();
     }
 
-    public void addColumn(final Record.Builder builder, final ColumnInfo columnInfo, final Object value) {
+    private static Set<String> getPrimaryKeys(DatabaseMetaData databaseMetdata, String catalogName, String schemaName,
+            String tableName) throws SQLException {
+        Set<String> result = new HashSet<>();
+
+        try (ResultSet resultSet = databaseMetdata.getPrimaryKeys(catalogName, schemaName, tableName)) {
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    result.add(resultSet.getString("COLUMN_NAME"));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static Set<String> getUniqueColumns(DatabaseMetaData databaseMetdata, String catalogName, String schemaName,
+            String tableName) throws SQLException {
+        Set<String> result = new HashSet<>();
+
+        try (ResultSet resultSet = databaseMetdata.getIndexInfo(catalogName, schemaName, tableName, true, true)) {
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    String indexColumn = resultSet.getString("COLUMN_NAME");
+                    // some database return some null, for example oracle, so need this null check
+                    if (indexColumn != null) {
+                        result.add(indexColumn);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static Set<String> getForeignKeys(DatabaseMetaData databaseMetdata, String catalogName, String schemaName,
+            String tableName) throws SQLException {
+        Set<String> result = new HashSet<>();
+
+        try (ResultSet resultSet = databaseMetdata.getImportedKeys(catalogName, schemaName, tableName)) {
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    result.add(resultSet.getString("FKCOLUMN_NAME"));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private void addField(final Schema.Builder builder, ColumnMetadata column) {
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder()
-                .withName(columnInfo.getColumnName())
-                .withNullable(columnInfo.isNullable());
-        switch (columnInfo.getSqlType()) {
+                .withName(column.columnName)// not use columnLabel? now only keep like before
+                .withNullable(column.isNullable())
+                .withProp(SchemaProperty.ORIGIN_TYPE, String.valueOf(column.columnTypeName));
+
+        if (column.isKey) {
+            entryBuilder.withProp(SchemaProperty.IS_KEY, "true");
+        }
+
+        if (column.isUnique) {
+            entryBuilder.withProp(SchemaProperty.IS_UNIQUE, "true");
+        }
+
+        if (column.isForeignKey) {
+            entryBuilder.withProp(SchemaProperty.IS_FOREIGN_KEY, "true");
+        }
+
+        setSize(entryBuilder, column.size);
+
+        switch (column.sqlType) {
         case java.sql.Types.SMALLINT:
         case java.sql.Types.TINYINT:
         case java.sql.Types.INTEGER:
-            if (value != null) {
-                if (value instanceof Integer) {
-                    builder.withInt(entryBuilder.withType(INT).build(), (Integer) value);
-                } else if (value instanceof Short) {
-                    builder.withInt(entryBuilder.withType(INT).build(), ((Short) value).intValue());
-                } else {
-                    builder.withLong(entryBuilder.withType(LONG).build(), Long.parseLong(value.toString()));
-                }
+            if (column.javaType.equals(Integer.class.getName()) || Short.class.getName().equals(column.javaType)) {
+                builder.withEntry(entryBuilder.withType(INT).build());
+            } else {
+                builder.withEntry(entryBuilder.withType(LONG).build());
             }
             break;
         case java.sql.Types.FLOAT:
         case java.sql.Types.REAL:
-            if (value != null) {
-                builder.withFloat(entryBuilder.withType(FLOAT).build(), (Float) value);
-            }
+            setScale(entryBuilder, column.scale);
+            builder.withEntry(entryBuilder.withType(FLOAT).build());
             break;
         case java.sql.Types.DOUBLE:
-            if (value != null) {
-                builder.withDouble(entryBuilder.withType(DOUBLE).build(), (Double) value);
-            }
+            setScale(entryBuilder, column.scale);
+            builder.withEntry(entryBuilder.withType(DOUBLE).build());
             break;
         case java.sql.Types.BOOLEAN:
-            if (value != null) {
-                builder.withBoolean(entryBuilder.withType(BOOLEAN).build(), (Boolean) value);
-            }
-            break;
-        case java.sql.Types.DATE:
-            builder
-                    .withDateTime(entryBuilder.withType(DATETIME).build(),
-                            value == null ? null : new Date(((java.sql.Date) value).getTime()));
+            builder.withEntry(entryBuilder.withType(BOOLEAN).build());
             break;
         case java.sql.Types.TIME:
-            builder
-                    .withDateTime(entryBuilder.withType(DATETIME).build(),
-                            value == null ? null : new Date(((java.sql.Time) value).getTime()));
-            break;
+        case java.sql.Types.DATE:
         case java.sql.Types.TIMESTAMP:
-            builder
-                    .withDateTime(entryBuilder.withType(DATETIME).build(),
-                            value == null ? null : new Date(((java.sql.Timestamp) value).getTime()));
+            setScale(entryBuilder, column.scale);
+            builder.withEntry(entryBuilder.withType(DATETIME).build());
             break;
         case java.sql.Types.BINARY:
         case java.sql.Types.VARBINARY:
         case java.sql.Types.LONGVARBINARY:
-            builder.withBytes(entryBuilder.withType(BYTES).build(), value == null ? null : (byte[]) value);
+            builder.withEntry(entryBuilder.withType(BYTES).build());
             break;
-        case java.sql.Types.BIGINT:
         case java.sql.Types.DECIMAL:
         case java.sql.Types.NUMERIC:
+            setScale(entryBuilder, column.scale);
+            // TODO use new tck DECIMAL, but before do it, we need to adapter all processor connector in cloud
+            builder.withEntry(entryBuilder.withType(STRING).build());
+            break;
+        case java.sql.Types.BIGINT:// why map to String here?
         case java.sql.Types.VARCHAR:
         case java.sql.Types.LONGVARCHAR:
         case java.sql.Types.CHAR:
+            builder.withEntry(entryBuilder.withType(STRING).build());
+            break;
         default:
-            builder.withString(entryBuilder.withType(STRING).build(), value == null ? null : String.valueOf(value));
+            setScale(entryBuilder, column.scale);
+            builder.withEntry(entryBuilder.withType(STRING).build());
+            break;
+        }
+
+        log.warn("[addField] {} {} {}.", column.columnName, column.sqlType, column.javaType);
+    }
+
+    private static void setSize(Schema.Entry.Builder builder, int size) {
+        if (size == 0)
+            return;// it's impossible that size is 0 if the size have meaning for that database column type
+        builder.withProp(SchemaProperty.SIZE, String.valueOf(size));
+    }
+
+    private static void setScale(Schema.Entry.Builder builder, int scale) {
+        // that is possible that scale is 0, for example : DECIMAL(12, 0), and no way to decide if 0 scale is valid for
+        // current database column type
+        builder.withProp(SchemaProperty.SCALE, String.valueOf(scale));
+    }
+
+    public void addColumn(final Record.Builder builder, final Schema.Entry entry, final Object value) {
+        switch (entry.getType()) {
+        case INT:
+            if (value != null) {
+                if (value instanceof Integer) {
+                    builder.withInt(entry, (Integer) value);
+                } else if (value instanceof Short) {
+                    builder.withInt(entry, ((Short) value).intValue());
+                } else if (value instanceof Number) {
+                    builder.withInt(entry, ((Number) value).intValue());
+                }
+            }
+            break;
+        case LONG:
+            if (value != null) {
+                builder.withLong(entry, Long.parseLong(value.toString()));
+            }
+            break;
+        case FLOAT:
+            if (value != null) {
+                builder.withFloat(entry, (Float) value);
+            }
+            break;
+        case DOUBLE:
+            if (value != null) {
+                builder.withDouble(entry, (Double) value);
+            }
+            break;
+        case BOOLEAN:
+            if (value != null) {
+                builder.withBoolean(entry, (Boolean) value);
+            }
+            break;
+        case DATETIME:
+            builder
+                    .withDateTime(entry,
+                            value == null ? null : new Date(((java.util.Date) value).getTime()));
+            break;
+        case BYTES:
+            builder.withBytes(entry, value == null ? null : (byte[]) value);
+            break;
+        case STRING:
+        default:
+            builder.withString(entry, value == null ? null : String.valueOf(value));
             break;
         }
     }

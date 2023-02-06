@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.39.0-SNAPSHOT</version>
+        <version>1.43.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>bigquery</artifactId>
@@ -16,6 +16,8 @@
     <properties>
         <google.bq.sdk.version>2.13.2</google.bq.sdk.version>
         <google.gcs.sdk.version>2.8.1</google.gcs.sdk.version>
+        <!-- a specific one, because bigtables uses 3.20.* -->
+        <protobuf-java.version>3.20.3</protobuf-java.version>
 
         <talend.scan.scannedDependencies>org.talend.components:stream-api</talend.scan.scannedDependencies>
     </properties>

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -10,12 +10,12 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.datastore;
+package org.talend.components.jdbc.migration;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
+import org.talend.components.jdbc.datastore.AuthenticationType;
 import org.talend.sdk.component.api.component.MigrationHandler;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +27,7 @@ public class JdbcConnectionMigrationHandler implements MigrationHandler {
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
+        log.debug(migration_log + incomingVersion);
         Map<String, String> migrated = new HashMap<>(incomingData);
 
         if (incomingVersion < 2) {

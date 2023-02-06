@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -20,7 +20,8 @@ import org.talend.components.jdbc.suite.JDBCBaseContainerTest;
 
 @Tag("IT")
 @Disabled
-//TODO https://jira.talendforge.org/browse/TDI-48743 ([internal] Oracle integration tests are failing to initialize test container)
+// TODO https://jira.talendforge.org/browse/TDI-48743 ([internal] Oracle integration tests are failing to initialize
+// test container)
 public class OracleContainerTest extends JDBCBaseContainerTest {
 
     @Override
