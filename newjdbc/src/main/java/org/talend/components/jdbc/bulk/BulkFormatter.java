@@ -122,7 +122,11 @@ public class BulkFormatter {
             if (inputValue == null) {
                 fillNull(nullValue, writer);
             } else {
-                writer.writeColumn(FormatterUtils.formatDate((Date) inputValue, pattern));
+                if (inputValue instanceof Long) {
+                    writer.writeColumn(FormatterUtils.formatDate(new Date(Long.class.cast(inputValue)), pattern));
+                } else {
+                    writer.writeColumn(FormatterUtils.formatDate((Date) inputValue, pattern));
+                }
             }
         }
 
