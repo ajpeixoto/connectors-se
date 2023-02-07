@@ -58,8 +58,8 @@ public class JDBCRollbackTestIT {
         JDBCRollbackConfig config = new JDBCRollbackConfig();
 
         JDBCRollbackProcessor processor = new JDBCRollbackProcessor(config, jdbcService, recordBuilderFactory);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
-            processor.doRollback(dataSourceWrapper);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
+            processor.doRollback(dataSourceWrapper.getConnection());
             assertTrue(dataSourceWrapper.getConnection().isClosed());
         }
     }
@@ -70,8 +70,8 @@ public class JDBCRollbackTestIT {
         config.setClose(false);
 
         JDBCRollbackProcessor processor = new JDBCRollbackProcessor(config, jdbcService, recordBuilderFactory);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
-            processor.doRollback(dataSourceWrapper);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
+            processor.doRollback(dataSourceWrapper.getConnection());
             assertTrue(!dataSourceWrapper.getConnection().isClosed());
         }
     }

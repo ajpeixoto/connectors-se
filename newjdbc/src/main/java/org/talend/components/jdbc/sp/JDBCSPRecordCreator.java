@@ -128,8 +128,9 @@ public class JDBCSPRecordCreator {
         }
 
         Record.Builder builder = recordBuilderFactory.newRecordBuilder(outputSchema);
-        int i = 0;
-        for (Schema.Entry entry : outputSchema.getEntries()) {
+        List<Schema.Entry> es = outputSchema.getEntries();
+        for (int i = 0; i < es.size(); i++) {
+            Schema.Entry entry = es.get(i);
             JDBCSPConverter converter = outputFieldLocation2AvroConverter.get(i);
             if (converter != null) {
                 builder.with(entry, converter.convert(value));
@@ -145,8 +146,6 @@ public class JDBCSPRecordCreator {
             if (inputName != null && inputRecord != null) {
                 builder.with(entry, inputRecord.get(Object.class, inputName));
             }
-
-            i++;
         }
 
         return builder.build();

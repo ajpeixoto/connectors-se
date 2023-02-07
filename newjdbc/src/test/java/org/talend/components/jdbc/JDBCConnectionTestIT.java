@@ -53,7 +53,7 @@ public class JDBCConnectionTestIT {
 
     @Test
     public void testConnection() throws SQLException {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
 
         }
     }
@@ -64,7 +64,7 @@ public class JDBCConnectionTestIT {
 
         dataStore.setJdbcUrl("");
 
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             fail();
         } catch (Exception e) {
 
@@ -77,7 +77,7 @@ public class JDBCConnectionTestIT {
 
         dataStore.setJdbcClass(null);
 
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             fail();
         } catch (Exception e) {
 
@@ -90,7 +90,7 @@ public class JDBCConnectionTestIT {
 
         dataStore.setJdbcClass("wrongDriver");
 
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             fail();
         } catch (Exception e) {
 
@@ -103,7 +103,7 @@ public class JDBCConnectionTestIT {
 
         dataStore.setJdbcUrl("wrongUrl");
 
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             fail();
         } catch (Exception e) {
 
@@ -117,7 +117,7 @@ public class JDBCConnectionTestIT {
         dataStore.setUseAutoCommit(true);
         dataStore.setAutoCommit(false);
 
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             assertTrue(!dataSourceWrapper.getConnection().getAutoCommit());
             assertTrue(!dataSourceWrapper.getConnection().isClosed());
         }
@@ -130,7 +130,7 @@ public class JDBCConnectionTestIT {
         dataStore.setUseAutoCommit(true);
         dataStore.setAutoCommit(true);
 
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             assertTrue(dataSourceWrapper.getConnection().getAutoCommit());
             assertTrue(!dataSourceWrapper.getConnection().isClosed());
         } catch (SQLException e) {

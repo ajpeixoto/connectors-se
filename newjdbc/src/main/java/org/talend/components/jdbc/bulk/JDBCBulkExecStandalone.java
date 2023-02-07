@@ -48,6 +48,8 @@ public class JDBCBulkExecStandalone implements Serializable {
     private transient JDBCBulkExecRuntime runtime;
 
     @Connection
+    private transient java.sql.Connection connection;
+
     private transient JDBCService.DataSourceWrapper dataSource;
 
     @RuntimeContext
@@ -64,7 +66,7 @@ public class JDBCBulkExecStandalone implements Serializable {
     public void init() {
         boolean useExistedConnection = false;
 
-        if (dataSource == null) {
+        if (connection == null) {
             try {
                 dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                         configuration.getDataSet().getDataStore(), context, false);
@@ -73,6 +75,7 @@ public class JDBCBulkExecStandalone implements Serializable {
             }
         } else {
             useExistedConnection = true;
+            dataSource = new JDBCService.DataSourceWrapper(null, connection);
         }
 
         runtime = new JDBCBulkExecRuntime(configuration.getDataSet(), configuration.getBulkCommonConfig(),

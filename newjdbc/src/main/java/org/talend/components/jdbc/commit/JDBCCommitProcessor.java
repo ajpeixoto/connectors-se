@@ -18,6 +18,8 @@ import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.context.RuntimeContext;
+import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.processor.*;
 import org.talend.sdk.component.api.record.Record;
@@ -42,11 +44,12 @@ public class JDBCCommitProcessor implements Serializable {
     private final JDBCService jdbcService;
 
     @Connection
-    private transient JDBCService.DataSourceWrapper connection;
+    private transient java.sql.Connection connection;
+
+    @RuntimeContext
+    private transient RuntimeContextHolder context;
 
     // private final I18nMessage i18n;
-
-    // private transient boolean init;
 
     private final RecordBuilderFactory recordBuilderFactory;
 
@@ -66,16 +69,26 @@ public class JDBCCommitProcessor implements Serializable {
         success.emit(record);
     }
 
-    public void doCommit(JDBCService.DataSourceWrapper connection) throws SQLException {
+    public void doCommit(java.sql.Connection connection) throws SQLException {
         if (connection == null) {
             throw new RuntimeException("can't find the connection object");
         }
 
-        if (!connection.getConnection().isClosed()) {
-            connection.getConnection().commit();
+        if (!connection.isClosed()) {
+            connection.commit();
 
             if (configuration.isClose()) {
-                connection.close();
+                if (context == null) {
+                    connection.close();
+                } else {
+                    JDBCService.DataSourceWrapper dataSourceWrapper =
+                            JDBCService.DataSourceWrapper.class.cast(context.get(JDBCService.CONNECTION_POOL_KEY));
+                    if (dataSourceWrapper != null) {
+                        dataSourceWrapper.close();
+                    } else {
+                        connection.close();
+                    }
+                }
             }
         }
     }

@@ -75,8 +75,12 @@ public class JDBCMapping {
         } else if (type == Schema.Type.INT) {
             statement.setInt(index, (Integer) value);
         } else if (type == Schema.Type.DATETIME) {
-            java.util.Date date = (java.util.Date) value;
-            statement.setTimestamp(index, new java.sql.Timestamp((date).getTime()));
+            if (value instanceof Long) {
+                statement.setTimestamp(index, new java.sql.Timestamp(Long.class.cast(value)));
+            } else {
+                java.util.Date date = (java.util.Date) value;
+                statement.setTimestamp(index, new java.sql.Timestamp(date.getTime()));
+            }
         } else if (type == Schema.Type.LONG) {
             statement.setLong(index, (Long) value);
         } else if (type == Schema.Type.DOUBLE) {

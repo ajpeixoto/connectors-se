@@ -42,7 +42,6 @@ import org.talend.sdk.component.api.service.dependency.Resolver;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-import org.talend.sdk.component.api.service.schema.DiscoverSchema;
 import org.talend.sdk.component.api.service.schema.DiscoverSchemaExtended;
 
 import javax.sql.DataSource;
@@ -185,16 +184,29 @@ public class JDBCService implements Serializable {
         return new HealthCheckStatus(HealthCheckStatus.Status.OK, "Connection successful");
     }
 
-    @CreateConnection
-    public DataSourceWrapper createConnection(@Option("configuration") final JDBCDataStore dataStore)
+    public static final String CONNECTION_POOL_KEY = "cpk";
+
+    public DataSourceWrapper createDataSource(final JDBCDataStore dataStore)
             throws SQLException {
         DataSourceWrapper dataSourceWrapper =
                 createConnectionOrGetFromSharedConnectionPoolOrDataSource(dataStore, context, false);
+
         // not call this in HikariDataSource wrapper as worry HikariDataSource implement
         if (dataStore.isUseAutoCommit()) {
             dataSourceWrapper.getConnection().setAutoCommit(dataStore.isAutoCommit());
         }
+
         return dataSourceWrapper;
+    }
+
+    @CreateConnection
+    public Connection createConnection(@Option("configuration") final JDBCDataStore dataStore)
+            throws SQLException {
+        DataSourceWrapper dataSourceWrapper = createDataSource(dataStore);
+
+        context.set(CONNECTION_POOL_KEY, dataSourceWrapper);
+
+        return dataSourceWrapper.getConnection();
     }
 
     @CloseConnection
@@ -203,10 +215,28 @@ public class JDBCService implements Serializable {
 
             public boolean close() {
                 Optional.ofNullable(this.getConnection())
-                        .map(DataSourceWrapper.class::cast)
+                        .map(Connection.class::cast)
                         .ifPresent(conn -> {
                             try {
-                                conn.close();
+                                // as tjdbcconnection also works for studio javajet component like tjdbcscdelt and so
+                                // on,
+                                // so we can't pass DataSourceWrapper for closing data source directly in close
+                                // component, have to pass java.sql.Connection,
+                                // so here also have to pass connection pool object here for closing connection pool in
+                                // close component
+                                if (context == null) {
+                                    if (conn != null && !conn.isClosed()) {
+                                        conn.close();
+                                    }
+                                } else {
+                                    DataSourceWrapper dataSourceWrapper =
+                                            DataSourceWrapper.class.cast(context.get(CONNECTION_POOL_KEY));
+                                    if (dataSourceWrapper != null) {
+                                        dataSourceWrapper.close();
+                                    } else if (conn != null && !conn.isClosed()) {
+                                        conn.close();
+                                    }
+                                }
                             } catch (SQLException e) {
                                 // TODO
                             }
@@ -411,7 +441,9 @@ public class JDBCService implements Serializable {
                 dataSource.setMaximumPoolSize(1);
 
                 // mysql special property?
-                dataSource.addDataSourceProperty("rewriteBatchedStatements", "true");
+                // this will make statement.executeBatch return wrong info for data insert/updte count, so disable it
+                // for studio
+                // dataSource.addDataSourceProperty("rewriteBatchedStatements", "true");
                 // Security Issues with LOAD DATA LOCAL https://jira.talendforge.org/browse/TDI-42001
                 // TODO add them back for cloud platform
                 // dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
@@ -485,7 +517,7 @@ public class JDBCService implements Serializable {
         }
     }
 
-    public class DataSourceWrapper implements AutoCloseable {
+    public static class DataSourceWrapper implements AutoCloseable {
 
         private JDBCDataSource dataSource;
 

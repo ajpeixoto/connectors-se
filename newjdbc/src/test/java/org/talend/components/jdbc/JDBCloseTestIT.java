@@ -53,8 +53,8 @@ public class JDBCloseTestIT {
     @Test
     public void testClose() throws SQLException {
         CloseConnectionObject closeConnectionObject = jdbcService.closeConnection();
-        JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore);
-        closeConnectionObject.setConnection(dataSourceWrapper);
+        JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore);
+        closeConnectionObject.setConnection(dataSourceWrapper.getConnection());
         closeConnectionObject.close();
 
         assertTrue(dataSourceWrapper.getConnection().isClosed());

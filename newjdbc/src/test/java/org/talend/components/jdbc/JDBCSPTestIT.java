@@ -59,7 +59,7 @@ public class JDBCSPTestIT {
 
         JDBCService service = componentsHandler.findService(JDBCService.class);
         try (JDBCService.DataSourceWrapper dataSourceWrapper =
-                service.createConnection(DBTestUtils.createDataStore(true));
+                service.createDataSource(DBTestUtils.createDataStore(true));
                 Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.createTestTable(conn, tableName);
         }
@@ -69,7 +69,7 @@ public class JDBCSPTestIT {
     public void afterAll() throws Exception {
         JDBCService service = componentsHandler.findService(JDBCService.class);
         try (JDBCService.DataSourceWrapper dataSourceWrapper =
-                service.createConnection(DBTestUtils.createDataStore(true));
+                service.createDataSource(DBTestUtils.createDataStore(true));
                 Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.dropTestTable(conn, tableName);
         } finally {
@@ -80,7 +80,7 @@ public class JDBCSPTestIT {
     @BeforeEach
     public void before() throws Exception {
         try (JDBCService.DataSourceWrapper dataSourceWrapper =
-                jdbcService.createConnection(DBTestUtils.createDataStore(true));
+                jdbcService.createDataSource(DBTestUtils.createDataStore(true));
                 Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.truncateTable(conn, tableName);
             DBTestUtils.loadTestData(conn, tableName);
