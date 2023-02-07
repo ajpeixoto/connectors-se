@@ -55,8 +55,8 @@ public class JDBCCommitTestIT {
     public void testCommit() throws SQLException {
         JDBCCommitConfig config = new JDBCCommitConfig();
         JDBCCommitProcessor processor = new JDBCCommitProcessor(config, jdbcService, recordBuilderFactory);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
-            processor.doCommit(dataSourceWrapper);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
+            processor.doCommit(dataSourceWrapper.getConnection());
             assertTrue(dataSourceWrapper.getConnection().isClosed());
         }
     }
@@ -67,8 +67,8 @@ public class JDBCCommitTestIT {
         config.setClose(false);
 
         JDBCCommitProcessor processor = new JDBCCommitProcessor(config, jdbcService, recordBuilderFactory);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore)) {
-            processor.doCommit(dataSourceWrapper);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
+            processor.doCommit(dataSourceWrapper.getConnection());
             assertTrue(!dataSourceWrapper.getConnection().isClosed());
         }
     }

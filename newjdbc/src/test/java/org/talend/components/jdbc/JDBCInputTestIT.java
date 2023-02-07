@@ -70,7 +70,7 @@ public class JDBCInputTestIT {
     public void beforeAll() throws Exception {
         dataStore = DBTestUtils.createDataStore(true);
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(dataStore);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createDataSource(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.createTestTable(conn, tableName);
             DBTestUtils.createAllTypesTable(conn, tableName_all_type);
@@ -80,7 +80,7 @@ public class JDBCInputTestIT {
     @AfterAll
     public void afterAll() throws SQLException {
         JDBCService service = componentsHandler.findService(JDBCService.class);
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(dataStore);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createDataSource(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.dropTestTable(conn, tableName);
             DBTestUtils.dropAllTypesTable(conn, tableName_all_type);
@@ -91,7 +91,7 @@ public class JDBCInputTestIT {
 
     @BeforeEach
     public void before() throws SQLException {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createConnection(dataStore);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
             DBTestUtils.truncateTable(conn, tableName);
             DBTestUtils.loadTestData(conn, tableName);

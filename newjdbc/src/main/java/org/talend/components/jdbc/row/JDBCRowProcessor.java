@@ -51,6 +51,8 @@ public class JDBCRowProcessor implements Serializable {
     private final RecordBuilderFactory recordBuilderFactory;
 
     @Connection
+    private transient java.sql.Connection connection;
+
     private transient JDBCService.DataSourceWrapper dataSource;
 
     @RuntimeContext
@@ -81,7 +83,7 @@ public class JDBCRowProcessor implements Serializable {
         if (!init) {
             boolean useExistedConnection = false;
 
-            if (dataSource == null) {
+            if (connection == null) {
                 try {
                     dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                             configuration.getDataSet().getDataStore(), context, false);
@@ -97,6 +99,7 @@ public class JDBCRowProcessor implements Serializable {
                 }
             } else {
                 useExistedConnection = true;
+                dataSource = new JDBCService.DataSourceWrapper(null, connection);
             }
 
             writer = new JDBCRowWriter(configuration, useExistedConnection, dataSource,

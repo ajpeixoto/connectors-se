@@ -50,7 +50,9 @@ public class TableEmitter implements Serializable {
     private transient RuntimeContextHolder context;
 
     @Connection
-    private transient JDBCService.DataSourceWrapper connection;
+    private transient java.sql.Connection connection;
+
+    private transient JDBCService.DataSourceWrapper dataSource;
 
     // private final I18nMessage i18n;
 

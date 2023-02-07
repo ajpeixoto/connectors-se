@@ -49,6 +49,8 @@ public class JDBCSPProcessor implements Serializable {
     private transient boolean init;
 
     @Connection
+    private transient java.sql.Connection connection;
+
     private transient JDBCService.DataSourceWrapper dataSource;
 
     @RuntimeContext
@@ -73,7 +75,7 @@ public class JDBCSPProcessor implements Serializable {
         if (!init) {
             boolean useExistedConnection = false;
 
-            if (dataSource == null) {
+            if (connection == null) {
                 try {
                     dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                             configuration.getDataStore(), context, false);
@@ -82,6 +84,7 @@ public class JDBCSPProcessor implements Serializable {
                 }
             } else {
                 useExistedConnection = true;
+                dataSource = new JDBCService.DataSourceWrapper(null, connection);
             }
 
             writer = new JDBCSPWriter(configuration, useExistedConnection, dataSource,

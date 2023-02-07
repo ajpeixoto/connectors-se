@@ -446,7 +446,7 @@ public class DBTestUtils {
 
     public static void createTableForEveryType(JDBCService service, JDBCDataStore dataStore, String tableName)
             throws SQLException {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(dataStore);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createDataSource(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
             createTestTableForEveryType(conn, tableName);
         }
@@ -462,7 +462,7 @@ public class DBTestUtils {
     public static void truncateTableAndLoadDataForEveryType(JDBCService service, JDBCDataStore dataStore,
             String tableName)
             throws SQLException, ClassNotFoundException {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(dataStore);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createDataSource(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
             truncateTable(conn, tableName);
             loadTestDataForEveryType(conn, tableName);
@@ -869,7 +869,7 @@ public class DBTestUtils {
 
     private static void createAllFunctionOrProcedures(JDBCService service, JDBCDataStore dataStore, String tableName)
             throws Exception {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(dataStore);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createDataSource(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
             try (Statement statement = conn.createStatement()) {
                 statement.execute("CREATE PROCEDURE p1 ()  INSERT INTO " + tableName + " values(4, 'lucky') ");// no in,
@@ -892,7 +892,7 @@ public class DBTestUtils {
     }
 
     private static void dropAllFunctionOrProcedures(JDBCService service, JDBCDataStore dataStore) throws SQLException {
-        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createConnection(dataStore);
+        try (JDBCService.DataSourceWrapper dataSourceWrapper = service.createDataSource(dataStore);
                 Connection conn = dataSourceWrapper.getConnection()) {
             try (Statement statement = conn.createStatement()) {
                 statement.execute("DROP PROCEDURE p1");

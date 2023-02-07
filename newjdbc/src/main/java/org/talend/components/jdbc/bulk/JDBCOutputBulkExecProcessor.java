@@ -55,6 +55,8 @@ public class JDBCOutputBulkExecProcessor implements Serializable {
     private transient JDBCBulkExecRuntime runtime;
 
     @Connection
+    private transient java.sql.Connection connection;
+
     private transient JDBCService.DataSourceWrapper dataSource;
 
     @RuntimeContext
@@ -84,7 +86,7 @@ public class JDBCOutputBulkExecProcessor implements Serializable {
     public void init() throws IOException {
         boolean useExistedConnection = false;
 
-        if (dataSource == null) {
+        if (connection == null) {
             try {
                 dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                         configuration.getDataSet().getDataStore(), context, false);
@@ -93,6 +95,7 @@ public class JDBCOutputBulkExecProcessor implements Serializable {
             }
         } else {
             useExistedConnection = true;
+            dataSource = new JDBCService.DataSourceWrapper(null, connection);
         }
 
         writer = new JDBCBulkFileWriter(configuration.getDataSet().getSchema(), configuration.getBulkCommonConfig(),

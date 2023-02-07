@@ -55,6 +55,8 @@ public class QueryEmitter implements Serializable {
     private transient RuntimeContextHolder context;
 
     @Connection
+    private transient java.sql.Connection connection;
+
     private transient JDBCService.DataSourceWrapper dataSource;
 
     // private final I18nMessage i18n;
@@ -76,7 +78,7 @@ public class QueryEmitter implements Serializable {
         }
 
         boolean useExistedConnection = false;
-        if (dataSource == null) {
+        if (connection == null) {
             try {
                 dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
                         configuration.getDataSet().getDataStore(), context, false);
@@ -85,6 +87,7 @@ public class QueryEmitter implements Serializable {
             }
         } else {
             useExistedConnection = true;
+            dataSource = new JDBCService.DataSourceWrapper(null, connection);
         }
 
         reader = new JDBCInputReader(configuration, useExistedConnection, dataSource, recordBuilderFactory, context);
