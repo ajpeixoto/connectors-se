@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,11 +13,13 @@
 package org.talend.components.rejector.configuration;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
+import org.talend.sdk.component.api.configuration.ui.widget.DateTime;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
@@ -26,11 +28,16 @@ import lombok.Data;
 @DataStore("RejectorDataStore")
 @Version(1)
 @Documentation("DataStore for Rejector connector.")
-@GridLayout({ @GridLayout.Row({ "url" }) })
+@GridLayout({ @GridLayout.Row({ "url", "credentialsValidity" }) })
 public class RejectorDataStore implements Serializable {
 
     @Option
     @Documentation(value = "URL.", tooltip = true)
     private String url;
+
+    @Option
+    @Documentation("Doc cd.")
+    @DateTime(dateFormat = "DD-MM-YYYY", useSeconds = false, useUTC = false)
+    private LocalDateTime credentialsValidity;
 
 }

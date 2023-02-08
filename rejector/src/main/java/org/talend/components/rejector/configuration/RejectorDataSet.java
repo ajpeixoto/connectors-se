@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2022 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -14,8 +14,8 @@ package org.talend.components.rejector.configuration;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.talend.sdk.component.api.component.Version;
@@ -65,6 +65,6 @@ public class RejectorDataSet implements Serializable {
     private Integer anInteger;
 
     @Option
-    @Documentation(value = "Zoned informations.", tooltip = true)
-    private ZonedDateTime zndaty;
+    @Documentation(value = "Local Date Time informations.", tooltip = true)
+    private LocalDateTime zndaty;
 }
