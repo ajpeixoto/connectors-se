@@ -21,7 +21,6 @@ import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.condition.UIScope;
-import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
@@ -66,7 +65,6 @@ public class JDBCDataStore implements Serializable {
     private List<Driver> jdbcDriver = Collections.emptyList();
 
     @Option
-    @Required
     @Suggestable(value = "GUESS_DRIVER_CLASS", parameters = { "jdbcDriver" })
     @Documentation("driver class")
     private String jdbcClass;

@@ -407,20 +407,125 @@ public class JDBCService implements Serializable {
         return mvnPath;
     }
 
+    // HikariCP force to use java.sql.Connection.isValid method, but studio allow any jdbc driver which may not
+    // implement that isValid method,
+    // also we don't want to set different test query for different database, so here give a chance to choose to use
+    // HikariCP or java jdbc api directly
+    private static class ConnectionPool {
+
+        private HikariDataSource dataSource;
+
+        private java.sql.Connection connection;
+
+        private void initConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths) {
+            dataSource = new HikariDataSource();
+            dataSource.setJdbcUrl(dataStore.getJdbcUrl());
+            dataSource.setDriverClassName(dataStore.getJdbcClass());
+
+            // HikariCP force to use java.sql.Connetion.isValid or test query to check connection if valid,
+            // so have to set here for different database if that driver not support isValid method
+            if (dataStore.getJdbcClass() != null
+                    && "net.sourceforge.jtds.jdbc.Driver".equals(dataStore.getJdbcClass())) {
+                // the lastest jtds driver not support isValid method :
+                // https://mvnrepository.com/artifact/net.sourceforge.jtds/jtds
+                dataSource.setConnectionTestQuery("SELECT 1");
+                // TODO check for sybase database as jtds also can works for that
+            } else if (driverPaths.stream().anyMatch(path -> path.contains("ojdbc5"))) {
+                // oracle ojdbc5 also not support isValid method
+                dataSource.setConnectionTestQuery("SELECT 1 FROM DUAL");
+            }
+
+            if (dataStore.getUserId() != null) {
+                dataSource.setUsername(dataStore.getUserId());
+            }
+            if (dataStore.getPassword() != null) {
+                dataSource.setPassword(dataStore.getPassword());
+            }
+
+            dataSource.setMaximumPoolSize(1);
+
+            // mysql special property?
+            // this will make statement.executeBatch return wrong info for data insert/updte count, so disable it
+            // for studio
+            // dataSource.addDataSourceProperty("rewriteBatchedStatements", "true");
+            // Security Issues with LOAD DATA LOCAL https://jira.talendforge.org/browse/TDI-42001
+            // TODO add them back for cloud platform
+            // dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
+            // dataSource.addDataSourceProperty("allowLocalInfile", "false"); // MariaDB
+        }
+
+        private void initSingleConnection(final JDBCDataStore dataStore) {
+            try {
+                Class.forName(dataStore.getJdbcClass());
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            final Properties properties = new Properties() {
+
+                {
+                    if (dataStore.getUserId() != null) {
+                        setProperty("user", dataStore.getUserId());
+                    }
+                    if (dataStore.getPassword() != null) {
+                        setProperty("password", dataStore.getPassword());
+                    }
+                    // TODO disable allowLoadLocalInfile or allowLocalInfile for security, now enable for it for test
+                    // for bulk components
+                }
+            };
+            try {
+                connection = DriverManager.getConnection(dataStore.getJdbcUrl(), properties);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        ConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths, boolean useConnectionPool) {
+            if (useConnectionPool) {
+                initConnectionPool(dataStore, driverPaths);
+            } else {
+                initSingleConnection(dataStore);
+            }
+        }
+
+        java.sql.Connection getConnection() throws SQLException {
+            if (connection != null) {
+                return connection;
+            } else {
+                return dataSource.getConnection();
+            }
+        }
+
+        void close() {
+            if (connection != null) {
+                try {
+                    if (!connection.isClosed()) {
+                        connection.close();
+                    }
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                dataSource.close();
+            }
+        }
+
+    }
+
     // copy from tck jdbc connector for cloud, TODO now for fast development, will unify them to one
     public static class JDBCDataSource implements AutoCloseable {
 
         private final Resolver.ClassLoaderDescriptor classLoaderDescriptor;
 
-        private final HikariDataSource dataSource;
+        private final ConnectionPool connectionPool;
 
         public JDBCDataSource(final Resolver resolver,
                 final JDBCDataStore dataStore) {
             final Thread thread = Thread.currentThread();
             final ClassLoader prev = thread.getContextClassLoader();
 
-            List<org.talend.components.jdbc.common.Driver> drivers = dataStore.getJdbcDriver();
-            List<String> paths = Optional.ofNullable(drivers)
+            final List<org.talend.components.jdbc.common.Driver> drivers = dataStore.getJdbcDriver();
+            final List<String> paths = Optional.ofNullable(drivers)
                     .orElse(Collections.emptyList())
                     .stream()
                     .map(driver -> convertMvnPath2TckPath(driver.getPath()))
@@ -430,24 +535,7 @@ public class JDBCService implements Serializable {
 
             try {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
-                dataSource = new HikariDataSource();
-                dataSource.setJdbcUrl(dataStore.getJdbcUrl());
-                dataSource.setDriverClassName(dataStore.getJdbcClass());
-
-                // TODO consider no auth case
-                dataSource.setUsername(dataStore.getUserId());
-                dataSource.setPassword(dataStore.getPassword());
-
-                dataSource.setMaximumPoolSize(1);
-
-                // mysql special property?
-                // this will make statement.executeBatch return wrong info for data insert/updte count, so disable it
-                // for studio
-                // dataSource.addDataSourceProperty("rewriteBatchedStatements", "true");
-                // Security Issues with LOAD DATA LOCAL https://jira.talendforge.org/browse/TDI-42001
-                // TODO add them back for cloud platform
-                // dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
-                // dataSource.addDataSourceProperty("allowLocalInfile", "false"); // MariaDB
+                connectionPool = new ConnectionPool(dataStore, paths, false);
             } finally {
                 thread.setContextClassLoader(prev);
             }
@@ -458,7 +546,7 @@ public class JDBCService implements Serializable {
             final ClassLoader prev = thread.getContextClassLoader();
             try {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
-                return wrap(classLoaderDescriptor.asClassLoader(), dataSource.getConnection(), Connection.class);
+                return wrap(classLoaderDescriptor.asClassLoader(), connectionPool.getConnection(), Connection.class);
             } finally {
                 thread.setContextClassLoader(prev);
             }
@@ -470,7 +558,7 @@ public class JDBCService implements Serializable {
             final ClassLoader prev = thread.getContextClassLoader();
             try {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
-                dataSource.close();
+                connectionPool.close();
             } finally {
                 thread.setContextClassLoader(prev);
                 try {
