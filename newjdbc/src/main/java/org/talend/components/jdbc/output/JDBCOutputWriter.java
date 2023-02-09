@@ -84,7 +84,7 @@ abstract public class JDBCOutputWriter {
 
     protected final RuntimeContextHolder context;
 
-    protected long totalCount;
+    protected int totalCount;
 
     public JDBCOutputWriter(JDBCOutputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
             RecordBuilderFactory recordBuilderFactory, RuntimeContextHolder context) {
@@ -366,6 +366,8 @@ abstract public class JDBCOutputWriter {
             context.set("NB_LINE_INSERTED", insertCount);
             context.set("NB_LINE_UPDATED", updateCount);
             context.set("NB_LINE_REJECTED", rejectCount);
+
+            context.set("NB_LINE", totalCount);
         }
     }
 
