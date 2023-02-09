@@ -81,7 +81,13 @@ public class RowWriter {
                     writer = new ByteTypeWriter(statement, statementIndex, inputValueName);
                 }
             } else if (type == Schema.Type.INT) {
-                writer = new IntTypeWriter(statement, statementIndex, inputValueName);
+                if ("id_Byte".equals(talendType)) {
+                    writer = new ByteTypeWriter(statement, statementIndex, inputValueName);
+                } else if ("id_Short".equals(talendType)) {
+                    writer = new ShortTypeWriter(statement, statementIndex, inputValueName);
+                } else {
+                    writer = new IntTypeWriter(statement, statementIndex, inputValueName);
+                }
             } else if (type == Schema.Type.DATETIME) {
                 writer = new DateTypeWriter(statement, statementIndex, inputValueName, pattern);
             } else if (type == Schema.Type.LONG) {
@@ -402,7 +408,7 @@ public class RowWriter {
                 statement.setNull(statementIndex, java.sql.Types.CHAR);
                 writeDebugColumnNullContent();
             } else {
-                statement.setInt(statementIndex, (char) inputValue);
+                statement.setString(statementIndex, String.valueOf(inputValue));
                 if (debug) {
                     debugUtil.writeColumn(inputValue.toString(), true);
                 }
