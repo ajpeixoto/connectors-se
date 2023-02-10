@@ -98,8 +98,9 @@ public class JDBCSPRecordCreator {
 
             Map<String, Schema.Entry> inputFieldMap = null;
 
-            int pos = 0;
-            for (Schema.Entry outputField : outputSchema.getEntries()) {
+            final List<Schema.Entry> entries = outputSchema.getEntries();
+            for (int pos = 0; pos < entries.size(); pos++) {
+                Schema.Entry outputField = entries.get(pos);
                 if (outputFieldLocation2AvroConverter.containsKey(pos)
                         || (resultSetPostionOfOutputSchema == pos)) {
                     continue;
@@ -122,8 +123,6 @@ public class JDBCSPRecordCreator {
                 if (inputField != null) {
                     autoPropagatedFieldsFromInputToOutput.put(pos, inputField.getName());
                 }
-
-                pos++;
             }
         }
 
