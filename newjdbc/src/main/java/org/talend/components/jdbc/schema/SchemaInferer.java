@@ -53,7 +53,7 @@ public class SchemaInferer {
 
             Schema.Entry.Builder entryBuilder = sqlType2Tck(recordBuilderFactory, size, scale, dbtype, nullable,
                     validName, dbColumnName, null, isKey, mapping,
-                    columnTypeName);
+                    columnTypeName, false, false);
 
             schemaBuilder.withEntry(entryBuilder.build());
         }
@@ -61,14 +61,25 @@ public class SchemaInferer {
         return schemaBuilder.build();
     }
 
-    public static Schema infer(RecordBuilderFactory recordBuilderFactory, JDBCTableMetadata tableMetadata, Dbms mapping)
+    public static Schema infer(RecordBuilderFactory recordBuilderFactory, JDBCTableMetadata tableMetadata, Dbms mapping,
+            boolean needUniqueColumnsAndForeignKeys)
             throws SQLException {
         Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(RECORD);
 
         DatabaseMetaData databaseMetdata = tableMetadata.getDatabaseMetaData();
 
-        Set<String> keys = getPrimaryKeys(databaseMetdata, tableMetadata.getCatalog(), tableMetadata.getDbSchema(),
-                tableMetadata.getTablename());
+        final Set<String> keys =
+                getPrimaryKeys(databaseMetdata, tableMetadata.getCatalog(), tableMetadata.getDbSchema(),
+                        tableMetadata.getTablename());
+
+        Set<String> uniqueColumns = null;
+        Set<String> foreignKeys = null;
+        if (needUniqueColumnsAndForeignKeys) {
+            uniqueColumns = getUniqueColumns(databaseMetdata, tableMetadata.getCatalog(), tableMetadata.getDbSchema(),
+                    tableMetadata.getTablename());
+            foreignKeys = getForeignKeys(databaseMetdata, tableMetadata.getCatalog(), tableMetadata.getDbSchema(),
+                    tableMetadata.getTablename());
+        }
 
         try (ResultSet metadata = databaseMetdata.getColumns(tableMetadata.getCatalog(), tableMetadata.getDbSchema(),
                 tableMetadata.getTablename(), null)) {
@@ -87,6 +98,14 @@ public class SchemaInferer {
                 String columnName = metadata.getString("COLUMN_NAME");
                 boolean isKey = keys.contains(columnName);
 
+                boolean isUniqueColumn = false;
+                boolean isForeignKey = false;
+                if (needUniqueColumnsAndForeignKeys) {
+                    // primary key also create unique index, so exclude it here
+                    isUniqueColumn = isKey ? false : uniqueColumns.contains(columnName);
+                    isForeignKey = foreignKeys.contains(columnName);
+                }
+
                 String defaultValue = metadata.getString("COLUMN_DEF");
 
                 String columnTypeName = metadata.getString("TYPE_NAME");
@@ -96,7 +115,7 @@ public class SchemaInferer {
 
                 Schema.Entry.Builder entryBuilder = sqlType2Tck(recordBuilderFactory, size, scale, dbtype, nullable,
                         validName, columnName, defaultValue, isKey, mapping,
-                        columnTypeName);
+                        columnTypeName, isUniqueColumn, isForeignKey);
 
                 schemaBuilder.withEntry(entryBuilder.build());
             } while (metadata.next());
@@ -120,14 +139,57 @@ public class SchemaInferer {
         return result;
     }
 
+    private static Set<String> getUniqueColumns(DatabaseMetaData databaseMetdata, String catalogName, String schemaName,
+            String tableName) throws SQLException {
+        Set<String> result = new HashSet<>();
+
+        try (ResultSet resultSet = databaseMetdata.getIndexInfo(catalogName, schemaName, tableName, true, true)) {
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    String indexColumn = resultSet.getString("COLUMN_NAME");
+                    // some database return some null, for example oracle, so need this null check
+                    if (indexColumn != null) {
+                        result.add(indexColumn);
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private static Set<String> getForeignKeys(DatabaseMetaData databaseMetdata, String catalogName, String schemaName,
+            String tableName) throws SQLException {
+        Set<String> result = new HashSet<>();
+
+        try (ResultSet resultSet = databaseMetdata.getImportedKeys(catalogName, schemaName, tableName)) {
+            if (resultSet != null) {
+                while (resultSet.next()) {
+                    result.add(resultSet.getString("FKCOLUMN_NAME"));
+                }
+            }
+        }
+
+        return result;
+    }
+
     private static Schema.Entry.Builder sqlType2Tck(RecordBuilderFactory recordBuilderFactory, int size, int scale,
             int dbtype, boolean nullable, String name, String dbColumnName,
-            Object defaultValue, boolean isKey, Dbms mapping, String columnTypeName) {
+            Object defaultValue, boolean isKey, Dbms mapping, String columnTypeName, boolean isUniqueColumn,
+            boolean isForeignKey) {
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder()
                 .withName(name)
                 .withRawName(dbColumnName)
                 .withNullable(nullable)
                 .withProp(SchemaProperty.IS_KEY, String.valueOf(isKey));
+
+        if (isUniqueColumn) {
+            entryBuilder.withProp(SchemaProperty.IS_UNIQUE, "true");
+        }
+
+        if (isForeignKey) {
+            entryBuilder.withProp(SchemaProperty.IS_FOREIGN_KEY, "true");
+        }
 
         boolean isIgnoreLength = false;
         boolean isIgnorePrecision = false;

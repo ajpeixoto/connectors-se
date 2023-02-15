@@ -44,7 +44,6 @@ public class QueryEmitter implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    // TODO how to make it both works well for cloud and studio?
     private final JDBCInputConfig configuration;
 
     private final RecordBuilderFactory recordBuilderFactory;
@@ -90,7 +89,8 @@ public class QueryEmitter implements Serializable {
             dataSource = new JDBCService.DataSourceWrapper(null, connection);
         }
 
-        reader = new JDBCInputReader(configuration, useExistedConnection, dataSource, recordBuilderFactory, context);
+        reader = new JDBCInputReader(configuration, jdbcService, useExistedConnection, dataSource, recordBuilderFactory,
+                context);
         reader.open();
     }
 

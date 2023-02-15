@@ -12,16 +12,24 @@
  */
 package org.talend.components.jdbc.output;
 
+import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.common.SchemaInfo;
+import org.talend.components.jdbc.platforms.GenericPlatform;
+import org.talend.components.jdbc.platforms.Platform;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 /**
  * SQL build tool for only runtime, for design time, we use another one : QueryUtils which consider the context.var and
  * so on
  *
  */
+@Slf4j
 public class JDBCSQLBuilder {
 
     private JDBCSQLBuilder() {
@@ -31,33 +39,24 @@ public class JDBCSQLBuilder {
         return new JDBCSQLBuilder();
     }
 
-    protected String getProtectedChar() {
-        return "";
+    private static final String QUERY_TEMPLATE = "select %s from %s";
+
+    public String generateSQL4SelectTable(Platform platform, String tableName, List<SchemaInfo> schema) {
+        String columns = ofNullable(schema).filter(list -> !list.isEmpty())
+                .map(l -> l.stream()
+                        .map(column -> platform.identifier(column.getOriginalDbColumnName()))
+                        .collect(Collectors.joining(",")))
+                .orElse("*");
+        // No need for the i18n service for this instance
+        return String.format(QUERY_TEMPLATE, columns, platform.identifier(tableName));
     }
 
-    public String generateSQL4SelectTable(String tablename, Schema schema) {
+    public String generateSQL4DeleteTable(Platform platform, String tableName) {
         StringBuilder sql = new StringBuilder();
-
-        sql.append("SELECT ");
-        List<Schema.Entry> fields = schema.getEntries();
-        boolean firstOne = true;
-        for (Schema.Entry field : fields) {
-            if (firstOne) {
-                firstOne = false;
-            } else {
-                sql.append(", ");
-            }
-            String dbColumnName = field.getRawName();
-            sql.append(tablename).append(".").append(dbColumnName);
-        }
-        sql.append(" FROM ").append(getProtectedChar()).append(tablename).append(getProtectedChar());
-
-        return sql.toString();
-    }
-
-    public String generateSQL4DeleteTable(String tablename) {
-        StringBuilder sql = new StringBuilder();
-        sql.append("DELETE FROM ").append(getProtectedChar()).append(tablename).append(getProtectedChar());
+        sql.append("DELETE FROM ")
+                .append(platform.delimiterToken())
+                .append(tableName)
+                .append(platform.delimiterToken());
         return sql.toString();
     }
 
@@ -97,7 +96,7 @@ public class JDBCSQLBuilder {
 
     }
 
-    public String generateSQL4Insert(String tablename, List<Column> columnList) {
+    public String generateSQL4Insert(Platform platform, String tableName, List<Column> columnList) {
         List<String> dbColumnNames = new ArrayList<>();
         List<String> expressions = new ArrayList<>();
 
@@ -110,7 +109,7 @@ public class JDBCSQLBuilder {
             }
         }
 
-        return generateSQL4Insert(tablename, dbColumnNames, expressions);
+        return generateSQL4Insert(platform, tableName, dbColumnNames, expressions);
     }
 
     public List<Column> createColumnList(JDBCOutputConfig config, Schema schema) {
@@ -264,9 +263,13 @@ public class JDBCSQLBuilder {
         return columnList;
     }
 
-    public String generateSQL4Insert(String tablename, Schema schema) {
+    public String generateSQL4Insert(Platform platform, String tableName, Schema schema) {
         StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO ").append(getProtectedChar()).append(tablename).append(getProtectedChar()).append(" ");
+        sb.append("INSERT INTO ")
+                .append(platform.delimiterToken())
+                .append(tableName)
+                .append(platform.delimiterToken())
+                .append(" ");
 
         sb.append("(");
 
@@ -281,7 +284,7 @@ public class JDBCSQLBuilder {
             }
 
             String dbColumnName = field.getRawName();
-            sb.append(dbColumnName);
+            sb.append(platform.delimiterToken()).append(dbColumnName).append(platform.delimiterToken());
         }
         sb.append(")");
 
@@ -305,9 +308,14 @@ public class JDBCSQLBuilder {
         return sb.toString();
     }
 
-    private String generateSQL4Insert(String tablename, List<String> insertableDBColumns, List<String> expressions) {
+    private String generateSQL4Insert(Platform platform, String tableName, List<String> insertableDBColumns,
+            List<String> expressions) {
         StringBuilder sb = new StringBuilder();
-        sb.append("INSERT INTO ").append(getProtectedChar()).append(tablename).append(getProtectedChar()).append(" ");
+        sb.append("INSERT INTO ")
+                .append(platform.delimiterToken())
+                .append(tableName)
+                .append(platform.delimiterToken())
+                .append(" ");
 
         sb.append("(");
         boolean firstOne = true;
@@ -318,7 +326,7 @@ public class JDBCSQLBuilder {
                 sb.append(",");
             }
 
-            sb.append(dbColumnName);
+            sb.append(platform.delimiterToken()).append(dbColumnName).append(platform.delimiterToken());
         }
         sb.append(")");
 
@@ -341,7 +349,7 @@ public class JDBCSQLBuilder {
         return sb.toString();
     }
 
-    public String generateSQL4Delete(String tablename, List<Column> columnList) {
+    public String generateSQL4Delete(Platform platform, String tableName, List<Column> columnList) {
         List<String> deleteKeys = new ArrayList<>();
         List<String> expressions = new ArrayList<>();
 
@@ -354,15 +362,16 @@ public class JDBCSQLBuilder {
             }
         }
 
-        return generateSQL4Delete(tablename, deleteKeys, expressions);
+        return generateSQL4Delete(platform, tableName, deleteKeys, expressions);
     }
 
-    private String generateSQL4Delete(String tablename, List<String> deleteKeys, List<String> expressions) {
+    private String generateSQL4Delete(Platform platform, String tableName, List<String> deleteKeys,
+            List<String> expressions) {
         StringBuilder sb = new StringBuilder();
         sb.append("DELETE FROM ")
-                .append(getProtectedChar())
-                .append(tablename)
-                .append(getProtectedChar())
+                .append(platform.delimiterToken())
+                .append(tableName)
+                .append(platform.delimiterToken())
                 .append(" WHERE ");
 
         int i = 0;
@@ -375,9 +384,9 @@ public class JDBCSQLBuilder {
                 sb.append(" AND ");
             }
 
-            sb.append(getProtectedChar())
+            sb.append(platform.delimiterToken())
                     .append(dbColumnName)
-                    .append(getProtectedChar())
+                    .append(platform.delimiterToken())
                     .append(" = ")
                     .append(expressions.get(i++));
         }
@@ -385,10 +394,15 @@ public class JDBCSQLBuilder {
         return sb.toString();
     }
 
-    private String generateSQL4Update(String tablename, List<String> updateValues, List<String> updateKeys,
+    private String generateSQL4Update(Platform platform, String tableName, List<String> updateValues,
+            List<String> updateKeys,
             List<String> updateValueExpressions, List<String> updateKeyExpressions) {
         StringBuilder sb = new StringBuilder();
-        sb.append("UPDATE ").append(getProtectedChar()).append(tablename).append(getProtectedChar()).append(" SET ");
+        sb.append("UPDATE ")
+                .append(platform.delimiterToken())
+                .append(tableName)
+                .append(platform.delimiterToken())
+                .append(" SET ");
 
         int i = 0;
 
@@ -400,9 +414,9 @@ public class JDBCSQLBuilder {
                 sb.append(",");
             }
 
-            sb.append(getProtectedChar())
+            sb.append(platform.delimiterToken())
                     .append(dbColumnName)
-                    .append(getProtectedChar())
+                    .append(platform.delimiterToken())
                     .append(" = ")
                     .append(updateValueExpressions.get(i++));
         }
@@ -419,9 +433,9 @@ public class JDBCSQLBuilder {
                 sb.append(" AND ");
             }
 
-            sb.append(getProtectedChar())
+            sb.append(platform.delimiterToken())
                     .append(dbColumnName)
-                    .append(getProtectedChar())
+                    .append(platform.delimiterToken())
                     .append(" = ")
                     .append(updateKeyExpressions.get(i++));
         }
@@ -429,7 +443,7 @@ public class JDBCSQLBuilder {
         return sb.toString();
     }
 
-    public String generateSQL4Update(String tablename, List<Column> columnList) {
+    public String generateSQL4Update(Platform platform, String tableName, List<Column> columnList) {
         List<String> updateValues = new ArrayList<>();
         List<String> updateValueExpressions = new ArrayList<>();
 
@@ -450,16 +464,17 @@ public class JDBCSQLBuilder {
             }
         }
 
-        return generateSQL4Update(tablename, updateValues, updateKeys, updateValueExpressions, updateKeyExpressions);
+        return generateSQL4Update(platform, tableName, updateValues, updateKeys, updateValueExpressions,
+                updateKeyExpressions);
     }
 
-    private String generateQuerySQL4InsertOrUpdate(String tablename, List<String> updateKeys,
+    private String generateQuerySQL4InsertOrUpdate(Platform platform, String tableName, List<String> updateKeys,
             List<String> updateKeyExpressions) {
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT COUNT(1) FROM ")
-                .append(getProtectedChar())
-                .append(tablename)
-                .append(getProtectedChar())
+                .append(platform.delimiterToken())
+                .append(tableName)
+                .append(platform.delimiterToken())
                 .append(" WHERE ");
 
         int i = 0;
@@ -472,9 +487,9 @@ public class JDBCSQLBuilder {
                 sb.append(" AND ");
             }
 
-            sb.append(getProtectedChar())
+            sb.append(platform.delimiterToken())
                     .append(dbColumnName)
-                    .append(getProtectedChar())
+                    .append(platform.delimiterToken())
                     .append(" = ")
                     .append(updateKeyExpressions.get(i++));
         }
@@ -482,7 +497,7 @@ public class JDBCSQLBuilder {
         return sb.toString();
     }
 
-    public String generateQuerySQL4InsertOrUpdate(String tablename, List<Column> columnList) {
+    public String generateQuerySQL4InsertOrUpdate(Platform platform, String tableName, List<Column> columnList) {
         List<String> updateKeys = new ArrayList<>();
         List<String> updateKeyExpressions = new ArrayList<>();
 
@@ -495,7 +510,7 @@ public class JDBCSQLBuilder {
             }
         }
 
-        return generateQuerySQL4InsertOrUpdate(tablename, updateKeys, updateKeyExpressions);
+        return generateQuerySQL4InsertOrUpdate(platform, tableName, updateKeys, updateKeyExpressions);
     }
 
     private List<Column> getAllColumns(List<Column> columnList) {

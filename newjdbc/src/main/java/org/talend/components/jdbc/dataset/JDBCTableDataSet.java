@@ -15,6 +15,8 @@ package org.talend.components.jdbc.dataset;
 import lombok.Data;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.output.JDBCSQLBuilder;
+import org.talend.components.jdbc.platforms.Platform;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
@@ -24,6 +26,9 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @Data
 @GridLayout({
@@ -36,7 +41,7 @@ import java.util.List;
 })
 @DataSet("JDBCTableDataSet")
 @Documentation("A table dataset")
-public class JDBCTableDataSet implements Serializable {
+public class JDBCTableDataSet implements BaseDataSet, Serializable {
 
     @Option
     @Documentation("The connection information to execute")
@@ -53,4 +58,14 @@ public class JDBCTableDataSet implements Serializable {
     @Documentation("schema")
     private List<SchemaInfo> schema;
 
+    @Override
+    public String getSqlQuery(Platform platform) {
+        // JDBCTableDataSet's getSqlQuery method should be only used for cloud source, so platform is impossible is null
+        return JDBCSQLBuilder.getInstance().generateSQL4SelectTable(platform, this.getTableName(), this.getSchema());
+    }
+
+    @Override
+    public boolean isTableMode() {
+        return true;
+    }
 }

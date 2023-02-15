@@ -14,6 +14,13 @@ package org.talend.components.jdbc.output;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.platforms.DatabaseSpecial;
+import org.talend.components.jdbc.platforms.ErrorFactory;
+import org.talend.components.jdbc.platforms.Platform;
+import org.talend.components.jdbc.platforms.RuntimeEnvUtil;
+import org.talend.components.jdbc.platforms.cloud.QueryManager;
+import org.talend.components.jdbc.platforms.cloud.QueryManagerFactory;
+import org.talend.components.jdbc.platforms.cloud.Reject;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable;
@@ -29,8 +36,10 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.io.Serializable;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable.AVAILABILITY.AFTER;
@@ -70,6 +79,18 @@ public class OutputProcessor implements Serializable {
 
     private transient JDBCOutputWriter writer;
 
+    private transient Boolean tableExistsCheck;
+
+    private transient boolean tableCreated;
+
+    private transient QueryManager queryManager;
+
+    private transient List<Record> records;
+
+    private transient int batchSize;
+
+    private transient int batchCount;
+
     public OutputProcessor(@Option("configuration") final JDBCOutputConfig configuration,
             final JDBCService jdbcService, final RecordBuilderFactory recordBuilderFactory/*
                                                                                            * , final I18nMessage
@@ -78,13 +99,14 @@ public class OutputProcessor implements Serializable {
         this.configuration = configuration;
         this.jdbcService = jdbcService;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.batchSize = this.configuration.getBatchSize();// batch size will always show for cloud
         // this.i18n = i18nMessage;
     }
 
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
             @Output("reject") final OutputEmitter<Record> reject)
-            throws SQLException {
+            throws SQLException, IOException {
         if (!init) {
             boolean useExistedConnection = false;
 
@@ -104,32 +126,88 @@ public class OutputProcessor implements Serializable {
                 dataSource = new JDBCService.DataSourceWrapper(null, connection);
             }
 
-            switch (configuration.getDataAction()) {
-            case INSERT:
-                writer = new JDBCOutputInsertWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory, context);
-                break;
-            case UPDATE:
-                writer = new JDBCOutputUpdateWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory, context);
-                break;
-            case INSERT_OR_UPDATE:
-                writer = new JDBCOutputInsertOrUpdateWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory, context);
-                break;
-            case UPDATE_OR_INSERT:
-                writer = new JDBCOutputUpdateOrInsertWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory, context);
-                break;
-            case DELETE:
-                writer = new JDBCOutputDeleteWriter(configuration, useExistedConnection, dataSource,
-                        recordBuilderFactory, context);
-                break;
+            final boolean isCloud = RuntimeEnvUtil.isCloud(configuration.getDataSet().getDataStore());
+            if (isCloud) {
+                final String driverId =
+                        jdbcService.getPlatformService().getDriver(configuration.getDataSet().getDataStore()).getId();
+                final Platform platform =
+                        jdbcService.getPlatformService().getPlatform(configuration.getDataSet().getDataStore());
+                this.queryManager = QueryManagerFactory.getQueryManager(platform, jdbcService.getI18n(), configuration);
+
+                if (this.tableExistsCheck == null) {
+                    this.tableExistsCheck = DatabaseSpecial.checkTableExistence(driverId,
+                            configuration.getDataSet().getTableName(), dataSource);
+                }
+                if (!this.tableExistsCheck && !this.configuration.isCreateTableIfNotExists()) {
+                    throw new IllegalStateException(
+                            jdbcService.getI18n()
+                                    .errorTaberDoesNotExists(this.configuration.getDataSet().getTableName()));
+                }
+
+                if (!tableExistsCheck && !tableCreated && configuration.isCreateTableIfNotExists()) {
+                    List<Record> data = new ArrayList<>(1);
+                    data.add(record);
+                    // no need to close the connection as expected reuse for studio and get it from pool for cloud
+                    final java.sql.Connection connection = dataSource.getConnection();
+                    platform.createTableIfNotExist(connection, configuration.getDataSet().getTableName(),
+                            configuration.getKeys(), configuration.getSortStrategy(), configuration.getSortKeys(),
+                            configuration.getDistributionStrategy(), configuration.getDistributionKeys(),
+                            configuration.getVarcharLength(), configuration.isUseOriginColumnName(), data);
+                    tableCreated = true;
+                }
             }
 
-            writer.open();
+            if (queryManager == null) {
+                switch (configuration.getDataAction()) {
+                case INSERT:
+                    writer = new JDBCOutputInsertWriter(configuration, jdbcService, useExistedConnection, dataSource,
+                            recordBuilderFactory, context);
+                    break;
+                case UPDATE:
+                    writer = new JDBCOutputUpdateWriter(configuration, jdbcService, useExistedConnection, dataSource,
+                            recordBuilderFactory, context);
+                    break;
+                case INSERT_OR_UPDATE:
+                    writer = new JDBCOutputInsertOrUpdateWriter(configuration, jdbcService, useExistedConnection,
+                            dataSource,
+                            recordBuilderFactory, context);
+                    break;
+                case UPDATE_OR_INSERT:
+                    writer = new JDBCOutputUpdateOrInsertWriter(configuration, jdbcService, useExistedConnection,
+                            dataSource,
+                            recordBuilderFactory, context);
+                    break;
+                case DELETE:
+                    writer = new JDBCOutputDeleteWriter(configuration, jdbcService, useExistedConnection, dataSource,
+                            recordBuilderFactory, context);
+                    break;
+                }
+
+                writer.open();
+            } else {
+                records = new ArrayList<>(1000);
+            }
 
             init = true;
+        }
+
+        if (queryManager != null) {
+            try {
+                batchCount++;
+                records.add(record);
+                if (batchCount < batchSize) {
+
+                } else {
+                    batchCount = 0;
+                    final List<Reject> discards = queryManager.execute(records, dataSource);
+                    records = new ArrayList<>(1000);
+                    discards.stream().map(Object::toString).forEach(log::error);
+                }
+            } catch (final SQLException | IOException e) {
+                records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
+                throw ErrorFactory.toIllegalStateException(e);
+            }
+            return;
         }
 
         // as output component, it's impossible that record is null
@@ -156,6 +234,14 @@ public class OutputProcessor implements Serializable {
 
     @PreDestroy
     public void release() throws SQLException {
+        if (records != null) {
+            records = null;
+        }
+
+        if (queryManager != null && dataSource != null) {
+            dataSource.close();
+        }
+
         if (writer != null) {
             writer.close();
         }

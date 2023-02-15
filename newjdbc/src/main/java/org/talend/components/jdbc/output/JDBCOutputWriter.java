@@ -13,6 +13,9 @@
 package org.talend.components.jdbc.output;
 
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.platforms.GenericPlatform;
+import org.talend.components.jdbc.platforms.Platform;
+import org.talend.components.jdbc.platforms.RuntimeEnvUtil;
 import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.context.RuntimeContextHolder;
@@ -86,9 +89,22 @@ abstract public class JDBCOutputWriter {
 
     protected int totalCount;
 
-    public JDBCOutputWriter(JDBCOutputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
-            RecordBuilderFactory recordBuilderFactory, RuntimeContextHolder context) {
+    protected final boolean isCloud;
+
+    protected final Platform platform;
+
+    public JDBCOutputWriter(final JDBCOutputConfig config, final JDBCService jdbcService,
+            final boolean useExistedConnection, final JDBCService.DataSourceWrapper conn,
+            final RecordBuilderFactory recordBuilderFactory, final RuntimeContextHolder context) {
         this.config = config;
+
+        this.isCloud = RuntimeEnvUtil.isCloud(config.getDataSet().getDataStore());
+        if (isCloud) {
+            this.platform = jdbcService.getPlatformService().getPlatform(config.getDataSet().getDataStore());
+        } else {
+            this.platform = new GenericPlatform(jdbcService.getI18n(), null);
+        }
+
         this.useExistedConnection = useExistedConnection;
         this.conn = conn;
         this.recordBuilderFactory = recordBuilderFactory;
@@ -143,7 +159,7 @@ abstract public class JDBCOutputWriter {
             return;
         }
 
-        String sql = JDBCSQLBuilder.getInstance().generateSQL4DeleteTable(config.getDataSet().getTableName());
+        String sql = JDBCSQLBuilder.getInstance().generateSQL4DeleteTable(platform, config.getDataSet().getTableName());
         try {
             try (Statement statement = conn.getConnection().createStatement()) {
                 if (useQueryTimeout) {

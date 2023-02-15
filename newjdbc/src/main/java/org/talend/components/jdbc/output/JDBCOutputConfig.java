@@ -13,21 +13,43 @@
 package org.talend.components.jdbc.output;
 
 import lombok.Data;
+import org.talend.components.jdbc.common.DistributionStrategy;
+import org.talend.components.jdbc.common.OperationKey;
+import org.talend.components.jdbc.common.RedshiftSortStrategy;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.configuration.action.Suggestable;
+import org.talend.sdk.component.api.configuration.action.Validable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
+import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+
+import static org.talend.sdk.component.api.configuration.condition.ActiveIf.EvaluationStrategy.CONTAINS;
+import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.AND;
+import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.OR;
 
 @Data
 @GridLayout({
         @GridLayout.Row("dataSet"),
         @GridLayout.Row("dataAction"),
         @GridLayout.Row("clearData"),
-        @GridLayout.Row("dieOnError")
+        @GridLayout.Row("dieOnError"),
+
+        // cloud special
+        @GridLayout.Row("createTableIfNotExists"),
+        @GridLayout.Row("varcharLength"),
+        @GridLayout.Row("keys"),
+        @GridLayout.Row("sortStrategy"),
+        @GridLayout.Row("sortKeys"),
+        @GridLayout.Row("distributionStrategy"),
+        @GridLayout.Row("distributionKeys"),
+        @GridLayout.Row("ignoreUpdate")
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataSet"),
@@ -39,7 +61,11 @@ import java.util.List;
         @GridLayout.Row("useBatch"),
         @GridLayout.Row("batchSize"),
         @GridLayout.Row("useQueryTimeout"),
-        @GridLayout.Row("queryTimeout")
+        @GridLayout.Row("queryTimeout"),
+
+        // cloud special
+        @GridLayout.Row("rewriteBatchedStatements"),
+        @GridLayout.Row("useOriginColumnName")
 
 })
 @Documentation("jdbc output")
@@ -49,8 +75,73 @@ public class JDBCOutputConfig implements Serializable {
     @Documentation("table dataset")
     private JDBCTableDataSet dataSet;
 
-    // TODO studio will add schema field auto
-    // TODO but how to add guess schema auto for tjdbcoutput, which should guess from table
+    // cloud special ui start================
+
+    @Option
+    @Required
+    @ActiveIf(target = "dataAction", value = { "INSERT", "INSERT_OR_UPDATE", "UPDATE_OR_INSERT", "BULK_LOAD" })
+    @Documentation("Create table if don't exists")
+    private boolean createTableIfNotExists = false;
+
+    @Option
+    @Required
+    @ActiveIf(target = "../createTableIfNotExists", value = { "true" })
+    @Documentation("The length of varchar types. This value will be used to create varchar columns in this table."
+            + "\n-1 means that the max supported length of the targeted database will be used.")
+    private int varcharLength = -1;
+
+    @Option
+    @ActiveIfs(operator = OR, value = { @ActiveIf(target = "../createTableIfNotExists", value = { "true" }),
+            @ActiveIf(target = "../dataAction", value = { "INSERT", "BULK_LOAD" }, negate = true) })
+    @Documentation("List of columns to be used as keys for this operation")
+    private OperationKey keys = new OperationKey();
+
+    @Option
+    @ActiveIfs(operator = AND, value = { @ActiveIf(target = "../dataSet.dataStore.dbType", value = { "Redshift" }),
+            @ActiveIf(target = "../createTableIfNotExists", value = { "true" }) })
+    @Documentation("Define the sort strategy of Redshift table")
+    private RedshiftSortStrategy sortStrategy = RedshiftSortStrategy.COMPOUND;
+
+    @Option
+    @Validable(value = "ACTION_VALIDATE_SORT_KEYS", parameters = { "../sortStrategy", "../sortKeys" })
+    @ActiveIfs(operator = AND, value = { @ActiveIf(target = "../dataSet.dataStore.dbType", value = { "Redshift" }),
+            @ActiveIf(target = "../createTableIfNotExists", value = { "true" }),
+            @ActiveIf(target = "../sortStrategy", value = { "NONE" }, negate = true), })
+    @Suggestable(value = "ACTION_SUGGESTION_TABLE_COLUMNS_NAMES", parameters = { "../dataSet" })
+    @Documentation("List of columns to be used as sort keys for redshift")
+    private List<String> sortKeys = new ArrayList<>();
+
+    @Option
+    @ActiveIfs(operator = AND, value = { @ActiveIf(target = "../dataSet.dataStore.dbType", value = { "Redshift" }),
+            @ActiveIf(target = "../createTableIfNotExists", value = { "true" }) })
+    @Documentation("Define the distribution strategy of Redshift table")
+    private DistributionStrategy distributionStrategy = DistributionStrategy.AUTO;
+
+    @Option
+    @ActiveIfs(operator = AND, value = { @ActiveIf(target = "../dataSet.dataStore.dbType", value = { "Redshift" }),
+            @ActiveIf(target = "../distributionStrategy", value = { "KEYS" }),
+            @ActiveIf(target = "../createTableIfNotExists", value = { "true" }) })
+    @Suggestable(value = "ACTION_SUGGESTION_TABLE_COLUMNS_NAMES", parameters = { "../dataSet" })
+    @Documentation("List of columns to be used as distribution keys for redshift")
+    private List<String> distributionKeys = new ArrayList<>();
+
+    @Option
+    @Suggestable(value = "ACTION_SUGGESTION_TABLE_COLUMNS_NAMES", parameters = { "../dataSet" })
+    @ActiveIf(target = "../dataAction", value = { "UPDATE", "UPSERT", "INSERT_OR_UPDATE", "UPDATE_OR_INSERT" })
+    @Documentation("List of columns to be ignored from update")
+    private List<String> ignoreUpdate = new ArrayList<>();
+
+    @Option
+    @ActiveIfs(operator = OR, value = { @ActiveIf(target = "../dataSet.dataStore.dbType", value = { "MySQL" }),
+            @ActiveIf(target = "../dataSet.dataStore.handler", evaluationStrategy = CONTAINS, value = { "MySQL" }) })
+    @Documentation("Rewrite batched statements, to execute one statement per batch combining values in the sql query")
+    private boolean rewriteBatchedStatements = true;
+
+    @Option
+    @Documentation("To keep the old behavior that use sanitized name as column name")
+    private boolean useOriginColumnName = true;
+
+    // cloud special ui end================
 
     @Option
     @Documentation("")
@@ -105,5 +196,9 @@ public class JDBCOutputConfig implements Serializable {
     @ActiveIf(target = "useQueryTimeout", value = { "true" })
     @Documentation("")
     private int queryTimeout = 30;
+
+    public List<String> getKeys() {
+        return keys.getKeys();
+    }
 
 }

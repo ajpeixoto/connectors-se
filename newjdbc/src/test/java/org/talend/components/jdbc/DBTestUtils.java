@@ -18,7 +18,10 @@ import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.input.BaseInputConfig;
+import org.talend.components.jdbc.input.JDBCCommonInputConfig;
 import org.talend.components.jdbc.input.JDBCInputConfig;
+import org.talend.components.jdbc.input.JDBCTableInputConfig;
 import org.talend.components.jdbc.output.DataAction;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.output.OutputProcessor;
@@ -110,6 +113,7 @@ public class DBTestUtils {
         dataset4Input.setSqlQuery(DBTestUtils.getSQL(tableName));
         dataset4Input.setSchema(schemaInfos);
         inputConfig.setDataSet(dataset4Input);
+        inputConfig.setConfig(new JDBCCommonInputConfig());
 
         List<Record> result = DBTestUtils.runInput(componentsHandler, inputConfig);
         return result;
@@ -195,6 +199,22 @@ public class DBTestUtils {
         String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
         Job.components()
                 .component("in", "JDBCNew://Input?" + inConfig)
+                .component("out", "test://collector")
+                .connections()
+                .from("in")
+                .to("out")
+                .build()
+                .run();
+        List<Record> data = new ArrayList<>(componentsHandler.getCollectedData(Record.class));
+        componentsHandler.resetState();
+
+        return data;
+    }
+
+    static List<Record> runInput(BaseComponentsHandler componentsHandler, JDBCTableInputConfig config) {
+        String inConfig = configurationByExample().forInstance(config).configured().toQueryString();
+        Job.components()
+                .component("in", "JDBCNew://TableInput?" + inConfig)
                 .component("out", "test://collector")
                 .connections()
                 .from("in")
@@ -820,20 +840,38 @@ public class DBTestUtils {
             }
         }
 
-        String driverClass = props.getProperty("driverClass");
+        final String driverClass = props.getProperty("driverClass");
 
-        String jdbcUrl = props.getProperty("jdbcUrl");
+        final String jdbcUrl = props.getProperty("jdbcUrl");
 
-        String userId = props.getProperty("userId");
+        final String userId = props.getProperty("userId");
 
-        String password = props.getProperty("password");
+        final String password = props.getProperty("password");
 
-        JDBCDataStore dataStore = new JDBCDataStore();
+        final JDBCDataStore dataStore = new JDBCDataStore();
 
         dataStore.setJdbcClass(driverClass);
         dataStore.setJdbcUrl(jdbcUrl);
         dataStore.setUserId(userId);
         dataStore.setPassword(password);
+
+        dataStore.setUseAutoCommit(true);
+        dataStore.setAutoCommit(autoCommit);
+
+        return dataStore;
+    }
+
+    // only for env special test, don't want to introduce the slow docker
+    public static JDBCDataStore createCloudStyleDataStore(boolean autoCommit) {
+        final JDBCDataStore dataStore = new JDBCDataStore();
+
+        dataStore.setDbType("MySQL");
+        dataStore.setSetRawUrl(false);
+        dataStore.setHost("localhost");
+        dataStore.setPort(32768);
+        dataStore.setDatabase("test");
+        dataStore.setUserId("xxx");
+        dataStore.setPassword("xxx");
 
         dataStore.setUseAutoCommit(true);
         dataStore.setAutoCommit(autoCommit);

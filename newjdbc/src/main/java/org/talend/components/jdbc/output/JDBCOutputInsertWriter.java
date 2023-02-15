@@ -30,10 +30,11 @@ public class JDBCOutputInsertWriter extends JDBCOutputWriter {
 
     private String sql;
 
-    public JDBCOutputInsertWriter(JDBCOutputConfig config, boolean useExistedConnection,
-            JDBCService.DataSourceWrapper conn,
-            RecordBuilderFactory recordBuilderFactory, RuntimeContextHolder context) {
-        super(config, useExistedConnection, conn, recordBuilderFactory, context);
+    public JDBCOutputInsertWriter(final JDBCOutputConfig config, final JDBCService jdbcService,
+            final boolean useExistedConnection,
+            final JDBCService.DataSourceWrapper conn,
+            final RecordBuilderFactory recordBuilderFactory, final RuntimeContextHolder context) {
+        super(config, jdbcService, useExistedConnection, conn, recordBuilderFactory, context);
     }
 
     @Override
@@ -42,7 +43,8 @@ public class JDBCOutputInsertWriter extends JDBCOutputWriter {
         try {
             // if not dynamic, we can computer it now for "fail soon" way, not fail in main part if fail
             if (!isDynamic) {
-                sql = JDBCSQLBuilder.getInstance().generateSQL4Insert(config.getDataSet().getTableName(), columnList);
+                sql = JDBCSQLBuilder.getInstance()
+                        .generateSQL4Insert(platform, config.getDataSet().getTableName(), columnList);
                 statement = conn.getConnection().prepareStatement(sql);
             }
         } catch (SQLException e) {
@@ -62,7 +64,7 @@ public class JDBCOutputInsertWriter extends JDBCOutputWriter {
                             recordBuilderFactory);
                     columnList = JDBCSQLBuilder.getInstance().createColumnList(config, currentSchema);
                     sql = JDBCSQLBuilder.getInstance()
-                            .generateSQL4Insert(config.getDataSet().getTableName(), columnList);
+                            .generateSQL4Insert(platform, config.getDataSet().getTableName(), columnList);
                     statement = conn.getConnection().prepareStatement(sql);
                 } catch (SQLException e) {
                     throw e;

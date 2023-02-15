@@ -29,6 +29,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.Serializable;
+import java.sql.SQLException;
 
 @Slf4j
 @Version(1)
@@ -39,24 +40,20 @@ public class TableEmitter implements Serializable {
 
     private static final long serialVersionUID = 1;
 
-    // TODO how to make it both works well for cloud and studio?
-    private final JDBCInputConfig configuration;
+    private final JDBCTableInputConfig configuration;
 
     private final RecordBuilderFactory recordBuilderFactory;
 
     private final JDBCService jdbcService;
 
-    @RuntimeContext
-    private transient RuntimeContextHolder context;
-
-    @Connection
-    private transient java.sql.Connection connection;
-
     private transient JDBCService.DataSourceWrapper dataSource;
 
     // private final I18nMessage i18n;
 
-    public TableEmitter(@Option("configuration") final JDBCInputConfig configuration, final JDBCService jdbcService,
+    private transient JDBCInputReader reader;
+
+    public TableEmitter(@Option("configuration") final JDBCTableInputConfig configuration,
+            final JDBCService jdbcService,
             final RecordBuilderFactory recordBuilderFactory/* .final I18nMessage i18nMessage */) {
         this.configuration = configuration;
         this.recordBuilderFactory = recordBuilderFactory;
@@ -65,18 +62,32 @@ public class TableEmitter implements Serializable {
     }
 
     @PostConstruct
-    public void init() {
+    public void init() throws SQLException {
+        try {
+            dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
+                    configuration.getDataSet().getDataStore(), null, false);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
+        reader = new JDBCInputReader(configuration, jdbcService, false, dataSource, recordBuilderFactory, null);
+        reader.open();
     }
 
     @Producer
-    public Record next() {
-        return null;
+    public Record next() throws SQLException {
+        if (reader.advance()) {
+            return reader.getCurrent();
+        } else {
+            return null;
+        }
     }
 
     @PreDestroy
-    public void release() {
-
+    public void release() throws SQLException {
+        if (reader != null) {
+            reader.close();
+        }
     }
 
 }
