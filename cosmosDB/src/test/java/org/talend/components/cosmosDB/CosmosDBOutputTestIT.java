@@ -12,8 +12,11 @@
  */
 package org.talend.components.cosmosDB;
 
-import com.microsoft.azure.documentdb.Document;
+/*import com.microsoft.azure.documentdb.Document;
 import com.microsoft.azure.documentdb.DocumentClientException;
+
+ */
+import com.azure.cosmos.implementation.Document;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.Before;
@@ -37,7 +40,7 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
     }
 
     @Test
-    public void outputTest() throws DocumentClientException {
+    public void outputTest()  {
         config.setAutoIDGeneration(true);
         CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service);
         cosmosDBOutput.init();
@@ -50,7 +53,7 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
     }
 
     @Test
-    public void outputTestRaw() throws DocumentClientException {
+    public void outputTestRaw() {
         config.setAutoIDGeneration(true);
         CosmosDBOutput cosmosDBOutput = new CosmosDBOutput(config, service);
         cosmosDBOutput.init();
@@ -63,7 +66,7 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
     }
 
     @Test
-    public void createCollectionTest() throws DocumentClientException {
+    public void createCollectionTest() {
         config.setAutoIDGeneration(true);
         dataSet.setCollectionID("pyzhouTest2");
         config.setDataset(dataSet);
@@ -91,12 +94,14 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
         Record record = createData3().get(0);
         cosmosDBOutput.onNext(record);
         cosmosDBOutput.release();
-        try {
+//        try {
             cosmosTestUtils.readDocuments(collectionID, "Andersen.1", "Andersen");
             Assertions.fail();
-        } catch (DocumentClientException e) {
+/*        } catch (Exception e) {
             Assertions.assertEquals(404, e.getStatusCode());
         }
+
+ */
 
     }
 }
