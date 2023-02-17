@@ -17,6 +17,7 @@ import com.microsoft.azure.documentdb.DocumentClientException;
 
  */
 import com.azure.cosmos.implementation.Document;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.Before;
@@ -25,6 +26,8 @@ import org.talend.components.cosmosDB.output.CosmosDBOutput;
 import org.talend.components.cosmosDB.output.CosmosDBOutputConfiguration;
 import org.talend.components.cosmosDB.output.DataAction;
 import org.talend.sdk.component.api.record.Record;
+
+import javax.json.JsonObject;
 
 @Slf4j
 public class CosmosDBOutputTestIT extends CosmosDbTestBase {
@@ -47,7 +50,8 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
         Record record = createData(1).get(0);
         cosmosDBOutput.onNext(record);
         cosmosDBOutput.release();
-        Document document = cosmosTestUtils.readDocuments(collectionID, record.getString("id"), "firstfirst");
+        JsonNode document = cosmosTestUtils.readDocuments(collectionID, record.getString("id"), "firstfirst");
+        System.out.println(document.toString());
         Assertions.assertTrue(this.recordEqual(record, document));
 
     }
@@ -60,7 +64,7 @@ public class CosmosDBOutputTestIT extends CosmosDbTestBase {
         Record record = createData4(90).get(0);
         cosmosDBOutput.onNext(record);
         cosmosDBOutput.release();
-        Document document = cosmosTestUtils.readDocuments(collectionID, "90", "firstfirst");
+        JsonNode document = cosmosTestUtils.readDocuments(collectionID, "90", "firstfirst");
         log.info(document.toString());
         // TODO make proper assertion
     }
