@@ -71,6 +71,7 @@ public class OutputParserFactory {
     }
 
     class Insert implements IOutputParser {
+
         boolean disAbleautoID = !configuration.isAutoIDGeneration();
 
         @Override
@@ -78,10 +79,12 @@ public class OutputParserFactory {
             String jsonString = getJsonString(record);
             try {
                 Document document = new Document(jsonString);
-                //TODO handle AutoID checkbox
-                client.getDatabase(databaseName).getContainer(collectionName).createItem(document,new CosmosItemRequestOptions());
-//                client.createDocument(collectionLink, document, new RequestOptions(), disAbleautoID);
-            } catch (Exception e) { //TODO
+                // TODO handle AutoID checkbox
+                client.getDatabase(databaseName)
+                        .getContainer(collectionName)
+                        .createItem(document, new CosmosItemRequestOptions());
+                // client.createDocument(collectionLink, document, new RequestOptions(), disAbleautoID);
+            } catch (Exception e) { // TODO
                 throw new IllegalArgumentException(e);
             }
         }
@@ -103,8 +106,10 @@ public class OutputParserFactory {
         public void output(Record record) {
             String id = record.getString("id");
             try {
-                client.getDatabase(databaseName).getContainer(collectionName).deleteItem(id,
-                        getPartitionKey(record),null);
+                client.getDatabase(databaseName)
+                        .getContainer(collectionName)
+                        .deleteItem(id,
+                                getPartitionKey(record), null);
             } catch (Exception e) { //
                 throw new IllegalArgumentException(e);
             }
@@ -113,12 +118,13 @@ public class OutputParserFactory {
         public PartitionKey getPartitionKey(Record record) {
             if (StringUtils.isNotEmpty(partitionKey)) {
                 // TODO support complex partition key
-                return new PartitionKey(record.get(Object.class,partitionKey));
-//                partitionKey1.setPartitionKey(new PartitionKey(record.get(Object.class, partitionKey)));
+                return new PartitionKey(record.get(Object.class, partitionKey));
+                // partitionKey1.setPartitionKey(new PartitionKey(record.get(Object.class, partitionKey)));
             }
             return PartitionKey.NONE;
         }
     }
+
     class Update implements IOutputParser {
 
         @Override
@@ -127,9 +133,11 @@ public class OutputParserFactory {
             final String documentLink = String.format("/dbs/%s/colls/%s/docs/%s", databaseName, collectionName, id);
             String jsonString = getJsonString(record);
             try {
-                client.getDatabase(databaseName).getContainer(collectionName).replaceItem(new Document(jsonString), id,null,null);
-//                client.replaceDocument(documentLink, new Document(jsonString), new RequestOptions());
-            } catch (Exception e) { //TODO
+                client.getDatabase(databaseName)
+                        .getContainer(collectionName)
+                        .replaceItem(new Document(jsonString), id, null, null);
+                // client.replaceDocument(documentLink, new Document(jsonString), new RequestOptions());
+            } catch (Exception e) { // TODO
                 throw new IllegalArgumentException(e);
             }
         }
@@ -144,8 +152,8 @@ public class OutputParserFactory {
             String jsonString = getJsonString(record);
             try {
                 client.getDatabase(databaseName).getContainer(collectionName).upsertItem(new Document(jsonString));
-//                client.upsertDocument(collectionLink, new Document(jsonString), new RequestOptions(), disAbleautoID);
-            } catch (Exception e) { //TODO
+                // client.upsertDocument(collectionLink, new Document(jsonString), new RequestOptions(), disAbleautoID);
+            } catch (Exception e) { // TODO
                 throw new IllegalArgumentException(e);
             }
         }
