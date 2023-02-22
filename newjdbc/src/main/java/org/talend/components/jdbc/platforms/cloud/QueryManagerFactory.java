@@ -44,7 +44,18 @@ public final class QueryManagerFactory {
                 throw new IllegalStateException(i18n.errorUnsupportedDatabaseAction());
             }
         default:
-            return null;// other database type use generic studio way
+            switch (configuration.getDataAction()) {
+            case INSERT:
+                return new Insert(platform, configuration, i18n);
+            case UPDATE:
+                return new Update(platform, configuration, i18n);
+            case DELETE:
+                return new Delete(platform, configuration, i18n);
+            case INSERT_OR_UPDATE:
+                return new UpsertDefault(platform, configuration, i18n);
+            default:
+                throw new IllegalStateException(i18n.errorUnsupportedDatabaseAction());
+            }
         }
     }
 

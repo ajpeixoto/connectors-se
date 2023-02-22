@@ -23,6 +23,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Optional.ofNullable;
 
@@ -30,7 +31,8 @@ import static java.util.Optional.ofNullable;
 public class DatabaseSpecial {
 
     public static void doConfig4DifferentDatabaseAndDifferentRuntimeEnv(final HikariDataSource dataSource,
-            final JDBCDataStore dataStore, final List<String> driverPaths, final JDBCService jdbcService) {
+            final JDBCDataStore dataStore, final List<String> driverPaths, final JDBCService jdbcService,
+            final Map<String, String> additionalJDBCProperties) {
         final boolean isCloud = RuntimeEnvUtil.isCloud(dataStore);
         if (!isCloud) {
             dataSource.setJdbcUrl(dataStore.getJdbcUrl());
@@ -99,6 +101,9 @@ public class DatabaseSpecial {
             dataSource.setValidationTimeout(dataStore.getConnectionValidationTimeOut() * 1000);
             platform.addDataSourceProperties(dataSource);
 
+            additionalJDBCProperties.entrySet()
+                    .stream()
+                    .forEach(kv -> dataSource.addDataSourceProperty(kv.getKey(), kv.getValue()));
             driver.getFixedParameters().forEach(kv -> dataSource.addDataSourceProperty(kv.getKey(), kv.getValue()));
         }
 

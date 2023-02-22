@@ -39,8 +39,7 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.Serializable;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable.AVAILABILITY.AFTER;
 
@@ -110,10 +109,16 @@ public class OutputProcessor implements Serializable {
         if (!init) {
             boolean useExistedConnection = false;
 
+            final boolean isCloud = RuntimeEnvUtil.isCloud(configuration.getDataSet().getDataStore());
+
             if (connection == null) {
                 try {
+                    Map<String, String> additionalJDBCProperties = new HashMap<>();
+                    if (isCloud && configuration.isRewriteBatchedStatements()) {
+                        additionalJDBCProperties.put("rewriteBatchedStatements", "true");
+                    }
                     dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
-                            configuration.getDataSet().getDataStore(), context, false);
+                            configuration.getDataSet().getDataStore(), context, false, additionalJDBCProperties);
 
                     if (configuration.getCommitEvery() != 0) {
                         dataSource.getConnection().setAutoCommit(false);
@@ -126,7 +131,6 @@ public class OutputProcessor implements Serializable {
                 dataSource = new JDBCService.DataSourceWrapper(null, connection);
             }
 
-            final boolean isCloud = RuntimeEnvUtil.isCloud(configuration.getDataSet().getDataStore());
             if (isCloud) {
                 final String driverId =
                         jdbcService.getPlatformService().getDriver(configuration.getDataSet().getDataStore()).getId();

@@ -354,10 +354,16 @@ public class JDBCService implements Serializable {
         return availableTableTypes;
     }
 
-    public DataSourceWrapper createConnection(final JDBCDataStore dataStore, final boolean readonly)
+    private DataSourceWrapper createConnection(final JDBCDataStore dataStore, final boolean readonly)
+            throws SQLException {
+        return createConnection(dataStore, readonly, Collections.emptyMap());
+    }
+
+    private DataSourceWrapper createConnection(final JDBCDataStore dataStore, final boolean readonly,
+            final Map<String, String> additionalJDBCProperties)
             throws SQLException {
         // TODO check this readonly before: conn = createConnection(dataStore, readonly);
-        JDBCDataSource dataSource = new JDBCDataSource(this.resolver, dataStore, this);
+        JDBCDataSource dataSource = new JDBCDataSource(this.resolver, dataStore, this, additionalJDBCProperties);
         Connection conn = dataSource.getConnection();
         // somebody add it for performance for dataprep
         if (readonly) {
@@ -376,6 +382,13 @@ public class JDBCService implements Serializable {
 
     public DataSourceWrapper createConnectionOrGetFromSharedConnectionPoolOrDataSource(final JDBCDataStore dataStore,
             final RuntimeContextHolder context, final boolean readonly) throws SQLException {
+        return createConnectionOrGetFromSharedConnectionPoolOrDataSource(dataStore, context, readonly,
+                Collections.emptyMap());
+    }
+
+    public DataSourceWrapper createConnectionOrGetFromSharedConnectionPoolOrDataSource(final JDBCDataStore dataStore,
+            final RuntimeContextHolder context, final boolean readonly,
+            final Map<String, String> additionalJDBCProperties) throws SQLException {
         Connection conn = null;
         log.debug("Connection attempt to '{}' with the username '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
 
@@ -422,7 +435,7 @@ public class JDBCService implements Serializable {
                 return createConnection(dataStore, false);
             }
         } else {
-            return createConnection(dataStore, readonly);
+            return createConnection(dataStore, readonly, additionalJDBCProperties);
         }
     }
 
@@ -450,19 +463,26 @@ public class JDBCService implements Serializable {
         private java.sql.Connection connection;
 
         private void initConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths,
-                final JDBCService jdbcService) {
+                final JDBCService jdbcService, final Map<String, String> additionalJDBCProperties) {
             dataSource = new HikariDataSource();
 
             DatabaseSpecial.doConfig4DifferentDatabaseAndDifferentRuntimeEnv(dataSource, dataStore, driverPaths,
-                    jdbcService);
+                    jdbcService, additionalJDBCProperties);
 
             dataSource.setMaximumPoolSize(1);
         }
 
         private void initSingleConnection(final JDBCDataStore dataStore) {
+            final ClassLoader threadContextClassLoader = Thread.currentThread().getContextClassLoader();
+            final Driver driver;
             try {
-                Class.forName(dataStore.getJdbcClass());
+                Class<?> driverClass = threadContextClassLoader.loadClass(dataStore.getJdbcClass());
+                driver = (Driver) driverClass.newInstance();
             } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
             final Properties properties = new Properties() {
@@ -479,16 +499,16 @@ public class JDBCService implements Serializable {
                 }
             };
             try {
-                connection = DriverManager.getConnection(dataStore.getJdbcUrl(), properties);
+                connection = driver.connect(dataStore.getJdbcUrl(), properties);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
 
         ConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths, final boolean useConnectionPool,
-                final JDBCService jdbcService) {
+                final JDBCService jdbcService, final Map<String, String> additionalJDBCProperties) {
             if (useConnectionPool) {
-                initConnectionPool(dataStore, driverPaths, jdbcService);
+                initConnectionPool(dataStore, driverPaths, jdbcService, additionalJDBCProperties);
             } else {
                 initSingleConnection(dataStore);
             }
@@ -518,7 +538,6 @@ public class JDBCService implements Serializable {
 
     }
 
-    // copy from tck jdbc connector for cloud, TODO now for fast development, will unify them to one
     public static class JDBCDataSource implements AutoCloseable {
 
         private final Resolver.ClassLoaderDescriptor classLoaderDescriptor;
@@ -526,7 +545,8 @@ public class JDBCService implements Serializable {
         private final ConnectionPool connectionPool;
 
         public JDBCDataSource(final Resolver resolver,
-                final JDBCDataStore dataStore, final JDBCService jdbcService) {
+                final JDBCDataStore dataStore, final JDBCService jdbcService,
+                final Map<String, String> additionalJDBCProperties) {
             final Thread thread = Thread.currentThread();
             final ClassLoader prev = thread.getContextClassLoader();
 
@@ -556,7 +576,7 @@ public class JDBCService implements Serializable {
 
             try {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
-                connectionPool = new ConnectionPool(dataStore, paths, true, jdbcService);
+                connectionPool = new ConnectionPool(dataStore, paths, isCloud, jdbcService, additionalJDBCProperties);
             } finally {
                 thread.setContextClassLoader(prev);
             }
