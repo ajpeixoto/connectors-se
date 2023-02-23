@@ -19,10 +19,14 @@ import org.talend.components.jdbc.common.DistributionStrategy;
 import org.talend.components.jdbc.common.JDBCConfiguration;
 import org.talend.components.jdbc.common.RedshiftSortStrategy;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.schema.Dbms;
+import org.talend.components.jdbc.schema.DbmsType;
+import org.talend.components.jdbc.schema.TalendTypeAndTckTypeConverter;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -60,7 +64,81 @@ public abstract class Platform implements Serializable {
     abstract public String delimiterToken();
 
     protected abstract String buildQuery(final Connection connection, final Table table,
-            final boolean useOriginColumnName) throws SQLException;
+            final boolean useOriginColumnName, Dbms mapping) throws SQLException;
+
+    protected String createColumns(final List<Column> columns, final boolean useOriginColumnName, Dbms mapping) {
+        return columns.stream()
+                .map(e -> createColumn(e, useOriginColumnName, mapping))
+                .collect(Collectors.joining(","));
+    }
+
+    private String createColumn(final Column column, final boolean useOriginColumnName, Dbms mapping) {
+        return identifier(useOriginColumnName ? column.getOriginalFieldName() : column.getName())//
+                + " " + toDBType(column, mapping)//
+                + " " + isRequired(column)//
+        ;
+    }
+
+    protected String toDBType(final Column column, Dbms mapping) {
+        String talendType = column.getProp(SchemaProperty.STUDIO_TYPE);
+        if (talendType == null) {
+            talendType = TalendTypeAndTckTypeConverter.convertTckType2TalendType(column.getType()).getName();
+        }
+
+        DbmsType dbType = mapping.getTalendMapping(talendType).getDefaultType();
+
+        int length = 0;
+        if (column.getSize() != null && column.getSize() > -1) {
+            length = column.getSize();
+        } else {
+            try {
+                length = Integer.valueOf(column.getProp(SchemaProperty.SIZE));
+            } catch (Exception e) {
+                length = dbType.getDefaultLength();
+            }
+        }
+
+        int precision = 0;
+        try {
+            precision = Integer.valueOf(column.getProp(SchemaProperty.SCALE));
+        } catch (Exception e) {
+            precision = dbType.getDefaultPrecision();
+        }
+
+        final boolean ignoreLength = dbType.isIgnoreLength();
+        final boolean ignorePrecision = dbType.isIgnorePrecision();
+
+        if (dbType.isPreBeforeLength()) {
+            return getTypeDefine(dbType.getName(), precision, length, ignorePrecision, ignoreLength);
+        } else {
+            return getTypeDefine(dbType.getName(), length, precision, ignoreLength, ignorePrecision);
+        }
+    }
+
+    private String getTypeDefine(String dbType, int length, int precision, boolean ignoreLength,
+            boolean ignorePrecision) {
+        StringBuilder stringBuilder = new StringBuilder(16);
+        stringBuilder.append(dbType);
+        boolean startLeft = false;
+        if (!ignoreLength) {
+            startLeft = true;
+            stringBuilder.append('(').append(length);
+        }
+        if (!ignorePrecision) {
+            if (startLeft) {
+                stringBuilder.append(',');
+            } else {
+                startLeft = true;
+                stringBuilder.append('(');
+            }
+            stringBuilder.append(precision);
+        }
+        if (startLeft) {
+            stringBuilder.append(')');
+        }
+
+        return stringBuilder.toString();
+    }
 
     /**
      * @param e if the exception if a table already exist ignore it. otherwise re throw e
@@ -113,7 +191,7 @@ public abstract class Platform implements Serializable {
             final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
             final DistributionStrategy distributionStrategy,
             final List<String> distributionKeys, final int varcharLength, final boolean useOriginColumnName,
-            final List<Record> records)
+            final List<Record> records, final Dbms mapping)
             throws SQLException {
         if (records.isEmpty()) {
             return;
@@ -121,7 +199,7 @@ public abstract class Platform implements Serializable {
         final Table table =
                 getTableModel(connection, name, keys, sortStrategy, sortKeys, distributionStrategy, distributionKeys,
                         varcharLength, records);
-        final String sql = buildQuery(connection, table, useOriginColumnName);
+        final String sql = buildQuery(connection, table, useOriginColumnName, mapping);
         try (final Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
             if (!connection.getAutoCommit()) {

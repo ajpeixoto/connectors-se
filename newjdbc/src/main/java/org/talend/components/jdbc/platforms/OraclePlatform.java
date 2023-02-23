@@ -15,6 +15,7 @@ package org.talend.components.jdbc.platforms;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import java.sql.Connection;
@@ -59,7 +60,8 @@ public class OraclePlatform extends Platform {
     }
 
     @Override
-    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName)
+    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName,
+            Dbms mapping)
             throws SQLException {
         // keep the string builder for readability
         final StringBuilder sql = new StringBuilder("CREATE TABLE");
@@ -69,7 +71,7 @@ public class OraclePlatform extends Platform {
         }
         sql.append(identifier(table.getName()));
         sql.append("(");
-        sql.append(createColumns(table.getColumns(), useOriginColumnName));
+        sql.append(createColumns(table.getColumns(), useOriginColumnName, mapping));
         sql
                 .append(createPKs(connection.getMetaData(), table.getName(),
                         table.getColumns().stream().filter(Column::isPrimaryKey).collect(Collectors.toList())));
@@ -91,41 +93,6 @@ public class OraclePlatform extends Platform {
     protected boolean isTableExistsCreationError(final Throwable e) {
         return e instanceof SQLException && "42000".equals(((SQLException) e).getSQLState())
                 && ((SQLException) e).getErrorCode() == 955;
-    }
-
-    private String createColumns(final List<Column> columns, final boolean useOriginColumnName) {
-        return columns.stream().map(e -> createColumn(e, useOriginColumnName)).collect(Collectors.joining(","));
-    }
-
-    private String createColumn(final Column column, final boolean useOriginColumnName) {
-        return identifier(useOriginColumnName ? column.getOriginalFieldName() : column.getName())//
-                + " " + toDBType(column)//
-                + " " + isRequired(column)//
-        ;
-    }
-
-    private String toDBType(final Column column) {
-        switch (column.getType()) {
-        case STRING:
-            return column.getSize() <= -1 ? "VARCHAR(" + VARCHAR2_MAX + ")" : "VARCHAR(" + column.getSize() + ")";
-        case DOUBLE:
-        case FLOAT:
-        case LONG:
-        case INT:
-            return "NUMBER";
-        case BYTES:
-            return "BLOB";
-        case DATETIME:
-            return "TIMESTAMP(6)";
-        case BOOLEAN:
-            throw new IllegalStateException(
-                    getI18n().errorUnsupportedBooleanType4Oracle(column.getOriginalFieldName()));
-        case RECORD:
-        case ARRAY:
-        default:
-            throw new IllegalStateException(
-                    getI18n().errorUnsupportedType(column.getType().name(), column.getOriginalFieldName()));
-        }
     }
 
 }

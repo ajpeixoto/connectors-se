@@ -140,16 +140,17 @@ public class JDBCInputReader {
             }
         }
 
-        DBType dbTypeInComponentSetting = config.getConfig().isEnableMapping() ? config.getConfig().getMapping() : null;
+        final DBType dbTypeInComponentSetting =
+                config.getConfig().isEnableMapping() ? config.getConfig().getMapping() : null;
 
-        Dbms mapping = null;
+        final Dbms mapping;
         if (mappingFileDir != null) {
             mapping = CommonUtils.getMapping(mappingFileDir, config.getDataSet().getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, jdbcService);
         } else {
             // use the connector nested mapping file
             mapping = CommonUtils.getMapping("/mappings", config.getDataSet().getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, jdbcService);
         }
 
         if (isCloud && config.getDataSet().isTableMode()) {

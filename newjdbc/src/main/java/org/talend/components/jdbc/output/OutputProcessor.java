@@ -21,6 +21,8 @@ import org.talend.components.jdbc.platforms.RuntimeEnvUtil;
 import org.talend.components.jdbc.platforms.cloud.QueryManager;
 import org.talend.components.jdbc.platforms.cloud.QueryManagerFactory;
 import org.talend.components.jdbc.platforms.cloud.Reject;
+import org.talend.components.jdbc.schema.CommonUtils;
+import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable;
@@ -151,12 +153,18 @@ public class OutputProcessor implements Serializable {
                 if (!tableExistsCheck && !tableCreated && configuration.isCreateTableIfNotExists()) {
                     List<Record> data = new ArrayList<>(1);
                     data.add(record);
+
+                    // use the connector nested mapping file
+                    final Dbms mapping =
+                            CommonUtils.getMapping("/mappings", configuration.getDataSet().getDataStore(), null,
+                                    null, jdbcService);
+
                     // no need to close the connection as expected reuse for studio and get it from pool for cloud
                     final java.sql.Connection connection = dataSource.getConnection();
                     platform.createTableIfNotExist(connection, configuration.getDataSet().getTableName(),
                             configuration.getKeys(), configuration.getSortStrategy(), configuration.getSortKeys(),
                             configuration.getDistributionStrategy(), configuration.getDistributionKeys(),
-                            configuration.getVarcharLength(), configuration.isUseOriginColumnName(), data);
+                            configuration.getVarcharLength(), configuration.isUseOriginColumnName(), data, mapping);
                     tableCreated = true;
                 }
             }

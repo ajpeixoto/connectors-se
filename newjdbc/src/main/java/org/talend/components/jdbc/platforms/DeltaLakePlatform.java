@@ -15,12 +15,10 @@ package org.talend.components.jdbc.platforms;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * https://docs.microsoft.com/en-us/azure/databricks/spark/latest/spark-sql/language-manual/sql-ref-syntax-ddl-create-table-datasource#create-table-delta
@@ -60,7 +58,8 @@ public class DeltaLakePlatform extends Platform {
     }
 
     @Override
-    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName) {
+    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName,
+            Dbms mapping) {
         final StringBuilder sql = new StringBuilder("CREATE TABLE");
         sql.append(" ");
         sql.append("IF NOT EXISTS");
@@ -70,7 +69,7 @@ public class DeltaLakePlatform extends Platform {
         }
         sql.append(identifier(table.getName()));
         sql.append("(");
-        sql.append(createColumns(table.getColumns(), useOriginColumnName));
+        sql.append(createColumns(table.getColumns(), useOriginColumnName, mapping));
         sql.append(") USING DELTA");
 
         log.debug("### create table query ###");
@@ -83,44 +82,8 @@ public class DeltaLakePlatform extends Platform {
         return false;
     }
 
-    private String createColumns(final List<Column> columns, final boolean useOriginColumnName) {
-        return columns.stream().map(e -> createColumn(e, useOriginColumnName)).collect(Collectors.joining(","));
-    }
-
-    private String createColumn(final Column column, final boolean useOriginColumnName) {
-        return identifier(useOriginColumnName ? column.getOriginalFieldName() : column.getName())//
-                + " " + toDBType(column)//
-                + " " + isRequired(column)//
-        ;
-    }
-
     protected String isRequired(final Column column) {
         return column.isNullable() && !column.isPrimaryKey() ? "" : "NOT NULL";
-    }
-
-    private String toDBType(final Column column) {
-        switch (column.getType()) {
-        case STRING:
-            return "STRING";
-        case BOOLEAN:
-            return "BOOLEAN";
-        case DOUBLE:
-            return "DOUBLE";
-        case FLOAT:
-            return "FLOAT";
-        case LONG:
-            return "BIGINT";
-        case INT:
-            return "INT";
-        case DATETIME:
-            return "TIMESTAMP";
-        case RECORD:
-        case ARRAY:
-        case BYTES:
-        default:
-            throw new IllegalStateException(
-                    getI18n().errorUnsupportedType(column.getType().name(), column.getOriginalFieldName()));
-        }
     }
 
 }

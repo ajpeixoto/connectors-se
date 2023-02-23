@@ -15,6 +15,7 @@ package org.talend.components.jdbc.platforms;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import java.sql.Connection;
@@ -56,7 +57,8 @@ public class MSSQLPlatform extends Platform {
     }
 
     @Override
-    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName)
+    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName,
+            Dbms mapping)
             throws SQLException {
         // keep the string builder for readability
         final StringBuilder sql = new StringBuilder("CREATE TABLE");
@@ -66,7 +68,7 @@ public class MSSQLPlatform extends Platform {
         }
         sql.append(identifier(table.getName()));
         sql.append("(");
-        sql.append(createColumns(table.getColumns(), useOriginColumnName));
+        sql.append(createColumns(table.getColumns(), useOriginColumnName, mapping));
         sql
                 .append(createPKs(connection.getMetaData(), table.getName(),
                         table.getColumns().stream().filter(Column::isPrimaryKey).collect(Collectors.toList())));
@@ -84,46 +86,8 @@ public class MSSQLPlatform extends Platform {
                 && 2714 == ((SQLException) e).getErrorCode();
     }
 
-    private String createColumns(final List<Column> columns, final boolean useOriginColumnName) {
-        return columns.stream().map(e -> createColumn(e, useOriginColumnName)).collect(Collectors.joining(","));
-    }
-
-    private String createColumn(final Column column, final boolean useOriginColumnName) {
-        return identifier(useOriginColumnName ? column.getOriginalFieldName() : column.getName())//
-                + " " + toDBType(column)//
-                + " " + isRequired(column)//
-        ;
-    }
-
     protected String isRequired(final Column column) {
         return column.isNullable() && !column.isPrimaryKey() ? "" : "NOT NULL";
-    }
-
-    private String toDBType(final Column column) {
-        switch (column.getType()) {
-        case STRING:
-            // https://docs.microsoft.com/fr-fr/sql/relational-databases/tables/primary-and-foreign-key-constraints?view=sql-server-2017
-            return column.getSize() <= -1 ? (column.isPrimaryKey() ? "VARCHAR(900)" : "VARCHAR(max)")
-                    : "VARCHAR(" + column.getSize() + ")";
-        case BOOLEAN:
-            return "BIT";
-        case DOUBLE:
-        case FLOAT:
-            return "DECIMAL";
-        case LONG:
-            return "BIGINT";
-        case INT:
-            return "INT";
-        case BYTES:
-            return "VARBINARY(max)";
-        case DATETIME:
-            return "datetime2";
-        case RECORD:
-        case ARRAY:
-        default:
-            throw new IllegalStateException(
-                    getI18n().errorUnsupportedType(column.getType().name(), column.getOriginalFieldName()));
-        }
     }
 
     @Override

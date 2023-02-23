@@ -15,7 +15,12 @@ package org.talend.components.jdbc.platforms;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.schema.Dbms;
+import org.talend.components.jdbc.schema.DbmsType;
+import org.talend.components.jdbc.schema.TalendType;
+import org.talend.components.jdbc.schema.TalendTypeAndTckTypeConverter;
 import org.talend.components.jdbc.service.I18nMessage;
+import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -56,7 +61,8 @@ public class MySQLPlatform extends Platform {
     }
 
     @Override
-    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName)
+    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName,
+            Dbms mapping)
             throws SQLException {
         // keep the string builder for readability
         final StringBuilder sql = new StringBuilder("CREATE TABLE");
@@ -68,7 +74,7 @@ public class MySQLPlatform extends Platform {
         }
         sql.append(identifier(table.getName()));
         sql.append("(");
-        sql.append(createColumns(table.getColumns(), useOriginColumnName));
+        sql.append(createColumns(table.getColumns(), useOriginColumnName, mapping));
         sql
                 .append(createPKs(connection.getMetaData(), table.getName(),
                         table.getColumns().stream().filter(Column::isPrimaryKey).collect(Collectors.toList())));
@@ -83,44 +89,6 @@ public class MySQLPlatform extends Platform {
     @Override
     protected boolean isTableExistsCreationError(final Throwable e) {
         return false;
-    }
-
-    private String createColumns(final List<Column> columns, final boolean useOriginColumnName) {
-        return columns.stream().map(e -> createColumn(e, useOriginColumnName)).collect(Collectors.joining(","));
-    }
-
-    private String createColumn(final Column column, final boolean useOriginColumnName) {
-        return identifier(useOriginColumnName ? column.getOriginalFieldName() : column.getName())//
-                + " " + toDBType(column)//
-                + " " + isRequired(column)//
-        ;
-    }
-
-    private String toDBType(final Column column) {
-        switch (column.getType()) {
-        case STRING:
-            return column.getSize() <= -1 ? (column.isPrimaryKey() ? "VARCHAR(255)" : "TEXT")
-                    : "VARCHAR(" + column.getSize() + ")";
-        case BOOLEAN:
-            return "BOOLEAN";
-        case DOUBLE:
-            return "DOUBLE";
-        case FLOAT:
-            return "FLOAT";
-        case LONG:
-            return "BIGINT";
-        case INT:
-            return "INT";
-        case BYTES:
-            return "BLOB";
-        case DATETIME:
-            return "DATETIME(6)";
-        case RECORD:
-        case ARRAY:
-        default:
-            throw new IllegalStateException(
-                    getI18n().errorUnsupportedType(column.getType().name(), column.getOriginalFieldName()));
-        }
     }
 
 }

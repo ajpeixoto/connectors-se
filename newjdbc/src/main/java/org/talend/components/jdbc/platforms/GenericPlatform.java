@@ -14,6 +14,7 @@ package org.talend.components.jdbc.platforms;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import java.sql.Connection;
@@ -39,7 +40,8 @@ public class GenericPlatform extends Platform {
     }
 
     @Override
-    public String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName)
+    public String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName,
+            Dbms mapping)
             throws SQLException {
         throw new UnsupportedOperationException("not support to generate to create table sql for generic jdbc case");
     }

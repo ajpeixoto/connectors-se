@@ -17,6 +17,7 @@ import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.condition.UIScope;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
@@ -63,12 +64,14 @@ public class JDBCCommonInputConfig implements Serializable {
     private List<ColumnTrim> columnTrims;
 
     @Option
+    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @Documentation("enable mapping")
     private boolean enableMapping;
 
     // TODO use enum or a new widget mapping? "widget.type.mappingType":"MAPPING_TYPE"
     // TODO duplicated with the one in datastore for metadata though
     @Option
+    @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @ActiveIf(target = "enableMapping", value = { "true" })
     @Documentation("select DB mapping")
     // private String mapping;

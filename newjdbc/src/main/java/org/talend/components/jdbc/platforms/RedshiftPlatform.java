@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DistributionStrategy;
 import org.talend.components.jdbc.common.JDBCConfiguration;
 import org.talend.components.jdbc.common.RedshiftSortStrategy;
+import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import java.sql.Connection;
@@ -50,7 +51,8 @@ public class RedshiftPlatform extends Platform {
     }
 
     @Override
-    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName)
+    protected String buildQuery(final Connection connection, final Table table, final boolean useOriginColumnName,
+            Dbms mapping)
             throws SQLException {
         // keep the string builder for readability
         final StringBuilder sql = new StringBuilder("CREATE TABLE");
@@ -65,7 +67,7 @@ public class RedshiftPlatform extends Platform {
         List<Column> columns = table.getColumns();
         sql
                 .append(createColumns(columns, table.getSortStrategy(), useOriginColumnName,
-                        columns.stream().filter(Column::isSortKey).collect(toList())));
+                        columns.stream().filter(Column::isSortKey).collect(toList()), mapping));
         sql
                 .append(createPKs(connection.getMetaData(), table.getName(),
                         columns.stream().filter(Column::isPrimaryKey).collect(toList())));
@@ -116,46 +118,19 @@ public class RedshiftPlatform extends Platform {
 
     private String createColumns(final List<Column> columns, final RedshiftSortStrategy sortStrategy,
             final boolean useOriginColumnName,
-            final List<Column> sortKeys) {
+            final List<Column> sortKeys, final Dbms mapping) {
         return columns.stream()
-                .map(c -> createColumn(c, sortStrategy, useOriginColumnName, sortKeys))
+                .map(c -> createColumn(c, sortStrategy, useOriginColumnName, sortKeys, mapping))
                 .collect(Collectors.joining(","));
     }
 
     private String createColumn(final Column column, final RedshiftSortStrategy sortStrategy,
             final boolean useOriginColumnName,
-            final List<Column> sortKeys) {
+            final List<Column> sortKeys, final Dbms mapping) {
         return identifier(useOriginColumnName ? column.getOriginalFieldName() : column.getName())//
-                + " " + toDBType(column)//
+                + " " + toDBType(column, mapping)//
                 + " " + isRequired(column)//
                 + (RedshiftSortStrategy.SINGLE.equals(sortStrategy) && sortKeys.contains(column) ? " sortkey" : "");
-    }
-
-    private String toDBType(final Column column) {
-        switch (column.getType()) {
-        case STRING:
-            // https://docs.aws.amazon.com/fr_fr/redshift/latest/dg/r_Character_types.html
-            return column.getSize() <= -1 ? "VARCHAR(max)" : "VARCHAR(" + column.getSize() + ")";
-        case BOOLEAN:
-            return "BOOLEAN";
-        case DOUBLE:
-            return "REAL";
-        case FLOAT:
-            return "DOUBLE PRECISION";
-        case LONG:
-            return "BIGINT";
-        case INT:
-            return "INTEGER";
-        case DATETIME:
-            return "TIMESTAMP";
-        case BYTES:
-            throw new IllegalStateException(getI18n().errorRedshiftUnsupportedBytes(column.getOriginalFieldName()));
-        case RECORD:
-        case ARRAY:
-        default:
-            throw new IllegalStateException(
-                    getI18n().errorUnsupportedType(column.getType().name(), column.getOriginalFieldName()));
-        }
     }
 
 }

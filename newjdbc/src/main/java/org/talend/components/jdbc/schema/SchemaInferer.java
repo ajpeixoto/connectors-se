@@ -278,7 +278,7 @@ public class SchemaInferer {
 
             entryBuilder.withProp(SchemaProperty.STUDIO_TYPE, talendType.getName());
 
-            entryBuilder.withType(convertTalendType2TckType(talendType));
+            entryBuilder.withType(TalendTypeAndTckTypeConverter.convertTalendType2TckType(talendType));
         }
 
         // correct precision/scale/date pattern
@@ -429,42 +429,6 @@ public class SchemaInferer {
         }
     }
 
-    private static Schema.Type convertTalendType2TckType(TalendType talendType) {
-        switch (talendType) {
-        case STRING:
-            return STRING;
-        case BOOLEAN:
-            return BOOLEAN;
-        case INTEGER:
-            return INT;
-        case LONG:
-            return LONG;
-        case DOUBLE:
-            return DOUBLE;
-        case FLOAT:
-            return FLOAT;
-        case BYTE:
-            // no Schema.Type.BYTE
-            return INT;
-        case BYTES:
-            return BYTES;
-        case SHORT:
-            // no Schema.Type.SHORT
-            return INT;
-        case CHARACTER:
-            // no Schema.Type.CHARACTER
-            return STRING;
-        case BIG_DECIMAL:
-            return DECIMAL;
-        case DATE:
-            return DATETIME;
-        case OBJECT:
-            return STRING;
-        default:
-            throw new UnsupportedOperationException("Unrecognized type " + talendType);
-        }
-    }
-
     public static Schema convertSchemaInfoList2TckSchema(List<SchemaInfo> infos,
             RecordBuilderFactory recordBuilderFactory) {
         final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
@@ -521,7 +485,7 @@ public class SchemaInferer {
                 // need to use this
                 // but only studio have the design schema which with raw db type and talend type, so no need to
                 // convert here as we will not use getType method
-                .withType(convertTalendType2TckType(TalendType.get(info.getTalendType())))
+                .withType(TalendTypeAndTckTypeConverter.convertTalendType2TckType(TalendType.get(info.getTalendType())))
                 // TODO also define a pro for origin db type like VARCHAR? info.getType()
                 .withProp(SchemaProperty.STUDIO_TYPE, info.getTalendType())
                 .withProp(SchemaProperty.IS_KEY, String.valueOf(info.isKey()));

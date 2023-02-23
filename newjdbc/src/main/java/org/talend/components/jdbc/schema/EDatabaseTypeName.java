@@ -387,6 +387,24 @@ public enum EDatabaseTypeName {
             "MAPRDB", //$NON-NLS-1$
             EDatabaseSchemaOrCatalogMapping.Sid,
             EDatabaseSchemaOrCatalogMapping.Column_Family,
+            true),
+
+    SNOWFLAKE(
+            "Snowflake", //$NON-NLS-1$
+            "Snowflake", //$NON-NLS-1$
+            Boolean.FALSE,
+            "SNOWFLAKE", //$NON-NLS-1$
+            EDatabaseSchemaOrCatalogMapping.Sid,
+            EDatabaseSchemaOrCatalogMapping.Column_Family,
+            true),
+
+    DELTALAKE(
+            "Deltalake", //$NON-NLS-1$
+            "Deltalake", //$NON-NLS-1$
+            Boolean.FALSE,
+            "DELTALAKE", //$NON-NLS-1$
+            EDatabaseSchemaOrCatalogMapping.Sid,
+            EDatabaseSchemaOrCatalogMapping.Column_Family,
             true);
 
     // displayName is used in Java code.

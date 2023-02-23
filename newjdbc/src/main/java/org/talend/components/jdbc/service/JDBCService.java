@@ -699,11 +699,12 @@ public class JDBCService implements Serializable {
 
         Dbms mapping = null;
         if (mappingFileDir != null) {
-            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting);
+            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting,
+                    this);
         } else {
             // use the connector nested mapping file
             mapping = CommonUtils.getMapping("/mappings", dataSet.getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, this);
         }
 
         try (final DataSourceWrapper dataSource = createConnection(dataSet.getDataStore(), false);
@@ -729,11 +730,12 @@ public class JDBCService implements Serializable {
 
         Dbms mapping = null;
         if (mappingFileDir != null) {
-            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting);
+            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting,
+                    this);
         } else {
             // use the connector nested mapping file
             mapping = CommonUtils.getMapping("/mappings", dataSet.getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, this);
         }
 
         try (final DataSourceWrapper dataSource = createConnection(dataSet.getDataStore(), false);
