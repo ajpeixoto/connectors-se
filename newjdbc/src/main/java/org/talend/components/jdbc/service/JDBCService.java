@@ -18,6 +18,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.common.RedshiftSortStrategy;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
@@ -35,6 +36,8 @@ import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.asyncvalidation.AsyncValidation;
+import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.connection.CloseConnection;
@@ -836,6 +839,15 @@ public class JDBCService implements Serializable {
                 .withProp(SchemaProperty.SIZE, "255")
                 .build());
         return schemaBuilder.build();
+    }
+
+    @AsyncValidation(value = "ACTION_VALIDATE_SORT_KEYS")
+    public ValidationResult validateSortKeys(final RedshiftSortStrategy sortStrategy, final List<String> sortKeys) {
+        if (RedshiftSortStrategy.SINGLE.equals(sortStrategy) && sortKeys != null && sortKeys.size() > 1) {
+            return new ValidationResult(ValidationResult.Status.KO, i18n.errorSingleSortKeyInvalid());
+        }
+
+        return new ValidationResult(ValidationResult.Status.OK, "");
     }
 
 }
