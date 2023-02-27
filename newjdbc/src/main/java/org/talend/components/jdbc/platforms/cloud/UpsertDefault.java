@@ -15,22 +15,25 @@ package org.talend.components.jdbc.platforms.cloud;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.output.JDBCSQLBuilder;
+import org.talend.components.jdbc.output.RowWriter;
 import org.talend.components.jdbc.platforms.Platform;
+import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -43,62 +46,59 @@ public class UpsertDefault extends QueryManagerImpl {
 
     private final List<String> keys;
 
-    private Map<Integer, Schema.Entry> queryParams;
+    private final List<String> ignoreColumns;
 
-    public UpsertDefault(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n) {
-        super(platform, configuration, i18n);
+    public UpsertDefault(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n,
+            final RecordBuilderFactory recordBuilderFactory) {
+        super(platform, configuration, i18n, recordBuilderFactory);
         this.keys = new ArrayList<>(ofNullable(configuration.getKeys()).orElse(emptyList()));
+        this.ignoreColumns = new ArrayList<>(ofNullable(configuration.getIgnoreUpdate()).orElse(emptyList()));
         if (this.keys.isEmpty()) {
             throw new IllegalArgumentException(i18n.errorNoKeyForUpdateQuery());
         }
-        insert = new Insert(platform, configuration, i18n);
-        update = new Update(platform, configuration, i18n);
+        insert = new Insert(platform, configuration, i18n, recordBuilderFactory);
+        update = new Update(platform, configuration, i18n, recordBuilderFactory);
     }
 
     @Override
-    public String buildQuery(final List<Record> records) {
-        this.queryParams = new HashMap<>();
-        final AtomicInteger index = new AtomicInteger(0);
+    public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
         final List<Schema.Entry> entries = records
                 .stream()
                 .flatMap(r -> r.getSchema().getEntries().stream())
                 .distinct()
                 .collect(toList());
 
-        return "SELECT COUNT(*) AS RECORD_EXIST FROM "
-                + getPlatform().identifier(getConfiguration().getDataSet().getTableName())
-                + " WHERE "
-                + getConfiguration()
-                        .getKeys()
-                        .stream()
-                        .peek(key -> queryParams
-                                .put(index.incrementAndGet(),
-                                        entries
-                                                .stream()
-                                                .filter(e -> e.getOriginalFieldName().equals(key))
-                                                .findFirst()
-                                                .orElseThrow(() -> new IllegalStateException(
-                                                        getI18n().errorNoFieldForQueryParam(key)))))
-                        .map(c -> getPlatform().identifier(c))
-                        .map(c -> c + " = ?")
-                        .collect(joining(" AND "));
-    }
+        final Schema.Builder schemaBuilder = getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD);
+        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        final Schema inputSchema = schemaBuilder.build();
 
-    @Override
-    public boolean validateQueryParam(final Record record) {
-        final Set<Schema.Entry> entries = new HashSet<>(record.getSchema().getEntries());
-        return keys.stream().allMatch(k -> entries.stream().anyMatch(entry -> entry.getOriginalFieldName().equals(k)))
-                && entries
-                        .stream()
-                        .filter(entry -> keys.contains(entry.getOriginalFieldName()))
-                        .filter(entry -> !entry.isNullable())
-                        .map(entry -> valueOf(record, entry))
-                        .allMatch(Optional::isPresent);
-    }
+        final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
+                getConfiguration().getDataSet().getSchema(), inputSchema, getRecordBuilderFactory());
 
-    @Override
-    public Map<Integer, Schema.Entry> getQueryParams() {
-        return queryParams;
+        final List<JDBCSQLBuilder.Column> columnList = JDBCSQLBuilder.getInstance()
+                .createColumnList(getConfiguration(), currentSchema, getConfiguration().isUseOriginColumnName(), keys,
+                        null);
+
+        final String sql = JDBCSQLBuilder.getInstance()
+                .generateQuerySQL4InsertOrUpdate(getPlatform(), getConfiguration().getDataSet().getTableName(),
+                        columnList);
+
+        final PreparedStatement statement = connection.prepareStatement(sql);
+
+        final List<JDBCSQLBuilder.Column> columnList4Statement = new ArrayList<>();
+        for (JDBCSQLBuilder.Column column : columnList) {
+            if (column.addCol || (column.isReplaced())) {
+                continue;
+            }
+
+            if (column.updateKey) {
+                columnList4Statement.add(column);
+            }
+        }
+
+        rowWriter = new RowWriter(columnList4Statement, inputSchema, currentSchema, statement);
+
+        return statement;
     }
 
     @Override
@@ -109,24 +109,20 @@ public class UpsertDefault extends QueryManagerImpl {
         }
         final List<Record> needUpdate = new ArrayList<>();
         final List<Record> needInsert = new ArrayList<>();
-        final String query = buildQuery(records);
-        final List<Reject> discards = new ArrayList<>();
         final Connection connection = dataSource.getConnection();
-        try (final PreparedStatement statement = connection.prepareStatement(query)) {
+        final PreparedStatement statement = buildQuery(records, connection);
+        final List<Reject> discards = new ArrayList<>();
+        try {
             for (final Record record : records) {
                 statement.clearParameters();
-                if (!validateQueryParam(record)) {
-                    discards.add(new Reject("missing required query param in this record", record));
-                    continue;
+
+                String sql_fact = rowWriter.write(record);
+                if (getConfiguration().isDebugQuery()) {
+                    log.debug("'" + sql_fact.trim() + "'.");
                 }
-                for (final Map.Entry<Integer, Schema.Entry> entry : getQueryParams().entrySet()) {
-                    RecordToSQLTypeConverter
-                            .valueOf(entry.getValue().getType().name())
-                            .setValue(statement, entry.getKey(),
-                                    entry.getValue(), record);
-                }
+
                 try (final ResultSet result = statement.executeQuery()) {
-                    if (result.next() && result.getInt("RECORD_EXIST") > 0) {
+                    if (result.next() && result.getInt(1) > 0) {
                         needUpdate.add(record);
                     } else {
                         needInsert.add(record);
@@ -141,15 +137,15 @@ public class UpsertDefault extends QueryManagerImpl {
                 connection.rollback();
             }
             throw e;
+        } finally {
+            statement.close();
         }
 
         // fixme handle the update and insert in // need a pool of 2 !
         if (!needInsert.isEmpty()) {
-            insert.buildQuery(needInsert);
             discards.addAll(insert.execute(needInsert, dataSource));
         }
         if (!needUpdate.isEmpty()) {
-            update.buildQuery(needUpdate);
             discards.addAll(update.execute(needUpdate, dataSource));
         }
 

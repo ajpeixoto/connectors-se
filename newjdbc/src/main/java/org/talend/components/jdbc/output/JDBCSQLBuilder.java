@@ -60,6 +60,14 @@ public class JDBCSQLBuilder {
         return sql.toString();
     }
 
+    public String generateSQL4SnowflakeUpdate(Platform platform, String tableName, List<Column> columnList) {
+        return null;
+    }
+
+    public String generateSQL4SnowflakeUpsert(Platform platform, String tableName, List<Column> columnList) {
+        return null;
+    }
+
     public static class Column {
 
         public String columnLabel;
@@ -113,22 +121,31 @@ public class JDBCSQLBuilder {
     }
 
     public List<Column> createColumnList(JDBCOutputConfig config, Schema schema) {
+        return createColumnList(config, schema, true, null, null);
+    }
+
+    public List<Column> createColumnList(JDBCOutputConfig config, Schema schema, boolean isUseOriginColumnName,
+            List<String> keys, List<String> ignoreColumns) {
         boolean missUpdateKey = true;
         boolean missDeleteKey = true;
 
         Map<String, Column> columnMap = new HashMap<>();
         List<Column> columnList = new ArrayList<>();
 
-        List<Schema.Entry> fields = schema.getEntries();
+        final List<Schema.Entry> fields = schema.getEntries();
+
+        keys = Optional.ofNullable(keys).orElse(new ArrayList<>());
+        ignoreColumns = Optional.ofNullable(ignoreColumns).orElse(new ArrayList<>());
 
         for (Schema.Entry field : fields) {
             Column column = new Column();
             column.columnLabel = field.getName();
             // the javajet template have an issue for dynamic convert, it don't pass the origin column name
             String originName = field.getRawName();
-            column.dbColumnName = originName != null ? originName : field.getName();
+            column.dbColumnName =
+                    isUseOriginColumnName ? (originName != null ? originName : field.getName()) : field.getName();
 
-            boolean isKey = Boolean.valueOf(field.getProp(SchemaProperty.IS_KEY));
+            boolean isKey = Boolean.valueOf(field.getProp(SchemaProperty.IS_KEY)) || keys.contains(originName);
             if (isKey) {
                 column.updateKey = true;
                 column.deletionKey = true;
@@ -139,7 +156,12 @@ public class JDBCSQLBuilder {
             } else {
                 column.updateKey = false;
                 column.deletionKey = false;
-                column.updatable = true;
+
+                if (ignoreColumns.contains(originName)) {
+                    column.updatable = false;
+                } else {
+                    column.updatable = true;
+                }
             }
 
             columnMap.put(field.getName(), column);

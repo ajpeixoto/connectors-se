@@ -18,6 +18,7 @@ import org.talend.components.jdbc.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -32,15 +33,15 @@ public class SnowflakeDelete extends Delete {
 
     SnowflakeCopyService snowflakeCopy = new SnowflakeCopyService();
 
-    public SnowflakeDelete(Platform platform, JDBCOutputConfig configuration, I18nMessage i18n) {
-        super(platform, configuration, i18n);
+    public SnowflakeDelete(Platform platform, JDBCOutputConfig configuration, I18nMessage i18n,
+            RecordBuilderFactory recordBuilderFactory) {
+        super(platform, configuration, i18n, recordBuilderFactory);
         snowflakeCopy.setUseOriginColumnName(configuration.isUseOriginColumnName());
     }
 
     @Override
     public List<Reject> execute(final List<Record> records, final JDBCService.DataSourceWrapper dataSource)
             throws SQLException {
-        buildQuery(records);
         final List<Reject> rejects = new ArrayList<>();
         try {
             final Connection connection = dataSource.getConnection();

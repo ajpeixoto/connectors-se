@@ -12,14 +12,16 @@
  */
 package org.talend.components.jdbc.platforms.cloud;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.output.RowWriter;
 import org.talend.components.jdbc.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.*;
 import java.util.*;
@@ -28,25 +30,36 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.*;
 import static java.util.stream.Collectors.toList;
 
-@Data
 @Slf4j
 public abstract class QueryManagerImpl implements QueryManager {
 
+    @Getter
     private final Platform platform;
 
+    @Getter
     private final JDBCOutputConfig configuration;
 
+    @Getter
     private final I18nMessage i18n;
+
+    @Getter
+    private final RecordBuilderFactory recordBuilderFactory;
+
+    public QueryManagerImpl(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n,
+            final RecordBuilderFactory recordBuilderFactory) {
+        this.platform = platform;
+        this.configuration = configuration;
+        this.i18n = i18n;
+        this.recordBuilderFactory = recordBuilderFactory;
+    }
+
+    protected RowWriter rowWriter;
 
     private final Integer maxRetry = 10;
 
     private Integer retryCount = 0;
 
-    abstract protected String buildQuery(List<Record> records);
-
-    abstract protected Map<Integer, Schema.Entry> getQueryParams();
-
-    abstract protected boolean validateQueryParam(Record record);
+    abstract protected PreparedStatement buildQuery(List<Record> records, Connection connection) throws SQLException;
 
     @Override
     public List<Reject> execute(final List<Record> records, final JDBCService.DataSourceWrapper dataSource)
@@ -55,31 +68,28 @@ public abstract class QueryManagerImpl implements QueryManager {
             return emptyList();
         }
         final Connection connection = dataSource.getConnection();
-        return processRecords(records, connection, buildQuery(records));
+        return processRecords(records, connection, buildQuery(records, connection));
     }
 
-    private List<Reject> processRecords(final List<Record> records, final Connection connection, final String query)
+    private List<Reject> processRecords(final List<Record> records, final Connection connection,
+            final PreparedStatement statement)
             throws SQLException {
         List<Reject> rejects;
         do {
             rejects = new ArrayList<>();
-            try (final PreparedStatement statement = connection.prepareStatement(query)) {
+            try {
                 final Map<Integer, Integer> batchOrder = new HashMap<>();
                 int recordIndex = -1;
                 int batchNumber = -1;
                 for (final Record record : records) {
                     recordIndex++;
                     statement.clearParameters();
-                    if (!validateQueryParam(record)) {
-                        rejects.add(new Reject("missing required query param in this record", record));
-                        continue;
+
+                    String sql_fact = rowWriter.write(record);
+                    if (configuration.isDebugQuery()) {
+                        log.debug("'" + sql_fact.trim() + "'.");
                     }
-                    for (final Map.Entry<Integer, Schema.Entry> entry : getQueryParams().entrySet()) {
-                        RecordToSQLTypeConverter
-                                .valueOf(entry.getValue().getType().name())
-                                .setValue(statement, entry.getKey(),
-                                        entry.getValue(), record);
-                    }
+
                     statement.addBatch();
                     batchNumber++;
                     batchOrder.put(batchNumber, recordIndex);
@@ -107,6 +117,8 @@ public abstract class QueryManagerImpl implements QueryManager {
                         Thread.currentThread().interrupt();
                     }
                 }
+            } finally {
+                statement.close();
             }
         } while (true);
 
@@ -163,50 +175,6 @@ public abstract class QueryManagerImpl implements QueryManager {
         return (connection.getCatalog() != null && !connection.getCatalog().isEmpty()
                 ? getPlatform().identifier(connection.getCatalog()) + "."
                 : "") + (schenma != null && !schenma.isEmpty() ? getPlatform().identifier(connection.getSchema()) : "");
-    }
-
-    public static Optional<Object> valueOf(final Record record, final Schema.Entry entry) {
-        switch (entry.getType()) {
-        case INT:
-            return record.getOptionalInt(entry.getName()).isPresent()
-                    ? of(record.getOptionalInt(entry.getName()).getAsInt())
-                    : empty();
-        case LONG:
-            return record.getOptionalLong(entry.getName()).isPresent()
-                    ? of(record.getOptionalLong(entry.getName()).getAsLong())
-                    : empty();
-        case FLOAT:
-            return record.getOptionalFloat(entry.getName()).isPresent()
-                    ? of(record.getOptionalFloat(entry.getName()).getAsDouble())
-                    : empty();
-        case DOUBLE:
-            return record.getOptionalDouble(entry.getName()).isPresent()
-                    ? of(record.getOptionalDouble(entry.getName()).getAsDouble())
-                    : empty();
-        case BOOLEAN:
-            return record.getOptionalBoolean(entry.getName()).isPresent()
-                    ? of(record.getOptionalBoolean(entry.getName()).get())
-                    : empty();
-        case BYTES:
-            return record.getOptionalBytes(entry.getName()).isPresent()
-                    ? of(record.getOptionalBytes(entry.getName()).get())
-                    : empty();
-        case DATETIME:
-            return record.getOptionalDateTime(entry.getName()).isPresent()
-                    ? of(record.getOptionalDateTime(entry.getName()).get())
-                    : empty();
-        case STRING:
-            return record.getOptionalString(entry.getName()).isPresent()
-                    ? of(record.getOptionalString(entry.getName()).get())
-                    : empty();
-        case RECORD:
-            return record.getOptionalRecord(entry.getName()).isPresent()
-                    ? of(record.getOptionalRecord(entry.getName()).get())
-                    : empty();
-        case ARRAY:
-        default:
-            return empty();
-        }
     }
 
 }

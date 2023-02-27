@@ -14,17 +14,23 @@ package org.talend.components.jdbc.platforms.cloud;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.output.JDBCSQLBuilder;
+import org.talend.components.jdbc.output.RowWriter;
 import org.talend.components.jdbc.platforms.Platform;
+import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -32,70 +38,56 @@ public class Delete extends QueryManagerImpl {
 
     private final List<String> keys;
 
-    private Map<Integer, Schema.Entry> queryParams;
-
-    private final String query;
-
-    private boolean namedParamsResolved;
-
-    public Delete(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n) {
-        super(platform, configuration, i18n);
+    public Delete(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n,
+            final RecordBuilderFactory recordBuilderFactory) {
+        super(platform, configuration, i18n, recordBuilderFactory);
         this.keys = new ArrayList<>(ofNullable(configuration.getKeys()).orElse(emptyList()));
         if (this.keys.isEmpty()) {
             throw new IllegalArgumentException(getI18n().errorNoKeyForDeleteQuery());
         }
-        this.query = "DELETE FROM " + getPlatform().identifier(configuration.getDataSet().getTableName()) + " WHERE "
-                + keys.stream().map(platform::identifier).map(c -> c + " = ?").collect(joining(" AND "));
-        log.debug("DELETE SQL: " + query);
     }
 
     @Override
-    public String buildQuery(final List<Record> records) {
-        if (!namedParamsResolved) {
-            queryParams = new HashMap<>();
-            final AtomicInteger index = new AtomicInteger(0);
-            final List<Schema.Entry> entries = records
-                    .stream()
-                    .flatMap(r -> r.getSchema().getEntries().stream())
-                    .distinct()
-                    .collect(toList());
-            keys
-                    .stream()
-                    .map(key -> entries.stream().filter(e -> key.equals(e.getOriginalFieldName())).findFirst())
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .forEach(entry -> queryParams.put(index.incrementAndGet(), entry));
-            /* can't handle this group without all the named params */
-            if (queryParams.size() != keys.size()) {
-                final String missingParams = keys
-                        .stream()
-                        .filter(key -> queryParams.values()
-                                .stream()
-                                .noneMatch(e -> e.getOriginalFieldName().equals(key)))
-                        .collect(joining(","));
-                throw new IllegalStateException(
-                        new IllegalStateException(getI18n().errorNoFieldForQueryParam(missingParams)));
+    public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
+        final List<Schema.Entry> entries = records
+                .stream()
+                .flatMap(r -> r.getSchema().getEntries().stream())
+                .distinct()
+                .collect(toList());
+
+        final Schema.Builder schemaBuilder = getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD);
+        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        final Schema inputSchema = schemaBuilder.build();
+
+        final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
+                getConfiguration().getDataSet().getSchema(), inputSchema, getRecordBuilderFactory());
+
+        final List<JDBCSQLBuilder.Column> columnList = JDBCSQLBuilder.getInstance()
+                .createColumnList(getConfiguration(), currentSchema, getConfiguration().isUseOriginColumnName(), keys,
+                        null);
+
+        final String sql = JDBCSQLBuilder.getInstance()
+                .generateSQL4Delete(getPlatform(), getConfiguration().getDataSet().getTableName(), columnList);
+
+        log.debug("DELETE SQL: " + sql);
+
+        final PreparedStatement statement = connection.prepareStatement(sql);
+
+        final List<JDBCSQLBuilder.Column> columnList4Statement = new ArrayList<>();
+        for (JDBCSQLBuilder.Column column : columnList) {
+            if (column.addCol || (column.isReplaced())) {
+                continue;
             }
 
-            namedParamsResolved = true;
+            if (column.deletionKey) {
+                columnList4Statement.add(column);
+            }
         }
-        return query;
+
+        rowWriter = new RowWriter(columnList4Statement, inputSchema, currentSchema, statement,
+                getConfiguration().isDebugQuery(), sql);
+
+        return statement;
     }
 
-    @Override
-    public boolean validateQueryParam(final Record record) {
-        final Set<Schema.Entry> entries = new HashSet<>(record.getSchema().getEntries());
-        return keys.stream().allMatch(k -> entries.stream().anyMatch(entry -> entry.getOriginalFieldName().equals(k)))
-                && entries
-                        .stream()
-                        .filter(entry -> keys.contains(entry.getOriginalFieldName()))
-                        .filter(entry -> !entry.isNullable())
-                        .map(entry -> valueOf(record, entry))
-                        .allMatch(Optional::isPresent);
-    }
-
-    @Override
-    public Map<Integer, Schema.Entry> getQueryParams() {
-        return queryParams;
-    }
 }

@@ -39,7 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import static java.util.Optional.ofNullable;
+import static java.util.Optional.*;
+import static java.util.Optional.empty;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -352,15 +353,15 @@ public class SnowflakeCopyService implements Serializable {
         case INT:
         case LONG:
         case BOOLEAN:
-            return QueryManagerImpl.valueOf(record, entry).map(String::valueOf).orElse("");
+            return SnowflakeCopyService.valueOf(record, entry).map(String::valueOf).orElse("");
         case FLOAT:
-            return QueryManagerImpl.valueOf(record, entry).map(v -> Float.toHexString((Float) v)).orElse("");
+            return SnowflakeCopyService.valueOf(record, entry).map(v -> Float.toHexString((Float) v)).orElse("");
         case DOUBLE:
-            return QueryManagerImpl.valueOf(record, entry).map(v -> Double.toHexString((Double) v)).orElse("");
+            return SnowflakeCopyService.valueOf(record, entry).map(v -> Double.toHexString((Double) v)).orElse("");
         case BYTES:
-            return QueryManagerImpl.valueOf(record, entry).map(v -> Hex.encodeHexString((byte[]) v)).orElse("");
+            return SnowflakeCopyService.valueOf(record, entry).map(v -> Hex.encodeHexString((byte[]) v)).orElse("");
         case DATETIME:
-            return QueryManagerImpl
+            return SnowflakeCopyService
                     .valueOf(record, entry)
                     .map(v -> ((ZonedDateTime) v).format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT_PATTERN)))
                     .orElse("");
@@ -371,6 +372,50 @@ public class SnowflakeCopyService implements Serializable {
         default:
             throw new IllegalArgumentException(
                     "Unsupported \"" + entry.getType().name() + "\" type for field: " + entry.getOriginalFieldName());
+        }
+    }
+
+    private static Optional<Object> valueOf(final Record record, final Schema.Entry entry) {
+        switch (entry.getType()) {
+        case INT:
+            return record.getOptionalInt(entry.getName()).isPresent()
+                    ? of(record.getOptionalInt(entry.getName()).getAsInt())
+                    : empty();
+        case LONG:
+            return record.getOptionalLong(entry.getName()).isPresent()
+                    ? of(record.getOptionalLong(entry.getName()).getAsLong())
+                    : empty();
+        case FLOAT:
+            return record.getOptionalFloat(entry.getName()).isPresent()
+                    ? of(record.getOptionalFloat(entry.getName()).getAsDouble())
+                    : empty();
+        case DOUBLE:
+            return record.getOptionalDouble(entry.getName()).isPresent()
+                    ? of(record.getOptionalDouble(entry.getName()).getAsDouble())
+                    : empty();
+        case BOOLEAN:
+            return record.getOptionalBoolean(entry.getName()).isPresent()
+                    ? of(record.getOptionalBoolean(entry.getName()).get())
+                    : empty();
+        case BYTES:
+            return record.getOptionalBytes(entry.getName()).isPresent()
+                    ? of(record.getOptionalBytes(entry.getName()).get())
+                    : empty();
+        case DATETIME:
+            return record.getOptionalDateTime(entry.getName()).isPresent()
+                    ? of(record.getOptionalDateTime(entry.getName()).get())
+                    : empty();
+        case STRING:
+            return record.getOptionalString(entry.getName()).isPresent()
+                    ? of(record.getOptionalString(entry.getName()).get())
+                    : empty();
+        case RECORD:
+            return record.getOptionalRecord(entry.getName()).isPresent()
+                    ? of(record.getOptionalRecord(entry.getName()).get())
+                    : empty();
+        case ARRAY:
+        default:
+            return empty();
         }
     }
 

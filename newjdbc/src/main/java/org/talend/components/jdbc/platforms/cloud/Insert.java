@@ -14,77 +14,69 @@ package org.talend.components.jdbc.platforms.cloud;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.output.JDBCSQLBuilder;
+import org.talend.components.jdbc.output.RowWriter;
 import org.talend.components.jdbc.platforms.Platform;
+import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import java.util.HashMap;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public class Insert extends QueryManagerImpl {
 
-    private Map<Integer, Schema.Entry> namedParams;
-
-    private final Map<String, String> queries = new HashMap<>();
-
-    public Insert(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n) {
-        super(platform, configuration, i18n);
+    public Insert(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n,
+            final RecordBuilderFactory recordBuilderFactory) {
+        super(platform, configuration, i18n, recordBuilderFactory);
     }
 
     @Override
-    public String buildQuery(final List<Record> records) {
+    public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
         final List<Schema.Entry> entries = records
                 .stream()
                 .flatMap(r -> r.getSchema().getEntries().stream())
                 .distinct()
                 .collect(toList());
-        return queries.computeIfAbsent(entries.stream().map(Schema.Entry::getOriginalFieldName).collect(joining("::")),
-                key -> {
-                    final AtomicInteger index = new AtomicInteger(0);
-                    namedParams = new HashMap<>();
-                    entries.forEach(name -> namedParams.put(index.incrementAndGet(), name));
-                    final List<Map.Entry<Integer, Schema.Entry>> params = namedParams
-                            .entrySet()
-                            .stream()
-                            .sorted(comparing(Map.Entry::getKey))
-                            .collect(toList());
-                    final StringBuilder query = new StringBuilder("INSERT INTO ")
-                            .append(getPlatform().identifier(getConfiguration().getDataSet().getTableName()));
-                    query
-                            .append(params
-                                    .stream()
-                                    .map(e -> getConfiguration().isUseOriginColumnName()
-                                            ? e.getValue().getOriginalFieldName()
-                                            : e.getValue().getName())
-                                    .map(name -> getPlatform().identifier(name))
-                                    .collect(joining(",", "(", ")")));
-                    query.append(" VALUES");
-                    query.append(params.stream().map(e -> "?").collect((joining(",", "(", ")"))));
-                    return query.toString();
-                });
+
+        final Schema.Builder schemaBuilder = getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD);
+        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        final Schema inputSchema = schemaBuilder.build();
+
+        final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
+                getConfiguration().getDataSet().getSchema(), inputSchema, getRecordBuilderFactory());
+
+        final List<JDBCSQLBuilder.Column> columnList = JDBCSQLBuilder.getInstance()
+                .createColumnList(getConfiguration(), currentSchema, getConfiguration().isUseOriginColumnName(), null,
+                        null);
+        final String sql = JDBCSQLBuilder.getInstance()
+                .generateSQL4Insert(getPlatform(), getConfiguration().getDataSet().getTableName(), columnList);
+
+        final PreparedStatement statement = connection.prepareStatement(sql);
+
+        final List<JDBCSQLBuilder.Column> columnList4Statement = new ArrayList<>();
+        for (JDBCSQLBuilder.Column column : columnList) {
+            if (column.addCol || (column.isReplaced())) {
+                continue;
+            }
+
+            if (column.insertable) {
+                columnList4Statement.add(column);
+            }
+        }
+
+        rowWriter = new RowWriter(columnList4Statement, inputSchema, currentSchema, statement,
+                getConfiguration().isDebugQuery(), sql);
+
+        return statement;
     }
 
-    @Override
-    public boolean validateQueryParam(final Record record) {
-        return namedParams
-                .values()
-                .stream()
-                .filter(e -> !e.isNullable())
-                .map(e -> valueOf(record, e))
-                .allMatch(Optional::isPresent);
-    }
-
-    @Override
-    public Map<Integer, Schema.Entry> getQueryParams() {
-        return namedParams;
-    }
 }

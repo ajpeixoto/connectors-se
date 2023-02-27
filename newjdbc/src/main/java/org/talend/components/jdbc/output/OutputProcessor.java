@@ -138,7 +138,8 @@ public class OutputProcessor implements Serializable {
                         jdbcService.getPlatformService().getDriver(configuration.getDataSet().getDataStore()).getId();
                 final Platform platform =
                         jdbcService.getPlatformService().getPlatform(configuration.getDataSet().getDataStore());
-                this.queryManager = QueryManagerFactory.getQueryManager(platform, jdbcService.getI18n(), configuration);
+                this.queryManager = QueryManagerFactory.getQueryManager(platform, jdbcService.getI18n(), configuration,
+                        recordBuilderFactory);
 
                 if (this.tableExistsCheck == null) {
                     this.tableExistsCheck = DatabaseSpecial.checkTableExistence(driverId,

@@ -507,8 +507,9 @@ public class SchemaInferer {
 
     public static Schema mergeRuntimeSchemaAndDesignSchema4Dynamic(List<SchemaInfo> designSchema, Schema runtimeSchema,
             RecordBuilderFactory recordBuilderFactory) {
-        if (designSchema == null)
+        if (designSchema == null || designSchema.isEmpty()) {
             return runtimeSchema;
+        }
 
         Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
 

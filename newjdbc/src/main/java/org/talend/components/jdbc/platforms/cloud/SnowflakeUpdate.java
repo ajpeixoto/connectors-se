@@ -13,32 +13,63 @@
 package org.talend.components.jdbc.platforms.cloud;
 
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.output.JDBCSQLBuilder;
 import org.talend.components.jdbc.platforms.Platform;
+import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class SnowflakeUpdate extends Update {
 
     SnowflakeCopyService snowflakeCopy = new SnowflakeCopyService();
 
-    public SnowflakeUpdate(Platform platform, JDBCOutputConfig configuration, I18nMessage i18n) {
-        super(platform, configuration, i18n);
+    public SnowflakeUpdate(Platform platform, JDBCOutputConfig configuration, I18nMessage i18n,
+            RecordBuilderFactory recordBuilderFactory) {
+        super(platform, configuration, i18n, recordBuilderFactory);
         snowflakeCopy.setUseOriginColumnName(configuration.isUseOriginColumnName());
+    }
+
+    @Override
+    public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
+        final List<Schema.Entry> entries = records
+                .stream()
+                .flatMap(r -> r.getSchema().getEntries().stream())
+                .distinct()
+                .collect(toList());
+
+        final Schema.Builder schemaBuilder = getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD);
+        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        final Schema inputSchema = schemaBuilder.build();
+
+        final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
+                getConfiguration().getDataSet().getSchema(), inputSchema, getRecordBuilderFactory());
+
+        final List<JDBCSQLBuilder.Column> columnList = JDBCSQLBuilder.getInstance()
+                .createColumnList(getConfiguration(), currentSchema, getConfiguration().isUseOriginColumnName(),
+                        getKeys(), getIgnoreColumns());
+
+        final String sql = JDBCSQLBuilder.getInstance()
+                .generateSQL4SnowflakeUpdate(getPlatform(), getConfiguration().getDataSet().getTableName(), columnList);
+
+        final PreparedStatement statement = connection.prepareStatement(sql);
+
+        return statement;
     }
 
     @Override
     public List<Reject> execute(List<Record> records, final JDBCService.DataSourceWrapper dataSource)
             throws SQLException {
-        buildQuery(records);
         final List<Reject> rejects = new ArrayList<>();
         try {
             final Connection connection = dataSource.getConnection();
@@ -48,25 +79,12 @@ public class SnowflakeUpdate extends Update {
             final String fqTmpTableName = namespace(connection) + "." + getPlatform().identifier(tmpTableName);
             final String fqStageName = namespace(connection) + ".%" + getPlatform().identifier(tmpTableName);
             rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, fqTmpTableName));
+            final PreparedStatement statement = buildQuery(records, connection);
             if (records.size() != rejects.size()) {
-                try (final Statement statement = connection.createStatement()) {
-                    statement
-                            .execute("merge into " + fqTableName + " target using " + fqTmpTableName + " as source on "
-                                    + getConfiguration()
-                                            .getKeys()
-                                            .stream()
-                                            .map(key -> getPlatform().identifier(key))
-                                            .map(key -> "source." + key + "= target." + key)
-                                            .collect(joining(" AND "))
-                                    + " when matched then update set "
-                                    + getQueryParams()
-                                            .values()
-                                            .stream()
-                                            .filter(p -> !getIgnoreColumns().contains(p.getOriginalFieldName())
-                                                    && !getKeys().contains(p.getOriginalFieldName()))
-                                            .map(e -> getPlatform().identifier(e.getOriginalFieldName()))
-                                            .map(name -> "target." + name + "= source." + name)
-                                            .collect(joining(",", "", " ")));
+                try {
+                    statement.execute();
+                } finally {
+                    statement.close();
                 }
             }
             connection.commit();
