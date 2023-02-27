@@ -16,15 +16,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DistributionStrategy;
 import org.talend.components.jdbc.common.JDBCConfiguration;
 import org.talend.components.jdbc.common.RedshiftSortStrategy;
+import org.talend.components.jdbc.common.SchemaInfo;
+import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class SQLDWHPlatform extends MSSQLPlatform {
@@ -36,19 +38,16 @@ public class SQLDWHPlatform extends MSSQLPlatform {
     }
 
     @Override
-    public void createTableIfNotExist(final Connection connection, final String name, final List<String> keys,
-            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
-            final DistributionStrategy distributionStrategy,
-            final List<String> distributionKeys, final int varcharLength, final boolean useOriginColumnName,
-            final List<Record> records, final Dbms mapping)
+    public void createTableIfNotExist(final Connection connection,
+            final List<Record> records, final Dbms mapping, final JDBCOutputConfig config,
+            final RecordBuilderFactory recordBuilderFactory)
             throws SQLException {
         if (records.isEmpty()) {
             return;
         }
         final Table tableModel =
-                getTableModel(connection, name, keys, null, sortKeys, distributionStrategy, distributionKeys,
-                        varcharLength, records);
-        final String sql = buildQuery(connection, tableModel, useOriginColumnName, mapping);
+                getTableModel(connection, records, config, recordBuilderFactory);
+        final String sql = buildQuery(connection, tableModel, config.isUseOriginColumnName(), mapping);
 
         try (final Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);

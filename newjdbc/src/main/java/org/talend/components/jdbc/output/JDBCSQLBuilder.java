@@ -14,7 +14,6 @@ package org.talend.components.jdbc.output;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.SchemaInfo;
-import org.talend.components.jdbc.platforms.GenericPlatform;
 import org.talend.components.jdbc.platforms.Platform;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
@@ -23,6 +22,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
 
 /**
  * SQL build tool for only runtime, for design time, we use another one : QueryUtils which consider the context.var and
@@ -60,12 +60,120 @@ public class JDBCSQLBuilder {
         return sql.toString();
     }
 
-    public String generateSQL4SnowflakeUpdate(Platform platform, String tableName, List<Column> columnList) {
-        return null;
+    public String generateSQL4SnowflakeUpdate(Platform platform, String tableName, String tmpTableName,
+            List<Column> columnList) {
+        final List<String> updateKeys = new ArrayList<>();
+
+        final List<String> updateValues = new ArrayList<>();
+
+        final List<Column> all = getAllColumns(columnList);
+
+        for (Column column : all) {
+            if (column.updateKey) {
+                updateKeys.add(column.dbColumnName);
+            }
+
+            if (column.updatable) {
+                updateValues.add(column.dbColumnName);
+            }
+        }
+
+        final StringBuilder sql = new StringBuilder();
+        sql.append("merge into ")
+                .append(tableName)
+                .append(" target using ")
+                .append(tmpTableName)
+                .append(" as source on ");
+        sql.append(updateKeys.stream()
+                .map(name -> platform.identifier(name))
+                .map(name -> "source." + name + "= target." + name)
+                .collect(joining(" AND ")));
+        sql.append(" when matched then update set ");
+        sql.append(updateValues.stream()
+                .map(name -> platform.identifier(name))
+                .map(name -> "target." + name + "= source." + name)
+                .collect(joining(",", "", " ")));
+
+        return sql.toString();
     }
 
-    public String generateSQL4SnowflakeUpsert(Platform platform, String tableName, List<Column> columnList) {
-        return null;
+    public String generateSQL4SnowflakeUpsert(Platform platform, String tableName, String tmpTableName,
+            List<Column> columnList) {
+        final List<String> updateKeys = new ArrayList<>();
+
+        final List<String> updateValues = new ArrayList<>();
+
+        final List<String> insertValues = new ArrayList<>();
+
+        final List<Column> all = getAllColumns(columnList);
+
+        for (Column column : all) {
+            if (column.updateKey) {
+                updateKeys.add(column.dbColumnName);
+            }
+
+            if (column.updatable) {
+                updateValues.add(column.dbColumnName);
+            }
+
+            if (column.insertable) {
+                insertValues.add(column.dbColumnName);
+            }
+        }
+
+        final StringBuilder sql = new StringBuilder();
+        sql.append("merge into ")
+                .append(tableName)
+                .append(" target using ")
+                .append(tmpTableName)
+                .append(" as source on ");
+        sql.append(updateKeys.stream()
+                .map(name -> platform.identifier(name))
+                .map(name -> "source." + name + "= target." + name)
+                .collect(joining(" AND ")));
+        sql.append(" when matched then update set ");
+        sql.append(updateValues.stream()
+                .map(name -> platform.identifier(name))
+                .map(name -> "target." + name + "= source." + name)
+                .collect(joining(",", "", " ")));
+        sql.append(" when not matched then insert ");
+        sql.append(insertValues.stream()
+                .map(name -> platform.identifier(name))
+                .map(name -> "target." + name)
+                .collect(Collectors.joining(",", "(", ")")));
+        sql.append(" values ");
+        sql.append(insertValues.stream()
+                .map(name -> platform.identifier(name))
+                .map(name -> "source." + name)
+                .collect(Collectors.joining(",", "(", ")")));
+
+        return sql.toString();
+    }
+
+    public String generateSQL4SnowflakeDelete(Platform platform, String targetTable, String tmpTable,
+            List<Column> columnList) {
+        final List<String> deleteKeys = new ArrayList<>();
+
+        final List<Column> all = getAllColumns(columnList);
+
+        for (Column column : all) {
+            if (column.deletionKey) {
+                deleteKeys.add(column.dbColumnName);
+            }
+        }
+
+        final StringBuilder sql = new StringBuilder();
+        sql.append("delete from ")
+                .append(targetTable)
+                .append(" target using ")
+                .append(tmpTable)
+                .append(" as source where ");
+        sql.append(deleteKeys.stream()
+                .map(name -> platform.identifier(name))
+                .map(name -> "source." + name + "= target." + name)
+                .collect(joining(" AND ")));
+
+        return sql.toString();
     }
 
     public static class Column {
@@ -535,7 +643,7 @@ public class JDBCSQLBuilder {
         return generateQuerySQL4InsertOrUpdate(platform, tableName, updateKeys, updateKeyExpressions);
     }
 
-    private List<Column> getAllColumns(List<Column> columnList) {
+    public static List<Column> getAllColumns(List<Column> columnList) {
         List<Column> result = new ArrayList<Column>();
         for (Column column : columnList) {
             if (column.replacements != null && !column.replacements.isEmpty()) {

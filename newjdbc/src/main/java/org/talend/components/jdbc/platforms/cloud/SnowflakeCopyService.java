@@ -17,8 +17,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Hex;
+import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -62,16 +65,31 @@ public class SnowflakeCopyService implements Serializable {
     private Path tmpFolder;
 
     public List<Reject> putAndCopy(final Connection connection, final List<Record> records, final String fqStageName,
-            final String fqTableName, final String fqTmpTableName) throws SQLException {
+            final String fqTableName, final String fqTmpTableName, final JDBCOutputConfig configuration,
+            final RecordBuilderFactory recordBuilderFactory) throws SQLException {
         try (final Statement statement = connection.createStatement()) {
             statement.execute("create temporary table if not exists " + fqTmpTableName + " like " + fqTableName);
         }
-        return putAndCopy(connection, records, fqStageName, fqTmpTableName);
+        return putAndCopy(connection, records, fqStageName, fqTmpTableName, configuration, recordBuilderFactory);
     }
 
     public List<Reject> putAndCopy(final Connection connection, final List<Record> records, final String fqStageName,
-            final String fqTableName) {
-        final List<RecordChunk> chunks = splitRecords(createWorkDir(), records);
+            final String fqTableName, final JDBCOutputConfig configuration,
+            final RecordBuilderFactory recordBuilderFactory) {
+        final List<Schema.Entry> entries = records
+                .stream()
+                .flatMap(r -> r.getSchema().getEntries().stream())
+                .distinct()
+                .collect(toList());
+
+        final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
+        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        final Schema inputSchema = schemaBuilder.build();
+
+        final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
+                configuration.getDataSet().getSchema(), inputSchema, recordBuilderFactory);
+
+        final List<RecordChunk> chunks = splitRecords(createWorkDir(), records, currentSchema);
         final List<Reject> rejects = new ArrayList<>();
         final List<RecordChunk> copy = chunks
                 .stream()
@@ -197,11 +215,10 @@ public class SnowflakeCopyService implements Serializable {
      * @return column names joined as a String with comma as a separator
      */
     private String getColumnNamesList(List<RecordChunk> chunks) {
-        return ofNullable(chunks)
-                .filter(chunk -> !chunk.isEmpty())
-                .flatMap(chunk -> ofNullable(chunk.get(0).getRecords()))
-                .filter(records -> !records.isEmpty())
-                .flatMap(records -> ofNullable(records.get(0).getSchema().getEntries()))
+        return ofNullable(chunks).orElse(Collections.emptyList())
+                .stream()
+                .findFirst()
+                .map(chunk -> chunk.getSchema().getEntries())
                 .filter(schemaEntries -> !schemaEntries.isEmpty())
                 .map(schemaEntries -> schemaEntries
                         .stream()
@@ -260,15 +277,15 @@ public class SnowflakeCopyService implements Serializable {
         private final int rowParsed;
     }
 
-    private List<RecordChunk> splitRecords(final Path directoryPath, final List<Record> records) {
+    private List<RecordChunk> splitRecords(final Path directoryPath, final List<Record> records,
+            final Schema currentSchema) {
         final AtomicLong size = new AtomicLong(0);
         final AtomicInteger count = new AtomicInteger(0);
         final AtomicInteger recordCounter = new AtomicInteger(0);
         final Map<Integer, RecordChunk> chunks = new HashMap<>();
         records
                 .stream()
-                .map(record -> record
-                        .getSchema()
+                .map(record -> currentSchema
                         .getEntries()
                         .stream()
                         .map(entry -> format(record, entry))
@@ -282,7 +299,7 @@ public class SnowflakeCopyService implements Serializable {
                     final int recordNumber = recordCounter.getAndIncrement();
                     chunks
                             .computeIfAbsent(count.get(),
-                                    key -> new RecordChunk(records, key, recordNumber, directoryPath))
+                                    key -> new RecordChunk(records, currentSchema, key, recordNumber, directoryPath))
                             .writer(line);
                 });
         chunks.get(count.get()).close(); // close the last writer
@@ -294,6 +311,8 @@ public class SnowflakeCopyService implements Serializable {
     private class RecordChunk {
 
         private final List<Record> records;
+
+        private final Schema schema;
 
         private final int part;
 

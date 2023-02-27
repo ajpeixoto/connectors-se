@@ -47,6 +47,12 @@ public class SnowflakeUpsert extends UpsertDefault {
 
     @Override
     public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
+        // do nothing here
+        return null;
+    }
+
+    public void updateTargetTableFromTmpTable(final List<Record> records, final Connection connection,
+            final String targetTable, final String tmpTable) throws SQLException {
         final List<Schema.Entry> entries = records
                 .stream()
                 .flatMap(r -> r.getSchema().getEntries().stream())
@@ -65,11 +71,11 @@ public class SnowflakeUpsert extends UpsertDefault {
                         getKeys(), getIgnoreColumns());
 
         final String sql = JDBCSQLBuilder.getInstance()
-                .generateSQL4SnowflakeUpsert(getPlatform(), getConfiguration().getDataSet().getTableName(), columnList);
+                .generateSQL4SnowflakeUpsert(getPlatform(), targetTable, tmpTable, columnList);
 
-        final PreparedStatement statement = connection.prepareStatement(sql);
-
-        return statement;
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        }
     }
 
     @Override
@@ -82,15 +88,11 @@ public class SnowflakeUpsert extends UpsertDefault {
         final String fqTableName = namespace(connection) + "." + getPlatform().identifier(tableName);
         final String fqTmpTableName = namespace(connection) + "." + getPlatform().identifier(tmpTableName);
         final String fqStageName = namespace(connection) + ".%" + getPlatform().identifier(tmpTableName);
-        rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, fqTmpTableName));
-        final PreparedStatement statement = buildQuery(records, connection);
+        rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, fqTmpTableName,
+                getConfiguration(), getRecordBuilderFactory()));
         if (records.size() != rejects.size()) {
             try {
-                try {
-                    statement.execute();
-                } finally {
-                    statement.close();
-                }
+                updateTargetTableFromTmpTable(records, connection, fqTableName, fqTmpTableName);
                 connection.commit();
             } finally {
                 snowflakeCopy.cleanTmpFiles();

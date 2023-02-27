@@ -20,6 +20,7 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,12 @@ public class SnowflakeInsert extends Insert {
     }
 
     @Override
+    public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
+        // do nothing here
+        return null;
+    }
+
+    @Override
     public List<Reject> execute(List<Record> records, final JDBCService.DataSourceWrapper dataSource)
             throws SQLException {
         final List<Reject> rejects = new ArrayList<>();
@@ -43,7 +50,8 @@ public class SnowflakeInsert extends Insert {
             final String tableName = getConfiguration().getDataSet().getTableName();
             final String fqTableName = namespace(connection) + "." + getPlatform().identifier(tableName);
             final String fqStageName = namespace(connection) + ".%" + getPlatform().identifier(tableName);
-            rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName));
+            rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, getConfiguration(),
+                    getRecordBuilderFactory()));
             if (rejects.isEmpty()) {
                 connection.commit();
             } else {

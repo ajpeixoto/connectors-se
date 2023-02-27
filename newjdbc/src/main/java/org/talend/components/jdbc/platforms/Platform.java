@@ -15,18 +15,20 @@ package org.talend.components.jdbc.platforms;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.common.DistributionStrategy;
 import org.talend.components.jdbc.common.JDBCConfiguration;
-import org.talend.components.jdbc.common.RedshiftSortStrategy;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.output.JDBCSQLBuilder;
 import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.schema.DbmsType;
+import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.schema.TalendTypeAndTckTypeConverter;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -187,19 +189,15 @@ public abstract class Platform implements Serializable {
         return builtURL;
     }
 
-    public void createTableIfNotExist(final Connection connection, final String name, final List<String> keys,
-            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
-            final DistributionStrategy distributionStrategy,
-            final List<String> distributionKeys, final int varcharLength, final boolean useOriginColumnName,
-            final List<Record> records, final Dbms mapping)
+    public void createTableIfNotExist(final Connection connection,
+            final List<Record> records, final Dbms mapping, final JDBCOutputConfig config,
+            final RecordBuilderFactory recordBuilderFactory)
             throws SQLException {
         if (records.isEmpty()) {
             return;
         }
-        final Table table =
-                getTableModel(connection, name, keys, sortStrategy, sortKeys, distributionStrategy, distributionKeys,
-                        varcharLength, records);
-        final String sql = buildQuery(connection, table, useOriginColumnName, mapping);
+        final Table table = getTableModel(connection, records, config, recordBuilderFactory);
+        final String sql = buildQuery(connection, table, config.isUseOriginColumnName(), mapping);
         try (final Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
             if (!connection.getAutoCommit()) {
@@ -255,15 +253,13 @@ public abstract class Platform implements Serializable {
         return column.isNullable() && !column.isPrimaryKey() ? "NULL" : "NOT NULL";
     }
 
-    protected Table getTableModel(final Connection connection, final String name, final List<String> keys,
-            final RedshiftSortStrategy sortStrategy, final List<String> sortKeys,
-            DistributionStrategy distributionStrategy,
-            final List<String> distributionKeys, final int varcharLength, final List<Record> records) {
+    protected Table getTableModel(final Connection connection, final List<Record> records,
+            final JDBCOutputConfig config, RecordBuilderFactory recordBuilderFactory) {
         final Table.TableBuilder builder = Table
                 .builder()
-                .name(name)
-                .distributionStrategy(distributionStrategy)
-                .sortStrategy(sortStrategy);
+                .name(config.getDataSet().getTableName())
+                .distributionStrategy(config.getDistributionStrategy())
+                .sortStrategy(config.getSortStrategy());
         try {
             builder.catalog(connection.getCatalog()).schema(JDBCService.getDatabaseSchema(connection));
         } catch (final SQLException e) {
@@ -281,16 +277,38 @@ public abstract class Platform implements Serializable {
                 .distinct()
                 .collect(toList());
         log.debug("Schema Entries: " + entries);
+
+        final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
+        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        final Schema inputSchema = schemaBuilder.build();
+
+        final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
+                config.getDataSet().getSchema(), inputSchema, recordBuilderFactory);
+        final List<JDBCSQLBuilder.Column> columnList = JDBCSQLBuilder.getInstance()
+                .createColumnList(config, currentSchema, config.isUseOriginColumnName(), config.getKeys(),
+                        config.getIgnoreUpdate());
+        final List<String> keys = new ArrayList<>();
+        final List<JDBCSQLBuilder.Column> all = JDBCSQLBuilder.getAllColumns(columnList);
+        for (JDBCSQLBuilder.Column column : all) {
+            if (column.updatable) {
+                keys.add(column.dbColumnName);
+            }
+
+            if (column.deletionKey) {
+                keys.add(column.dbColumnName);
+            }
+        }
+
         return builder
-                .columns(entries
+                .columns(currentSchema.getEntries()
                         .stream()
                         .map(entry -> Column
                                 .builder()
                                 .entry(entry)
                                 .primaryKey(keys.contains(entry.getOriginalFieldName()))
-                                .sortKey(sortKeys.contains(entry.getOriginalFieldName()))
-                                .distributionKey(distributionKeys.contains(entry.getOriginalFieldName()))
-                                .size(STRING == entry.getType() ? varcharLength : null)
+                                .sortKey(config.getSortKeys().contains(entry.getOriginalFieldName()))
+                                .distributionKey(config.getDistributionKeys().contains(entry.getOriginalFieldName()))
+                                .size(STRING == entry.getType() ? config.getVarcharLength() : null)
                                 .build())
                         .collect(toList()))
                 .build();

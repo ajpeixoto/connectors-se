@@ -12,6 +12,7 @@
  */
 package org.talend.components.jdbc.platforms.cloud;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.output.JDBCSQLBuilder;
@@ -36,6 +37,7 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class Delete extends QueryManagerImpl {
 
+    @Getter
     private final List<String> keys;
 
     public Delete(final Platform platform, final JDBCOutputConfig configuration, final I18nMessage i18n,

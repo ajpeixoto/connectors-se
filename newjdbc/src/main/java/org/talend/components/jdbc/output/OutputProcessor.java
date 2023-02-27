@@ -152,9 +152,6 @@ public class OutputProcessor implements Serializable {
                 }
 
                 if (!tableExistsCheck && !tableCreated && configuration.isCreateTableIfNotExists()) {
-                    List<Record> data = new ArrayList<>(1);
-                    data.add(record);
-
                     // use the connector nested mapping file
                     final Dbms mapping =
                             CommonUtils.getMapping("/mappings", configuration.getDataSet().getDataStore(), null,
@@ -162,10 +159,7 @@ public class OutputProcessor implements Serializable {
 
                     // no need to close the connection as expected reuse for studio and get it from pool for cloud
                     final java.sql.Connection connection = dataSource.getConnection();
-                    platform.createTableIfNotExist(connection, configuration.getDataSet().getTableName(),
-                            configuration.getKeys(), configuration.getSortStrategy(), configuration.getSortKeys(),
-                            configuration.getDistributionStrategy(), configuration.getDistributionKeys(),
-                            configuration.getVarcharLength(), configuration.isUseOriginColumnName(), data, mapping);
+                    platform.createTableIfNotExist(connection, records, mapping, configuration, recordBuilderFactory);
                     tableCreated = true;
                 }
             }
