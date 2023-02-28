@@ -17,7 +17,8 @@ import org.talend.components.jdbc.datastore.JDBCDataStore;
 public class RuntimeEnvUtil {
 
     public static boolean isCloud(final JDBCDataStore dataStore) {
-        return (dataStore.getJdbcClass() == null || dataStore.getJdbcClass().isEmpty())
+        return (dataStore.getDbType() != null)
+                && (dataStore.getJdbcClass() == null || dataStore.getJdbcClass().isEmpty())
                 && !dataStore.isUseSharedDBConnection() && !dataStore.isUseDataSource();
     }
 
