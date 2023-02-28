@@ -44,9 +44,6 @@ public class Delete extends QueryManagerImpl {
             final RecordBuilderFactory recordBuilderFactory) {
         super(platform, configuration, i18n, recordBuilderFactory);
         this.keys = new ArrayList<>(ofNullable(configuration.getKeys()).orElse(emptyList()));
-        if (this.keys.isEmpty()) {
-            throw new IllegalArgumentException(getI18n().errorNoKeyForDeleteQuery());
-        }
     }
 
     @Override

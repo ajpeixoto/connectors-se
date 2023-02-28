@@ -59,7 +59,9 @@ public abstract class QueryManagerImpl implements QueryManager {
 
     private Integer retryCount = 0;
 
-    abstract protected PreparedStatement buildQuery(List<Record> records, Connection connection) throws SQLException;
+    protected PreparedStatement buildQuery(List<Record> records, Connection connection) throws SQLException {
+        return null;
+    };
 
     @Override
     public List<Reject> execute(final List<Record> records, final JDBCService.DataSourceWrapper dataSource)

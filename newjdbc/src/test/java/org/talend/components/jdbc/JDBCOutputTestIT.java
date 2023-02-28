@@ -12,6 +12,7 @@
  */
 package org.talend.components.jdbc;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
@@ -21,7 +22,9 @@ import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.input.JDBCCommonInputConfig;
 import org.talend.components.jdbc.input.JDBCInputConfig;
+import org.talend.components.jdbc.input.JDBCTableInputConfig;
 import org.talend.components.jdbc.output.DataAction;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.service.JDBCService;
@@ -747,6 +750,257 @@ public class JDBCOutputTestIT {
             fail();
         } catch (Exception e) {
         }
+    }
+
+    @Test
+    public void testWriterWithCloudStyle() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleAndUpdate() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setDataAction(DataAction.UPDATE);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleAndDesignSchemaAndUpdate() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setDataAction(DataAction.UPDATE);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleAndDesignSchemaAndDelete() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setDataAction(DataAction.DELETE);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleAndDesignSchemaAndUpsert() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setDataAction(DataAction.INSERT_OR_UPDATE);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleWithCreateTable() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("testCreateTable1");
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setCreateTableIfNotExists(true);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleWithCreateTableAndDesignSchema() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("testCreateTable2");
+        // in the design schema, it contains size/scale, then can help create table
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setCreateTableIfNotExists(true);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleWithDesignSchema() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchema() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setCreateTableIfNotExists(true);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai1").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpdate() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setCreateTableIfNotExists(true);
+        config.setDataAction(DataAction.UPDATE);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai1").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndDelete() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setCreateTableIfNotExists(true);
+        config.setDataAction(DataAction.DELETE);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming1").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai1").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
+    }
+
+    @Test
+    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpsert() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCOutputConfig config = new JDBCOutputConfig();
+        config.setDataSet(dataSet);
+        config.setCreateTableIfNotExists(true);
+        config.setDataAction(DataAction.INSERT_OR_UPDATE);
+
+        Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
+        List<Record> records = new ArrayList<>();
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 4).withString("NAME", "xiaoming").build());
+        records.add(
+                recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 5).withString("NAME", "xiaobai").build());
+
+        DBTestUtils.runOutput(records, componentsHandler, config);
     }
 
 }

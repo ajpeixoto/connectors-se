@@ -216,10 +216,54 @@ public class JDBCInputTestIT {
     }
 
     @Test
+    public void testReaderWithCloudStyleAndQueryDataSetWithDesignSchema() {
+        JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setSqlQuery(DBTestUtils.getSQL("test"));
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCInputConfig config = new JDBCInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
+    @Test
     public void testReaderWithCloudStyleAndTableDataSet() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
+
+        JDBCTableInputConfig config = new JDBCTableInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
+    @Test
+    public void testReaderWithCloudStyleAndSnowflakeAndTableDataSet() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
+        dataSet.setTableName("test");
+
+        JDBCTableInputConfig config = new JDBCTableInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
+    @Test
+    public void testReaderWithCloudStyleAndTableDataSetWithDesignSchema() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
 
         JDBCTableInputConfig config = new JDBCTableInputConfig();
         config.setDataSet(dataSet);

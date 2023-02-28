@@ -84,6 +84,10 @@ public class OutputProcessor implements Serializable {
 
     private transient boolean tableCreated;
 
+    private transient String driverId;
+
+    private transient Platform platform;
+
     private transient QueryManager queryManager;
 
     private transient List<Record> records;
@@ -107,7 +111,7 @@ public class OutputProcessor implements Serializable {
     @ElementListener
     public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
             @Output("reject") final OutputEmitter<Record> reject)
-            throws SQLException, IOException {
+            throws SQLException {
         if (!init) {
             boolean useExistedConnection = false;
 
@@ -134,34 +138,12 @@ public class OutputProcessor implements Serializable {
             }
 
             if (isCloud) {
-                final String driverId =
+                this.driverId =
                         jdbcService.getPlatformService().getDriver(configuration.getDataSet().getDataStore()).getId();
-                final Platform platform =
+                this.platform =
                         jdbcService.getPlatformService().getPlatform(configuration.getDataSet().getDataStore());
                 this.queryManager = QueryManagerFactory.getQueryManager(platform, jdbcService.getI18n(), configuration,
                         recordBuilderFactory);
-
-                if (this.tableExistsCheck == null) {
-                    this.tableExistsCheck = DatabaseSpecial.checkTableExistence(driverId,
-                            configuration.getDataSet().getTableName(), dataSource);
-                }
-                if (!this.tableExistsCheck && !this.configuration.isCreateTableIfNotExists()) {
-                    throw new IllegalStateException(
-                            jdbcService.getI18n()
-                                    .errorTaberDoesNotExists(this.configuration.getDataSet().getTableName()));
-                }
-
-                if (!tableExistsCheck && !tableCreated && configuration.isCreateTableIfNotExists()) {
-                    // use the connector nested mapping file
-                    final Dbms mapping =
-                            CommonUtils.getMapping("/mappings", configuration.getDataSet().getDataStore(), null,
-                                    null, jdbcService);
-
-                    // no need to close the connection as expected reuse for studio and get it from pool for cloud
-                    final java.sql.Connection connection = dataSource.getConnection();
-                    platform.createTableIfNotExist(connection, records, mapping, configuration, recordBuilderFactory);
-                    tableCreated = true;
-                }
             }
 
             if (queryManager == null) {
@@ -199,20 +181,21 @@ public class OutputProcessor implements Serializable {
         }
 
         if (queryManager != null) {
-            try {
-                batchCount++;
-                records.add(record);
-                if (batchCount < batchSize) {
+            batchCount++;
+            records.add(record);
+            if (batchCount < batchSize) {
 
-                } else {
-                    batchCount = 0;
+            } else {
+                batchCount = 0;
+                try {
+                    createTableIfNeed();
                     final List<Reject> discards = queryManager.execute(records, dataSource);
                     records = new ArrayList<>(1000);
                     discards.stream().map(Object::toString).forEach(log::error);
+                } catch (final SQLException | IOException e) {
+                    records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
+                    throw ErrorFactory.toIllegalStateException(e);
                 }
-            } catch (final SQLException | IOException e) {
-                records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
-                throw ErrorFactory.toIllegalStateException(e);
             }
             return;
         }
@@ -235,18 +218,54 @@ public class OutputProcessor implements Serializable {
         }
     }
 
+    private void createTableIfNeed() throws SQLException {
+        if (this.tableExistsCheck == null) {
+            this.tableExistsCheck = DatabaseSpecial.checkTableExistence(driverId,
+                    configuration.getDataSet().getTableName(), dataSource);
+        }
+
+        if (!this.tableExistsCheck && !this.configuration.isCreateTableIfNotExists()) {
+            throw new IllegalStateException(
+                    jdbcService.getI18n()
+                            .errorTaberDoesNotExists(this.configuration.getDataSet().getTableName()));
+        }
+
+        if (!tableExistsCheck && !tableCreated && configuration.isCreateTableIfNotExists()) {
+            // use the connector nested mapping file
+            final Dbms mapping =
+                    CommonUtils.getMapping("/mappings", configuration.getDataSet().getDataStore(), null,
+                            null, jdbcService);
+
+            // no need to close the connection as expected reuse for studio and get it from pool for cloud
+            final java.sql.Connection connection = dataSource.getConnection();
+            platform.createTableIfNotExist(connection, records, mapping, configuration, recordBuilderFactory);
+            tableCreated = true;
+        }
+    }
+
     @PostConstruct
     public void init() {
     }
 
     @PreDestroy
     public void release() throws SQLException {
-        if (records != null) {
-            records = null;
+        if (queryManager != null && dataSource != null) {
+            if (batchCount > 0) {
+                batchCount = 0;
+                try {
+                    createTableIfNeed();
+                    final List<Reject> discards = queryManager.execute(records, dataSource);
+                    discards.stream().map(Object::toString).forEach(log::error);
+                } catch (final SQLException | IOException e) {
+                    records.stream().map(r -> new Reject(e.getMessage(), r)).map(Reject::toString).forEach(log::error);
+                    throw ErrorFactory.toIllegalStateException(e);
+                }
+            }
+            dataSource.close();
         }
 
-        if (queryManager != null && dataSource != null) {
-            dataSource.close();
+        if (records != null) {
+            records = null;
         }
 
         if (writer != null) {

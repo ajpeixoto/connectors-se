@@ -63,16 +63,12 @@ public class JDBCBulkExecStandalone implements Serializable {
     }
 
     @PostConstruct
-    public void init() {
+    public void init() throws SQLException {
         boolean useExistedConnection = false;
 
         if (connection == null) {
-            try {
-                dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
-                        configuration.getDataSet().getDataStore(), context, false);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
+                    configuration.getDataSet().getDataStore(), context, false);
         } else {
             useExistedConnection = true;
             dataSource = new JDBCService.DataSourceWrapper(null, connection);

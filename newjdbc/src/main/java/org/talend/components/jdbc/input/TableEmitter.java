@@ -63,12 +63,8 @@ public class TableEmitter implements Serializable {
 
     @PostConstruct
     public void init() throws SQLException {
-        try {
-            dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
-                    configuration.getDataSet().getDataStore(), null, false);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
+                configuration.getDataSet().getDataStore(), null, false);
 
         reader = new JDBCInputReader(configuration, jdbcService, false, dataSource, recordBuilderFactory, null);
         reader.open();

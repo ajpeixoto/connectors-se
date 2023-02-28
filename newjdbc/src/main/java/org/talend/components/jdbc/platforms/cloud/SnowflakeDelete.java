@@ -24,13 +24,11 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -42,12 +40,6 @@ public class SnowflakeDelete extends Delete {
             RecordBuilderFactory recordBuilderFactory) {
         super(platform, configuration, i18n, recordBuilderFactory);
         snowflakeCopy.setUseOriginColumnName(configuration.isUseOriginColumnName());
-    }
-
-    @Override
-    public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
-        // do nothing here
-        return null;
     }
 
     public void updateTargetTableFromTmpTable(final List<Record> records, final Connection connection,

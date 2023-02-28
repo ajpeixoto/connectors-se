@@ -14,6 +14,7 @@ package org.talend.components.jdbc.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.platforms.PlatformService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.service.Service;
@@ -70,6 +71,20 @@ public class UIActionService {
                 .sorted(comparingInt(JDBCConfiguration.Driver::getOrder))
                 .map(driver -> new SuggestionValues.Item(driver.getId(), driver.getDisplayName()))
                 .collect(toList()));
+    }
+
+    @Suggestions("ACTION_SUGGESTION_TABLE_COLUMNS_NAMES")
+    public SuggestionValues getTableColumns(@Option final JDBCTableDataSet dataSet) {
+        List<String> listColumns = dataSet.getSchema()
+                .stream()
+                .map(column -> column.getOriginalDbColumnName() != null ? column.getOriginalDbColumnName()
+                        : column.getLabel())
+                .collect(toList());
+        return new SuggestionValues(true,
+                listColumns
+                        .stream()
+                        .map(columnName -> new SuggestionValues.Item(columnName, columnName))
+                        .collect(toList()));
     }
 
 }

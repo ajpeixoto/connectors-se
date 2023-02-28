@@ -78,12 +78,8 @@ public class QueryEmitter implements Serializable {
 
         boolean useExistedConnection = false;
         if (connection == null) {
-            try {
-                dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
-                        configuration.getDataSet().getDataStore(), context, false);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
+                    configuration.getDataSet().getDataStore(), context, false);
         } else {
             useExistedConnection = true;
             dataSource = new JDBCService.DataSourceWrapper(null, connection);

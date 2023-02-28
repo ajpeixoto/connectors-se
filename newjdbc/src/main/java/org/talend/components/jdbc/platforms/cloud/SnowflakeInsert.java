@@ -20,7 +20,6 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,12 +32,6 @@ public class SnowflakeInsert extends Insert {
             RecordBuilderFactory recordBuilderFactory) {
         super(platform, configuration, i18n, recordBuilderFactory);
         snowflakeCopy.setUseOriginColumnName(configuration.isUseOriginColumnName());
-    }
-
-    @Override
-    public PreparedStatement buildQuery(final List<Record> records, final Connection connection) throws SQLException {
-        // do nothing here
-        return null;
     }
 
     @Override

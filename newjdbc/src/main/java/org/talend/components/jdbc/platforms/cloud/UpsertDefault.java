@@ -53,9 +53,6 @@ public class UpsertDefault extends QueryManagerImpl {
         super(platform, configuration, i18n, recordBuilderFactory);
         this.keys = new ArrayList<>(ofNullable(configuration.getKeys()).orElse(emptyList()));
         this.ignoreColumns = new ArrayList<>(ofNullable(configuration.getIgnoreUpdate()).orElse(emptyList()));
-        if (this.keys.isEmpty()) {
-            throw new IllegalArgumentException(i18n.errorNoKeyForUpdateQuery());
-        }
         insert = new Insert(platform, configuration, i18n, recordBuilderFactory);
         update = new Update(platform, configuration, i18n, recordBuilderFactory);
     }

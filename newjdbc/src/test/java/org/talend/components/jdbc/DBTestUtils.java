@@ -13,6 +13,7 @@
 package org.talend.components.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.common.AuthenticationType;
 import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
@@ -867,8 +868,24 @@ public class DBTestUtils {
         dataStore.setHost("localhost");
         dataStore.setPort(32768);
         dataStore.setDatabase("test");
-        dataStore.setUserId("xxx");
-        dataStore.setPassword("xxx");
+        dataStore.setUserId("");
+        dataStore.setPassword("");
+
+        dataStore.setUseAutoCommit(true);
+        dataStore.setAutoCommit(autoCommit);
+
+        return dataStore;
+    }
+
+    public static JDBCDataStore createCloudStyleSnowflakeDataStore(boolean autoCommit) {
+        final JDBCDataStore dataStore = new JDBCDataStore();
+
+        dataStore.setDbType("Snowflake");
+        dataStore.setSetRawUrl(true);
+        dataStore.setJdbcUrl("");
+        dataStore.setAuthenticationType(AuthenticationType.BASIC);
+        dataStore.setUserId("");
+        dataStore.setPassword("");
 
         dataStore.setUseAutoCommit(true);
         dataStore.setAutoCommit(autoCommit);

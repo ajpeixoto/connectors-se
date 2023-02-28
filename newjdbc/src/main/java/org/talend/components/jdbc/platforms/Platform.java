@@ -96,7 +96,9 @@ public abstract class Platform implements Serializable {
             try {
                 length = Integer.valueOf(column.getProp(SchemaProperty.SIZE));
             } catch (Exception e) {
-                length = dbType.getDefaultLength();
+                if (DbmsType.UNDEFINED != dbType.getDefaultLength()) {
+                    length = dbType.getDefaultLength();
+                }
             }
         }
 
@@ -104,7 +106,9 @@ public abstract class Platform implements Serializable {
         try {
             precision = Integer.valueOf(column.getProp(SchemaProperty.SCALE));
         } catch (Exception e) {
-            precision = dbType.getDefaultPrecision();
+            if (DbmsType.UNDEFINED != dbType.getDefaultPrecision()) {
+                precision = dbType.getDefaultPrecision();
+            }
         }
 
         final boolean ignoreLength = dbType.isIgnoreLength();
@@ -290,7 +294,7 @@ public abstract class Platform implements Serializable {
         final List<String> keys = new ArrayList<>();
         final List<JDBCSQLBuilder.Column> all = JDBCSQLBuilder.getAllColumns(columnList);
         for (JDBCSQLBuilder.Column column : all) {
-            if (column.updatable) {
+            if (column.updateKey) {
                 keys.add(column.dbColumnName);
             }
 
