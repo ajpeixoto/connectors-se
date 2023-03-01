@@ -29,6 +29,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.talend.sdk.component.api.configuration.condition.ActiveIf.EvaluationStrategy.CONTAINS;
@@ -201,7 +202,7 @@ public class JDBCOutputConfig implements Serializable {
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @Documentation("")
-    private List<AdditionalColumn> additionalColumns;
+    private List<AdditionalColumn> additionalColumns = Collections.emptyList();
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
@@ -213,7 +214,7 @@ public class JDBCOutputConfig implements Serializable {
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @ActiveIf(target = "useFieldOptions", value = { "true" })
     @Documentation("")
-    private List<FieldOption> fieldOptions;
+    private List<FieldOption> fieldOptions = Collections.emptyList();
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })

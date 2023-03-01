@@ -70,13 +70,13 @@ import static java.util.stream.Collectors.joining;
 
 @Slf4j
 @Service
-public class JDBCService implements Serializable {
+public class JDBCService {
 
     private static final long serialVersionUID = 1;
 
     // TODO get the classloader tool to use maven gav pathes to load the jdbc driver jars classes dynamiclly
     @Service
-    private transient Resolver resolver;
+    private Resolver resolver;
 
     // this should be used in @CreateConnection and @CloseConnection action method,
     // that method should not be code called outside of JDBCService

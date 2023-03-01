@@ -14,7 +14,6 @@ package org.talend.components.jdbc.dataset;
 
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
-import org.talend.components.jdbc.input.JDBCCommonInputConfig;
 import org.talend.components.jdbc.platforms.Platform;
 
 import java.io.Serializable;
