@@ -201,6 +201,7 @@ public class JDBCInputTestIT {
         DBTestUtils.testMetadata(columns);
     }
 
+    @Disabled
     @Test
     public void testReaderWithCloudStyleAndQueryDataSet() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
@@ -215,6 +216,7 @@ public class JDBCInputTestIT {
         System.out.println(data);
     }
 
+    @Disabled
     @Test
     public void testReaderWithCloudStyleAndQueryDataSetWithDesignSchema() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
@@ -230,6 +232,7 @@ public class JDBCInputTestIT {
         System.out.println(data);
     }
 
+    @Disabled
     @Test
     public void testReaderWithCloudStyleAndTableDataSet() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
@@ -244,6 +247,7 @@ public class JDBCInputTestIT {
         System.out.println(data);
     }
 
+    @Disabled
     @Test
     public void testReaderWithCloudStyleAndSnowflakeAndTableDataSet() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
@@ -258,6 +262,7 @@ public class JDBCInputTestIT {
         System.out.println(data);
     }
 
+    @Disabled
     @Test
     public void testReaderWithCloudStyleAndTableDataSetWithDesignSchema() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();

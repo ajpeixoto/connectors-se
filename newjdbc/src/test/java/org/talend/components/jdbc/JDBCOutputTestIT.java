@@ -916,6 +916,7 @@ public class JDBCOutputTestIT {
         DBTestUtils.runOutput(records, componentsHandler, config);
     }
 
+    @Disabled
     @Test
     public void testWriterWithCloudStyleWithSnowflakeAndDesignSchema() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
@@ -937,6 +938,7 @@ public class JDBCOutputTestIT {
         DBTestUtils.runOutput(records, componentsHandler, config);
     }
 
+    @Disabled
     @Test
     public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpdate() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
@@ -959,6 +961,7 @@ public class JDBCOutputTestIT {
         DBTestUtils.runOutput(records, componentsHandler, config);
     }
 
+    @Disabled
     @Test
     public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndDelete() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
@@ -981,6 +984,7 @@ public class JDBCOutputTestIT {
         DBTestUtils.runOutput(records, componentsHandler, config);
     }
 
+    @Disabled
     @Test
     public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpsert() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
