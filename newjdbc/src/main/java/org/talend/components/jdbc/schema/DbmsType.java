@@ -20,7 +20,7 @@ public class DbmsType {
     /**
      * Used to specify that value wansn't defined. Can be used for positive integer variables
      */
-    static final int UNDEFINED = -1;
+    public static final int UNDEFINED = -1;
 
     /**
      * DBMS type name

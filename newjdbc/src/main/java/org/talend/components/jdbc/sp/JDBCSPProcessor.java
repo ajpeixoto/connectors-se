@@ -76,12 +76,8 @@ public class JDBCSPProcessor implements Serializable {
             boolean useExistedConnection = false;
 
             if (connection == null) {
-                try {
-                    dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
-                            configuration.getDataStore(), context, false);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
+                        configuration.getDataStore(), context, false);
             } else {
                 useExistedConnection = true;
                 dataSource = new JDBCService.DataSourceWrapper(null, connection);

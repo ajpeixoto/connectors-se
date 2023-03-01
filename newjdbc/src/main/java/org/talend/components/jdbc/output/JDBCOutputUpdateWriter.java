@@ -30,10 +30,10 @@ public class JDBCOutputUpdateWriter extends JDBCOutputWriter {
 
     private String sql;
 
-    public JDBCOutputUpdateWriter(JDBCOutputConfig config, boolean useExistedConnection,
+    public JDBCOutputUpdateWriter(JDBCOutputConfig config, final JDBCService jdbcService, boolean useExistedConnection,
             JDBCService.DataSourceWrapper conn,
             RecordBuilderFactory recordBuilderFactory, RuntimeContextHolder context) {
-        super(config, useExistedConnection, conn, recordBuilderFactory, context);
+        super(config, jdbcService, useExistedConnection, conn, recordBuilderFactory, context);
     }
 
     @Override
@@ -41,7 +41,8 @@ public class JDBCOutputUpdateWriter extends JDBCOutputWriter {
         super.open();
         try {
             if (!isDynamic) {
-                sql = JDBCSQLBuilder.getInstance().generateSQL4Update(config.getDataSet().getTableName(), columnList);
+                sql = JDBCSQLBuilder.getInstance()
+                        .generateSQL4Update(platform, config.getDataSet().getTableName(), columnList);
                 statement = conn.getConnection().prepareStatement(sql);
             }
         } catch (SQLException e) {
@@ -62,7 +63,7 @@ public class JDBCOutputUpdateWriter extends JDBCOutputWriter {
                             recordBuilderFactory);
                     columnList = JDBCSQLBuilder.getInstance().createColumnList(config, currentSchema);
                     sql = JDBCSQLBuilder.getInstance()
-                            .generateSQL4Update(config.getDataSet().getTableName(), columnList);
+                            .generateSQL4Update(platform, config.getDataSet().getTableName(), columnList);
                     statement = conn.getConnection().prepareStatement(sql);
                 } catch (SQLException e) {
                     throw e;

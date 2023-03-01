@@ -10,28 +10,19 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.jdbc.common;
+package org.talend.components.jdbc.input;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.talend.sdk.component.api.record.Record;
+import org.talend.components.jdbc.common.SchemaInfo;
+import org.talend.components.jdbc.dataset.BaseDataSet;
+import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.platforms.Platform;
 
 import java.io.Serializable;
+import java.util.List;
 
-// TODO remove this, we create it by tck document, but seems wrong
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class Reject implements Serializable {
+public interface BaseInputConfig extends Serializable {
 
-    private static final long serialVersionUID = 1;
+    BaseDataSet getDataSet();
 
-    // TODO have to json object, not support tck Record
-    private transient Record record;
-
-    private String errorCode;
-
-    private String errorMessage;
-
+    JDBCCommonInputConfig getConfig();
 }

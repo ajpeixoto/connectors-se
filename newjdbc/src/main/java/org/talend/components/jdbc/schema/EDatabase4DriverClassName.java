@@ -50,6 +50,7 @@ public enum EDatabase4DriverClassName {
 
     MYSQL(EDatabaseTypeName.MYSQL, "org.gjt.mm.mysql.Driver"), //$NON-NLS-1$
     MYSQL2(EDatabaseTypeName.MYSQL, "com.mysql.jdbc.Driver"), //$NON-NLS-1$
+    MYSQL3(EDatabaseTypeName.MYSQL, "com.mysql.cj.jdbc.Driver"), //$NON-NLS-1$
     MARIADB(EDatabaseTypeName.MYSQL, "org.mariadb.jdbc.Driver"), //$NON-NLS-1$
     AMAZON_AURORA(EDatabaseTypeName.AMAZON_AURORA, "org.gjt.mm.mysql.Driver"), //$NON-NLS-1$
     NETEZZA(EDatabaseTypeName.NETEZZA, "org.netezza.Driver"), //$NON-NLS-1$
@@ -101,6 +102,9 @@ public enum EDatabase4DriverClassName {
     HIVE2(EDatabaseTypeName.HIVE, "org.apache.hive.jdbc.HiveDriver"), //$NON-NLS-1$
 
     IMPALA(EDatabaseTypeName.IMPALA, "org.apache.hive.jdbc.HiveDriver"), //$NON-NLS-1$
+
+    SNOWFLAKE(EDatabaseTypeName.SNOWFLAKE, "net.snowflake.client.jdbc.SnowflakeDriver"), //$NON-NLS-1$
+    DELTALAKE(EDatabaseTypeName.DELTALAKE, "com.simba.spark.jdbc.Driver"), //$NON-NLS-1$
 
     H2(EDatabaseTypeName.H2, "org.h2.Driver")//$NON-NLS-1$
     //

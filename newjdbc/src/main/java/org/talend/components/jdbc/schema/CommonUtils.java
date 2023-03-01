@@ -15,7 +15,10 @@ package org.talend.components.jdbc.schema;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.common.Driver;
+import org.talend.components.jdbc.common.JDBCConfiguration;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.platforms.RuntimeEnvUtil;
+import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Schema;
 
 import java.io.File;
@@ -55,21 +58,32 @@ public class CommonUtils {
      * @param dbType
      * @return
      */
-    private static String getRealDBType(JDBCDataStore dataStore, String dbType) {
+    private static String getRealDBType(JDBCDataStore dataStore, String dbType, JDBCService jdbcService) {
         if (dbType == null || dbType.equals(EDatabaseTypeName.GENERAL_JDBC.getDisplayName())) {
-            String driverClassName = dataStore.getJdbcClass();
+            final boolean isCloud = RuntimeEnvUtil.isCloud(dataStore);
 
-            if ("com.sybase.jdbc3.jdbc.SybDataSource".equals(driverClassName)) {
-                driverClassName = EDatabase4DriverClassName.SYBASEASE.getDriverClass();
+            String driverClassName;
+            final List<String> driverPaths;
+            if (isCloud) {
+                JDBCConfiguration.Driver driverInfo = jdbcService.getPlatformService().getDriver(dataStore);
+                driverClassName = driverInfo.getClassName();
+                driverPaths = driverInfo.getPaths();
+            } else {
+                driverClassName = dataStore.getJdbcClass();
+
+                if ("com.sybase.jdbc3.jdbc.SybDataSource".equals(driverClassName)) {
+                    driverClassName = EDatabase4DriverClassName.SYBASEASE.getDriverClass();
+                }
+
+                driverPaths =
+                        dataStore.getJdbcDriver().stream().map(Driver::getPath).collect(Collectors.toList());
             }
 
-            List<String> driverPaths =
-                    dataStore.getJdbcDriver().stream().map(Driver::getPath).collect(Collectors.toList());
-            StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
             for (String path : driverPaths) {
                 sb.append(path);
             }
-            String driverJarInfo = sb.toString();
+            final String driverJarInfo = sb.toString();
 
             dbType = getDbTypeByClassNameAndDriverJar(driverClassName, driverJarInfo);
 
@@ -91,8 +105,9 @@ public class CommonUtils {
 
     public static Dbms getMapping(String mappingFilesDir, JDBCDataStore dataStore,
             String dbTypeByComponentType,
-            DBType dbTypeInComponentSetting) {
-        String mappingFileSubfix = guessMappingFile(dataStore, dbTypeByComponentType, dbTypeInComponentSetting);
+            DBType dbTypeInComponentSetting, JDBCService jdbcService) {
+        String mappingFileSubfix =
+                guessMappingFile(dataStore, dbTypeByComponentType, dbTypeInComponentSetting, jdbcService);
 
         InputStream is = CommonUtils.class
                 .getResourceAsStream(String.format("%s/mapping_%s.xml", mappingFilesDir, mappingFileSubfix));
@@ -116,8 +131,10 @@ public class CommonUtils {
                                          * for example, if tjdbcxxx, the type is "General JDBC", if tmysqlxxx, the type
                                          * is "MySQL"
                                          */,
-            DBType dbTypeInComponentSetting/* in tjdbcinput, can choose the db type in advanced setting */) {
-        String mappingFileSubfix = guessMappingFile(dataStore, dbTypeByComponentType, dbTypeInComponentSetting);
+            DBType dbTypeInComponentSetting/* in tjdbcinput, can choose the db type in advanced setting */,
+            JDBCService jdbcService) {
+        String mappingFileSubfix =
+                guessMappingFile(dataStore, dbTypeByComponentType, dbTypeInComponentSetting, jdbcService);
 
         MappingFileLoader fileLoader = new MappingFileLoader();
         Dbms dbms = null;
@@ -134,8 +151,8 @@ public class CommonUtils {
     }
 
     private static String guessMappingFile(JDBCDataStore dataStore, String dbTypeByComponentType,
-            DBType dbTypeInComponentSetting) {
-        final String realDbType = getRealDBType(dataStore, dbTypeByComponentType);
+            DBType dbTypeInComponentSetting, JDBCService jdbcService) {
+        final String realDbType = getRealDBType(dataStore, dbTypeByComponentType, jdbcService);
         final String product = EDatabaseTypeName.getTypeFromDisplayName(realDbType).getProduct();
 
         String mappingFileSubfix = productValue2DefaultMappingFileSubfix.get(product);
@@ -271,6 +288,9 @@ public class CommonUtils {
         productValue2DefaultMappingFileSubfix.put("TERADATA", "Teradata");
         productValue2DefaultMappingFileSubfix.put("VECTORWISE", "VectorWise");
         productValue2DefaultMappingFileSubfix.put("VERTICA", "Vertica");
+
+        productValue2DefaultMappingFileSubfix.put("SNOWFLAKE", "Snowflake");
+        productValue2DefaultMappingFileSubfix.put("DELTALAKE", "Databricks_Delta_Lake");
     }
 
     // hywang add for bug 7575

@@ -83,16 +83,12 @@ public class JDBCOutputBulkExecProcessor implements Serializable {
     }
 
     @PostConstruct
-    public void init() throws IOException {
+    public void init() throws SQLException, IOException {
         boolean useExistedConnection = false;
 
         if (connection == null) {
-            try {
-                dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
-                        configuration.getDataSet().getDataStore(), context, false);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            dataSource = jdbcService.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
+                    configuration.getDataSet().getDataStore(), context, false);
         } else {
             useExistedConnection = true;
             dataSource = new JDBCService.DataSourceWrapper(null, connection);

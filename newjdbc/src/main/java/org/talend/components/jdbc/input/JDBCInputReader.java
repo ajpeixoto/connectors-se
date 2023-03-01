@@ -15,8 +15,12 @@ package org.talend.components.jdbc.input;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.common.SchemaInfo;
+import org.talend.components.jdbc.platforms.GenericPlatform;
+import org.talend.components.jdbc.platforms.Platform;
+import org.talend.components.jdbc.platforms.RuntimeEnvUtil;
 import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.components.jdbc.schema.Dbms;
+import org.talend.components.jdbc.schema.JDBCTableMetadata;
 import org.talend.components.jdbc.schema.SchemaInferer;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.context.RuntimeContextHolder;
@@ -38,7 +42,7 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class JDBCInputReader {
 
-    protected JDBCInputConfig config;
+    protected BaseInputConfig config;
 
     protected JDBCService.DataSourceWrapper conn;
 
@@ -62,13 +66,20 @@ public class JDBCInputReader {
 
     private Map<Integer, Boolean> trimMap = new HashMap<>();
 
-    public JDBCInputReader(JDBCInputConfig config, boolean useExistedConnection, JDBCService.DataSourceWrapper conn,
-            RecordBuilderFactory recordBuilderFactory, final RuntimeContextHolder context) {
+    private final JDBCService jdbcService;
+
+    private final boolean isCloud;
+
+    public JDBCInputReader(final BaseInputConfig config, final JDBCService jdbcService,
+            final boolean useExistedConnection, final JDBCService.DataSourceWrapper conn,
+            final RecordBuilderFactory recordBuilderFactory, final RuntimeContextHolder context) {
         this.config = config;
+        this.jdbcService = jdbcService;
         this.useExistedConnection = useExistedConnection;
         this.conn = conn;
         this.recordBuilderFactory = recordBuilderFactory;
         this.context = context;
+        this.isCloud = RuntimeEnvUtil.isCloud(config.getDataSet().getDataStore());
     }
 
     private Schema getSchema() throws SQLException {
@@ -91,12 +102,12 @@ public class JDBCInputReader {
                 }
             }
 
-            if (config.isTrimAllStringOrCharColumns()) {
+            if (config.getConfig().isTrimAllStringOrCharColumns()) {
                 isTrimAll = true;
                 return querySchema;
             }
 
-            List<ColumnTrim> columnTrims = config.getColumnTrims();
+            List<ColumnTrim> columnTrims = config.getConfig().getColumnTrims();
             if (columnTrims != null && !columnTrims.isEmpty()) {
                 boolean defaultTrim =
                         ((dynamicIndex > -1) && !columnTrims.isEmpty()) ? columnTrims.get(dynamicIndex).isTrim()
@@ -129,34 +140,53 @@ public class JDBCInputReader {
             }
         }
 
-        DBType dbTypeInComponentSetting = config.isEnableMapping() ? config.getMapping() : null;
+        final DBType dbTypeInComponentSetting =
+                config.getConfig().isEnableMapping() ? config.getConfig().getMapping() : null;
 
-        Dbms mapping = null;
+        final Dbms mapping;
         if (mappingFileDir != null) {
             mapping = CommonUtils.getMapping(mappingFileDir, config.getDataSet().getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, jdbcService);
         } else {
             // use the connector nested mapping file
             mapping = CommonUtils.getMapping("/mappings", config.getDataSet().getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, jdbcService);
         }
 
-        return SchemaInferer.infer(recordBuilderFactory, resultSet.getMetaData(), mapping);
+        if (isCloud && config.getDataSet().isTableMode()) {
+            JDBCTableMetadata tableMetadata = new JDBCTableMetadata();
+            tableMetadata.setDatabaseMetaData(conn.getConnection().getMetaData())
+                    .setCatalog(conn.getConnection().getCatalog())
+                    .setDbSchema(JDBCService.getDatabaseSchema(conn.getConnection()))
+                    .setTablename(config.getDataSet().getTableName());
+            return SchemaInferer.infer(recordBuilderFactory, tableMetadata, mapping, true);
+        } else {
+            return SchemaInferer.infer(recordBuilderFactory, resultSet.getMetaData(), mapping);
+        }
     }
 
     public void open() throws SQLException {
         log.debug("JDBCInputReader start.");
 
-        boolean usePreparedStatement = config.isUsePreparedStatement();
+        final Platform platform;
+        if (isCloud) {
+            platform = jdbcService.getPlatformService().getPlatform(config.getDataSet().getDataStore());
+        } else {
+            platform = new GenericPlatform(jdbcService.getI18n(), null);
+        }
+        final String query = config.getDataSet().getSqlQuery(platform);
+
+        boolean usePreparedStatement = config.getConfig().isUsePreparedStatement();
         try {
             String driverClass = config.getDataSet().getDataStore().getJdbcClass();
             if (driverClass != null && driverClass.toLowerCase().contains("mysql")) {
                 if (usePreparedStatement) {
-                    log.debug("Prepared statement: " + config.getDataSet().getSqlQuery());
+                    log.debug("Prepared statement: " + query);
                     PreparedStatement prepared_statement = conn.getConnection()
-                            .prepareStatement(config.getDataSet().getSqlQuery(),
+                            .prepareStatement(query,
                                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                    JDBCRuntimeUtils.setPreparedStatement(prepared_statement, config.getPreparedStatementParameters());
+                    JDBCRuntimeUtils.setPreparedStatement(prepared_statement,
+                            config.getConfig().getPreparedStatementParameters());
                     statement = prepared_statement;
                 } else {
                     log.debug("Create statement.");
@@ -175,10 +205,11 @@ public class JDBCInputReader {
                 }
             } else {
                 if (usePreparedStatement) {
-                    log.debug("Prepared statement: " + config.getDataSet().getSqlQuery());
+                    log.debug("Prepared statement: " + query);
                     PreparedStatement prepared_statement =
-                            conn.getConnection().prepareStatement(config.getDataSet().getSqlQuery());
-                    JDBCRuntimeUtils.setPreparedStatement(prepared_statement, config.getPreparedStatementParameters());
+                            conn.getConnection().prepareStatement(query);
+                    JDBCRuntimeUtils.setPreparedStatement(prepared_statement,
+                            config.getConfig().getPreparedStatementParameters());
                     statement = prepared_statement;
 
                 } else {
@@ -186,20 +217,20 @@ public class JDBCInputReader {
                 }
             }
 
-            if (config.isUseQueryTimeout()) {
-                log.debug("Query timeout: " + config.getQueryTimeout());
-                statement.setQueryTimeout(config.getQueryTimeout());
+            if (config.getConfig().isUseQueryTimeout()) {
+                log.debug("Query timeout: " + config.getConfig().getQueryTimeout());
+                statement.setQueryTimeout(config.getConfig().getQueryTimeout());
             }
 
-            if (config.isUseCursor()) {
-                log.debug("Fetch size: " + config.getCursorSize());
-                statement.setFetchSize(config.getCursorSize());
+            if (config.getConfig().isUseCursor()) {
+                log.debug("Fetch size: " + config.getConfig().getCursorSize());
+                statement.setFetchSize(config.getConfig().getCursorSize());
             }
             if (usePreparedStatement) {
                 resultSet = ((PreparedStatement) statement).executeQuery();
             } else {
-                log.debug("Executing the query: '{}'", config.getDataSet().getSqlQuery());
-                resultSet = statement.executeQuery(config.getDataSet().getSqlQuery());
+                log.debug("Executing the query: '{}'", query);
+                resultSet = statement.executeQuery(query);
             }
         } catch (SQLException e) {
             throw e;

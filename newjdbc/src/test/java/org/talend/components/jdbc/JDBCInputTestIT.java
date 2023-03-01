@@ -21,9 +21,7 @@ import org.talend.components.jdbc.common.Type;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
-import org.talend.components.jdbc.input.ColumnTrim;
-import org.talend.components.jdbc.input.JDBCInputConfig;
-import org.talend.components.jdbc.input.QueryEmitter;
+import org.talend.components.jdbc.input.*;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
@@ -203,6 +201,83 @@ public class JDBCInputTestIT {
         DBTestUtils.testMetadata(columns);
     }
 
+    @Disabled
+    @Test
+    public void testReaderWithCloudStyleAndQueryDataSet() {
+        JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setSqlQuery(DBTestUtils.getSQL("test"));
+
+        JDBCInputConfig config = new JDBCInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
+    @Disabled
+    @Test
+    public void testReaderWithCloudStyleAndQueryDataSetWithDesignSchema() {
+        JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setSqlQuery(DBTestUtils.getSQL("test"));
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCInputConfig config = new JDBCInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
+    @Disabled
+    @Test
+    public void testReaderWithCloudStyleAndTableDataSet() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+
+        JDBCTableInputConfig config = new JDBCTableInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
+    @Disabled
+    @Test
+    public void testReaderWithCloudStyleAndSnowflakeAndTableDataSet() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
+        dataSet.setTableName("test");
+
+        JDBCTableInputConfig config = new JDBCTableInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
+    @Disabled
+    @Test
+    public void testReaderWithCloudStyleAndTableDataSetWithDesignSchema() {
+        JDBCTableDataSet dataSet = new JDBCTableDataSet();
+        dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
+        dataSet.setTableName("test");
+        dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
+
+        JDBCTableInputConfig config = new JDBCTableInputConfig();
+        config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
+
+        List<Record> data = DBTestUtils.runInput(componentsHandler, config);
+        System.out.println(data);
+    }
+
     @Test
     public void testReader() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
@@ -212,6 +287,7 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
 
         List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
@@ -235,6 +311,7 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
 
         List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
@@ -259,7 +336,8 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
-        config.setTrimAllStringOrCharColumns(true);
+        config.setConfig(new JDBCCommonInputConfig());
+        config.getConfig().setTrimAllStringOrCharColumns(true);
 
         List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
@@ -282,7 +360,8 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
-        config.setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("NAME", true)));
+        config.setConfig(new JDBCCommonInputConfig());
+        config.getConfig().setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("NAME", true)));
 
         List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
@@ -305,7 +384,8 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
-        config.setColumnTrims(Arrays.asList(new ColumnTrim("DYN", true)));
+        config.setConfig(new JDBCCommonInputConfig());
+        config.getConfig().setColumnTrims(Arrays.asList(new ColumnTrim("DYN", true)));
 
         List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
@@ -328,7 +408,8 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
-        config.setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("DYN", true)));
+        config.setConfig(new JDBCCommonInputConfig());
+        config.getConfig().setColumnTrims(Arrays.asList(new ColumnTrim("ID", false), new ColumnTrim("DYN", true)));
 
         List<Record> data = DBTestUtils.runInput(componentsHandler, config);
 
@@ -407,9 +488,10 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
-        config.setUsePreparedStatement(true);
-        config.setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 2147483647),
-                new PreparedStatementParameter(2, Type.String, "abcdefg")));
+        config.getConfig().setUsePreparedStatement(true);
+        config.getConfig()
+                .setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 2147483647),
+                        new PreparedStatementParameter(2, Type.String, "abcdefg")));
 
         // skip parameter ser, as PreparedStatementParameter use object to store value, and the function only for studio
         List<Record> records = new ArrayList<>();
@@ -471,6 +553,7 @@ public class JDBCInputTestIT {
 
         JDBCInputConfig config = new JDBCInputConfig();
         config.setDataSet(dataSet);
+        config.setConfig(new JDBCCommonInputConfig());
 
         List<Record> records = DBTestUtils.runInput(componentsHandler, config);
 

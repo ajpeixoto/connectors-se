@@ -17,11 +17,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DBType;
+import org.talend.components.jdbc.common.JDBCConfiguration;
+import org.talend.components.jdbc.common.RedshiftSortStrategy;
 import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.components.jdbc.input.JDBCInputConfig;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
+import org.talend.components.jdbc.platforms.*;
 import org.talend.components.jdbc.row.JDBCRowConfig;
 import org.talend.components.jdbc.schema.CommonUtils;
 import org.talend.components.jdbc.schema.Dbms;
@@ -33,6 +36,8 @@ import org.talend.sdk.component.api.context.RuntimeContextHolder;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.asyncvalidation.AsyncValidation;
+import org.talend.sdk.component.api.service.asyncvalidation.ValidationResult;
 import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.completion.Suggestions;
 import org.talend.sdk.component.api.service.connection.CloseConnection;
@@ -60,6 +65,9 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+
 @Slf4j
 @Service
 public class JDBCService implements Serializable {
@@ -77,6 +85,18 @@ public class JDBCService implements Serializable {
 
     @Service
     private RecordBuilderFactory recordBuilderFactory;
+
+    @Getter
+    @Service
+    private TokenClient tokenClient;
+
+    @Getter
+    @Service
+    private PlatformService platformService;
+
+    @Getter
+    @Service
+    private I18nMessage i18n;
 
     @Suggestions("GUESS_DRIVER_CLASS")
     public SuggestionValues loadRecordTypes(@Option final List<org.talend.components.jdbc.common.Driver> driverJars)
@@ -299,6 +319,21 @@ public class JDBCService implements Serializable {
         return null;
     }
 
+    public static String getDatabaseSchema(Connection connection) throws SQLException {
+        // Special code for MSSQL JDTS driver
+        String schema = null;
+        try {
+            String result = connection.getSchema();
+            // delta lake database driver return empty string which not follow jdbc spec.
+            if (result != null && !"".equals(result)) {
+                schema = result;
+            }
+        } catch (AbstractMethodError e) {
+            // ignore
+        }
+        return schema;
+    }
+
     private Set<String> getAvailableTableTypes(DatabaseMetaData dbMetaData) throws SQLException {
         Set<String> availableTableTypes = new HashSet<String>();
         List<String> neededTableTypes = Arrays.asList("TABLE", "VIEW", "SYNONYM");
@@ -322,10 +357,16 @@ public class JDBCService implements Serializable {
         return availableTableTypes;
     }
 
-    public DataSourceWrapper createConnection(final JDBCDataStore dataStore, final boolean readonly)
+    private DataSourceWrapper createConnection(final JDBCDataStore dataStore, final boolean readonly)
+            throws SQLException {
+        return createConnection(dataStore, readonly, Collections.emptyMap());
+    }
+
+    private DataSourceWrapper createConnection(final JDBCDataStore dataStore, final boolean readonly,
+            final Map<String, String> additionalJDBCProperties)
             throws SQLException {
         // TODO check this readonly before: conn = createConnection(dataStore, readonly);
-        JDBCDataSource dataSource = new JDBCDataSource(this.resolver, dataStore);
+        JDBCDataSource dataSource = new JDBCDataSource(this.resolver, dataStore, this, additionalJDBCProperties);
         Connection conn = dataSource.getConnection();
         // somebody add it for performance for dataprep
         if (readonly) {
@@ -344,6 +385,13 @@ public class JDBCService implements Serializable {
 
     public DataSourceWrapper createConnectionOrGetFromSharedConnectionPoolOrDataSource(final JDBCDataStore dataStore,
             final RuntimeContextHolder context, final boolean readonly) throws SQLException {
+        return createConnectionOrGetFromSharedConnectionPoolOrDataSource(dataStore, context, readonly,
+                Collections.emptyMap());
+    }
+
+    public DataSourceWrapper createConnectionOrGetFromSharedConnectionPoolOrDataSource(final JDBCDataStore dataStore,
+            final RuntimeContextHolder context, final boolean readonly,
+            final Map<String, String> additionalJDBCProperties) throws SQLException {
         Connection conn = null;
         log.debug("Connection attempt to '{}' with the username '{}'", dataStore.getJdbcUrl(), dataStore.getUserId());
 
@@ -390,7 +438,7 @@ public class JDBCService implements Serializable {
                 return createConnection(dataStore, false);
             }
         } else {
-            return createConnection(dataStore, readonly);
+            return createConnection(dataStore, readonly, additionalJDBCProperties);
         }
     }
 
@@ -417,47 +465,27 @@ public class JDBCService implements Serializable {
 
         private java.sql.Connection connection;
 
-        private void initConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths) {
+        private void initConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths,
+                final JDBCService jdbcService, final Map<String, String> additionalJDBCProperties) {
             dataSource = new HikariDataSource();
-            dataSource.setJdbcUrl(dataStore.getJdbcUrl());
-            dataSource.setDriverClassName(dataStore.getJdbcClass());
 
-            // HikariCP force to use java.sql.Connetion.isValid or test query to check connection if valid,
-            // so have to set here for different database if that driver not support isValid method
-            if (dataStore.getJdbcClass() != null
-                    && "net.sourceforge.jtds.jdbc.Driver".equals(dataStore.getJdbcClass())) {
-                // the lastest jtds driver not support isValid method :
-                // https://mvnrepository.com/artifact/net.sourceforge.jtds/jtds
-                dataSource.setConnectionTestQuery("SELECT 1");
-                // TODO check for sybase database as jtds also can works for that
-            } else if (driverPaths.stream().anyMatch(path -> path.contains("ojdbc5"))) {
-                // oracle ojdbc5 also not support isValid method
-                dataSource.setConnectionTestQuery("SELECT 1 FROM DUAL");
-            }
-
-            if (dataStore.getUserId() != null) {
-                dataSource.setUsername(dataStore.getUserId());
-            }
-            if (dataStore.getPassword() != null) {
-                dataSource.setPassword(dataStore.getPassword());
-            }
+            DatabaseSpecial.doConfig4DifferentDatabaseAndDifferentRuntimeEnv(dataSource, dataStore, driverPaths,
+                    jdbcService, additionalJDBCProperties);
 
             dataSource.setMaximumPoolSize(1);
-
-            // mysql special property?
-            // this will make statement.executeBatch return wrong info for data insert/updte count, so disable it
-            // for studio
-            // dataSource.addDataSourceProperty("rewriteBatchedStatements", "true");
-            // Security Issues with LOAD DATA LOCAL https://jira.talendforge.org/browse/TDI-42001
-            // TODO add them back for cloud platform
-            // dataSource.addDataSourceProperty("allowLoadLocalInfile", "false"); // MySQL
-            // dataSource.addDataSourceProperty("allowLocalInfile", "false"); // MariaDB
         }
 
         private void initSingleConnection(final JDBCDataStore dataStore) {
+            final ClassLoader threadContextClassLoader = Thread.currentThread().getContextClassLoader();
+            final Driver driver;
             try {
-                Class.forName(dataStore.getJdbcClass());
+                Class<?> driverClass = threadContextClassLoader.loadClass(dataStore.getJdbcClass());
+                driver = (Driver) driverClass.newInstance();
             } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
             final Properties properties = new Properties() {
@@ -474,15 +502,16 @@ public class JDBCService implements Serializable {
                 }
             };
             try {
-                connection = DriverManager.getConnection(dataStore.getJdbcUrl(), properties);
+                connection = driver.connect(dataStore.getJdbcUrl(), properties);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        ConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths, boolean useConnectionPool) {
+        ConnectionPool(final JDBCDataStore dataStore, final List<String> driverPaths, final boolean useConnectionPool,
+                final JDBCService jdbcService, final Map<String, String> additionalJDBCProperties) {
             if (useConnectionPool) {
-                initConnectionPool(dataStore, driverPaths);
+                initConnectionPool(dataStore, driverPaths, jdbcService, additionalJDBCProperties);
             } else {
                 initSingleConnection(dataStore);
             }
@@ -512,7 +541,6 @@ public class JDBCService implements Serializable {
 
     }
 
-    // copy from tck jdbc connector for cloud, TODO now for fast development, will unify them to one
     public static class JDBCDataSource implements AutoCloseable {
 
         private final Resolver.ClassLoaderDescriptor classLoaderDescriptor;
@@ -520,22 +548,38 @@ public class JDBCService implements Serializable {
         private final ConnectionPool connectionPool;
 
         public JDBCDataSource(final Resolver resolver,
-                final JDBCDataStore dataStore) {
+                final JDBCDataStore dataStore, final JDBCService jdbcService,
+                final Map<String, String> additionalJDBCProperties) {
             final Thread thread = Thread.currentThread();
             final ClassLoader prev = thread.getContextClassLoader();
 
-            final List<org.talend.components.jdbc.common.Driver> drivers = dataStore.getJdbcDriver();
-            final List<String> paths = Optional.ofNullable(drivers)
-                    .orElse(Collections.emptyList())
-                    .stream()
-                    .map(driver -> convertMvnPath2TckPath(driver.getPath()))
-                    .collect(Collectors.toList());
-
-            classLoaderDescriptor = resolver.mapDescriptorToClassLoader(paths);
+            final boolean isCloud = RuntimeEnvUtil.isCloud(dataStore);
+            final List<String> paths;
+            if (isCloud) {
+                final JDBCConfiguration.Driver driver = jdbcService.getPlatformService().getDriver(dataStore);
+                paths = driver.getPaths();
+                classLoaderDescriptor = resolver.mapDescriptorToClassLoader(paths);
+                if (!classLoaderDescriptor.resolvedDependencies().containsAll(driver.getPaths())) {
+                    String missingJars = driver
+                            .getPaths()
+                            .stream()
+                            .filter(p -> !classLoaderDescriptor.resolvedDependencies().contains(p))
+                            .collect(joining("\n"));
+                    throw new IllegalStateException(jdbcService.getI18n().errorDriverLoad(driver.getId(), missingJars));
+                }
+            } else {
+                final List<org.talend.components.jdbc.common.Driver> drivers = dataStore.getJdbcDriver();
+                paths = Optional.ofNullable(drivers)
+                        .orElse(Collections.emptyList())
+                        .stream()
+                        .map(driver -> convertMvnPath2TckPath(driver.getPath()))
+                        .collect(Collectors.toList());
+                classLoaderDescriptor = resolver.mapDescriptorToClassLoader(paths);
+            }
 
             try {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
-                connectionPool = new ConnectionPool(dataStore, paths, false);
+                connectionPool = new ConnectionPool(dataStore, paths, isCloud, jdbcService, additionalJDBCProperties);
             } finally {
                 thread.setContextClassLoader(prev);
             }
@@ -658,11 +702,12 @@ public class JDBCService implements Serializable {
 
         Dbms mapping = null;
         if (mappingFileDir != null) {
-            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting);
+            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting,
+                    this);
         } else {
             // use the connector nested mapping file
             mapping = CommonUtils.getMapping("/mappings", dataSet.getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, this);
         }
 
         try (final DataSourceWrapper dataSource = createConnection(dataSet.getDataStore(), false);
@@ -688,19 +733,21 @@ public class JDBCService implements Serializable {
 
         Dbms mapping = null;
         if (mappingFileDir != null) {
-            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting);
+            mapping = CommonUtils.getMapping(mappingFileDir, dataSet.getDataStore(), null, dbTypeInComponentSetting,
+                    this);
         } else {
             // use the connector nested mapping file
             mapping = CommonUtils.getMapping("/mappings", dataSet.getDataStore(), null,
-                    dbTypeInComponentSetting);
+                    dbTypeInComponentSetting, this);
         }
 
         try (final DataSourceWrapper dataSource = createConnection(dataSet.getDataStore(), false);
                 final Connection conn = dataSource.getConnection()) {
             JDBCTableMetadata tableMetadata = new JDBCTableMetadata();
+            // TODO no need to set catalog/schema here? maybe an old studio jdbc connector bug?
             tableMetadata.setDatabaseMetaData(conn.getMetaData()).setTablename(dataSet.getTableName());
 
-            Schema schema = SchemaInferer.infer(recordBuilderFactory, tableMetadata, mapping);
+            Schema schema = SchemaInferer.infer(recordBuilderFactory, tableMetadata, mapping, false);
 
             return schema;
         }
@@ -749,7 +796,8 @@ public class JDBCService implements Serializable {
     @DiscoverSchemaExtended("JDBCQueryDataSet")
     public Schema discoverInputSchema(@Option("configuration") final JDBCInputConfig config)
             throws SQLException {
-        Schema result = guessSchemaByQuery(config.getDataSet(), config.isEnableMapping() ? config.getMapping() : null);
+        Schema result = guessSchemaByQuery(config.getDataSet(),
+                config.getConfig().isEnableMapping() ? config.getConfig().getMapping() : null);
         return result;
     }
 
@@ -791,6 +839,15 @@ public class JDBCService implements Serializable {
                 .withProp(SchemaProperty.SIZE, "255")
                 .build());
         return schemaBuilder.build();
+    }
+
+    @AsyncValidation(value = "ACTION_VALIDATE_SORT_KEYS")
+    public ValidationResult validateSortKeys(final RedshiftSortStrategy sortStrategy, final List<String> sortKeys) {
+        if (RedshiftSortStrategy.SINGLE.equals(sortStrategy) && sortKeys != null && sortKeys.size() > 1) {
+            return new ValidationResult(ValidationResult.Status.KO, i18n.errorSingleSortKeyInvalid());
+        }
+
+        return new ValidationResult(ValidationResult.Status.OK, "");
     }
 
 }

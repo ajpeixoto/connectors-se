@@ -84,18 +84,14 @@ public class JDBCRowProcessor implements Serializable {
             boolean useExistedConnection = false;
 
             if (connection == null) {
-                try {
-                    dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
-                            configuration.getDataSet().getDataStore(), context, false);
+                dataSource = service.createConnectionOrGetFromSharedConnectionPoolOrDataSource(
+                        configuration.getDataSet().getDataStore(), context, false);
 
-                    if (configuration.getCommitEvery() != 0) {
-                        java.sql.Connection connection = dataSource.getConnection();
-                        if (connection.getAutoCommit()) {
-                            connection.setAutoCommit(false);
-                        }
+                if (configuration.getCommitEvery() != 0) {
+                    java.sql.Connection connection = dataSource.getConnection();
+                    if (connection.getAutoCommit()) {
+                        connection.setAutoCommit(false);
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace();
                 }
             } else {
                 useExistedConnection = true;

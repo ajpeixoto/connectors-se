@@ -15,6 +15,7 @@ package org.talend.components.jdbc.dataset;
 import lombok.Data;
 import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
+import org.talend.components.jdbc.platforms.Platform;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.type.DataSet;
@@ -38,7 +39,7 @@ import java.util.List;
 })
 @DataSet("JDBCQueryDataSet")
 @Documentation("A query dataset")
-public class JDBCQueryDataSet implements Serializable {
+public class JDBCQueryDataSet implements BaseDataSet, Serializable {
 
     @Option
     @Documentation("The connection information to execute")
@@ -64,4 +65,13 @@ public class JDBCQueryDataSet implements Serializable {
     @Documentation("sql query")
     private String sqlQuery = "select id, name from employee";
 
+    @Override
+    public String getSqlQuery(Platform platform) {
+        return sqlQuery;
+    }
+
+    @Override
+    public boolean isTableMode() {
+        return false;
+    }
 }
