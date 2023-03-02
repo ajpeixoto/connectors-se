@@ -70,13 +70,13 @@ import static java.util.stream.Collectors.joining;
 
 @Slf4j
 @Service
-public class JDBCService implements Serializable {
+public class JDBCService {
 
     private static final long serialVersionUID = 1;
 
     // TODO get the classloader tool to use maven gav pathes to load the jdbc driver jars classes dynamiclly
     @Service
-    private transient Resolver resolver;
+    private Resolver resolver;
 
     // this should be used in @CreateConnection and @CloseConnection action method,
     // that method should not be code called outside of JDBCService
@@ -287,9 +287,13 @@ public class JDBCService implements Serializable {
             Set<String> tableTypes = getAvailableTableTypes(dbMetaData);
 
             String database_schema = getDatabaseSchema(dataStore);
+            if (database_schema == null) {
+                // from jdbc api to get the runtime jdbc schema, but it may not be right?
+                database_schema = getDatabaseSchema(conn);
+            }
 
             try (ResultSet resultset =
-                    dbMetaData.getTables(null, database_schema, null, tableTypes.toArray(new String[0]))) {
+                    dbMetaData.getTables(conn.getCatalog(), database_schema, null, tableTypes.toArray(new String[0]))) {
                 while (resultset.next()) {
                     String tableName = resultset.getString("TABLE_NAME");
                     if (tableName == null) {

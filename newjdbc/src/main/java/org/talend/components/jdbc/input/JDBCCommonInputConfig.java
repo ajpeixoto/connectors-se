@@ -22,6 +22,7 @@ import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -61,7 +62,7 @@ public class JDBCCommonInputConfig implements Serializable {
     @Option
     @ActiveIf(target = "trimAllStringOrCharColumns", value = { "false" })
     @Documentation("")
-    private List<ColumnTrim> columnTrims;
+    private List<ColumnTrim> columnTrims = Collections.emptyList();
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
@@ -92,7 +93,7 @@ public class JDBCCommonInputConfig implements Serializable {
     @Option
     @ActiveIf(target = "usePreparedStatement", value = { "true" })
     @Documentation("")
-    private List<PreparedStatementParameter> preparedStatementParameters;
+    private List<PreparedStatementParameter> preparedStatementParameters = Collections.emptyList();
 
     @Option
     @Documentation("")

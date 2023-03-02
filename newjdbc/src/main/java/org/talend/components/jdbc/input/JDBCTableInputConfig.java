@@ -37,6 +37,6 @@ public class JDBCTableInputConfig implements BaseInputConfig, Serializable {
 
     @Option
     @Documentation("common input config")
-    private JDBCCommonInputConfig config;
+    private JDBCCommonInputConfig config = new JDBCCommonInputConfig();
 
 }
