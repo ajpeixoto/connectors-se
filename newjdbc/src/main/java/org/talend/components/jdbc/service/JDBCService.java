@@ -287,9 +287,13 @@ public class JDBCService {
             Set<String> tableTypes = getAvailableTableTypes(dbMetaData);
 
             String database_schema = getDatabaseSchema(dataStore);
+            if (database_schema == null) {
+                // from jdbc api to get the runtime jdbc schema, but it may not be right?
+                database_schema = getDatabaseSchema(conn);
+            }
 
             try (ResultSet resultset =
-                    dbMetaData.getTables(null, database_schema, null, tableTypes.toArray(new String[0]))) {
+                    dbMetaData.getTables(conn.getCatalog(), database_schema, null, tableTypes.toArray(new String[0]))) {
                 while (resultset.next()) {
                     String tableName = resultset.getString("TABLE_NAME");
                     if (tableName == null) {
