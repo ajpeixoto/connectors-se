@@ -43,6 +43,11 @@ public class ExcelReader implements FormatReader {
         try {
             final Workbook currentWorkBook = ExcelUtils.readWorkBook(configuration.getExcelFormat(), input);
             final Sheet sheet = currentWorkBook.getSheet(configuration.getSheetName());
+            if (sheet == null) {
+                throw new IllegalArgumentException(
+                        "A sheet with the name " + configuration.getSheetName() + " doesn't exist");
+            }
+
             final Iterator<Row> rowIterator = sheet.iterator();
             int headers = configuration.calcHeader();
 

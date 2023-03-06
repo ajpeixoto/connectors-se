@@ -14,6 +14,7 @@ package org.talend.components.azure.datastore;
 
 import java.io.Serializable;
 
+import org.talend.components.azure.runtime.token.EndpointUtil;
 import org.talend.components.common.connection.azureblob.AzureStorageConnectionAccount;
 import org.talend.components.common.connection.azureblob.AzureStorageConnectionSignature;
 import org.talend.components.azure.migration.AzureStorageConnectionMigration;
@@ -21,6 +22,7 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -31,7 +33,8 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 
 @GridLayout({ @GridLayout.Row("useAzureSharedSignature"), @GridLayout.Row("accountConnection"),
         @GridLayout.Row("signatureConnection") })
-@GridLayout(names = ADVANCED, value = { @GridLayout.Row("endpointSuffix") })
+@GridLayout(names = ADVANCED,
+        value = { @GridLayout.Row("region"), @GridLayout.Row("endpointSuffix"), @GridLayout.Row("authorityHost") })
 @Data
 @DataStore
 @Checkable(TEST_CONNECTION)
@@ -45,9 +48,27 @@ public class AzureCloudConnection implements Serializable {
     @ActiveIf(target = "useAzureSharedSignature", value = "false")
     private AzureStorageConnectionAccount accountConnection;
 
+    public enum Region {
+        AZURE_CLOUD,
+        AZURE_CHINA_CLOUD,
+        AZURE_GERMAN_CLOUD,
+        AZURE_US_GOVERNMENT,
+        CUSTOM
+    }
+
+    @Option
+
+    @ActiveIfs({ @ActiveIf(target = "useAzureSharedSignature", value = "false"),
+            @ActiveIf(target = "../accountConnection.authType", value = "MANAGED_IDENTITIES", negate = true) })
+    @Documentation("Region of Azure : Azure cloud, Azure China cloud, Azure German cloud, Azure US government")
+    private Region region = Region.CUSTOM;
+
     @Option
     @Documentation("Endpoint suffix, decide the region of current service : core.chinacloudapi.cn, core.windows.net, core.cloudapi.de, core.usgovcloudapi.net")
     @ActiveIf(target = "useAzureSharedSignature", value = "false")
+    @ActiveIfs({ @ActiveIf(target = "region", value = "CUSTOM"), @ActiveIf(target = "../accountConnection.authType",
+            value = { "BASIC", "ACTIVE_DIRECTORY_CLIENT_CREDENTIAL" }),
+            @ActiveIf(target = "useAzureSharedSignature", value = "false") })
     private String endpointSuffix = "core.windows.net";
 
     @Option
@@ -68,4 +89,10 @@ public class AzureCloudConnection implements Serializable {
             + "and you need to make sure your SAS is still valid when running your Job.")
     @ActiveIf(target = "useAzureSharedSignature", value = "true")
     private AzureStorageConnectionSignature signatureConnection;
+
+    @Option
+    @ActiveIfs({ @ActiveIf(target = "region", value = "CUSTOM"),
+            @ActiveIf(target = "../accountConnection.authType", value = "ACTIVE_DIRECTORY_CLIENT_CREDENTIAL") })
+    @Documentation("AuthorityHost for AD")
+    private String authorityHost = EndpointUtil.DEFAULT_AUTHORITY;
 }

@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.json.JsonBuilderFactory;
 import org.talend.components.azure.datastore.AzureCloudConnection;
+import org.talend.components.azure.runtime.token.EndpointUtil;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.exception.ComponentException;
@@ -54,11 +55,16 @@ public class AzureBlobComponentServices {
     @HealthCheck(TEST_CONNECTION)
     public HealthCheckStatus testConnection(@Option AzureCloudConnection azureConnection) {
         try {
+            String authHost = AzureCloudConnection.Region.CUSTOM.equals(azureConnection.getRegion())
+                    ? azureConnection.getAuthorityHost()
+                    : EndpointUtil.DEFAULT_AUTHORITY;
             CloudStorageAccount cloudStorageAccount = azureConnection.isUseAzureSharedSignature()
                     ? connectionService.createStorageAccount(azureConnection.getSignatureConnection())
                     : connectionService
                             .createStorageAccount(azureConnection.getAccountConnection(),
-                                    azureConnection.getEndpointSuffix());
+                                    EndpointUtil.getEndpoint(azureConnection.getRegion().toString(),
+                                            azureConnection.getEndpointSuffix()),
+                                    authHost);
             return connectionService.testConnection(cloudStorageAccount);
         } catch (URISyntaxException e) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18nService.illegalContainerName());
@@ -68,11 +74,16 @@ public class AzureBlobComponentServices {
     }
 
     public CloudStorageAccount createStorageAccount(AzureCloudConnection azureConnection) throws URISyntaxException {
+        String authHost = AzureCloudConnection.Region.CUSTOM.equals(azureConnection.getRegion())
+                ? azureConnection.getAuthorityHost()
+                : EndpointUtil.DEFAULT_AUTHORITY;
         return azureConnection.isUseAzureSharedSignature()
                 ? connectionService.createStorageAccount(azureConnection.getSignatureConnection())
                 : connectionService
                         .createStorageAccount(azureConnection.getAccountConnection(),
-                                azureConnection.getEndpointSuffix());
+                                EndpointUtil.getEndpoint(azureConnection.getRegion().toString(),
+                                        azureConnection.getEndpointSuffix()),
+                                authHost);
     }
 
     @Suggestions(GET_CONTAINER_NAMES)

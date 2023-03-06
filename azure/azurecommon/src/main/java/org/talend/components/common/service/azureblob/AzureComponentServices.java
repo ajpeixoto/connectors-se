@@ -18,6 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.talend.components.azure.runtime.token.AzureManagedIdentitiesTokenGetter;
 import org.talend.components.common.connection.azureblob.AzureConnectionActiveDir;
 import org.talend.components.common.connection.azureblob.Protocol;
 import org.talend.components.common.connection.azureblob.AzureStorageConnectionAccount;
@@ -63,11 +64,11 @@ public class AzureComponentServices {
 
     public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection)
             throws URISyntaxException {
-        return createStorageAccount(azureConnection, null);
+        return createStorageAccount(azureConnection, null, "");
     }
 
     public CloudStorageAccount createStorageAccount(AzureStorageConnectionAccount azureConnection,
-            String endpointSuffix)
+            String endpointSuffix, String authHost)
             throws URISyntaxException {
         if (azureConnection == null || StringUtils.isEmpty(azureConnection.getAccountName())) {
             throw new IllegalArgumentException(i18nService.connectionIsNull());
@@ -77,7 +78,9 @@ public class AzureComponentServices {
         case BASIC:
             return createStorageAccountBasic(azureConnection, endpointSuffix);
         case ACTIVE_DIRECTORY_CLIENT_CREDENTIAL:
-            return createStorageAccountAD(azureConnection, endpointSuffix);
+            return createStorageAccountAD(azureConnection, endpointSuffix, authHost);
+        case MANAGED_IDENTITIES:
+            return createStorageAccountManagedIdentity(azureConnection);
         default:
             throw new IllegalArgumentException("Not supported auth type selected"); // shouldn't go here
         }
@@ -151,7 +154,7 @@ public class AzureComponentServices {
     }
 
     private CloudStorageAccount createStorageAccountAD(AzureStorageConnectionAccount azureConnection,
-            String endpointSuffix) {
+            String endpointSuffix, String authHost) {
         AzureConnectionActiveDir activeDirProperties = azureConnection.getActiveDirProperties();
         if (activeDirProperties == null || StringUtils.isEmpty(activeDirProperties.getClientId())
                 || StringUtils.isEmpty(activeDirProperties.getTenantId())
@@ -160,12 +163,24 @@ public class AzureComponentServices {
         }
         AzureActiveDirectoryTokenGetter tokenGetter =
                 new AzureActiveDirectoryTokenGetter(activeDirProperties.getTenantId(),
-                        activeDirProperties.getClientId(), activeDirProperties.getClientSecret());
+                        activeDirProperties.getClientId(), activeDirProperties.getClientSecret(), authHost);
         try {
-            String token = tokenGetter.retrieveAccessToken();
+            String token = tokenGetter.retrieveAccessToken(endpointSuffix);
 
             StorageCredentials credentials = new StorageCredentialsToken(azureConnection.getAccountName(), token);
             return new CloudStorageAccount(credentials, true, endpointSuffix);
+        } catch (Exception e) {
+            throw new RuntimeException(i18nService.connectionError(e.getMessage()), e);
+        }
+    }
+
+    private CloudStorageAccount createStorageAccountManagedIdentity(AzureStorageConnectionAccount azureConnection) {
+        AzureManagedIdentitiesTokenGetter tokenGetter =
+                new AzureManagedIdentitiesTokenGetter();
+        try {
+            String token = tokenGetter.retrieveSystemAssignMItoken();
+            StorageCredentials credentials = new StorageCredentialsToken(azureConnection.getAccountName(), token);
+            return new CloudStorageAccount(credentials, true);
         } catch (Exception e) {
             throw new RuntimeException(i18nService.connectionError(e.getMessage()), e);
         }

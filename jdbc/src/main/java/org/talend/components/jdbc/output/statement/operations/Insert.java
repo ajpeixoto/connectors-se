@@ -14,6 +14,7 @@ package org.talend.components.jdbc.output.statement.operations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.configuration.OutputConfig;
+import org.talend.components.jdbc.output.OutputUtils;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
@@ -41,11 +42,8 @@ public class Insert extends QueryManagerImpl {
 
     @Override
     public String buildQuery(final List<Record> records) {
-        final List<Schema.Entry> entries = records
-                .stream()
-                .flatMap(r -> r.getSchema().getEntries().stream())
-                .distinct()
-                .collect(toList());
+        final List<Schema.Entry> entries = OutputUtils.getAllSchemaEntries(records);
+
         return queries.computeIfAbsent(entries.stream().map(Schema.Entry::getOriginalFieldName).collect(joining("::")),
                 key -> {
                     final AtomicInteger index = new AtomicInteger(0);
