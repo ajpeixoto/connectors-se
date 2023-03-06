@@ -17,16 +17,14 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.talend.components.jdbc.configuration.DistributionStrategy;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.configuration.RedshiftSortStrategy;
 import org.talend.components.jdbc.datastore.JdbcConnection;
+import org.talend.components.jdbc.output.OutputUtils;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.sdk.component.api.record.Record;
@@ -199,11 +197,8 @@ public abstract class Platform implements Serializable {
                 .stream()
                 .map(Schema.Entry::getRawName)
                 .collect(Collectors.joining(",")));
-        final List<Schema.Entry> entries = records
-                .stream()
-                .flatMap(record -> record.getSchema().getEntries().stream())
-                .distinct()
-                .collect(toList());
+
+        final List<Schema.Entry> entries = OutputUtils.getAllSchemaEntries(records);
         log.debug("Schema Entries: " + entries);
         return builder
                 .columns(entries

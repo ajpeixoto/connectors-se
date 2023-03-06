@@ -14,8 +14,10 @@ package org.talend.components.common.connection.azureblob;
 
 import java.io.Serializable;
 
+import org.talend.components.azure.runtime.token.EndpointUtil;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -23,7 +25,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @GridLayout({ @GridLayout.Row("accountName"), @GridLayout.Row("authType"), @GridLayout.Row("accountKey"),
-        @GridLayout.Row("protocol"), @GridLayout.Row("activeDirProperties") })
+        @GridLayout.Row("protocol"), @GridLayout.Row("activeDirProperties")
+})
 @Data
 public class AzureStorageConnectionAccount implements Serializable {
 
@@ -53,4 +56,5 @@ public class AzureStorageConnectionAccount implements Serializable {
     @ActiveIf(target = "authType", value = "ACTIVE_DIRECTORY_CLIENT_CREDENTIAL")
     @Documentation("")
     private AzureConnectionActiveDir activeDirProperties;
+
 }
