@@ -36,8 +36,8 @@ Boolean fail_at_end = false
 String logContent
 
 // Pod config
-final String tsbiImage = 'jdk11-svc-springboot-builder'
-final String tsbiVersion = '2.9.18-2.4-20220104141654'
+final String tsbiImage = 'jdk17-svc-springboot-builder'
+final String tsbiVersion = '2.9.9-2.6-20211214133056'
 
 // Files and folder definition
 final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
