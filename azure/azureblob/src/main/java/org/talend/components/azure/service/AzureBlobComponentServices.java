@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.json.JsonBuilderFactory;
 import org.talend.components.azure.datastore.AzureCloudConnection;
+import org.talend.components.azure.output.BlobOutputConfiguration;
+import org.talend.components.azure.runtime.output.CloudBlobWriterBuilder;
+import org.talend.components.azure.runtime.output.DefaultCloudBlobWriterBuilder;
 import org.talend.components.azure.runtime.token.EndpointUtil;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.configuration.Option;
@@ -28,6 +31,8 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheck;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.OperationContext;
+import com.microsoft.azure.storage.StorageException;
+import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import lombok.Getter;
 
@@ -84,6 +89,17 @@ public class AzureBlobComponentServices {
                                 EndpointUtil.getEndpoint(azureConnection.getRegion().toString(),
                                         azureConnection.getEndpointSuffix()),
                                 authHost);
+    }
+
+    public CloudBlobWriterBuilder buildWriter(final BlobOutputConfiguration config) throws URISyntaxException,
+            StorageException {
+        CloudStorageAccount connection = this.createStorageAccount(config.getDataset().getConnection());
+        CloudBlobClient blobClient = this
+                .getConnectionService()
+                .createCloudBlobClient(connection,
+                        AzureComponentServices.DEFAULT_RETRY_POLICY);
+        final CloudBlobContainer container = blobClient.getContainerReference(config.getDataset().getContainerName());
+        return new DefaultCloudBlobWriterBuilder(container);
     }
 
     @Suggestions(GET_CONTAINER_NAMES)
