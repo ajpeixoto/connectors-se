@@ -68,9 +68,11 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 
+// if want to inject context successful, need implement Serializable, seems the limit come from tck framework, TODO
+// check why
 @Slf4j
 @Service
-public class JDBCService {
+public class JDBCService implements Serializable {
 
     private static final long serialVersionUID = 1;
 
