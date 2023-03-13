@@ -409,13 +409,13 @@ public class SchemaInferer {
                 builder.withBoolean(entry, resultSet.getBoolean(jdbcIndex));
                 break;
             case DATETIME:
-                Date date;
+                // this will lose precision, so use another withInstant method
+                // builder.withTimestamp(entry, date.getTime());
                 try {
-                    date = resultSet.getTimestamp(jdbcIndex);
+                    builder.withInstant(entry, resultSet.getTimestamp(jdbcIndex).toInstant());
                 } catch (Exception e) {
-                    date = resultSet.getDate(jdbcIndex);
+                    builder.withTimestamp(entry, resultSet.getDate(jdbcIndex).getTime());
                 }
-                builder.withTimestamp(entry, date.getTime());
                 break;
             case BYTES:
                 builder.withBytes(entry, resultSet.getBytes(jdbcIndex));

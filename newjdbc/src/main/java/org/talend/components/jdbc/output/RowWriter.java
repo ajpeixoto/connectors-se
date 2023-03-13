@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -205,29 +206,17 @@ public class RowWriter {
         }
 
         public void write(Record input) throws SQLException {
-            Object inputValue = input.get(java.util.Date.class, inputValueName);
+            Instant inputValue = input.getInstant(inputValueName);
             if (inputValue == null) {
                 statement.setNull(statementIndex, java.sql.Types.TIMESTAMP);
             } else {
-                if (inputValue instanceof Timestamp) {
-                    // some jdbc implement may not follow jdbc spec, for example :
-                    // mysq_preparestatement.setTimestamp(oracle_timestamp) may not work
-                    // but that is only a guess, may not right, maybe can set directly, so do the thing below
-                    // here only for safe, so do like this
-                    Timestamp source = (Timestamp) inputValue;
-                    Timestamp target = new Timestamp(source.getTime());
-                    target.setNanos(source.getNanos());
-                    statement.setTimestamp(statementIndex, target);
-                    debug(inputValue);
-                } else if (inputValue instanceof Date) {
-                    statement.setTimestamp(statementIndex, new Timestamp(((Date) inputValue).getTime()));
-                    debug(inputValue);
-                } else {
-                    statement.setTimestamp(statementIndex, new Timestamp((long) inputValue));
-                    if (debug) {
-                        debugUtil.writeColumn(new Timestamp((long) inputValue).toString(), false);
-                    }
-                }
+                // some jdbc implement may not follow jdbc spec, for example :
+                // mysq_preparestatement.setTimestamp(oracle_timestamp) may not work
+                // but that is only a guess, may not right, maybe can set directly, so do the thing below
+                // here only for safe, so do like this
+                Timestamp timestamp = Timestamp.from(inputValue);
+                statement.setTimestamp(statementIndex, timestamp);
+                debug(inputValue);
             }
         }
 

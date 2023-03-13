@@ -211,7 +211,7 @@ public class JDBCSPRecordCreator {
 
                 public Object convert(CallableStatement value) throws SQLException {
                     try {
-                        return value.getObject(index) == null ? null : value.getTimestamp(index);
+                        return value.getObject(index) == null ? null : value.getTimestamp(index).toInstant();
                     } catch (Exception e) {
                         return value.getDate(index).getTime();
                     }

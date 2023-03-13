@@ -425,7 +425,6 @@ public class JDBCInputTestIT {
 
     // TODO fix the mapping
     @Test
-    @Disabled
     public void testReaderAllTypesString() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
@@ -451,9 +450,9 @@ public class JDBCInputTestIT {
         // TODO support Object type in tck framework for studio, without ser/deser : TCOMP-2292
         // byte[] col8 = (byte[]) getValueByIndex(record, 8);
         // String col9 = (String) getValueByIndex(record, 9);
-        Timestamp col10 = new Timestamp(Long.class.cast(getValueByIndex(record, 10)));
-        Timestamp col11 = new Timestamp(Long.class.cast(getValueByIndex(record, 11)));
-        Timestamp col12 = new Timestamp(Long.class.cast(getValueByIndex(record, 12)));
+        Timestamp col10 = Timestamp.from(record.getInstant(record.getSchema().getEntries().get(10).getName()));
+        Timestamp col11 = Timestamp.from(record.getInstant(record.getSchema().getEntries().get(11).getName()));
+        Timestamp col12 = Timestamp.from(record.getInstant(record.getSchema().getEntries().get(12).getName()));
         Boolean col13 = (Boolean) getValueByIndex(record, 13);
 
         assertEquals(32767, col0.shortValue());
@@ -480,7 +479,6 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    @Disabled
     public void testUsePrepareStatement() throws SQLException {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
@@ -518,9 +516,9 @@ public class JDBCInputTestIT {
         String col7 = (String) getValueByIndex(record, 7);
         // byte[] col8 = (byte[]) getValueByIndex(record, 8);
         // String col9 = (String) getValueByIndex(record, 9);
-        Timestamp col10 = new Timestamp(Long.class.cast(getValueByIndex(record, 10)));
-        Timestamp col11 = new Timestamp(Long.class.cast(getValueByIndex(record, 11)));
-        Timestamp col12 = new Timestamp(Long.class.cast(getValueByIndex(record, 12)));
+        Timestamp col10 = Timestamp.from(record.getInstant(record.getSchema().getEntries().get(10).getName()));
+        Timestamp col11 = Timestamp.from(record.getInstant(record.getSchema().getEntries().get(11).getName()));
+        Timestamp col12 = Timestamp.from(record.getInstant(record.getSchema().getEntries().get(12).getName()));
         Boolean col13 = (Boolean) getValueByIndex(record, 13);
 
         assertEquals(32767, col0.shortValue());
