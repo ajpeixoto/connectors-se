@@ -14,6 +14,7 @@ package org.talend.components.azure.migration;
 
 import java.util.Map;
 
+import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.common.connection.azureblob.AzureAuthType;
 import org.talend.sdk.component.api.component.MigrationHandler;
 
@@ -23,6 +24,16 @@ public class AzureStorageConnectionMigration implements MigrationHandler {
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
         if (incomingVersion < 2) {
             incomingData.put("accountConnection.authType", AzureAuthType.BASIC.toString());
+        }
+        if (incomingVersion < 3) {
+            final String region = incomingData.get("region");
+            final String endpointSuffix = incomingData.get("endpointSuffix");
+            if( region == null && !"core.windows.net".equals(endpointSuffix)){
+                incomingData.put("region", AzureCloudConnection.Region.CUSTOM.toString());
+            }
+            if(AzureCloudConnection.Region.CUSTOM.toString().equals(region) && "core.windows.net".equals(endpointSuffix)){
+                incomingData.put("region", AzureCloudConnection.Region.AZURE_CLOUD.toString());
+            }
         }
         return incomingData;
     }

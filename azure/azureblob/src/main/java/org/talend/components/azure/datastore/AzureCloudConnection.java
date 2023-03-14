@@ -38,7 +38,7 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 @Data
 @DataStore
 @Checkable(TEST_CONNECTION)
-@Version(value = 2, migrationHandler = AzureStorageConnectionMigration.class)
+@Version(value = 3, migrationHandler = AzureStorageConnectionMigration.class)
 public class AzureCloudConnection implements Serializable {
 
     @Option
@@ -61,7 +61,7 @@ public class AzureCloudConnection implements Serializable {
     @ActiveIfs({ @ActiveIf(target = "useAzureSharedSignature", value = "false"),
             @ActiveIf(target = "../accountConnection.authType", value = "MANAGED_IDENTITIES", negate = true) })
     @Documentation("Region of Azure : Azure cloud, Azure China cloud, Azure German cloud, Azure US government")
-    private Region region = Region.CUSTOM;
+    private Region region = Region.AZURE_CLOUD;
 
     @Option
     @Documentation("Endpoint suffix, decide the region of current service : core.chinacloudapi.cn, core.windows.net, core.cloudapi.de, core.usgovcloudapi.net")
