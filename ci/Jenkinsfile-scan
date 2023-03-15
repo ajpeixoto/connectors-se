@@ -5,20 +5,18 @@ def veracodeCredentials = usernamePassword(
 
 def slackChannel = 'components-ci'
 
-def podLabel = "connectors-se-scan-${UUID.randomUUID().toString()}".take(53)
+final String tsbiImage = 'jdk11-svc-springboot-builder'
+final String tsbiVersion = '3.0.8-2.6-20220928070500'
 
-pipeline {
-    agent {
-        kubernetes {
-            label podLabel
-            yaml """
+// Pod definition
+final String podDefinition = """\
 apiVersion: v1
 kind: Pod
 spec:
     containers:
         -
             name: main
-            image: '${env.TSBI_IMAGE}'
+            image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/${tsbiImage}:${tsbiVersion}'
             command: [cat]
             tty: true
             volumeMounts: [
@@ -36,7 +34,12 @@ spec:
                 claimName: efs-jenkins-connectors-se-m2
     imagePullSecrets:
         - name: talend-registry
-"""
+""".stripIndent()
+
+pipeline {
+    agent {
+        kubernetes {
+            yaml podDefinition
         }
     }
 
@@ -60,7 +63,7 @@ spec:
     }
 
     stages {
-        stage("SourceClear analysis") {
+        stage("Veracode SCA (Source Clear Analysis)") {
             steps {
                 container('main') {
                     withCredentials([string(credentialsId: 'veracode-token', variable: 'SRCCLR_API_TOKEN')]) {
@@ -71,7 +74,7 @@ spec:
                 }
             }
         }
-        stage('Vera code') {
+        stage('Veracode SAST (Static testing)') {
             steps {
                 container('main') {
                     sh "mvn -U -B clean package -Dmaven.test.skip=true"
