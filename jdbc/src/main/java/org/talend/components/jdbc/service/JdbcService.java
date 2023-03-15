@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import com.zaxxer.hikari.HikariDataSource;
 
 import lombok.Data;
+import org.talend.components.jdbc.JDBCSchemaProperty;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.configuration.JdbcConfiguration.Driver;
 import org.talend.components.jdbc.dataset.BaseDataSet;
@@ -510,8 +511,17 @@ public class JdbcService {
             builder.withEntry(entryBuilder.withType(BOOLEAN).build());
             break;
         case java.sql.Types.TIME:
+            entryBuilder.withProp(JDBCSchemaProperty.LOGICAL_TYPE, JDBCSchemaProperty.LogicalType.TIME.name());
+            setScale(entryBuilder, column.scale);
+            builder.withEntry(entryBuilder.withType(DATETIME).build());
+            break;
         case java.sql.Types.DATE:
+            entryBuilder.withProp(JDBCSchemaProperty.LOGICAL_TYPE, JDBCSchemaProperty.LogicalType.DATE.name());
+            setScale(entryBuilder, column.scale);
+            builder.withEntry(entryBuilder.withType(DATETIME).build());
+            break;
         case java.sql.Types.TIMESTAMP:
+            entryBuilder.withProp(JDBCSchemaProperty.LOGICAL_TYPE, JDBCSchemaProperty.LogicalType.TIMESTAMP.name());
             setScale(entryBuilder, column.scale);
             builder.withEntry(entryBuilder.withType(DATETIME).build());
             break;

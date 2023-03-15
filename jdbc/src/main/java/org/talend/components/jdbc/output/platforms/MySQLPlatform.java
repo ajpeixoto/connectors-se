@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.talend.components.jdbc.JDBCSchemaProperty;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.service.I18nMessage;
 
@@ -116,6 +117,20 @@ public class MySQLPlatform extends Platform {
         case BYTES:
             return "BLOB";
         case DATETIME:
+            String logicalTypeName = column.getProp(JDBCSchemaProperty.LOGICAL_TYPE);
+            log.warn("logical type :" + logicalTypeName);// TODO remove this, only for test now
+            if (logicalTypeName != null) {
+                JDBCSchemaProperty.LogicalType logicalType = JDBCSchemaProperty.LogicalType.valueOf(logicalTypeName);
+                switch (logicalType) {
+                case DATE:
+                    return "DATE";
+                case TIME:
+                    return "TIME";
+                case TIMESTAMP:
+                default:
+                    return "DATETIME(6)";
+                }
+            }
             return "DATETIME(6)";
         case RECORD:
         case ARRAY:
