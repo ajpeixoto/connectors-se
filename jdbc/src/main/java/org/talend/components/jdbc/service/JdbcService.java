@@ -12,24 +12,11 @@
  */
 package org.talend.components.jdbc.service;
 
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.joining;
-import static org.talend.sdk.component.api.record.Schema.Type.*;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.net.URL;
-import java.sql.*;
-import java.util.*;
-import java.util.Date;
-import java.util.regex.Pattern;
-
 import com.zaxxer.hikari.HikariDataSource;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.talend.components.jdbc.JDBCSchemaProperty;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
 import org.talend.components.jdbc.configuration.JdbcConfiguration.Driver;
 import org.talend.components.jdbc.dataset.BaseDataSet;
@@ -38,6 +25,7 @@ import org.talend.components.jdbc.datastore.AuthenticationType;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.output.platforms.PlatformService;
+import org.talend.sdk.component.api.record.LogicalType;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
@@ -45,9 +33,19 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.dependency.Resolver;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.net.URL;
+import java.sql.*;
+import java.util.Date;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+import static org.talend.sdk.component.api.record.Schema.Type.*;
 
 @Slf4j
 @Service
@@ -469,10 +467,17 @@ public class JdbcService {
     }
 
     private void addField(final Schema.Builder builder, ColumnMetadata column) {
+        final String originType = String.valueOf(column.columnTypeName);
+
         final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder()
                 .withName(column.columnName)// not use columnLabel? now only keep like before
                 .withNullable(column.isNullable())
-                .withProp(SchemaProperty.ORIGIN_TYPE, String.valueOf(column.columnTypeName));
+                .withProp(SchemaProperty.ORIGIN_TYPE, originType);
+
+        // only some special database have this type
+        if (originType.equalsIgnoreCase("uuid")) {
+            entryBuilder.withProp(SchemaProperty.LOGICAL_TYPE, LogicalType.UUID.name());
+        }
 
         if (column.isKey) {
             entryBuilder.withProp(SchemaProperty.IS_KEY, "true");
@@ -511,17 +516,17 @@ public class JdbcService {
             builder.withEntry(entryBuilder.withType(BOOLEAN).build());
             break;
         case java.sql.Types.TIME:
-            entryBuilder.withProp(JDBCSchemaProperty.LOGICAL_TYPE, JDBCSchemaProperty.LogicalType.TIME.name());
+            entryBuilder.withProp(SchemaProperty.LOGICAL_TYPE, LogicalType.TIME.name());
             setScale(entryBuilder, column.scale);
             builder.withEntry(entryBuilder.withType(DATETIME).build());
             break;
         case java.sql.Types.DATE:
-            entryBuilder.withProp(JDBCSchemaProperty.LOGICAL_TYPE, JDBCSchemaProperty.LogicalType.DATE.name());
+            entryBuilder.withProp(SchemaProperty.LOGICAL_TYPE, LogicalType.DATE.name());
             setScale(entryBuilder, column.scale);
             builder.withEntry(entryBuilder.withType(DATETIME).build());
             break;
         case java.sql.Types.TIMESTAMP:
-            entryBuilder.withProp(JDBCSchemaProperty.LOGICAL_TYPE, JDBCSchemaProperty.LogicalType.TIMESTAMP.name());
+            entryBuilder.withProp(SchemaProperty.LOGICAL_TYPE, LogicalType.TIMESTAMP.name());
             setScale(entryBuilder, column.scale);
             builder.withEntry(entryBuilder.withType(DATETIME).build());
             break;

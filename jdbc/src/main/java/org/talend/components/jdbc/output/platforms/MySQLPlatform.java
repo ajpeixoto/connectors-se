@@ -12,18 +12,17 @@
  */
 package org.talend.components.jdbc.output.platforms;
 
+import com.zaxxer.hikari.HikariDataSource;
+import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.configuration.JdbcConfiguration;
+import org.talend.components.jdbc.service.I18nMessage;
+import org.talend.sdk.component.api.record.LogicalType;
+import org.talend.sdk.component.api.record.SchemaProperty;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.talend.components.jdbc.JDBCSchemaProperty;
-import org.talend.components.jdbc.configuration.JdbcConfiguration;
-import org.talend.components.jdbc.service.I18nMessage;
-
-import com.zaxxer.hikari.HikariDataSource;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * syntax detail can be found at <a href=
@@ -117,20 +116,30 @@ public class MySQLPlatform extends Platform {
         case BYTES:
             return "BLOB";
         case DATETIME:
-            String logicalTypeName = column.getProp(JDBCSchemaProperty.LOGICAL_TYPE);
-            log.warn("logical type :" + logicalTypeName);// TODO remove this, only for test now
+            final String logicalTypeName = column.getProp(SchemaProperty.LOGICAL_TYPE);
+            log.info("logical type :" + logicalTypeName);
             if (logicalTypeName != null) {
-                JDBCSchemaProperty.LogicalType logicalType = JDBCSchemaProperty.LogicalType.valueOf(logicalTypeName);
+                final LogicalType logicalType = LogicalType.valueOf(logicalTypeName);
+                final Integer scale = getInt(column, SchemaProperty.SCALE);
                 switch (logicalType) {
                 case DATE:
                     return "DATE";
                 case TIME:
-                    return "TIME";
+                    if (needScale(scale)) {
+                        return "TIME(" + scale + ")";
+                    } else {
+                        return "TIME";
+                    }
                 case TIMESTAMP:
                 default:
-                    return "DATETIME(6)";
+                    if (needScale(scale)) {
+                        return "DATETIME(" + scale + ")";
+                    } else {
+                        return "DATETIME";
+                    }
                 }
             }
+            // keep the old action, no timezone consider here, so not use mysql TIMESTAMP type
             return "DATETIME(6)";
         case RECORD:
         case ARRAY:
@@ -138,6 +147,19 @@ public class MySQLPlatform extends Platform {
             throw new IllegalStateException(
                     getI18n().errorUnsupportedType(column.getType().name(), column.getOriginalFieldName()));
         }
+    }
+
+    private int getInt(final Column column, final String key) {
+        try {
+            return Integer.parseInt(key);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    // mysql time scale valid scope is [0, 6], and default is 0 if not set
+    private boolean needScale(int scale) {
+        return scale > 0 && scale < 7;
     }
 
 }
