@@ -30,6 +30,8 @@ public class AzureStorageConnectionMigration implements MigrationHandler {
             final String endpointSuffix = incomingData.get("endpointSuffix");
             if( region == null && !"core.windows.net".equals(endpointSuffix)){
                 incomingData.put("region", AzureCloudConnection.Region.CUSTOM.toString());
+            }else {
+                incomingData.put("region", AzureCloudConnection.Region.AZURE_CLOUD.toString());
             }
             if(AzureCloudConnection.Region.CUSTOM.toString().equals(region) && "core.windows.net".equals(endpointSuffix)){
                 incomingData.put("region", AzureCloudConnection.Region.AZURE_CLOUD.toString());
