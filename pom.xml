@@ -120,6 +120,7 @@
         <jersey-common.version>2.33</jersey-common.version>
 
         <json-smart.version>2.4.7</json-smart.version>
+        <json.version>20230227</json.version>
 
         <frontend.version>1.7.5</frontend.version>
         <node.version>v12.13.1</node.version>
@@ -587,6 +588,11 @@
                 <groupId>net.minidev</groupId>
                 <artifactId>json-smart</artifactId>
                 <version>${json-smart.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${json.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.hadoop</groupId>
