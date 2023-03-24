@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.27.21-SNAPSHOT</version>
+        <version>1.27.21</version>
     </parent>
+
     <artifactId>jdbc</artifactId>
+
     <name>Connectors SE :: JDBC</name>
     <description>Suite of JDBC component</description>
+
     <properties>
         <xbean-finder-shaded.version>4.8</xbean-finder-shaded.version>
         <HikariCP.version>3.4.2-talend20200325</HikariCP.version>
@@ -20,6 +24,7 @@
         <test.excluded>IT</test.excluded>
         <talend.nexus.url>https://artifacts-oss.talend.com</talend.nexus.url>
     </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -159,10 +164,10 @@
             <version>1.0</version>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
-            <plugin>
-                <!--
+            <plugin><!--
                  To debug test run mvn -Dmaven.surefire.debug test
                 -->
                 <groupId>org.apache.maven.plugins</groupId>
@@ -174,12 +179,13 @@
             </plugin>
         </plugins>
     </build>
+
     <profiles>
         <profile>
             <id>ITs</id>
             <properties>
                 <jdbc.it>true</jdbc.it>
-                <test.excluded/>
+                <test.excluded />
             </properties>
             <dependencies>
                 <dependency>
