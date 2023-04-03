@@ -15,6 +15,7 @@ package org.talend.components.cosmosDB.output;
 import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Operator.AND;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.talend.components.cosmosDB.dataset.QueryDataset;
 import org.talend.sdk.component.api.component.Version;
@@ -33,9 +34,11 @@ import lombok.Data;
         @GridLayout.Row({ "createCollection" }), //
         @GridLayout.Row({ "dataAction" }), //
         @GridLayout.Row({ "autoIDGeneration" }), //
+        @GridLayout.Row({ "attachment" })
 }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }),
                 @GridLayout.Row({ "offerThroughput" }), @GridLayout.Row({ "partitionKey" }),
+                @GridLayout.Row({ "attachment_advanced" }), //
                 @GridLayout.Row({ "partitionKeyForDelete" }) }) })
 @Documentation("cosmosDB output configuration")
 public class CosmosDBOutputConfiguration implements Serializable {
@@ -74,5 +77,13 @@ public class CosmosDBOutputConfiguration implements Serializable {
     @Documentation("Auto generation ID")
     @ActiveIf(target = "dataAction", value = { "INSERT", "UPSERT" })
     private boolean autoIDGeneration;
+
+    @Option
+    @Documentation("test field")
+    private List<Attachment> attachment;
+
+    @Option
+    @Documentation("test field")
+    private List<Attachment> attachment_advanced;
 
 }
