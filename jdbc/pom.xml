@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
         <version>1.44.0-SNAPSHOT</version>
     </parent>
-
     <artifactId>jdbc</artifactId>
-
     <name>Connectors SE :: JDBC</name>
     <description>Suite of JDBC component</description>
-
     <properties>
         <xbean-finder-shaded.version>4.8</xbean-finder-shaded.version>
         <HikariCP.version>3.4.2-talend20200325</HikariCP.version>
@@ -23,8 +19,8 @@
         <snowflake.version>3.13.1</snowflake.version>
         <!-- To run ITs test give the following option to mvn : -Dtest.excluded="" -->
         <test.excluded>IT</test.excluded>
+        <talend.nexus.url>https://artifacts-oss.talend.com</talend.nexus.url>
     </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.zaxxer</groupId>
@@ -111,7 +107,6 @@
             <version>${testcontainers.version}</version>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -164,11 +159,16 @@
             <version>5.5.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.talend.components.lib</groupId>
+            <artifactId>talend-sql-injection-utils</artifactId>
+            <version>1.0</version>
+        </dependency>
     </dependencies>
-
     <build>
         <plugins>
-            <plugin><!--
+            <plugin>
+                <!--
                  To debug test run mvn -Dmaven.surefire.debug test
                 -->
                 <groupId>org.apache.maven.plugins</groupId>
@@ -180,13 +180,12 @@
             </plugin>
         </plugins>
     </build>
-
     <profiles>
         <profile>
             <id>ITs</id>
             <properties>
                 <jdbc.it>true</jdbc.it>
-                <test.excluded />
+                <test.excluded/>
             </properties>
             <dependencies>
                 <dependency>
@@ -226,7 +225,6 @@
                     <scope>provided</scope>
                 </dependency>
             </dependencies>
-
             <repositories>
                 <repository>
                     <!-- repository for oracle driver-->
@@ -246,6 +244,14 @@
                         Failed to execute goal on project jdbc: Could not resolve dependencies for project org.talend.components:jdbc:jar:0.7.1-SNAPSHOT: Failed to collect dependencies at com.amazon.redshift:redshift-jdbc42:jar:1.2.37.1061
                     -->
                     <url>https://mvnrepository.com/artifact/</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </repository>
+                <!-- repository for talend-sql-injection-utils:jar -->
+                <repository>
+                    <id>talend_nexus_deployment</id>
+                    <url>${talend.nexus.url}/nexus/content/repositories/TalendOpenSourceRelease/</url>
                     <snapshots>
                         <enabled>false</enabled>
                     </snapshots>

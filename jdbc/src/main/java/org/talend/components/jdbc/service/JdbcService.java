@@ -600,5 +600,4 @@ public class JdbcService {
             break;
         }
     }
-
 }
