@@ -14,7 +14,7 @@
 
   <properties>
     <couchbase.client.version>3.2.3</couchbase.client.version>
-    <couchbase.core.version>2.4.4</couchbase.core.version>
+    <couchbase.core.version>2.2.7</couchbase.core.version>
   </properties>
 
   <dependencies>
