@@ -23,6 +23,7 @@ import java.util.OptionalLong;
 import java.util.function.Supplier;
 
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.talend.sdk.component.api.record.Record;
@@ -33,6 +34,10 @@ import org.talend.sdk.component.api.record.Schema.Entry;
  * Transform record format to excel format.
  */
 public class RecordToExcel {
+
+    private static final short DATE_EXCEL_FORMAT = (short) 14;
+
+    private CellStyle cachedDateCellStyle;
 
     /**
      * Build excel row from record.
@@ -99,6 +104,13 @@ public class RecordToExcel {
             break;
         case DATETIME:
             cell.setCellType(CellType.NUMERIC);
+            // use built-in format: m/d/yy, org.apache.poi.ss.usermodel.BuiltinFormats
+            if (cachedDateCellStyle == null) {
+                final CellStyle cellStyle = cell.getSheet().getWorkbook().createCellStyle();
+                cellStyle.setDataFormat(DATE_EXCEL_FORMAT);
+                cachedDateCellStyle = cellStyle;
+            }
+            cell.setCellStyle(cachedDateCellStyle);
             final Optional<ZonedDateTime> optionalDateTime = record.getOptionalDateTime(name);
             if (optionalDateTime.isPresent()) {
                 cell.setCellValue(Date.from(optionalDateTime.get().toInstant()));
