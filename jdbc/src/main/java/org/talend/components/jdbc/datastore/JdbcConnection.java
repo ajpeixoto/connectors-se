@@ -135,6 +135,7 @@ public class JdbcConnection implements Serializable {
     private String password;
 
     @Option
+    @Required
     @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
             @ActiveIf(target = "authenticationType", value = "KEY_PAIR") })
     @Credential
@@ -149,18 +150,21 @@ public class JdbcConnection implements Serializable {
     private String privateKeyPassword;
 
     @Option
+    @Required
     @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
             @ActiveIf(target = "authenticationType", value = "OAUTH") })
     @Documentation("Oauth token endpoint.")
     private String oauthTokenEndpoint;
 
     @Option
+    @Required
     @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
             @ActiveIf(target = "authenticationType", value = "OAUTH") })
     @Documentation("Client ID.")
     private String clientId;
 
     @Option
+    @Required
     @ActiveIfs({ @ActiveIf(target = "dbType", value = "Snowflake"),
             @ActiveIf(target = "authenticationType", value = "OAUTH") })
     @Credential
@@ -175,6 +179,7 @@ public class JdbcConnection implements Serializable {
     private GrantType grantType;
 
     @Option
+    @Required
     @ActiveIfs(value = { @ActiveIf(target = "dbType", value = "Snowflake"),
             @ActiveIf(target = "authenticationType", value = "OAUTH"),
             @ActiveIf(target = "grantType", value = "PASSWORD") }, operator = AND)
@@ -182,6 +187,7 @@ public class JdbcConnection implements Serializable {
     private String oauthUsername;
 
     @Option
+    @Required
     @ActiveIfs(value = { @ActiveIf(target = "dbType", value = "Snowflake"),
             @ActiveIf(target = "authenticationType", value = "OAUTH"),
             @ActiveIf(target = "grantType", value = "PASSWORD") }, operator = AND)
