@@ -38,6 +38,10 @@ public class JdbcConnectionMigrationHandler implements MigrationHandler {
             to_3(migrated);
         }
 
+        if (incomingVersion < 4) {
+            to_4(migrated);
+        }
+
         return migrated;
     }
 
@@ -47,6 +51,24 @@ public class JdbcConnectionMigrationHandler implements MigrationHandler {
 
     private void to_3(final Map<String, String> incomingData) {
         incomingData.putIfAbsent("setRawUrl", "true");
+    }
+
+    private void to_4(final Map<String, String> incomingData) {
+        final String dbType = incomingData.get("dbType");
+        if (dbType == null) {
+            return;
+        }
+
+        // consider user may add custom jdbc self, so need this check
+        if (!"DeltaLake".equals(dbType)) {
+            return;
+        }
+
+        final String jdbcUrl = incomingData.get("jdbcUrl");
+        final String oldPrefix = "jdbc:spark://";
+        if (jdbcUrl != null && jdbcUrl.trim().startsWith(oldPrefix)) {
+            incomingData.put("jdbcUrl", jdbcUrl.replace(oldPrefix, "jdbc:databricks://"));
+        }
     }
 
 }

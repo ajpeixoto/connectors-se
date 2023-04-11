@@ -58,7 +58,7 @@ import lombok.ToString;
 @Documentation("A connection to a data base.")
 public class JdbcConnection implements Serializable {
 
-    public final static int VERSION = 3;
+    public final static int VERSION = 4;
 
     @Option
     @Required
