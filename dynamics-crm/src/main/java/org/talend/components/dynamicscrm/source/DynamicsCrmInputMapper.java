@@ -17,7 +17,9 @@ import static java.util.Collections.singletonList;
 import java.io.Serializable;
 import java.util.List;
 
+import org.talend.components.dynamicscrm.migration.DynamicsRuntimeMigrationHandler;
 import org.talend.components.dynamicscrm.service.DynamicsCrmService;
+import org.talend.components.dynamicscrm.service.I18n;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Icon.IconType;
 import org.talend.sdk.component.api.component.Version;
@@ -30,7 +32,7 @@ import org.talend.sdk.component.api.input.Split;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-@Version(1)
+@Version(value = 2, migrationHandler = DynamicsRuntimeMigrationHandler.class)
 @Icon(value = IconType.CUSTOM, custom = "azure-dynamics-connector")
 @PartitionMapper(name = "AzureDynamics365Input")
 @Documentation("Dynamics CRM input")
@@ -42,11 +44,15 @@ public class DynamicsCrmInputMapper implements Serializable {
 
     private final RecordBuilderFactory recordBuilderFactory;
 
+    private final I18n i18n;
+
     public DynamicsCrmInputMapper(@Option("configuration") final DynamicsCrmInputMapperConfiguration configuration,
-            final DynamicsCrmService service, final RecordBuilderFactory recordBuilderFactory) {
+            final DynamicsCrmService service, final RecordBuilderFactory recordBuilderFactory,
+            final I18n i18n) {
         this.configuration = configuration;
         this.service = service;
         this.recordBuilderFactory = recordBuilderFactory;
+        this.i18n = i18n;
     }
 
     @Assessor
@@ -61,6 +67,6 @@ public class DynamicsCrmInputMapper implements Serializable {
 
     @Emitter
     public DynamicsCrmInputSource createWorker() {
-        return new DynamicsCrmInputSource(configuration, service, recordBuilderFactory);
+        return new DynamicsCrmInputSource(configuration, service, recordBuilderFactory, i18n);
     }
 }

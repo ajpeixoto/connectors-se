@@ -154,6 +154,14 @@ pipeline {
           name: 'SONAR_ANALYSIS',
           defaultValue: true,
           description: 'Execute Sonar analysis (only for STANDARD action).')
+        booleanParam(
+          name: 'CHECKSTYLE',
+          defaultValue: true,
+          description: '''
+            Execute checkstyle analysis (only for STANDARD action).
+              - Code rules
+              - Translation check             
+            ''')
         string(
           name: 'EXTRA_BUILD_PARAMS',
           defaultValue: "",
@@ -212,7 +220,7 @@ pipeline {
                             branch_description) = extract_branch_info("$env.BRANCH_NAME")
 
                             // Check only branch_user, because if there is an error all three params are empty.
-                            if (branch_user.equals("")) {
+                            if (branch_user == ("")) {
                                 println """
                                 ERROR: The branch name doesn't comply with the format: user/JIRA-1234-Description
                                 It is MANDATORY for artifact management.
@@ -391,11 +399,11 @@ pipeline {
                 script {
                     withCredentials([nexusCredentials,
                                      sonarCredentials]) {
+                        // checkstyle is skipped because executed dedicated stage
                         sh """
-                            bash .jenkins/build.sh \
-                                '${params.SONAR_ANALYSIS}' \
-                                '${env.BRANCH_NAME}' \
-                                ${extraBuildParams}
+                        bash .jenkins/mvn_build.sh \
+                            --define checkstyle.skip=true \
+                            ${extraBuildParams}
                         """
                     }
                 }
@@ -417,6 +425,58 @@ pipeline {
             }
         }
 
+        stage('Maven checkstyle') {
+            when {
+                // For dependencies reasons, checkstyle need to be after the build
+                // If not, the qualified dependencies doesn't exist yet
+                expression { params.CHECKSTYLE }
+            }
+            steps {
+                script {
+                    withCredentials([nexusCredentials,
+                                     sonarCredentials]) {
+                        sh """
+                            bash .jenkins/mvn_checkstyle.sh ${extraBuildParams}
+                        """
+                    }
+                }
+            }
+            post {
+                always {
+                    script {
+                        println '====== Archive artifacts'
+                        println "Checkstyle report"
+                        archiveArtifacts artifacts: "**/checkstyle-result.xml", allowEmptyArchive: true, onlyIfSuccessful: false
+                    }
+
+                    recordIssues(
+                      enabledForFailure: true,
+                      tools: [
+                        checkStyle()
+                      ]
+                    )
+                }
+            }
+        }
+
+        stage('Maven sonar') {
+            when {
+                expression { params.ACTION == 'STANDARD' && params.SONAR_ANALYSIS }
+            }
+            steps {
+                script {
+                    withCredentials([nexusCredentials,
+                                     sonarCredentials]) {
+                        sh """
+                        bash .jenkins/mvn_sonar.sh \
+                            '${env.BRANCH_NAME}' \
+                            ${extraBuildParams}
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Maven deploy') {
             when {
                 expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY }
@@ -425,7 +485,7 @@ pipeline {
                 withCredentials([nexusCredentials]) {
                     script {
                         sh """
-                            bash .jenkins/deploy.sh \
+                            bash .jenkins/mvn_deploy.sh \
                                 ${extraBuildParams}
                         """
                     }
@@ -476,7 +536,10 @@ pipeline {
                   ignoreCase: true,
                   highTags: 'FIX_ME, FIXME',
                   lowTags: 'TO_DO, TODO'
-                )
+                ),
+                //Add Maven log analysis in jenkins build result page
+                // It allows to see the all, non blocking warning in our build log to reduce them in the future.
+                mavenConsole()
               ]
             )
             script {
@@ -516,7 +579,7 @@ pipeline {
                 //Only post results to Slack for Master and Maintenance branches
                 if (isOnMasterOrMaintenanceBranch) {
                     //if previous build was a success, ping channel in the Slack message
-                    if ("SUCCESS".equals(currentBuild.previousBuild.result)) {
+                    if ("SUCCESS" == (currentBuild.previousBuild.result)) {
                         slackSend(
                           color: '#FF0000',
                           message: "@here : NEW FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",

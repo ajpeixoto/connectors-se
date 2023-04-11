@@ -19,10 +19,12 @@ import java.util.stream.StreamSupport;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
+import org.talend.sdk.component.api.record.Schema.Type;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class ExcelToRecord {
@@ -63,6 +65,11 @@ public class ExcelToRecord {
             }
             return cellType;
         }
+
+        boolean hasDateFormat(final Row row) {
+            return row.getCell(this.index).getCellType() == CellType.NUMERIC
+                    && DateUtil.isCellDateFormatted(row.getCell(this.index));
+        }
     }
 
     private List<Column> columns = null;
@@ -94,6 +101,9 @@ public class ExcelToRecord {
                     case DOUBLE:
                         recordBuilder.withDouble(colName, recordCell.getNumericCellValue());
                         break;
+                    case DATETIME:
+                        recordBuilder.withDateTime(colName, recordCell.getDateCellValue());
+                        break;
                     default:
                         recordBuilder.withString(colName, recordCell.getStringCellValue());
                     }
@@ -120,8 +130,9 @@ public class ExcelToRecord {
                 final Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
                 entryBuilder.withName(column.name);
                 final CellType cellType = column.getRealCellType(rowRecord);
+                final boolean hasDateFormat = column.hasDateFormat(rowRecord);
 
-                final Schema.Type st = toRecordType(cellType, column.index + 1);
+                final Schema.Type st = toRecordType(cellType, hasDateFormat, column.index + 1);
                 entryBuilder.withType(st);
 
                 schemaBuilder.withEntry(entryBuilder.build());
@@ -131,7 +142,7 @@ public class ExcelToRecord {
         return schema;
     }
 
-    private Schema.Type toRecordType(CellType cellType, int indexCol) {
+    private Schema.Type toRecordType(CellType cellType, boolean hasDateFormat, int indexCol) {
 
         if (cellType == CellType.ERROR) {
             throw new UnsupportedOperationException(
@@ -141,7 +152,7 @@ public class ExcelToRecord {
         if (cellType == CellType.STRING || cellType == CellType.BLANK || cellType == null) {
             return Schema.Type.STRING;
         } else if (cellType == CellType.NUMERIC) {
-            return Schema.Type.DOUBLE;
+            return hasDateFormat ? Schema.Type.DATETIME : Schema.Type.DOUBLE;
         } else if (cellType == CellType.BOOLEAN) {
             return Schema.Type.BOOLEAN;
         }

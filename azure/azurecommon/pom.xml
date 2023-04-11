@@ -18,7 +18,7 @@
   <parent>
     <groupId>org.talend.components</groupId>
     <artifactId>azure</artifactId>
-    <version>1.44.0-SNAPSHOT</version>
+    <version>1.45.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>azurecommon</artifactId>
@@ -32,7 +32,6 @@
     <delta.version>0.2.0.1-talend</delta.version>
     <excel.streamer.version>2.2.0</excel.streamer.version>
     <common.lang.version>3.9</common.lang.version>
-    <commons-csv.version>1.7.1</commons-csv.version>
   </properties>
 
   <dependencies>
@@ -56,7 +55,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
-      <version>${commons-csv.version}</version>
     </dependency>
 
     <!-- Excel HTML format -->

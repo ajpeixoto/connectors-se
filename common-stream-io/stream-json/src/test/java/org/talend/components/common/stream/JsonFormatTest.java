@@ -68,7 +68,7 @@ class JsonFormatTest {
     private JsonEmitter.Config config;
 
     @BeforeEach
-    private void buildConfig() {
+    void buildConfig() {
         this.config = new JsonEmitter.Config();
         this.config.setJsonPointer("/");
     }

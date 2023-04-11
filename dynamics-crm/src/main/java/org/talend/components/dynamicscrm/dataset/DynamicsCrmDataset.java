@@ -17,7 +17,9 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 import java.io.Serializable;
 
 import org.talend.components.dynamicscrm.datastore.DynamicsCrmConnection;
+import org.talend.components.dynamicscrm.migration.DynamicsDatasetMigrationHandler;
 import org.talend.components.dynamicscrm.service.UIActionService;
+import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.constraint.Required;
@@ -29,6 +31,7 @@ import lombok.Data;
 
 @Data
 @DataSet("DynamicsCrmDataset")
+@Version(value = 2, migrationHandler = DynamicsDatasetMigrationHandler.class)
 @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "entitySet" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("datastore") })
 @Documentation("Dynamics CRM dataset")

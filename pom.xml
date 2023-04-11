@@ -18,7 +18,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.44.0-SNAPSHOT</version>
+    <version>1.45.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Connectors SE</name>
@@ -77,10 +77,10 @@
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <component-runtime.version>1.54.1</component-runtime.version>
+        <component-runtime.version>1.55.2</component-runtime.version>
 
         <slf4j.version>1.7.36</slf4j.version>
-        <log4j-api.version>2.17.2</log4j-api.version>
+        <log4j-api.version>2.20.0</log4j-api.version>
         <reload4j.version>1.2.22</reload4j.version>
 
         <beanutils.version>1.9.4</beanutils.version>
@@ -101,11 +101,11 @@
         <tcomp0.version>0.23.2</tcomp0.version> <!-- until they are rewritten -->
         <daikon.version>0.31.0</daikon.version>
 
-        <junit5.version>5.8.2</junit5.version>
+        <junit5.version>5.9.2</junit5.version>
         <junit4.version>4.13.2</junit4.version>
         <hamcrest.version>1.3</hamcrest.version>
 
-        <commons-csv.version>1.4</commons-csv.version>
+        <commons-csv.version>1.10.0</commons-csv.version>
         <commons-lang3.version>3.10</commons-lang3.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version> <!-- update this with httpclient -->
@@ -141,7 +141,7 @@
         <hadoop.version>3.2.4</hadoop.version>
         <axis2.version>1.8.0</axis2.version>
         <lombok.version>1.18.24</lombok.version>
-        <woodstox.version>6.4.0</woodstox.version>
+        <woodstox.version>6.5.0</woodstox.version>
         <commons-configuration2.version>2.8.0</commons-configuration2.version>
         <commons-text.version>1.10.0</commons-text.version>
         <commons-net.version>3.9.0</commons-net.version>
@@ -669,6 +669,11 @@
                 <groupId>org.codehaus.jettison</groupId>
                 <artifactId>jettison</artifactId>
                 <version>${jettison.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-csv</artifactId>
+                <version>${commons-csv.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1274,6 +1279,26 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.2.1</version>
+                <configuration>
+                    <consoleOutput>true</consoleOutput>
+                    <logViolationsToConsole>true</logViolationsToConsole>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <failOnViolation>false</failOnViolation>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>verify-style</id>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -1350,7 +1375,7 @@
                 -> deploy - copies the final package to the remote repository
              -->
             <properties>
-                <!-- Skips enforcer, already executed during build.sh -->
+                <!-- Skips enforcer, already executed during mvn_build.sh -->
                 <enforcer.skip>true</enforcer.skip>
                 <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
                 <maven.javadoc.skip>true</maven.javadoc.skip>

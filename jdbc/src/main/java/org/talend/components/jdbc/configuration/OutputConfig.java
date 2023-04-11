@@ -43,7 +43,7 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
         @GridLayout.Row("sortKeys"),
         @GridLayout.Row("distributionStrategy"), @GridLayout.Row("distributionKeys"), @GridLayout.Row("ignoreUpdate") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("dataset"),
-        @GridLayout.Row("rewriteBatchedStatements"), @GridLayout.Row("useOriginColumnName") })
+        @GridLayout.Row("rewriteBatchedStatements"), @GridLayout.Row("useSanitizedColumnName") })
 @Documentation("Those properties define an output data set for the JDBC output component")
 public class OutputConfig implements Serializable {
 
@@ -118,9 +118,13 @@ public class OutputConfig implements Serializable {
     @Documentation("Rewrite batched statements, to execute one statement per batch combining values in the sql query")
     private boolean rewriteBatchedStatements = true;
 
+    // @Option
+    // @Documentation("To keep the old behavior that use sanitized name as column name")
+    // private boolean useOriginColumnName = true;
+
     @Option
     @Documentation("To keep the old behavior that use sanitized name as column name")
-    private boolean useOriginColumnName = true;
+    private boolean useSanitizedColumnName = false;
 
     public ActionOnData getActionOnData() {
         if (actionOnData == null || actionOnData.isEmpty()) {
@@ -159,6 +163,10 @@ public class OutputConfig implements Serializable {
 
     public void setKeys(List<String> keys) {
         this.keys.setKeys(keys);
+    }
+
+    public boolean isUseOriginColumnName() {
+        return !useSanitizedColumnName;
     }
 
 }
