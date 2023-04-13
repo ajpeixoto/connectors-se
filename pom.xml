@@ -170,7 +170,7 @@
         <surefire.version>3.0.0-M6</surefire.version>
         <maven.enforcer.version>3.0.0-M3</maven.enforcer.version>
         <jacoco.version>0.8.8</jacoco.version>
-        <jettison.version>1.5.3</jettison.version>
+        <jettison.version>1.5.4</jettison.version>
 
         <commons-fileupload.version>1.5</commons-fileupload.version>
     </properties>
