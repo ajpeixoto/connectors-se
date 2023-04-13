@@ -154,6 +154,8 @@
     <jettison.version>1.5.3</jettison.version>
     <protobuf-java.version>3.19.6</protobuf-java.version>
 
+    <commons-fileupload.version>1.5</commons-fileupload.version>
+
     <!-- code quality enforcer default values.
          run build w/ -Pcode-quality to have a full validation -->
     <!-- should enforcing rules fail? Not yet, but soon! -->
@@ -594,6 +596,11 @@
         <groupId>com.google.protobuf</groupId>
         <artifactId>protobuf-java</artifactId>
         <version>${protobuf-java.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-fileupload</groupId>
+        <artifactId>commons-fileupload</artifactId>
+        <version>${commons-fileupload.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
