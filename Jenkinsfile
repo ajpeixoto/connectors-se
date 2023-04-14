@@ -142,6 +142,12 @@ pipeline {
              - DEFAULT means the qualifier will be the Jira id extracted from the branch name.
             From "user/JIRA-12345_some_information" the qualifier will be 'JIRA-12345'.
             Before the build, the maven version will be set to: x.y.z-JIRA-12345-SNAPSHOT''')
+        booleanParam(
+          name: 'UPDATE_SNAPSHOT',
+          defaultValue: true,
+          description: '''
+            UPDATE_SNAPSHOT : Add the --update-snapshot (-U) option to all maven cmd.
+            Uncheck may lead not to have the last version of deployed connectors-se''')
         choice(
           name: 'FAIL_AT_END',
           choices: ['DEFAULT', 'YES', 'NO'],
@@ -325,7 +331,7 @@ pipeline {
                     }
 
                     // No need to use snapshot update because se don't have dependencies to others Talend snapshot
-                    extraBuildParams = extraBuildParams_assembly(fail_at_end, false)
+                    extraBuildParams = extraBuildParams_assembly(fail_at_end, params.UPDATE_SNAPSHOT as Boolean)
 
                     job_description_append("Final parameters used for maven:  ")
                     job_description_append("`$extraBuildParams`")
