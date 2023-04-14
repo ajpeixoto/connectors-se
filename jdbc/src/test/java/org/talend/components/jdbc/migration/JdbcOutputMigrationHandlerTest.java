@@ -28,7 +28,7 @@ class JdbcMigrationHandlerTest {
         final Map<String, String> migrate = jdbcOutputMigrationHandler.migrate(1, incomingData);
         Assertions.assertEquals("dummyValue", migrate.get("configuration.keys.keys[dummyData]"));
         incomingData = jdbcOutputMigrationHandler.migrate(2, incomingData);
-        Assertions.assertEquals("false", incomingData.get("configuration.useOriginColumnName"));
+        Assertions.assertEquals("true", incomingData.get("configuration.useSanitizedColumnName"));
 
     }
 

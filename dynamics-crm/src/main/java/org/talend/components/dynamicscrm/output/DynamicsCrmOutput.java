@@ -25,6 +25,7 @@ import javax.naming.ServiceUnavailableException;
 
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
+import org.talend.components.dynamicscrm.migration.DynamicsRuntimeMigrationHandler;
 import org.talend.components.dynamicscrm.output.DynamicsCrmOutputConfiguration.Action;
 import org.talend.components.dynamicscrm.service.DynamicsCrmException;
 import org.talend.components.dynamicscrm.service.DynamicsCrmService;
@@ -41,7 +42,7 @@ import org.talend.sdk.component.api.processor.Input;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
 
-@Version(1)
+@Version(value = 2, migrationHandler = DynamicsRuntimeMigrationHandler.class)
 @Icon(value = IconType.CUSTOM, custom = "azure-dynamics-connector")
 @Processor(name = "AzureDynamics365Output")
 @Documentation("Azure Dynamics 365 output")

@@ -45,6 +45,13 @@ public class JdbcOutputMigrationHandler implements MigrationHandler {
         if (incomingVersion < 3) {
             incomingData.putIfAbsent("configuration.useOriginColumnName", "false");
         }
+
+        final String useOriginColumnName = incomingData.remove("configuration.useOriginColumnName");
+        if (useOriginColumnName != null && "false".equals(useOriginColumnName)) {
+            incomingData.putIfAbsent("configuration.useSanitizedColumnName", "true");
+        } else {
+            incomingData.putIfAbsent("configuration.useSanitizedColumnName", "false");
+        }
         return incomingData;
     }
 }
