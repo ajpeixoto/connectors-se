@@ -29,6 +29,7 @@ import org.apache.olingo.commons.api.edm.EdmPrimitiveTypeKind;
 import org.talend.components.dynamicscrm.dataset.DynamicsCrmDataset;
 import org.talend.components.dynamicscrm.datastore.AppType;
 import org.talend.components.dynamicscrm.datastore.DynamicsCrmConnection;
+import org.talend.components.dynamicscrm.datastore.OAuthFlow;
 import org.talend.components.dynamicscrm.service.I18n;
 import org.talend.ms.crm.odata.ClientConfiguration;
 import org.talend.ms.crm.odata.ClientConfiguration.WebAppPermission;
@@ -56,11 +57,12 @@ public abstract class DynamicsCrmTestBase {
     @Injected
     protected BaseComponentsHandler components;
 
-    public final String authEndpoint = "https://login.windows.net/common/oauth2/authorize";
+    public final String authEndpoint =
+            "https://login.microsoftonline.com/20c81da6-7d81-4bd1-995a-1a70f8d4fb65/oauth2/v2.0/token";
 
-    public final String rootUrl = "https://talend.api.crm.dynamics.com/api/data/v9.0/";
+    public final String rootUrl = "https://trial-8y5ff4.trial.operations.dynamics.com/";
 
-    public final String entitySet = "contacts";
+    public final String entitySet = "CustomerGroups";
 
     public final String company = "dchmyga_test" + UUID.randomUUID().toString().replace("-", "");
 
@@ -85,22 +87,23 @@ public abstract class DynamicsCrmTestBase {
     }
 
     public String getClientId() {
-        return clientIdSecret.getUsername();
+        return "ed4ea843-9544-4ec2-a3fb-476e1e3e12b7";
     }
 
     public String getClientSecret() {
-        return clientIdSecret.getPassword();
+        return "qdv8Q~f9cl6v92EI7exCiQoTR~BtU7vXKOMMtbdQ";
     }
 
     public void init() throws AuthenticationException {
-        ClientConfiguration clientConfig = ClientConfigurationFactory
-                .buildOAuthWebClientConfiguration(getClientId(),
-                        getClientSecret(), getUsername(), getPassword(), authEndpoint, WebAppPermission.DELEGATED);
+        ClientConfiguration clientConfig = ClientConfigurationFactory.buildOAuthWebClientConfiguration(getClientId(),
+                getClientSecret(),
+                authEndpoint,
+                WebAppPermission.APPLICATION);
         clientConfig.setTimeout(60);
         clientConfig.setMaxRetry(5, 1000);
         clientConfig.setReuseHttpClient(false);
-
-        client = new DynamicsCRMClient(clientConfig, rootUrl, entitySet);
+        clientConfig.setResource("https://trial-8y5ff4.trial.operations.dynamics.com/");
+        client = new DynamicsCRMClient(clientConfig, rootUrl + "data/", entitySet);
     }
 
     public void tearDown(DynamicsCRMClient client) throws ServiceUnavailableException {
@@ -136,6 +139,7 @@ public abstract class DynamicsCrmTestBase {
         connection.setPassword(getPassword());
         connection.setServiceRootUrl(rootUrl);
         connection.setTimeout(60);
+        connection.setFlow(OAuthFlow.CLIENT_CREDENTIALS);
         DynamicsCrmDataset dataset = new DynamicsCrmDataset();
         dataset.setDatastore(connection);
         dataset.setEntitySet(entitySet);

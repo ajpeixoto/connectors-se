@@ -63,11 +63,13 @@ public class DynamicsCrmService {
                     connection.getClientSecret(),
                     connection.getAuthorizationEndpoint(),
                     WebAppPermission.APPLICATION);
+            clientConfig.setResource(connection.getServiceRootUrl());
+
         }
         clientConfig.setTimeout(connection.getTimeout());
         clientConfig.setMaxRetry(connection.getMaxRetries(), INTERVAL_TIME);
         clientConfig.setReuseHttpClient(false);
-        return new DynamicsCRMClient(clientConfig, connection.getServiceRootUrl(), entitySet);
+        return new DynamicsCRMClient(clientConfig, connection.getServiceRootUrl() + "data/", entitySet);
     }
 
     public List<String> getEntitySetNames(DynamicsCrmConnection connection) {

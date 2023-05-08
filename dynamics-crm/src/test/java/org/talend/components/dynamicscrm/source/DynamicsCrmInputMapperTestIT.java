@@ -42,15 +42,16 @@ public class DynamicsCrmInputMapperTestIT extends DynamicsCrmTestBase {
     @BeforeAll
     public void prepareTestData() throws AuthenticationException, ServiceUnavailableException {
         init();
-        ClientEntity entity = createTestEntity(client);
+        // ClientEntity entity = createTestEntity(client);
 
-        client.insertEntity(entity);
+        // client.insertEntity(entity);
     }
 
     @Test
     public void produce() {
         final DynamicsCrmDataset dataset = createDataset();
         final DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
+        dataset.setEntitySet("CustomerGroups");
         configuration.setDataset(dataset);
         configuration
                 .setColumns(Arrays

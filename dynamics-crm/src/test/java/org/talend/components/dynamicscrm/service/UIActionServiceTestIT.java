@@ -17,10 +17,16 @@ import org.junit.jupiter.api.TestInstance;
 import org.talend.components.dynamicscrm.DynamicsCrmTestBase;
 import org.talend.components.dynamicscrm.datastore.DynamicsCrmConnection;
 import org.talend.components.dynamicscrm.datastore.AppType;
+import org.talend.components.dynamicscrm.datastore.OAuthFlow;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.completion.SuggestionValues;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus.Status;
 import org.talend.sdk.component.junit5.WithComponents;
+
+import javax.naming.AuthenticationException;
+
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -34,8 +40,22 @@ public class UIActionServiceTestIT extends DynamicsCrmTestBase {
     @Test
     public void testValidateConnection() {
         DynamicsCrmConnection connection = createDataset().getDatastore();
+        connection.setFlow(OAuthFlow.CLIENT_CREDENTIALS);
         HealthCheckStatus status = service.validateConnection(connection);
+        System.out.println(status.getComment());
         assertEquals(Status.OK, status.getStatus());
+    }
+
+    @Test
+    public void testEntitySetsList() throws AuthenticationException {
+        DynamicsCrmConnection connection = createDataset().getDatastore();
+        connection.setFlow(OAuthFlow.CLIENT_CREDENTIALS);
+        final SuggestionValues suggestionValues = service.entitySetsList(connection);
+        final String collect = suggestionValues.getItems()
+                .stream()
+                .map(e -> e.getId() + " : " + e.getLabel())
+                .collect(Collectors.joining(" "));
+        System.out.println(collect);
     }
 
     @Test
