@@ -1,4 +1,7 @@
 
+//Imports
+import java.util.regex.Matcher
+
 // Credentials
 final def nexusCredentials = usernamePassword(
   credentialsId: 'nexus-artifact-zl-credentials',
@@ -21,19 +24,19 @@ def sonarCredentials = usernamePassword(
 // Job config
 final String slackChannel = 'components-ci'
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
+final boolean isOnLocalesBranch = env.BRANCH_NAME.startsWith("locales/")
 
 // Job variables declaration
-String jenkins_action // Only used for job description
 String branch_user
 String branch_ticket
 String branch_description
 String pomVersion
 String componentRuntimeVersion
-String qualifiedVersion
-String releaseVersion = ''
+String finalVersion
 String extraBuildParams = ''
 Boolean fail_at_end = false
 String logContent
+Boolean devBranch_mavenDeploy = false
 
 // Pod config
 final String tsbiImage = 'jdk11-svc-springboot-builder'
@@ -130,10 +133,10 @@ pipeline {
             - RELEASE : Build release, deploy to the Nexus for master/maintenance branches''')
         booleanParam(
           name: 'MAVEN_DEPLOY',
-          defaultValue: true,
+          defaultValue: !isOnLocalesBranch,
           description: '''
-            Deploy A build to the Nexus after the build''')
-
+            Deploy A build to the Nexus after the build
+            Default is true for any branches except "locales/"''')
         string(
           name: 'VERSION_QUALIFIER',
           defaultValue: 'DEFAULT',
@@ -142,6 +145,12 @@ pipeline {
              - DEFAULT means the qualifier will be the Jira id extracted from the branch name.
             From "user/JIRA-12345_some_information" the qualifier will be 'JIRA-12345'.
             Before the build, the maven version will be set to: x.y.z-JIRA-12345-SNAPSHOT''')
+        booleanParam(
+          name: 'UPDATE_SNAPSHOT',
+          defaultValue: true,
+          description: '''
+            UPDATE_SNAPSHOT : Add the --update-snapshot (-U) option to all maven cmd.
+            Uncheck may lead not to have the last version of deployed connectors-se''')
         choice(
           name: 'FAIL_AT_END',
           choices: ['DEFAULT', 'YES', 'NO'],
@@ -181,6 +190,15 @@ pipeline {
     stages {
         stage('Validate parameters') {
             steps {
+                ///////////////////////////////////////////
+                // Variables init
+                ///////////////////////////////////////////
+                script {
+                    devBranch_mavenDeploy = !isOnMasterOrMaintenanceBranch && params.MAVEN_DEPLOY
+                }
+                ///////////////////////////////////////////
+                // Pom version and Qualifier management
+                ///////////////////////////////////////////
                 script {
                     final def pom = readMavenPom file: 'pom.xml'
                     pomVersion = pom.version
@@ -194,23 +212,22 @@ pipeline {
                         error('Can only release from a maintenance branch, exiting.')
                     }
 
-                    echo 'Manage the version qualifier'
-                    if (isOnMasterOrMaintenanceBranch || !params.MAVEN_DEPLOY) {
+                    println 'Manage the version qualifier'
+                    if (devBranch_mavenDeploy || (params.VERSION_QUALIFIER != ("DEFAULT"))) {
                         println """
-                             No need to add qualifier in followings cases:' +
-                             - We are on Master or Maintenance branch
-                             - We do not want to deploy
+                             We need to add qualifier in followings cases:' +
+                             - We are on a deployed dev branch
+                             - We do not want to deploy but give a qualifier
                              """.stripIndent()
-                        qualifiedVersion = pomVersion
-                    }
-                    else {
+
                         branch_user = ""
                         branch_ticket = ""
                         branch_description = ""
+
                         if (params.VERSION_QUALIFIER != ("DEFAULT")) {
                             // If the qualifier is given, use it
                             println """
-                             No need to add qualifier, use the given one: "$params.VERSION_QUALIFIER"
+                             No need to detect qualifier, use the given one: "$params.VERSION_QUALIFIER"
                              """.stripIndent()
                         }
                         else {
@@ -235,7 +252,7 @@ pipeline {
                         }
 
                         echo "Insert a qualifier in pom version..."
-                        qualifiedVersion = add_qualifier_to_version(
+                        finalVersion = add_qualifier_to_version(
                           pomVersion,
                           branch_ticket,
                           "$params.VERSION_QUALIFIER" as String)
@@ -244,7 +261,11 @@ pipeline {
                           Configure the version qualifier for the curent branche: $env.BRANCH_NAME
                           requested qualifier: $params.VERSION_QUALIFIER
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
-                          Qualified Version = $qualifiedVersion"""
+                          Qualified Version = $finalVersion"""
+                    }
+                    else {
+                        println "No need to add qualifier on this job"
+                        qualifiedVersion = pomVersion
                     }
 
                     println 'Manage the FAIL_AT_END parameter'
@@ -252,17 +273,12 @@ pipeline {
                       (params.FAIL_AT_END == 'YES')) {
                         fail_at_end = true
                     }
-
-                    releaseVersion = pomVersion.split('-')[0]
-                    println "releaseVersion: $releaseVersion"
                 }
                 ///////////////////////////////////////////
                 // Updating build displayName and description
                 ///////////////////////////////////////////
                 script {
-                    String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
-                    if ( user_name == null) { user_name = "auto" }
-
+                    String jenkins_action
                     if(params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY) {
                         jenkins_action = 'DEPLOY'
                     }
@@ -270,13 +286,11 @@ pipeline {
                         jenkins_action = params.ACTION
                     }
 
-                    currentBuild.displayName = (
-                      "#$currentBuild.number-$jenkins_action: $user_name"
-                    )
+                    job_name_creation("$jenkins_action")
 
                     // updating build description
                     String description = """
-                      $qualifiedVersion - $jenkins_action 
+                      $finalVersion - $jenkins_action 
                       Component-runtime Version: $componentRuntimeVersion  
                       Sonar: $params.SONAR_ANALYSIS  
                       Extra user maven args:  `$params.EXTRA_BUILD_PARAMS`  
@@ -318,14 +332,14 @@ pipeline {
                     if (!isOnMasterOrMaintenanceBranch) {
                         // Maven documentation about maven_version:
                         // https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm
-                        println "Edit version on dev branches, new version is ${qualifiedVersion}"
+                        println "Edit version on dev branches, new version is ${finalVersion}"
                         sh """
-                          mvn versions:set --define newVersion=${qualifiedVersion}
+                          mvn versions:set --define newVersion=${finalVersion}
                         """
                     }
 
                     // No need to use snapshot update because se don't have dependencies to others Talend snapshot
-                    extraBuildParams = extraBuildParams_assembly(fail_at_end, false)
+                    extraBuildParams = extraBuildParams_assembly(fail_at_end, params.UPDATE_SNAPSHOT as Boolean)
 
                     job_description_append("Final parameters used for maven:  ")
                     job_description_append("`$extraBuildParams`")
@@ -459,6 +473,22 @@ pipeline {
             }
         }
 
+        stage('Maven deploy') {
+            when {
+                expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY }
+            }
+            steps {
+                withCredentials([nexusCredentials]) {
+                    script {
+                        sh """
+                            bash .jenkins/mvn_deploy.sh \
+                                ${extraBuildParams}
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Maven sonar') {
             when {
                 expression { params.ACTION == 'STANDARD' && params.SONAR_ANALYSIS }
@@ -477,22 +507,6 @@ pipeline {
             }
         }
 
-        stage('Maven deploy') {
-            when {
-                expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY }
-            }
-            steps {
-                withCredentials([nexusCredentials]) {
-                    script {
-                        sh """
-                            bash .jenkins/mvn_deploy.sh \
-                                ${extraBuildParams}
-                        """
-                    }
-                }
-            }
-        }
-
         stage('Release') {
             when {
                 expression { params.ACTION == 'RELEASE' }
@@ -502,6 +516,7 @@ pipeline {
                                  nexusCredentials,
                                  artifactoryCredentials]) {
                     script {
+                        String releaseVersion = pomVersion.split('-')[0]
                         sh """
                             bash .jenkins/release.sh \
                                 'RELEASE' \
@@ -601,10 +616,32 @@ pipeline {
     }
 }
 
+/**
+ * Job name creation
+ * Update the job name in a predefined format, including build launcher user name
+ *
+ * @param extra: extra string to include in the job name
+ * @return void
+ */
+private void job_name_creation(String extra='') {
+    String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
+    if (user_name == null) {
+        user_name = "auto"
+    }
+
+    String comment = ''
+    if ('' != extra){
+        comment = "-$extra"
+    }
+
+    currentBuild.displayName = (
+      "#$currentBuild.number$comment: $user_name"
+    )
+}
 
 /**
  * Append a new line to job description
- * Reminder: this is MARKDOWN, do not forget double space at the end of line
+ * REM This is MARKDOWN, do not forget double space at the end of line
  *
  * @param new line
  * @return void
@@ -729,9 +766,6 @@ private String extraBuildParams_assembly(Boolean fail_at_end, Boolean snapshot_u
 /**
  * Edit properties in the pom to allow maven to choose between qualifier version or normal one
  *
- * @param String pomVersion,
- * @param String qualifiedVersion
- *
  * @return nothing
  * it will edit local pom on specific properties
  */
@@ -785,7 +819,7 @@ private static String add_qualifier_to_version(String version, String ticket, St
 private static ArrayList<String> extract_branch_info(GString branch_name) {
 
     String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,8}-\d{1,6})[_-](?<description>.*)/
-    java.util.regex.Matcher branchMatcher = branch_name =~ branchRegex
+    Matcher branchMatcher = branch_name =~ branchRegex
 
     try {
         assert branchMatcher.matches()

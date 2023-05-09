@@ -35,4 +35,9 @@ public class CredentialServiceFake extends CredentialService {
     public GoogleCredentials getCredentials(String jsonCredentials) {
         return this.wrappedService.getCredentials(jsonCredentials);
     }
+
+    @Override
+    public Storage newStorage(GoogleCredentials credentials, String customEndpoint) {
+        return storage;
+    }
 }

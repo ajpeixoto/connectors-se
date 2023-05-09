@@ -17,6 +17,7 @@ import java.io.Serializable;
 import org.talend.components.google.storage.service.GSService;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -25,10 +26,14 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
+import static org.talend.components.google.storage.service.GSService.DEFAULT_GS_HOST;
+import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.FormType.ADVANCED;
+
 @Data
 @DataStore(GSDataStore.NAME)
 @Checkable(GSService.ACTION_HEALTH_CHECK)
 @GridLayout({ @GridLayout.Row({ "jsonCredentials" }) })
+@GridLayout(names = ADVANCED, value = { @GridLayout.Row("usePrivateEndpoint"), @GridLayout.Row("privateEndpoint") })
 @Documentation("Connector for google cloud storage")
 public class GSDataStore implements Serializable {
 
@@ -43,5 +48,15 @@ public class GSDataStore implements Serializable {
     @Required
     @Documentation("Google credential (JSON)")
     private String jsonCredentials;
+
+    @Option
+    @Required
+    @Documentation("Use Private Service Connect endpoint access Google Storage.")
+    private boolean usePrivateEndpoint;
+
+    @Option
+    @ActiveIf(target = "usePrivateEndpoint", value = "true")
+    @Documentation("Google Storage private endpoint.")
+    private String privateEndpoint = DEFAULT_GS_HOST;
 
 }

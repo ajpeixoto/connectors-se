@@ -118,7 +118,7 @@ public class GoogleStorageOutput implements Serializable {
     }
 
     private StorageFacade buildStorage() {
-        return this.services.buildStorage(this.getDataSet().getDataStore().getJsonCredentials());
+        return this.services.buildStorage(this.getDataSet().getDataStore());
     }
 
 }
