@@ -73,7 +73,10 @@ public class DynamicsCrmInputSource implements Serializable {
             client = service
                     .createClient(configuration.getDataset().getDatastore(), configuration.getDataset().getEntitySet());
         } catch (AuthenticationException e) {
-            throw new DynamicsCrmException(i18n.authenticationFailed(e.getMessage()));
+            final DynamicsCrmException dynamicsCrmException =
+                    new DynamicsCrmException(i18n.authenticationFailed(e.getMessage()));
+            dynamicsCrmException.setStackTrace(e.getStackTrace());
+            throw dynamicsCrmException;
         }
 
         metadata = service.getMetadata(client);
