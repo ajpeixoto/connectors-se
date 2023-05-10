@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.google.api.client.util.Strings;
 import com.google.api.gax.paging.Page;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Blob;
@@ -52,6 +53,8 @@ public class GSService {
 
     public static final String ACTION_SUGGESTION_BLOB = "getBlobs";
 
+    public static final String DEFAULT_GS_HOST = "https://storage.googleapis.com";
+
     @Service
     private I18nMessage i18n;
 
@@ -66,7 +69,7 @@ public class GSService {
         }
         try {
             final GoogleCredentials credentials = credentialService.getCredentials(connection.getJsonCredentials());
-            final Storage storage = credentialService.newStorage(credentials);
+            final Storage storage = credentialService.newStorage(credentials, getCustomEndpoint(connection));
             storage.list();
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
         } catch (final Exception e) {
@@ -122,13 +125,19 @@ public class GSService {
         }
     }
 
+    @Deprecated
     public StorageFacade buildStorage(final String jsonCredentials) {
         return new StorageImpl(this.credentialService, jsonCredentials, this.i18n);
     }
 
+    public StorageFacade buildStorage(final GSDataStore dataStore) {
+        return new StorageImpl(this.credentialService, dataStore.getJsonCredentials(), getCustomEndpoint(dataStore),
+                this.i18n);
+    }
+
     private Storage newStorage(GSDataStore dataStore) {
         final GoogleCredentials credentials = credentialService.getCredentials(dataStore.getJsonCredentials());
-        return credentialService.newStorage(credentials);
+        return credentialService.newStorage(credentials, getCustomEndpoint(dataStore));
     }
 
     private <T> SuggestionValues retrieveItems(Page<T> pages, Function<T, String> toName) {
@@ -141,5 +150,12 @@ public class GSService {
                 .map((String name) -> new SuggestionValues.Item(name, name)) // name -> suggestion values item.
                 .collect(Collectors.toList());
         return new SuggestionValues(!names.isEmpty(), names);
+    }
+
+    private String getCustomEndpoint(GSDataStore dataStore) {
+        if (dataStore.isUsePrivateEndpoint() && !Strings.isNullOrEmpty(dataStore.getPrivateEndpoint())) {
+            return dataStore.getPrivateEndpoint();
+        }
+        return DEFAULT_GS_HOST;
     }
 }

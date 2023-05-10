@@ -14,11 +14,13 @@ package org.talend.components.dynamicscrm.source;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
 import org.apache.olingo.client.api.domain.ClientComplexValue;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.client.api.domain.ClientValue;
@@ -46,7 +48,6 @@ import org.talend.ms.crm.odata.QueryOptionConfig;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -62,7 +63,7 @@ public class InputHelper {
         QueryOptionConfig config = new QueryOptionConfig();
         final String[] names = schema.getEntries().stream().map(Schema.Entry::getName).toArray(String[]::new);
         config.setReturnEntityProperties(names);
-        String filterString = getFilterQuery(configuration);
+        String filterString = getFilterQuery(schema, configuration);
         if (filterString != null) {
             config.setFilter(filterString);
         }
@@ -91,39 +92,46 @@ public class InputHelper {
     }
 
     public String getFilterQuery(DynamicsCrmInputMapperConfiguration configuration) {
+        return getFilterQuery(null, configuration);
+    }
+
+    public String getFilterQuery(Schema schema, DynamicsCrmInputMapperConfiguration configuration) {
         if (configuration.isCustomFilter() && configuration.getFilter() != null
                 && !configuration.getFilter().isEmpty()) {
             return configuration.getFilter();
         } else if (!configuration.isCustomFilter() && configuration.getFilterConditions() != null
                 && !configuration.getFilterConditions().isEmpty()) {
-            return convertFilterConditionsTableToString(configuration.getFilterConditions(),
+            return convertFilterConditionsTableToString(schema, configuration.getFilterConditions(),
                     configuration.getOperator());
         }
         return null;
     }
 
-    public String convertFilterConditionsTableToString(List<FilterCondition> filterConditions, Operator operator) {
+    public String convertFilterConditionsTableToString(Schema schema,
+            List<FilterCondition> filterConditions, Operator operator) {
         FilterFactory filterFactory = new FilterFactoryImpl();
         List<URIFilter> uriFilters = new ArrayList<>();
         for (FilterCondition condition : filterConditions) {
+            String field = condition.getField();
+            Object value = convertStringValueIfNeeded(schema, field, condition.getValue());
             switch (condition.getFilterOperator()) {
             case EQUAL:
-                uriFilters.add(filterFactory.eq(condition.getField(), condition.getValue()));
+                uriFilters.add(filterFactory.eq(field, value));
                 break;
             case NOTEQUAL:
-                uriFilters.add(filterFactory.ne(condition.getField(), condition.getValue()));
+                uriFilters.add(filterFactory.ne(field, value));
                 break;
             case GREATER_THAN:
-                uriFilters.add(filterFactory.gt(condition.getField(), condition.getValue()));
+                uriFilters.add(filterFactory.gt(field, value));
                 break;
             case GREATER_OR_EQUAL:
-                uriFilters.add(filterFactory.ge(condition.getField(), condition.getValue()));
+                uriFilters.add(filterFactory.ge(field, value));
                 break;
             case LESS_THAN:
-                uriFilters.add(filterFactory.lt(condition.getField(), condition.getValue()));
+                uriFilters.add(filterFactory.lt(field, value));
                 break;
             case LESS_OR_EQUAL:
-                uriFilters.add(filterFactory.le(condition.getField(), condition.getValue()));
+                uriFilters.add(filterFactory.le(field, value));
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported condition operator:" + condition.getFilterOperator());
@@ -139,6 +147,41 @@ public class InputHelper {
             sb.append(uriFilters.get(i).build());
         }
         return sb.toString();
+
+    }
+
+    private Object convertStringValueIfNeeded(Schema schema, String columnName, String stringValue) {
+        Object convertedValue = stringValue;
+        if (schema != null) {
+            Schema.Entry column = schema.getEntry(columnName);
+            if (column != null) {
+                Schema.Type columnType = column.getType();
+                try {
+                    if (columnType == Schema.Type.INT || columnType == Schema.Type.LONG) {
+                        convertedValue = Long.parseLong(stringValue);
+                    } else if (columnType == Schema.Type.FLOAT || columnType == Schema.Type.DOUBLE) {
+                        convertedValue = Double.parseDouble(stringValue);
+                    } else if (columnType == Schema.Type.BOOLEAN) {
+                        convertedValue = Boolean.parseBoolean(stringValue);
+                    } else if (columnType == Schema.Type.DATETIME) {
+                        // Edm.DateTimeOffset "should be in format 'yyyy-mm-ddThh:mm:ss('.'s+)?(zzzzzz)?"
+                        // but also returns an error when LocalDateTime with this format passed as filter value
+                        // so only Instant would
+                        try {
+                            convertedValue = Instant.parse(stringValue);
+                        } catch (DateTimeParseException e) {
+                            log.warn("Can't parse string value to Edm.DateTimeOffset Instant: " + stringValue, e);
+                        }
+                    } else if (columnType == Schema.Type.DECIMAL) {
+                        convertedValue = new BigDecimal(stringValue);
+                    }
+                } catch (Exception e) {
+                    log.warn("Can't parse the filter value, would use a string value instead", e);
+                }
+            }
+        }
+
+        return convertedValue;
     }
 
     public Schema getSchemaFromMetadata(Edm metadata, String entitySetName, List<String> columnNames,
