@@ -120,7 +120,7 @@ pipeline {
     }
 
     triggers {
-        cron(env.BRANCH_NAME == "master" ? "@daily" : "")
+        cron(env.BRANCH_NAME == "master" ? "0 0 * * *" : "")
     }
 
     parameters {
