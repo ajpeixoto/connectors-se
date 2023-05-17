@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.44.0-SNAPSHOT</version>
+        <version>1.46.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>newjdbc</artifactId>
 
-    <name>Connectors SE :: JDBC</name>
-    <description>Suite of JDBC component</description>
+    <name>Connectors SE :: New JDBC</name>
+    <description>Suite of New JDBC component</description>
 
     <properties>
         <xbean-finder-shaded.version>4.8</xbean-finder-shaded.version>
