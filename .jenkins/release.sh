@@ -18,29 +18,31 @@ if [[ $pre_release_version != *'-SNAPSHOT' ]]; then
 fi
 
 # prepare release
-mvn -B -s .jenkins/settings.xml release:clean release:prepare ${EXTRA_BUILD_PARAMS} -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/
+mvn -B -s .jenkins/settings.xml release:clean release:prepare ${EXTRA_BUILD_PARAMS} \
+    -DscmCommentPrefix='[jenkins-release]' -DscmReleaseCommitComment='@{prefix} Release @{releaseLabel}' \
+    -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/
 if [[ ! $? -eq 0 ]]; then
   echo mvn error during build
   exit 123
 fi
 
 # perform release
-mvn -B -s .jenkins/settings.xml release:perform ${EXTRA_BUILD_PARAMS} -Darguments='-Dmaven.javadoc.skip=true' -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/
+mvn -B -s .jenkins/settings.xml release:perform ${EXTRA_BUILD_PARAMS} \
+    -Darguments="-Dmaven.javadoc.skip=true" \
+    -Dtalend.maven.decrypter.m2.location=${WORKSPACE}/.jenkins/
 if [[ ! $? -eq 0 ]]; then
   echo mvn error during build
   exit 123
 fi
+
 post_release_version=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
 
 # push tag to origin
 git push origin release/${release_version}
 
-# We want smooth transition on version with no transition to release
-# ie: 1.3.0-SNAPSHOT > 1.3.1-SNAPSHOT
-# and NOT 1.3.0-SNAPSHOT > 1.3.0 > 1.3.1-SNAPSHOT
-
-# Reset the current branch to the commit just before the release:
-git reset --hard HEAD~2
+# Reset the current branch to the release commit
+# We want include all changes into prepare for next development iteration
+git reset --hard HEAD~1
 
 # Squash merge to next-iter state:
 git merge --squash HEAD@{1}
