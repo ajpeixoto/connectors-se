@@ -26,6 +26,8 @@ import org.talend.sdk.component.api.service.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
+import static org.talend.components.google.storage.service.GSService.DEFAULT_GS_HOST;
+
 @Service
 @Slf4j
 public class CredentialService {
@@ -39,7 +41,22 @@ public class CredentialService {
      * @return storage.
      */
     public Storage newStorage(GoogleCredentials credentials) {
-        return StorageOptions.newBuilder().setCredentials(credentials).build().getService();
+        return newStorage(credentials, null);
+    }
+
+    /**
+     * Build new Access Storage from credentials with custom endpoint.
+     *
+     * @return storage.
+     */
+    public Storage newStorage(GoogleCredentials credentials, String customEndpoint) {
+        StorageOptions.Builder builder = StorageOptions.newBuilder();
+        builder.setCredentials(credentials);
+        if (customEndpoint != null && !DEFAULT_GS_HOST.equals(customEndpoint)) {
+            builder.setHost(customEndpoint);
+        }
+        StorageOptions options = builder.build();
+        return options.getService();
     }
 
     /**

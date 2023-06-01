@@ -72,6 +72,21 @@ class GSServiceTest {
     }
 
     @Test
+    void testCustomEndpoint() throws IOException {
+        final GSDataStore ds = new GSDataStore();
+        ds.setUsePrivateEndpoint(true);
+        ds.setPrivateEndpoint("https://storage-custom.p.googleapis.com");
+        String jwtContent = this.getContentFile("./engineering-test-custom-endpoint.json");
+        ds.setJsonCredentials(jwtContent);
+
+        final SuggestionValues bucketsName = this.service.findBucketsName(ds);
+        Assertions.assertNotNull(bucketsName);
+        Assertions.assertEquals(73, bucketsName.getItems().size());
+        final Item firstItem = bucketsName.getItems().iterator().next();
+        Assertions.assertEquals("bucket1", firstItem.getId());
+    }
+
+    @Test
     void findBucketsName() throws IOException {
         final GSDataStore ds = new GSDataStore();
         String jwtContent = this.getContentFile("./engineering-test.json");

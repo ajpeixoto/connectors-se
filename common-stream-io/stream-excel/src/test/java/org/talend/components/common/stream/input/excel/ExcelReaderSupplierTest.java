@@ -14,6 +14,8 @@ package org.talend.components.common.stream.input.excel;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Iterator;
 
 import org.junit.jupiter.api.Assertions;
@@ -78,7 +80,7 @@ class ExcelReaderSupplierTest {
         final String nameValue = "a";
         final double longValue = 10000000000000.0;
         final double doubleValue = 2.5;
-        final double dateValue = 43501.0;
+        final long dateValue = 1549317600; // epoch seconds, original excel value: 43501.0
         final boolean booleanValue = true;
 
         try (final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
@@ -96,14 +98,16 @@ class ExcelReaderSupplierTest {
                 Assertions.assertEquals(nameValue, firstRecord.getString("name"));
                 Assertions.assertEquals(longValue, firstRecord.getDouble("longValue"), 0.01);
                 Assertions.assertEquals(doubleValue, firstRecord.getDouble("doubleValue"), 0.01);
-                Assertions.assertEquals(dateValue, firstRecord.getDouble("dateValue"), 0.01);
+                // delta == 1 day, date is read in local time zone
+                Assertions.assertEquals(dateValue, firstRecord.getDateTime("dateValue").toEpochSecond(), 86400);
                 Assertions.assertEquals(booleanValue, firstRecord.getBoolean("booleanValue"));
             } else {
                 Assertions.assertEquals(idValue, firstRecord.getDouble("field0"), 0.01);
                 Assertions.assertEquals(nameValue, firstRecord.getString("field1"));
                 Assertions.assertEquals(longValue, firstRecord.getDouble("field2"), 0.01);
                 Assertions.assertEquals(doubleValue, firstRecord.getDouble("field3"), 0.01);
-                Assertions.assertEquals(dateValue, firstRecord.getDouble("field4"), 0.01);
+                // delta == 1 day
+                Assertions.assertEquals(dateValue, firstRecord.getDateTime("field4").toEpochSecond(), 86400);
                 Assertions.assertEquals(booleanValue, firstRecord.getBoolean("field5"));
             }
             Assertions.assertFalse(records.hasNext(), "more than one record");

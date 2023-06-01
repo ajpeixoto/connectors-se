@@ -18,7 +18,7 @@
   <parent>
     <groupId>org.talend.components</groupId>
     <artifactId>azure</artifactId>
-    <version>1.43.0-SNAPSHOT</version>
+    <version>1.47.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>azurecommon</artifactId>
@@ -32,7 +32,6 @@
     <delta.version>0.2.0.1-talend</delta.version>
     <excel.streamer.version>2.2.0</excel.streamer.version>
     <common.lang.version>3.9</common.lang.version>
-    <commons-csv.version>1.7.1</commons-csv.version>
   </properties>
 
   <dependencies>
@@ -56,7 +55,6 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-csv</artifactId>
-      <version>${commons-csv.version}</version>
     </dependency>
 
     <!-- Excel HTML format -->
@@ -241,6 +239,12 @@
       <version>${hadoop-azure.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.wildfly.openssl</groupId>
+      <artifactId>wildfly-openssl</artifactId>
+      <version>2.2.5.Final</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
       <exclusions>
@@ -281,7 +285,7 @@
     <dependency>
       <groupId>org.talend.components.lib</groupId>
       <artifactId>azure-utils</artifactId>
-      <version>1.0.3</version>
+      <version>1.0.5</version>
     </dependency>
   </dependencies>
 </project>

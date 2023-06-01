@@ -14,6 +14,7 @@ package org.talend.components.jdbc.output.statement.operations;
 
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.configuration.OutputConfig;
+import org.talend.components.jdbc.output.OutputUtils;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
@@ -60,11 +61,8 @@ public class Delete extends QueryManagerImpl {
         if (!namedParamsResolved) {
             queryParams = new HashMap<>();
             final AtomicInteger index = new AtomicInteger(0);
-            final List<Schema.Entry> entries = records
-                    .stream()
-                    .flatMap(r -> r.getSchema().getEntries().stream())
-                    .distinct()
-                    .collect(toList());
+            final List<Schema.Entry> entries = OutputUtils.getAllSchemaEntries(records);
+
             keys
                     .stream()
                     .map(key -> entries.stream().filter(e -> key.equals(e.getOriginalFieldName())).findFirst())

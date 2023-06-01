@@ -21,6 +21,7 @@ import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.util.HadoopInputFile;
 import org.apache.parquet.io.InputFile;
+import org.talend.components.azure.runtime.token.EndpointUtil;
 import org.talend.components.common.connection.azureblob.AzureAuthType;
 import org.talend.components.common.connection.azureblob.Protocol;
 import org.talend.components.azure.dataset.AzureBlobDataset;
@@ -89,7 +90,8 @@ public class ParquetBlobFileReader extends BlobFileReader {
                 hadoopConfig.set(sasKey, token);
             } else if (getConfig().getConnection().getAccountConnection().getAuthType() == AzureAuthType.BASIC) {
                 accountName = getConfig().getConnection().getAccountConnection().getAccountName();
-                endpointSuffix = getConfig().getConnection().getEndpointSuffix();
+                endpointSuffix = EndpointUtil.getEndpoint(getConfig().getConnection().getRegion().toString(),
+                        getConfig().getConnection().getEndpointSuffix());
                 String accountCredKey = RegionUtils.getAccountCredKey4AccountAuth(accountName, endpointSuffix);
                 hadoopConfig.set(accountCredKey, getConfig().getConnection().getAccountConnection().getAccountKey());
             } else {

@@ -14,5 +14,6 @@ package org.talend.components.common.connection.azureblob;
 
 public enum AzureAuthType {
     BASIC,
-    ACTIVE_DIRECTORY_CLIENT_CREDENTIAL
+    ACTIVE_DIRECTORY_CLIENT_CREDENTIAL,
+    MANAGED_IDENTITIES
 }

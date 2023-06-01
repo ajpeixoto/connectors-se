@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.olingo.client.api.ODataClient;
 import org.apache.olingo.client.api.domain.ClientCollectionValue;
 import org.apache.olingo.client.api.domain.ClientComplexValue;
@@ -335,7 +336,7 @@ public abstract class AbstractToEntityRecordProcessor implements RecordProcessor
             EdmPrimitiveTypeKind primitiveTypeKind =
                     EdmPrimitiveTypeKind.valueOfFQN(propType.getType().getFullQualifiedName());
             if (primitiveTypeKind == EdmPrimitiveTypeKind.Guid) {
-                if (value == null) {
+                if (StringUtils.isEmpty(value)) {
                     return odataClient
                             .getObjectFactory()
                             .newPrimitiveProperty(name, odataClient

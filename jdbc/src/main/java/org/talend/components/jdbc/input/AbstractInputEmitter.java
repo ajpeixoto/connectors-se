@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.jooq.impl.DSL;
-import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.ParserException;
 import org.talend.components.jdbc.configuration.InputConfig;
 import org.talend.components.jdbc.dataset.BaseDataSet;
@@ -75,8 +73,7 @@ public abstract class AbstractInputEmitter implements Serializable {
             throw new IllegalArgumentException(i18n.errorEmptyQuery());
         }
         try {
-            if (jdbcDriversService.isNotReadOnlySQLQuery(query) ||
-                    DSL.using(new DefaultConfiguration()).parser().parse(query).queries().length > 1) {
+            if (jdbcDriversService.isInvalidSQLQuery(query, dataSet.getConnection().getDbType())) {
                 throw new IllegalArgumentException(i18n.errorUnauthorizedQuery());
             }
         } catch (ParserException e) {

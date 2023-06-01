@@ -34,6 +34,8 @@ import org.talend.sdk.component.api.exception.ComponentException.ErrorOrigin;
 
 import lombok.extern.slf4j.Slf4j;
 
+import static org.talend.components.google.storage.service.GSService.DEFAULT_GS_HOST;
+
 @Slf4j
 public class StorageImpl implements StorageFacade {
 
@@ -42,6 +44,8 @@ public class StorageImpl implements StorageFacade {
     private final GoogleCredentials credentials;
 
     private final CredentialService credentialService;
+
+    private final String customEndpoint;
 
     private final I18nMessage i18n;
 
@@ -53,6 +57,16 @@ public class StorageImpl implements StorageFacade {
             final I18nMessage i18n) {
         this.credentialService = credentialService;
         this.credentials = credentialService.getCredentials(jsonCredentials);
+        this.customEndpoint = DEFAULT_GS_HOST;
+        this.i18n = i18n;
+    }
+
+    public StorageImpl(final CredentialService credentialService, final String jsonCredentials,
+            final String customEndpoint,
+            final I18nMessage i18n) {
+        this.credentialService = credentialService;
+        this.credentials = credentialService.getCredentials(jsonCredentials);
+        this.customEndpoint = customEndpoint;
         this.i18n = i18n;
     }
 
@@ -126,7 +140,7 @@ public class StorageImpl implements StorageFacade {
 
     private synchronized Storage getStorage() {
         if (this.storage == null) {
-            this.storage = this.credentialService.newStorage(this.credentials);
+            this.storage = this.credentialService.newStorage(this.credentials, customEndpoint);
         }
         return this.storage;
     }

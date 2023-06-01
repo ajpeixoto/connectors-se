@@ -21,6 +21,8 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
+import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.FormType.ADVANCED;
+
 @Data
 @GridLayout({ @GridLayout.Row("dataset") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("dataset") })

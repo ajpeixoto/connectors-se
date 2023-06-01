@@ -119,7 +119,7 @@ public abstract class DynamicsCrmTestBase {
         queryOptionConfig
                 .setReturnEntityProperties(new String[] { "contactid", "annualincome", "assistantname", "business2",
                         "callback", "childrensnames", "company", "creditonhold", "_transactioncurrencyid_value",
-                        "birthdate" });
+                        "birthdate", "processid" });
         ODataEntitySetRequest<ClientEntitySet> request = client.createEntityRetrieveRequest(queryOptionConfig);
         ODataRetrieveResponse<ClientEntitySet> response = request.execute();
         return response.getBody().getEntities();
@@ -222,7 +222,7 @@ public abstract class DynamicsCrmTestBase {
                 .withString("company", company)
                 .withBoolean("creditonhold", false)
                 .withInt("birthdate", 6720)
-                .withString("_transactioncurrencyid_value", "dca1714c-6d1a-e311-a5fb-b4b52f67b688")
+                .withString("_transactioncurrencyid_value", "7efe21e1-d9e1-ed11-a7c7-000d3a4755c6")
                 .build();
         return record;
     }

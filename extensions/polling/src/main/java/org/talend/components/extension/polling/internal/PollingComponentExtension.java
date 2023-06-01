@@ -113,7 +113,8 @@ public class PollingComponentExtension implements CustomComponentExtension {
             return emptyList();
         }
 
-        // Class.forName(container.get(RepositoryModel.class).getContainerComponentFamilies().get(0).getConfigs().get().get(0).getChildConfigs().get(0).getMeta().getJavaType().getTypeName()).getAnnotations()
+        // Class.forName(container.get(RepositoryModel.class).getContainerComponentFamilies().get(0).getConfigs().get()
+        // .get(0).getChildConfigs().get(0).getMeta().getJavaType().getTypeName()).getAnnotations()
         final RepositoryModel repositoryModel = container.get(RepositoryModel.class);
         if (repositoryModel == null) {
             log

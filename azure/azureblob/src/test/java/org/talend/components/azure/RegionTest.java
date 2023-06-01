@@ -46,7 +46,7 @@ public class RegionTest {
         accountConnection.setAccountKey("myaccountkey");
 
         AzureComponentServices service = new AzureComponentServices();
-        CloudStorageAccount csa = service.createStorageAccount(accountConnection, "core.chinacloudapi.cn");
+        CloudStorageAccount csa = service.createStorageAccount(accountConnection, "core.chinacloudapi.cn", null);
 
         Assertions.assertEquals("myaccount", csa.getCredentials().getAccountName().toString());
         Assertions.assertEquals("core.chinacloudapi.cn", csa.getEndpointSuffix());

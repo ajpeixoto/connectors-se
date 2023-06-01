@@ -17,11 +17,14 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 
 import java.io.Serializable;
 
+import org.talend.components.dynamicscrm.migration.DynamicsConnectionMigrationHandler;
+import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -31,7 +34,10 @@ import lombok.Data;
 @Data
 @Checkable(ACTION_HEALTHCHECK_DYNAMICS365)
 @DataStore("DynamicsCrmConnection")
-@GridLayout({ @GridLayout.Row({ "appType" }), @GridLayout.Row({ "username", "password" }),
+@Version(value = 2, migrationHandler = DynamicsConnectionMigrationHandler.class)
+@GridLayout({ @GridLayout.Row({ "appType" }),
+        @GridLayout.Row({ "flow" }),
+        @GridLayout.Row({ "username", "password" }),
         @GridLayout.Row({ "serviceRootUrl" }),
         @GridLayout.Row({ "clientId" }), @GridLayout.Row({ "clientSecret" }),
         @GridLayout.Row({ "authorizationEndpoint" }) })
@@ -41,19 +47,30 @@ public class DynamicsCrmConnection implements Serializable {
 
     @Option
     @Required
+    @DefaultValue("NATIVE")
     @Documentation("Select the type of your application, either Native App or Web App with delegated permissions.")
     private AppType appType = AppType.NATIVE;
 
     @Option
+    @DefaultValue("ROPC")
+    @Documentation("Select which OAuth flow to use.")
+    @ActiveIf(target = "appType", value = "WEB")
+    private OAuthFlow flow = OAuthFlow.ROPC;
+
+    @Option
     @Required
-    @Documentation("User name")
-    private String username;
+    @DefaultValue("")
+    @Documentation("User name.")
+    @ActiveIf(target = "flow", value = "ROPC")
+    private String username = "";
 
     @Option
     @Required
     @Credential
-    @Documentation("Password")
-    private String password;
+    @DefaultValue("")
+    @Documentation("Password.")
+    @ActiveIf(target = "flow", value = "ROPC")
+    private String password = "";
 
     @Option
     @Required

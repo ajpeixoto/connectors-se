@@ -15,6 +15,7 @@ package org.talend.components.jdbc.output.statement.operations;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.configuration.OutputConfig;
+import org.talend.components.jdbc.output.OutputUtils;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.sdk.component.api.record.Record;
@@ -74,11 +75,8 @@ public class Update extends QueryManagerImpl {
     public String buildQuery(final List<Record> records) {
         this.queryParams = new HashMap<>();
         final AtomicInteger index = new AtomicInteger(0);
-        final List<Schema.Entry> entries = records
-                .stream()
-                .flatMap(r -> r.getSchema().getEntries().stream())
-                .distinct()
-                .collect(toList());
+        final List<Schema.Entry> entries = OutputUtils.getAllSchemaEntries(records);
+
         final String query = "UPDATE " + getPlatform().identifier(getConfiguration().getDataset().getTableName())
                 + " SET "
                 + entries
