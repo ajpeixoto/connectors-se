@@ -16,6 +16,8 @@ main() (
       --batch-mode \
       --activate-profiles 'STANDARD, ITs'\
       "${extraBuildParams[@]}"
+
+  mvn -Dbuildinfo.reproducible=true artifact:buildinfo
 )
 
 main "$@"
