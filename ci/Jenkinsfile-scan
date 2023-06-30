@@ -1,52 +1,34 @@
+
+
 def veracodeCredentials = usernamePassword(
         credentialsId: 'veracode-api-credentials',
         passwordVariable: 'VERACODE_KEY',
         usernameVariable: 'VERACODE_ID')
 
-def slackChannel = 'components-ci'
+// Job variables declaration
 
-final String tsbiImage = 'jdk11-svc-springboot-builder'
-final String tsbiVersion = '3.0.8-2.6-20220928070500'
-
-// Pod definition
-final String podDefinition = """\
-apiVersion: v1
-kind: Pod
-spec:
-    containers:
-        -
-            name: main
-            image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/${tsbiImage}:${tsbiVersion}'
-            command: [cat]
-            tty: true
-            volumeMounts: [
-                {name: docker, mountPath: /var/run/docker.sock},
-                {name: efs-jenkins-connectors-se-m2, mountPath: /root/.m2/repository}
-            ]
-            resources: {requests: {memory: 3G, cpu: '2'}, limits: {memory: 8G, cpu: '2'}}
-    volumes:
-        -
-            name: docker
-            hostPath: {path: /var/run/docker.sock}
-        -
-            name: efs-jenkins-connectors-se-m2
-            persistentVolumeClaim: 
-                claimName: efs-jenkins-connectors-se-m2
-    imagePullSecrets:
-        - name: talend-registry
-""".stripIndent()
+// Maven package skipped elements
+// Everything that is not needed for the veracode scan is excluded to reduce time
+_SKIP_OPTS = [
+  '--define maven.test.skip=true',
+  '--define spotless.apply.skip=true',
+  '--define checkstyle.skip=true',
+  '--define rat.skip=true',
+  '--define skipTests=true',
+  '--define invoker.skip=true'
+].join(' ')
 
 pipeline {
     agent {
         kubernetes {
-            yaml podDefinition
+            yamlFile '.jenkins/jenkins_pod.yml'
+            defaultContainer 'main'
         }
     }
 
     environment {
         MAVEN_OPTS = '-Dmaven.artifact.threads=128 -Dorg.slf4j.simpleLogger.showThreadName=true -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss'
         TALEND_REGISTRY = 'registry.datapwn.com'
-
         VERACODE_APP_NAME = 'Components'
         VERACODE_SANDBOX = 'connectors-se'
         APP_ID = '579232'
@@ -58,26 +40,82 @@ pipeline {
         skipStagesAfterUnstable()
     }
 
-    triggers {
-        cron('0 9 * * 0')
+    parameters {
+        booleanParam(
+          name: 'VERACODE_SCA',
+          defaultValue: true,
+          description: 'Veracode SCA (Source Clear Analysis)')
+        booleanParam(
+          name: 'VERACODE_SAST',
+          defaultValue: true,
+          description: 'Veracode SAST (Static testing)')
+        booleanParam(
+          name: 'JENKINS_DEBUG',
+          defaultValue: false,
+          description: '''
+        Add an extra comportment to the job allowing analysis:
+          - keep the pod alive for debug purposes''')
     }
 
     stages {
-        stage("Veracode SCA (Source Clear Analysis)") {
+        stage('Preliminary steps') {
             steps {
-                container('main') {
+                ///////////////////////////////////////////
+                // Update build info
+                ///////////////////////////////////////////
+                script {
+                    def scans = []
+                    if (params.VERACODE_SCA) {
+                        scans.add('SCA')
+                    }
+                    if (params.VERACODE_SAST) {
+                        scans.add('SAST')
+                    }
+                    job_name_creation(scans.join('+') as String)
+
+                    git_branch_name = "${env.GIT_BRANCH}".replace("origin/", "")
+                    job_description_append("Scanned branch: ${git_branch_name}")
+                }
+                ///////////////////////////////////////////
+                // asdf install
+                ///////////////////////////////////////////
+                script {
+                    println "asdf install the content of repository .tool-versions"
+                    sh 'bash .jenkins/asdf_install.sh'
+                }
+            }
+        }
+        stage("Veracode SCA (Source Clear Analysis)") {
+            when {
+                expression { params.VERACODE_SCA }
+            }
+            steps {
+                script {
                     withCredentials([string(credentialsId: 'veracode-token', variable: 'SRCCLR_API_TOKEN')]) {
-                        sh '''#!/bin/bash
-                          curl -sSL https://download.sourceclear.com/ci.sh | SRCCLR_API_TOKEN=${SRCCLR_API_TOKEN} DEBUG=1 sh -s -- scan --allow-dirty --recursive --skip-collectors npm;
-                        '''
+                        sh "bash .jenkins/veracode-sca.sh $SRCCLR_API_TOKEN"
+                    }
+                }
+            }
+        }
+        stage('Package the app for Static testing') {
+            when {
+                expression { params.VERACODE_SAST }
+            }
+            steps {
+                withCredentials([veracodeCredentials]) {
+                    script {
+                        // Execute a mvn package skipping not needed element
+                        sh "bash .jenkins/mvn_package.sh ${_SKIP_OPTS}"
                     }
                 }
             }
         }
         stage('Veracode SAST (Static testing)') {
+            when {
+                expression { params.VERACODE_SAST }
+            }
             steps {
-                container('main') {
-                    sh "mvn -U -B clean package -Dmaven.test.skip=true"
+                script {
                     withCredentials([veracodeCredentials]) {
                         veracode applicationName: "$VERACODE_SANDBOX",
                             teams: "Components",
@@ -103,11 +141,79 @@ pipeline {
         }
     }
     post {
+        always {
+            script {
+                if (params.JENKINS_DEBUG) {
+                    jenkinsBreakpoint()
+                }
+            }
+        }
         success {
-            slackSend(color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
+            slackSend(
+              color: '#00FF00',
+              message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
+              channel: "${env.SLACK_CI_CHANNEL}")
         }
         failure {
-            slackSend(color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})", channel: "${slackChannel}")
+            slackSend(
+              color: '#FF0000',
+              message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
+              channel: "${env.SLACK_CI_CHANNEL}")
         }
     }
+}
+
+/**
+ * Append a new line to job description
+ * REM This is MARKDOWN, do not forget double space at the end of line
+ *
+ * @param new line
+ * @return void
+ */
+private void job_name_creation(String extra) {
+    String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
+    if (user_name == null) {
+        user_name = "auto"
+    }
+
+    currentBuild.displayName = (
+      "#$currentBuild.number-$extra-$user_name"
+    )
+}
+
+/**
+ * Append a new line to job description
+ * REM This is MARKDOWN, do not forget double space at the end of line
+ *
+ * @param new line
+ * @return void
+ */
+private void job_description_append(String new_line) {
+    if (currentBuild.description == null) {
+        println "Create the job description with: \n$new_line"
+        currentBuild.description = new_line
+    } else {
+        println "Edit the job description adding: $new_line"
+        currentBuild.description = currentBuild.description + '\n' + new_line
+    }
+}
+
+/**
+ * Implement a simple breakpoint to stop actual job
+ * Use the method anywhere you need to stop
+ * The first usage is to keep the pod alive on post stage.
+ * Change and restore the job description to be more visible
+ *
+ * @param job_description_to_backup
+ * @return void
+ */
+private void jenkinsBreakpoint() {
+    // Backup the description
+    String job_description_backup = currentBuild.description
+    // updating build description
+    currentBuild.description = "ACTION NEEDED TO CONTINUE \n ${job_description_backup}"
+    // Request user action
+    input message: 'Finish the job?', ok: 'Yes'
+    // updating build description
+    currentBuild.description = "$job_description_backup"
 }

@@ -52,7 +52,8 @@ public class SnowflakeDelete extends Delete {
             final String fqTableName = namespace(connection) + "." + getPlatform().identifier(tableName);
             final String fqTmpTableName = namespace(connection) + "." + getPlatform().identifier(tmpTableName);
             final String fqStageName = namespace(connection) + ".%" + getPlatform().identifier(tmpTableName);
-            rejects.addAll(snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, fqTmpTableName));
+            rejects.addAll(
+                    snowflakeCopy.putAndCopy(connection, records, fqStageName, fqTableName, fqTmpTableName, true));
             if (records.size() != rejects.size()) {
                 try (final Statement statement = connection.createStatement()) {
                     String query = "delete from " + fqTableName + " target using " + fqTmpTableName

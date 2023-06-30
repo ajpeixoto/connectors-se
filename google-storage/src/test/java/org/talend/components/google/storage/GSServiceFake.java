@@ -50,4 +50,9 @@ public class GSServiceFake extends GSService {
     public StorageFacade buildStorage(String jsonCredentials) {
         return new StorageFacadeFake(bucket, root);
     }
+
+    @Override
+    public StorageFacade buildStorage(final GSDataStore dataStore) {
+        return new StorageFacadeFake(bucket, root);
+    }
 }

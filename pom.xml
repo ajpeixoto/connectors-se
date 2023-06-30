@@ -18,7 +18,7 @@
 
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.45.0-SNAPSHOT</version>
+    <version>1.47.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Connectors SE</name>
@@ -49,6 +49,7 @@
         <module>migration-tester</module>
         <module>common-test</module>
         <module>mongodb</module>
+        <module>pgp-common</module>
     </modules>
 
     <scm>
@@ -113,13 +114,14 @@
         <commons-codec.version>1.14</commons-codec.version>
         <commons-io.version>2.8.0</commons-io.version>
         <mockito.version>1.10.19</mockito.version>
-        <testcontainers.version>1.17.3</testcontainers.version>
+        <testcontainers.version>1.18.0</testcontainers.version>
         <jna.version>5.5.0</jna.version>
 
         <jersey.version>2.22.2</jersey.version>
         <jersey-common.version>2.33</jersey-common.version>
 
-        <json-smart.version>2.4.7</json-smart.version>
+        <json-smart.version>2.4.11</json-smart.version>
+        <json.version>20230227</json.version>
 
         <frontend.version>1.7.5</frontend.version>
         <node.version>v12.13.1</node.version>
@@ -144,6 +146,9 @@
         <commons-configuration2.version>2.8.0</commons-configuration2.version>
         <commons-text.version>1.10.0</commons-text.version>
         <commons-net.version>3.9.0</commons-net.version>
+
+        <bouncycastle.version>1.73</bouncycastle.version>
+        <pgpainless.version>1.5.1</pgpainless.version>
 
         <!-- code quality enforcer default values.
              run build w/ -Pcode-quality to have a full validation -->
@@ -170,8 +175,7 @@
         <surefire.version>3.0.0-M6</surefire.version>
         <maven.enforcer.version>3.0.0-M3</maven.enforcer.version>
         <jacoco.version>0.8.8</jacoco.version>
-        <jettison.version>1.5.3</jettison.version>
-
+        <jettison.version>1.5.4</jettison.version>
         <commons-fileupload.version>1.5</commons-fileupload.version>
     </properties>
 
@@ -591,6 +595,11 @@
                 <version>${json-smart.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>${json.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-client</artifactId>
                 <version>${hadoop.version}</version>
@@ -675,6 +684,21 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-csv</artifactId>
                 <version>${commons-csv.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpg-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcmail-jdk18on</artifactId>
+                <version>${bouncycastle.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -1047,6 +1071,7 @@
                 <configuration>
                     <java>
                         <encoding>UTF-8</encoding>
+                        <lineEndings>UNIX</lineEndings>
                         <licenseHeader>
                             <content><![CDATA[/*
  * Copyright (C) 2006-${timestamp.year} Talend Inc. - www.talend.com
@@ -1413,14 +1438,6 @@
             <id>RELEASE</id>
             <properties>
                 <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
-                <maven.javadoc.skip>true</maven.javadoc.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>DEPLOY_SNAPSHOT_AFTER_RELEASE</id>
-            <properties>
-                <skipTests>true</skipTests>
-                <enforcer.skip>true</enforcer.skip>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
             </properties>
         </profile>

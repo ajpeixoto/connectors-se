@@ -12,15 +12,14 @@
  */
 package org.talend.components.dynamicscrm.source;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -28,8 +27,13 @@ import org.talend.components.dynamicscrm.service.I18n;
 import org.talend.components.dynamicscrm.source.DynamicsCrmInputMapperConfiguration.Operator;
 import org.talend.components.dynamicscrm.source.FilterCondition.FilterOperator;
 import org.talend.components.dynamicscrm.source.OrderByCondition.Order;
+import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @WithComponents("org.talend.components.dynamicscrm")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -37,6 +41,9 @@ public class InputHelperTest {
 
     @Service
     private I18n i18n;
+
+    @Service
+    private RecordBuilderFactory recordBuilderFactory;
 
     private InputHelper helper;
 
@@ -182,6 +189,95 @@ public class InputHelperTest {
         assertEquals(
                 "(field eq 'value') or (field ne 'value') or (field gt '5') or (field ge '5') or (field lt '5') or (field le '5')",
                 filterQuery);
+    }
+
+    @Test
+    void testFilterIntField() {
+        String intColumnName = "intColumn";
+        Schema schema = recordBuilderFactory.newRecordBuilder().withInt(intColumnName, 1).build().getSchema();
+
+        DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
+        configuration.setCustomFilter(false);
+        configuration.setOperator(Operator.OR);
+        List<FilterCondition> filterConditionList = Collections.singletonList(
+                new FilterCondition(intColumnName, FilterOperator.EQUAL, "1"));
+
+        configuration.setFilterConditions(filterConditionList);
+
+        String filterQuery = helper.getFilterQuery(schema, configuration);
+
+        Assertions.assertFalse(filterQuery.contains("'"));
+        Assertions.assertTrue(filterQuery.contains(intColumnName));
+        Assertions.assertTrue(filterQuery.contains("eq"));
+        Assertions.assertTrue(filterQuery.contains("1"));
+    }
+
+    @Test
+    void testFilterSeveralNoStringFields() {
+        String longColumnName = "longColumn";
+        String floatColumnName = "floatColumn";
+        String doubleColumnName = "doubleColumn";
+        String booleanColumnName = "booleanColumn";
+        String dateTimeColumnName = "dateTimeColumn";
+        String decimalColumnName = "decimalColumn";
+
+        Instant dateTimeValue = Instant.now();
+        Schema schema = recordBuilderFactory.newRecordBuilder()
+                .withLong(longColumnName, 1L)
+                .withFloat(floatColumnName, 1.0f)
+                .withDouble(doubleColumnName, 1.0)
+                .withBoolean(booleanColumnName, true)
+                .withDateTime(dateTimeColumnName, dateTimeValue.atZone(ZoneId.systemDefault()))
+                .withDecimal(decimalColumnName, new BigDecimal("1234567890"))
+                .build()
+                .getSchema();
+
+        DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
+        configuration.setCustomFilter(false);
+        configuration.setOperator(Operator.OR);
+        List<FilterCondition> filterConditionList = new ArrayList<>();
+
+        filterConditionList.add(new FilterCondition(longColumnName, FilterOperator.EQUAL, "1"));
+        filterConditionList.add(new FilterCondition(floatColumnName, FilterOperator.EQUAL, "1.0"));
+        filterConditionList.add(new FilterCondition(doubleColumnName, FilterOperator.EQUAL, "1.0"));
+        filterConditionList.add(new FilterCondition(booleanColumnName, FilterOperator.EQUAL, "true"));
+        filterConditionList.add(new FilterCondition(
+                dateTimeColumnName, FilterOperator.NOTEQUAL, Instant.now().toString()));
+        filterConditionList.add(new FilterCondition(decimalColumnName, FilterOperator.EQUAL, "1234567890"));
+
+        configuration.setFilterConditions(filterConditionList);
+
+        String filterQuery = helper.getFilterQuery(schema, configuration);
+
+        Assertions.assertFalse(filterQuery.contains("'"));
+        assertEquals(filterConditionList.size(), filterQuery.split("eq").length);
+    }
+
+    @Test
+    void testFilterOneStringOneNotStringColumns() {
+        String longColumnName = "longColumn";
+        String stringColumnName = "stringColumn";
+
+        Schema schema = recordBuilderFactory.newRecordBuilder()
+                .withLong(longColumnName, 1L)
+                .withString(stringColumnName, "abc")
+                .build()
+                .getSchema();
+
+        DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
+        configuration.setCustomFilter(false);
+        configuration.setOperator(Operator.OR);
+        List<FilterCondition> filterConditionList = new ArrayList<>();
+
+        filterConditionList.add(new FilterCondition(longColumnName, FilterOperator.EQUAL, "1"));
+        filterConditionList.add(new FilterCondition(stringColumnName, FilterOperator.EQUAL, "abc"));
+
+        configuration.setFilterConditions(filterConditionList);
+
+        String filterQuery = helper.getFilterQuery(schema, configuration);
+
+        Assertions.assertEquals(filterQuery.length() - 2,
+                filterQuery.replaceAll("'", "").length());
     }
 
     @Test

@@ -25,6 +25,8 @@ hs_err_pid*
 .idea
 *.iml
 target
+.project
+.settings
 
 # yarn and node
 .node

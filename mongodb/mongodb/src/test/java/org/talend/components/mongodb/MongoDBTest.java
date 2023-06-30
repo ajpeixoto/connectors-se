@@ -16,12 +16,6 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import de.flapdoodle.embed.mongo.MongodExecutable;
-import de.flapdoodle.embed.mongo.MongodProcess;
-import de.flapdoodle.embed.mongo.MongodStarter;
-import de.flapdoodle.embed.mongo.config.*;
-import de.flapdoodle.embed.mongo.distribution.Version;
-import de.flapdoodle.embed.process.runtime.Network;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.junit.jupiter.api.*;
@@ -48,11 +42,14 @@ import org.talend.sdk.component.junit.SimpleFactory;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.ServerSocket;
+import java.net.URI;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.*;
 
 @Slf4j
@@ -73,40 +70,33 @@ public class MongoDBTest {
 
     private static int port;
 
-    private static MongodExecutable mongodExecutable;
-
-    private static MongodProcess mongodProcess;
-
     private static MongoClient client;
 
-    public static int getAvailableLocalPort() throws IOException {
-        try (ServerSocket socket = new ServerSocket(0);) {
-            return socket.getLocalPort();
-        }
-    }
+    private static URI mongoUri;
+
+    private static final MongoDBContainer MONGO_DB_CONTAINER =
+            new MongoDBContainer(DockerImageName.parse("mongo:4.4.16"));
 
     @BeforeAll
     public static void beforeClass(@TempDir Path tempDir) throws Exception {
-        System.setProperty("de.flapdoodle.os.override", "Linux|X86_64|CentOS|CentOS_7");
 
-        port = getAvailableLocalPort();
+        MONGO_DB_CONTAINER
+                .withAccessToHost(true)
+                .withReuse(true)
+                .start();
+
+        port = MONGO_DB_CONTAINER.getExposedPorts()
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("unable to start mongo"));
+
+        MONGO_DB_CONTAINER.waitingFor(Wait.forListeningPort()
+                .withStartupTimeout(Duration.ofSeconds(20)));
+
         log.info("Starting MongoDB on port {}", port);
-        MongodConfig mongodConfig = MongodConfig.builder()
-                .version(Version.Main.PRODUCTION)
-                .isConfigServer(false)
-                .replication(new Storage(tempDir.toFile().getPath(), null, 0))
-                .net(new Net("localhost", port, Network.localhostIsIPv6()))
-                .cmdOptions(MongoCmdOptions.builder()
-                        .syncDelay(10)
-                        .useNoPrealloc(true)
-                        .useSmallFiles(true)
-                        .useNoJournal(true)
-                        .isVerbose(false)
-                        .build())
-                .build();
-        mongodExecutable = MongodStarter.getDefaultInstance().prepare(mongodConfig);
-        mongodProcess = mongodExecutable.start();
-        client = new MongoClient("localhost", port);
+
+        mongoUri = URI.create(MONGO_DB_CONTAINER.getReplicaSetUrl());
+        client = new MongoClient(mongoUri.getHost(), mongoUri.getPort());
 
         MongoDatabase database = client.getDatabase(DATABASE);
 
@@ -181,8 +171,9 @@ public class MongoDBTest {
     public static void afterClass() {
         log.info("Stopping MongoDB");
         client.close();
-        mongodProcess.stop();
-        mongodExecutable.stop();
+        if (MONGO_DB_CONTAINER.isRunning()) {
+            MONGO_DB_CONTAINER.stop();
+        }
     }
 
     @Test
@@ -229,7 +220,6 @@ public class MongoDBTest {
     private List<Record> getRecords(MongoDBReadDataSet dataset) {
         MongoDBQuerySourceConfiguration config = new MongoDBQuerySourceConfiguration();
         config.setDataset(dataset);
-
         executeSourceTestJob(config);
         return componentsHandler.getCollectedData(Record.class);
     }
@@ -258,41 +248,41 @@ public class MongoDBTest {
      * @Test
      * void testAggregation() {
      * MongoDBReadDataSet dataset = getMongoDBDataSet("bakesales");
-     * 
+     *
      * List<PathMapping> pathMappings = new ArrayList<>();
      * pathMappings.add(new PathMapping("_id", "_id", ""));
      * pathMappings.add(new PathMapping("sales_quantity", "sales_quantity", ""));
      * pathMappings.add(new PathMapping("sales_amount", "sales_amount", ""));
-     * 
+     *
      * dataset.setPathMappings(pathMappings);
-     * 
+     *
      * List<AggregationStage> stages = new ArrayList<>();
      * AggregationStage stage = new AggregationStage();
      * stage.setStage("{ $match: { date: { $gte: new ISODate(\"2018-12-05\") } } }");
      * stages.add(stage);
-     * 
+     *
      * stage = new AggregationStage();
      * stage.setStage(
      * "{ $group: { _id: { $dateToString: { format: \"%Y-%m\", date: \"$date\" } }, sales_quantity: { $sum: \"$quantity\"}, sales_amount: { $sum: \"$amount\" } } }"
      * );
      * stages.add(stage);
-     * 
+     *
      * dataset.setQueryType(QueryType.AGGREGATION);
      * dataset.setAggregationStages(stages);
-     * 
+     *
      * MongoDBQuerySourceConfiguration config = new MongoDBQuerySourceConfiguration();
      * config.setDataset(dataset);
-     * 
+     *
      * executeJob(config);
      * final List<Record> res = componentsHandler.getCollectedData(Record.class);
-     * 
+     *
      * System.out.println(res);
      * }
      */
 
     private MongoDBReadDataSet getMongoDBDataSet(String collection) {
         MongoDBDataStore datastore = new MongoDBDataStore();
-        datastore.setAddress(new Address("localhost", port));
+        datastore.setAddress(new Address(mongoUri.getHost(), mongoUri.getPort()));
         datastore.setDatabase(DATABASE);
         datastore.setAuth(new Auth());
 
@@ -304,7 +294,7 @@ public class MongoDBTest {
 
     private MongoDBReadAndWriteDataSet getMongoDBReadAndWriteDataSet(String collection) {
         MongoDBDataStore datastore = new MongoDBDataStore();
-        datastore.setAddress(new Address("localhost", port));
+        datastore.setAddress(new Address(mongoUri.getHost(), mongoUri.getPort()));
         datastore.setDatabase(DATABASE);
         datastore.setAuth(new Auth());
 
@@ -327,7 +317,7 @@ public class MongoDBTest {
     @Test
     void testHealthCheck() {
         MongoDBDataStore datastore = getMongoDBDataSet("basic").getDatastore();
-        datastore.setAddress(new Address("localhost", port));
+        datastore.setAddress(new Address(mongoUri.getHost(), mongoUri.getPort()));
         datastore.setDatabase(DATABASE);
 
         Assertions.assertEquals(HealthCheckStatus.Status.OK, mongoDBService.healthCheck(datastore).getStatus());
@@ -338,10 +328,9 @@ public class MongoDBTest {
     void testMultiServers() {
         MongoDBDataStore datastore = new MongoDBDataStore();
         datastore.setAddressType(AddressType.REPLICA_SET);
-        datastore
-                .setReplicaSetAddress(Arrays
-                        .asList(new Address("192.168.31.228", 27017), new Address("192.168.31.228", 27018),
-                                new Address("192.168.31.228", 27019)));
+        datastore.setReplicaSetAddress(Arrays
+                .asList(new Address("192.168.31.228", 27017), new Address("192.168.31.228", 27018),
+                        new Address("192.168.31.228", 27019)));
         datastore.setDatabase("admin");
         datastore.setAuth(new Auth());
 
@@ -351,21 +340,9 @@ public class MongoDBTest {
         dataset.setDatastore(datastore);
         dataset.setCollection("test123");
 
-        // MongoDBSinkConfiguration config = new MongoDBSinkConfiguration();
-        // config.setDataset(dataset);
-        //
-        // componentsHandler.setInputData(getTestData());
-        // executeSinkTestJob(config);
-
         final List<Record> res = getRecords(dataset);
 
         System.out.println(res);
-    }
-
-    @Disabled
-    @Test
-    void testAuth() {
-
     }
 
     @Test
@@ -578,7 +555,7 @@ public class MongoDBTest {
         MongoDBSinkConfiguration config = new MongoDBSinkConfiguration();
         config.setDataset(dataset);
         config.setDataAction(DataAction.UPSERT_WITH_SET);
-        config.setKeyMappings(Arrays.asList(new KeyMapping("id", "id")));
+        config.setKeyMappings(Collections.singletonList(new KeyMapping("id", "id")));
         config.setBulkWrite(true);
         config.setBulkWriteType(BulkWriteType.UNORDERED);
 
@@ -599,7 +576,7 @@ public class MongoDBTest {
         config.setDataset(dataset);
         config.setDataAction(DataAction.UPSERT_WITH_SET);
         // i can't use _id here as mongodb upsert limit, TODO show clear exception information
-        config.setKeyMappings(Arrays.asList(new KeyMapping("id", "id")));
+        config.setKeyMappings(Collections.singletonList(new KeyMapping("id", "id")));
 
         componentsHandler.setInputData(getUpsertData());
         executeSinkTestJob(config);
@@ -939,14 +916,6 @@ public class MongoDBTest {
         final List<Record> res = getRecords(dataset);
 
         System.out.println(res);
-        /*
-         * List<String> result = SplitUtil.getQueries4Split(source_config, new MongoDBService(), 5);
-         * System.out.println(result);
-         * result.stream().forEach(query -> {
-         * BsonDocument doc = new MongoDBService().getBsonDocument(query);
-         * System.out.println(doc);
-         * });
-         */
     }
 
     @Test

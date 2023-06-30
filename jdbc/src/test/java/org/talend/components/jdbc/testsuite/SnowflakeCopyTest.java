@@ -91,7 +91,7 @@ public class SnowflakeCopyTest {
     }
 
     @Test
-    public void testGetColumnNamesList() throws Exception {
+    public void getColumnNamesContentInCopyCommand() throws Exception {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         try {
             Method createWorkDir = SnowflakeCopyService.class.getDeclaredMethod("createWorkDir");
@@ -101,21 +101,35 @@ public class SnowflakeCopyTest {
             splitRecords.setAccessible(true);
             List<?> chunks = (List<?>) splitRecords.invoke(snowflakeCopyService, path, createData(100));
 
-            Method columnNames = SnowflakeCopyService.class.getDeclaredMethod("getColumnNamesList", List.class);
-            columnNames.setAccessible(true);
+            Method getColumnNamesListMethod =
+                    SnowflakeCopyService.class.getDeclaredMethod("getColumnNamesList", List.class);
+            getColumnNamesListMethod.setAccessible(true);
 
-            String columnNamesList = (String) columnNames.invoke(snowflakeCopyService, chunks);
+            List<String> columnList = (List<String>) getColumnNamesListMethod.invoke(snowflakeCopyService, chunks);
+
+            Method getColumnNamesContentInCopyCommandMethod =
+                    SnowflakeCopyService.class.getDeclaredMethod("getColumnNamesContentInCopyCommand", List.class);
+            getColumnNamesContentInCopyCommandMethod.setAccessible(true);
+            String columnNamesList =
+                    (String) getColumnNamesContentInCopyCommandMethod.invoke(snowflakeCopyService, columnList);
+
             String expectedString = "(\"id\",\"firstname\",\"lastname\",\"address\",\"enrolled\",\"zip\",\"state\")";
             Assertions.assertEquals(expectedString, columnNamesList);
 
             chunks = (List<?>) splitRecords
                     .invoke(snowflakeCopyService, path,
                             Arrays.asList(recordBuilderFactory.newRecordBuilder().withInt("id", 1).build()));
-            columnNamesList = (String) columnNames.invoke(snowflakeCopyService, chunks);
+            columnList = (List<String>) getColumnNamesListMethod.invoke(snowflakeCopyService, chunks);
+            columnNamesList =
+                    (String) getColumnNamesContentInCopyCommandMethod.invoke(snowflakeCopyService, columnList);
+
             expectedString = "(\"id\")";
             Assertions.assertEquals(expectedString, columnNamesList);
 
-            columnNamesList = (String) columnNames.invoke(snowflakeCopyService, (List<?>) null);
+            columnList = (List<String>) getColumnNamesListMethod.invoke(snowflakeCopyService, (List<?>) null);
+            columnNamesList =
+                    (String) getColumnNamesContentInCopyCommandMethod.invoke(snowflakeCopyService, columnList);
+
             Assertions.assertEquals("", columnNamesList);
         } finally {
             snowflakeCopyService.cleanTmpFiles();

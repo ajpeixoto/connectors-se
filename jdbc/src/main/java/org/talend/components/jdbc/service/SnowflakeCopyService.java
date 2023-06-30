@@ -30,12 +30,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -69,25 +64,43 @@ public class SnowflakeCopyService implements Serializable {
     private Path tmpFolder;
 
     public List<Reject> putAndCopy(final Connection connection, final List<Record> records, final String fqStageName,
-            final String fqTableName, final String fqTmpTableName) throws SQLException {
-        try (final Statement statement = connection.createStatement()) {
-            statement.execute("create temporary table if not exists " + fqTmpTableName + " like " + fqTableName);
-        }
-        return putAndCopy(connection, records, fqStageName, fqTmpTableName);
-    }
-
-    public List<Reject> putAndCopy(final Connection connection, final List<Record> records, final String fqStageName,
-            final String fqTableName) {
+            final String fqTableName, final String fqTmpTableName, final boolean cleanColumnsInTmpTable)
+            throws SQLException {
         final List<RecordChunk> chunks = splitRecords(createWorkDir(), records);
         final List<Reject> rejects = new ArrayList<>();
+
+        if (fqTmpTableName != null) {
+            try (final Statement statement = connection.createStatement()) {
+                if (cleanColumnsInTmpTable) {
+                    final List<String> columns = getColumnNamesList(chunks);
+                    final String columnsStr = getColumnNamesContentInSelectCommand(columns);
+                    statement.execute(String.format(
+                            "create temporary table if not exists %1$s as select %2$s from %3$s where false",
+                            fqTmpTableName, columnsStr, fqTableName));
+                } else {
+                    statement
+                            .execute("create temporary table if not exists " + fqTmpTableName + " like " + fqTableName);
+                }
+            }
+        }
+
+        final List<RecordChunk> copy = doPut(connection, fqStageName, chunks, rejects);
+        final List<String> columns = getColumnNamesList(copy);
+
+        rejects.addAll(toReject(chunks,
+                doCopy(fqStageName, fqTmpTableName != null ? fqTmpTableName : fqTableName, connection, copy, columns)));
+        return rejects;
+    }
+
+    private List<RecordChunk> doPut(Connection connection, String fqStageName, List<RecordChunk> chunks,
+            List<Reject> rejects) {
         final List<RecordChunk> copy = chunks
                 .stream()
                 .parallel()
                 .map(chunk -> doPUT(fqStageName, connection, chunk, rejects))
                 .filter(Objects::nonNull)
                 .collect(toList());
-        rejects.addAll(toReject(chunks, doCopy(fqStageName, fqTableName, connection, copy)));
-        return rejects;
+        return copy;
     }
 
     /**
@@ -151,9 +164,9 @@ public class SnowflakeCopyService implements Serializable {
     }
 
     private List<CopyError> doCopy(final String fqStageName, final String fqTableName, final Connection connection,
-            final List<RecordChunk> chunks) {
+            final List<RecordChunk> chunks, final List<String> columns) {
         final String query = String
-                .format(COPY_INTO_QUERY, fqTableName, getColumnNamesList(chunks), fqStageName,
+                .format(COPY_INTO_QUERY, fqTableName, getColumnNamesContentInCopyCommand(columns), fqStageName,
                         joinFileNamesString(chunks));
         log.debug("Copy query: " + query);
         try (final Statement statement = connection.createStatement();
@@ -188,22 +201,7 @@ public class SnowflakeCopyService implements Serializable {
         }
     }
 
-    /**
-     * Retrieves a record schema columns from chunks. This column names are case sensitive due to the Snowflake quote
-     * identifier.
-     * </br>
-     * <ul>
-     * <li>incoming chunks list is empty - return <b>""</b></li>
-     * <li>incoming chunks contain record(-s) with single column <b>firstName</b> - return value
-     * <b>("firstName")</b></li>
-     * <li>incoming chunks contain record(-s) with multiple columns:
-     * <b>firstName</b>, <b>lastName</b>, <b>AGE</b> - return value <b>("firstName","lastName","AGE")</b></li>
-     * </ul>
-     *
-     * @param chunks
-     * @return column names joined as a String with comma as a separator
-     */
-    private String getColumnNamesList(List<RecordChunk> chunks) {
+    private List<String> getColumnNamesList(List<RecordChunk> chunks) {
         return ofNullable(chunks)
                 .filter(chunk -> !chunk.isEmpty())
                 .flatMap(chunk -> ofNullable(chunk.get(0).getRecords()))
@@ -213,8 +211,22 @@ public class SnowflakeCopyService implements Serializable {
                 .map(schemaEntries -> schemaEntries
                         .stream()
                         .map(e -> isUseOriginColumnName ? e.getOriginalFieldName() : e.getName())
-                        .collect(joining("\",\"", "(\"", "\")")))
-                .orElse("");
+                        .collect(toList()))
+                .orElse(Collections.emptyList());
+    }
+
+    private String getColumnNamesContentInCopyCommand(List<String> columns) {
+        if (columns.isEmpty()) {
+            return "";
+        }
+        return columns.stream().collect(joining("\",\"", "(\"", "\")"));
+    }
+
+    private String getColumnNamesContentInSelectCommand(List<String> columns) {
+        if (columns.isEmpty()) {
+            return "";
+        }
+        return columns.stream().collect(joining("\",\"", "\"", "\""));
     }
 
     /**

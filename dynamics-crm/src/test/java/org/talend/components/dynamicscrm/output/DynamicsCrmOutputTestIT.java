@@ -97,10 +97,43 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         assertEquals("callback", entity.getProperty("callback").getPrimitiveValue().toString());
         assertEquals("childrensnames", entity.getProperty("childrensnames").getPrimitiveValue().toString());
         assertEquals(company, entity.getProperty("company").getPrimitiveValue().toString());
-        assertEquals("dca1714c-6d1a-e311-a5fb-b4b52f67b688",
+        assertEquals("7efe21e1-d9e1-ed11-a7c7-000d3a4755c6",
                 entity.getProperty("_transactioncurrencyid_value").getPrimitiveValue().toString());
-        assertEquals(Timestamp.valueOf(date.atTime(LocalTime.MIDNIGHT)),
-                entity.getProperty("birthdate").getPrimitiveValue().toValue());
+        assertEquals(date.toString(), entity.getProperty("birthdate").getValue().asPrimitive().toString());
+    }
+
+    @Test
+    public void testInsertWithEmptyGuid() {
+        Record testRecord = createTestRecordWithEmptyGuid();
+        final DynamicsCrmDataset dataset = createDataset();
+        final DynamicsCrmOutputConfiguration configuration = new DynamicsCrmOutputConfiguration();
+        configuration.setDataset(dataset);
+        configuration.setIgnoreNull(true);
+        configuration.setEmptyStringToNull(true);
+        configuration.setAction(Action.INSERT);
+        configuration
+                .setColumns(Arrays
+                        .asList("annualincome", "business2", "company", "_transactioncurrencyid_value", "processid"));
+        configuration
+                .setLookupMapping(
+                        Arrays.asList(new LookupMapping("_transactioncurrencyid_value", "transactioncurrencies")));
+        final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
+        List<Record> testRecords = Collections.singletonList(testRecord);
+        components.setInputData(testRecords);
+        Job
+                .components()
+                .component("in", "test://emitter")
+                .component("out", "Azure://AzureDynamics365Output?" + config)
+                .connections()
+                .from("in")
+                .to("out")
+                .build()
+                .run();
+
+        List<ClientEntity> data = getData(client);
+        assertEquals(1, data.size());
+        ClientEntity entity = data.get(0);
+        assertEquals("", entity.getProperty("processid").getPrimitiveValue().toString());
     }
 
     @Test
@@ -162,10 +195,9 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
         assertEquals("callback", resultEntity.getProperty("callback").getPrimitiveValue().toString());
         assertEquals("childrensnames", resultEntity.getProperty("childrensnames").getPrimitiveValue().toString());
         assertEquals(company, resultEntity.getProperty("company").getPrimitiveValue().toString());
-        assertEquals("dca1714c-6d1a-e311-a5fb-b4b52f67b688",
+        assertEquals("7efe21e1-d9e1-ed11-a7c7-000d3a4755c6",
                 resultEntity.getProperty("_transactioncurrencyid_value").getPrimitiveValue().toString());
-        assertEquals(Timestamp.valueOf(date.atTime(LocalTime.MIDNIGHT)),
-                resultEntity.getProperty("birthdate").getPrimitiveValue().toValue());
+        assertEquals(date.toString(), resultEntity.getProperty("birthdate").getValue().asPrimitive().toString());
     }
 
     @Test
@@ -320,6 +352,51 @@ public class DynamicsCrmOutputTestIT extends DynamicsCrmTestBase {
                 .withInt("birthdate", 6720)
                 .build();
         return testRecord;
+    }
+
+    protected Record createTestRecordWithEmptyGuid() {
+        Schema schema = builderFactory
+                .newSchemaBuilder(Type.RECORD)
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("annualincome")
+                        .withType(Type.FLOAT)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.FLOAT).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("business2")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("company")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("_transactioncurrencyid_value")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .withEntry(builderFactory
+                        .newEntryBuilder()
+                        .withName("processid")
+                        .withType(Type.STRING)
+                        .withElementSchema(builderFactory.newSchemaBuilder(Type.STRING).build())
+                        .build())
+                .build();
+        Record record = builderFactory
+                .newRecordBuilder(schema)
+                .withFloat("annualincome", 2.0f)
+                .withString("business2", "")
+                .withString("company", company)
+                .withString("_transactioncurrencyid_value", "7efe21e1-d9e1-ed11-a7c7-000d3a4755c6")
+                .withString("processid", "")
+                .build();
+        return record;
     }
 
 }

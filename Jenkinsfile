@@ -1,4 +1,7 @@
 
+//Imports
+import java.util.regex.Matcher
+
 // Credentials
 final def nexusCredentials = usernamePassword(
   credentialsId: 'nexus-artifact-zl-credentials',
@@ -19,25 +22,21 @@ def sonarCredentials = usernamePassword(
 
 
 // Job config
-final String slackChannel = 'components-ci'
 final boolean isOnMasterOrMaintenanceBranch = env.BRANCH_NAME == "master" || env.BRANCH_NAME.startsWith("maintenance/")
+final boolean isOnLocalesBranch = env.BRANCH_NAME.startsWith("locales/")
 
 // Job variables declaration
-String jenkins_action // Only used for job description
 String branch_user
 String branch_ticket
 String branch_description
 String pomVersion
 String componentRuntimeVersion
-String qualifiedVersion
-String releaseVersion = ''
+String finalVersion
 String extraBuildParams = ''
 Boolean fail_at_end = false
 String logContent
-
-// Pod config
-final String tsbiImage = 'jdk11-svc-springboot-builder'
-final String tsbiVersion = '2.9.18-2.4-20220104141654'
+Boolean devBranch_mavenDeploy = false
+final String repository = 'connectors-se'
 
 // Files and folder definition
 final String _COVERAGE_REPORT_PATH = '**/jacoco-aggregate/jacoco.xml'
@@ -47,47 +46,17 @@ final String _ARTIFACT_COVERAGE = '**/target/site/**/*.*'
 final String _ARTIFACT_BUILD_LOGS  = '**/build_log.txt'
 final String _ARTIFACT_RAW_LOGS   = '**/raw_log.txt'
 
-// Pod definition
-final String podDefinition = """\
-    apiVersion: v1
-    kind: Pod
-    spec:
-      imagePullSecrets:
-        - name: talend-registry
-      containers:
-        - name: '${tsbiImage}'
-          image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/${tsbiImage}:${tsbiVersion}'
-          command: [ cat ]
-          tty: true
-          volumeMounts: [
-            { name: efs-jenkins-connectors-se-m2, mountPath: /root/.m2/repository }
-          ]
-          resources: { requests: { memory: 3G, cpu: '2' }, limits: { memory: 8G, cpu: '2' } }
-          env: 
-            - name: DOCKER_HOST
-              value: tcp://localhost:2375
-        - name: docker-daemon
-          image: artifactory.datapwn.com/docker-io-remote/docker:19.03.1-dind
-          env:
-            - name: DOCKER_TLS_CERTDIR
-              value: ""
-          securityContext:
-            privileged: true
-      volumes:
-        - name: efs-jenkins-connectors-se-m2
-          persistentVolumeClaim: 
-            claimName: efs-jenkins-connectors-se-m2
-""".stripIndent()
-
 pipeline {
     agent {
         kubernetes {
-            yaml podDefinition
-            defaultContainer tsbiImage
+            yamlFile '.jenkins/jenkins_pod.yml'
+            defaultContainer 'main'
         }
     }
 
     environment {
+        // This jenkins job need some environments variables to be defined
+        // Common variables are defined in flux jenkins.yaml at config-vars/jenkins/globalNodeProperties/envVars
         MAVEN_SETTINGS = "${WORKSPACE}/.jenkins/settings.xml"
         DECRYPTER_ARG = "-Dtalend.maven.decrypter.m2.location=${env.WORKSPACE}/.jenkins/"
         MAVEN_OPTS = [
@@ -112,12 +81,12 @@ pipeline {
             numToKeepStr: isOnMasterOrMaintenanceBranch ? '10' : '7'
           )
         )
-        timeout(time: 60, unit: 'MINUTES')
+        timeout(time: 2, unit: 'HOURS')
         skipStagesAfterUnstable()
     }
 
     triggers {
-        cron(env.BRANCH_NAME == "master" ? "@daily" : "")
+        cron(env.BRANCH_NAME == "master" ? "0 0 * * *" : "")
     }
 
     parameters {
@@ -130,10 +99,10 @@ pipeline {
             - RELEASE : Build release, deploy to the Nexus for master/maintenance branches''')
         booleanParam(
           name: 'MAVEN_DEPLOY',
-          defaultValue: true,
+          defaultValue: !isOnLocalesBranch,
           description: '''
-            Deploy A build to the Nexus after the build''')
-
+            Deploy A build to the Nexus after the build
+            Default is true for any branches except "locales/"''')
         string(
           name: 'VERSION_QUALIFIER',
           defaultValue: 'DEFAULT',
@@ -182,11 +151,33 @@ pipeline {
             Add an extra comportment to the job allowing to extra analysis:
               - keep the pod alive for debug purposes at the end
               - activate the Maven dependencies analysis stage''')
+        booleanParam(
+                name: 'DRAFT_CHANGELOG',
+                defaultValue: true,
+                description: '''
+            Create a draft release changelog. User will need to approve it on github.
+            Only used on release action''')
     }
 
     stages {
         stage('Validate parameters') {
             steps {
+                ///////////////////////////////////////////
+                // asdf install
+                ///////////////////////////////////////////
+                script {
+                    println "asdf install the content of repository .tool-versions'\n"
+                    sh 'bash .jenkins/asdf_install.sh'
+                }
+                ///////////////////////////////////////////
+                // Variables init
+                ///////////////////////////////////////////
+                script {
+                    devBranch_mavenDeploy = !isOnMasterOrMaintenanceBranch && params.MAVEN_DEPLOY
+                }
+                ///////////////////////////////////////////
+                // Pom version and Qualifier management
+                ///////////////////////////////////////////
                 script {
                     final def pom = readMavenPom file: 'pom.xml'
                     pomVersion = pom.version
@@ -200,23 +191,22 @@ pipeline {
                         error('Can only release from a maintenance branch, exiting.')
                     }
 
-                    echo 'Manage the version qualifier'
-                    if (isOnMasterOrMaintenanceBranch || !params.MAVEN_DEPLOY) {
+                    println 'Manage the version qualifier'
+                    if (devBranch_mavenDeploy || (params.VERSION_QUALIFIER != ("DEFAULT"))) {
                         println """
-                             No need to add qualifier in followings cases:' +
-                             - We are on Master or Maintenance branch
-                             - We do not want to deploy
+                             We need to add qualifier in followings cases:
+                             - We are on a deployed dev branch
+                             - We do not want to deploy but give a qualifier
                              """.stripIndent()
-                        qualifiedVersion = pomVersion
-                    }
-                    else {
+
                         branch_user = ""
                         branch_ticket = ""
                         branch_description = ""
+
                         if (params.VERSION_QUALIFIER != ("DEFAULT")) {
                             // If the qualifier is given, use it
                             println """
-                             No need to add qualifier, use the given one: "$params.VERSION_QUALIFIER"
+                             No need to detect qualifier, use the given one: "$params.VERSION_QUALIFIER"
                              """.stripIndent()
                         }
                         else {
@@ -227,21 +217,22 @@ pipeline {
 
                             // Check only branch_user, because if there is an error all three params are empty.
                             if (branch_user == ("")) {
-                                println """
-                                ERROR: The branch name doesn't comply with the format: user/JIRA-1234-Description
-                                It is MANDATORY for artifact management.
-                                You have few options:
-                                - You do not need to deploy, uncheck MAVEN_DEPLOY checkbox
-                                - Change the VERSION_QUALIFIER text box to a personal qualifier, BUT you need to do it on ALL se/ee and cloud-components build
-                                - Rename your branch
-                                """.stripIndent()
                                 currentBuild.description = ("ERROR: The branch name is not correct")
-                                sh """exit 1"""
+                                println("""
+                                ERROR: The branch name doesn't comply with the format: user/JIRA-1234-Description  
+                                It is MANDATORY for artifact management.  
+                                You have few options:  
+                                - You do not need to deploy, uncheck MAVEN_DEPLOY checkbox  
+                                - Change the VERSION_QUALIFIER text box to a personal qualifier,  
+                                  BUT you need to do it on ALL se/ee and cloud-components build  
+                                - Rename your branch  
+                                """.stripIndent())
+                                error("ERROR: The branch name is not correct")
                             }
                         }
 
                         echo "Insert a qualifier in pom version..."
-                        qualifiedVersion = add_qualifier_to_version(
+                        finalVersion = add_qualifier_to_version(
                           pomVersion,
                           branch_ticket,
                           "$params.VERSION_QUALIFIER" as String)
@@ -250,7 +241,11 @@ pipeline {
                           Configure the version qualifier for the curent branche: $env.BRANCH_NAME
                           requested qualifier: $params.VERSION_QUALIFIER
                           with User = $branch_user, Ticket = $branch_ticket, Description = $branch_description
-                          Qualified Version = $qualifiedVersion"""
+                          Qualified Version = $finalVersion"""
+                    }
+                    else {
+                        println "No need to add qualifier on this job"
+                        finalVersion = pomVersion
                     }
 
                     println 'Manage the FAIL_AT_END parameter'
@@ -258,17 +253,12 @@ pipeline {
                       (params.FAIL_AT_END == 'YES')) {
                         fail_at_end = true
                     }
-
-                    releaseVersion = pomVersion.split('-')[0]
-                    println "releaseVersion: $releaseVersion"
                 }
                 ///////////////////////////////////////////
                 // Updating build displayName and description
                 ///////////////////////////////////////////
                 script {
-                    String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
-                    if ( user_name == null) { user_name = "auto" }
-
+                    String jenkins_action
                     if(params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY) {
                         jenkins_action = 'DEPLOY'
                     }
@@ -276,13 +266,11 @@ pipeline {
                         jenkins_action = params.ACTION
                     }
 
-                    currentBuild.displayName = (
-                      "#$currentBuild.number-$jenkins_action: $user_name"
-                    )
+                    job_name_creation("$jenkins_action")
 
                     // updating build description
                     String description = """
-                      $qualifiedVersion - $jenkins_action 
+                      $finalVersion - $jenkins_action 
                       Component-runtime Version: $componentRuntimeVersion  
                       Sonar: $params.SONAR_ANALYSIS  
                       Extra user maven args:  `$params.EXTRA_BUILD_PARAMS`  
@@ -291,6 +279,10 @@ pipeline {
                       Debug: $params.JENKINS_DEBUG  
                       """.stripIndent()
                     job_description_append(description)
+
+                    String tool_versions = readFile ".tool-versions"
+                    job_description_append(
+                      ".tool-versions content: ${tool_versions.replace('\n',"; ")}")
                 }
             }
         }
@@ -324,10 +316,7 @@ pipeline {
                     if (!isOnMasterOrMaintenanceBranch) {
                         // Maven documentation about maven_version:
                         // https://docs.oracle.com/middleware/1212/core/MAVEN/maven_version.htm
-                        println "Edit version on dev branches, new version is ${qualifiedVersion}"
-                        sh """
-                          mvn versions:set --define newVersion=${qualifiedVersion}
-                        """
+                        sh "bash .jenkins/mvn_set_versions.sh ${finalVersion}"
                     }
 
                     // No need to use snapshot update because se don't have dependencies to others Talend snapshot
@@ -381,7 +370,9 @@ pipeline {
                                  artifactoryCredentials]) {
                     script {
                         println 'Debug step to resolve pom file and analysis'
-                        sh """
+                        sh """\
+                            #!/usr/bin/env bash 
+                            set -xe
                             (mvn help:effective-pom | tee effective-pom-se.txt) &&\
                             (mvn dependency:tree | tee dependency-tree-se.txt)
                         """
@@ -465,6 +456,22 @@ pipeline {
             }
         }
 
+        stage('Maven deploy') {
+            when {
+                expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY }
+            }
+            steps {
+                withCredentials([nexusCredentials]) {
+                    script {
+                        sh """
+                            bash .jenkins/mvn_deploy.sh \
+                                ${extraBuildParams}
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Maven sonar') {
             when {
                 expression { params.ACTION == 'STANDARD' && params.SONAR_ANALYSIS }
@@ -483,22 +490,6 @@ pipeline {
             }
         }
 
-        stage('Maven deploy') {
-            when {
-                expression { params.ACTION == 'STANDARD' && params.MAVEN_DEPLOY }
-            }
-            steps {
-                withCredentials([nexusCredentials]) {
-                    script {
-                        sh """
-                            bash .jenkins/mvn_deploy.sh \
-                                ${extraBuildParams}
-                        """
-                    }
-                }
-            }
-        }
-
         stage('Release') {
             when {
                 expression { params.ACTION == 'RELEASE' }
@@ -508,12 +499,40 @@ pipeline {
                                  nexusCredentials,
                                  artifactoryCredentials]) {
                     script {
+                        String releaseVersion = pomVersion.split('-')[0]
                         sh """
                             bash .jenkins/release.sh \
                                 'RELEASE' \
                                 '${releaseVersion}' \
                                 ${extraBuildParams}
                         """
+                    }
+                }
+            }
+        }
+
+        stage('Release changelog') {
+            when {
+                expression { params.ACTION == 'RELEASE' }
+            }
+            steps {
+                withCredentials([gitCredentials]) {
+                    // Do not failed the build in case of changelog issue.
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                        script {
+                            String releaseVersion = pomVersion.split('-')[0]
+                            String previousVersion = evaluatePreviousVersion(releaseVersion)
+                            sh """
+                                    bash .jenkins/changelog.sh \
+                                        '${repository}' \
+                                        '${previousVersion}' \
+                                        '${releaseVersion}' \
+                                        '${params.DRAFT_CHANGELOG}' \
+                                        "\${BRANCH_NAME}" \
+                                        "\${GITHUB_LOGIN}" \
+                                        "\${GITHUB_TOKEN}"
+                                """
+                        }
                     }
                 }
             }
@@ -572,7 +591,7 @@ pipeline {
                     slackSend(
                       color: '#00FF00',
                       message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
-                      channel: "${slackChannel}")
+                      channel: "${env.SLACK_CI_CHANNEL}")
                 }
             }
             script {
@@ -589,13 +608,13 @@ pipeline {
                         slackSend(
                           color: '#FF0000',
                           message: "@here : NEW FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
-                          channel: "${slackChannel}")
+                          channel: "${env.SLACK_CI_CHANNEL}")
                     } else {
                         //else send notification without pinging channel
                         slackSend(
                           color: '#FF0000',
                           message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})",
-                          channel: "${slackChannel}")
+                          channel: "${env.SLACK_CI_CHANNEL}")
                     }
                 }
             }
@@ -607,10 +626,32 @@ pipeline {
     }
 }
 
+/**
+ * Job name creation
+ * Update the job name in a predefined format, including build launcher user name
+ *
+ * @param extra: extra string to include in the job name
+ * @return void
+ */
+private void job_name_creation(String extra='') {
+    String user_name = currentBuild.getBuildCauses('hudson.model.Cause$UserIdCause').userId[0]
+    if (user_name == null) {
+        user_name = "auto"
+    }
+
+    String comment = ''
+    if ('' != extra){
+        comment = "-$extra"
+    }
+
+    currentBuild.displayName = (
+      "#$currentBuild.number$comment: $user_name"
+    )
+}
 
 /**
  * Append a new line to job description
- * Reminder: this is MARKDOWN, do not forget double space at the end of line
+ * REM This is MARKDOWN, do not forget double space at the end of line
  *
  * @param new line
  * @return void
@@ -666,7 +707,9 @@ private String extractJenkinsLog() {
     // Clean jenkins log file, could do better with a "ansi2txt < raw_log.txt" instead of "cat raw_log.txt"
     // https://en.wikipedia.org/wiki/ANSI_escape_code
     // Also could be good to replace '8m0m' by '' when common lib will be in place
-    sh """
+    sh """\
+      #!/usr/bin/env bash 
+      set -xe
       cat raw_log.txt | col -b | sed 's;ha:////[[:print:]]*AAAA[=]*;;g' > build_log.txt
     """
 
@@ -687,7 +730,9 @@ private void CleanM2Corruption(String logContent) {
     if (logContent.contains("Malformed \\uxxxx encoding")) {
         println 'Malformed encoding detected: Cleaning M2 corruptions'
         try {
-            sh """
+            sh """\
+            #!/usr/bin/env bash 
+            set -xe
             grep --recursive --word-regexp --files-with-matches --regexp '\\u0000' ~/.m2/repository | xargs -I % rm %
         """
         }
@@ -705,20 +750,25 @@ private void CleanM2Corruption(String logContent) {
  *
  * @return extraBuildParams as a string ready for mvn cmd
  */
-private String extraBuildParams_assembly(Boolean fail_at_end, Boolean snapshot_update) {
+private String extraBuildParams_assembly(Boolean fail_at_end,
+                                         Boolean snapshot_update) {
     String extraBuildParams
 
     println 'Processing extraBuildParams'
+
     println 'Manage the env.MAVEN_SETTINGS and env.DECRYPTER_ARG'
     final List<String> buildParamsAsArray = ['--settings',
                                              env.MAVEN_SETTINGS,
                                              env.DECRYPTER_ARG]
+
     println 'Manage the EXTRA_BUILD_PARAMS'
     buildParamsAsArray.add(params.EXTRA_BUILD_PARAMS)
+
     println 'Manage the failed-at-end option'
     if (fail_at_end) {
         buildParamsAsArray.add('--fail-at-end')
     }
+
     println 'Manage the --update-snapshots option'
     if (snapshot_update) {
         buildParamsAsArray.add('--update-snapshots')
@@ -734,9 +784,6 @@ private String extraBuildParams_assembly(Boolean fail_at_end, Boolean snapshot_u
 
 /**
  * Edit properties in the pom to allow maven to choose between qualifier version or normal one
- *
- * @param String pomVersion,
- * @param String qualifiedVersion
  *
  * @return nothing
  * it will edit local pom on specific properties
@@ -791,7 +838,7 @@ private static String add_qualifier_to_version(String version, String ticket, St
 private static ArrayList<String> extract_branch_info(GString branch_name) {
 
     String branchRegex = /^(?<user>.*)\/(?<ticket>[A-Z]{2,8}-\d{1,6})[_-](?<description>.*)/
-    java.util.regex.Matcher branchMatcher = branch_name =~ branchRegex
+    Matcher branchMatcher = branch_name =~ branchRegex
 
     try {
         assert branchMatcher.matches()
@@ -805,4 +852,36 @@ private static ArrayList<String> extract_branch_info(GString branch_name) {
     String description = branchMatcher.group("description")
 
     return [user, ticket, description]
+}
+
+/**
+ * Evaluate previous SemVer version
+ * @param version current version
+ * @return previous version
+ */
+private static String evaluatePreviousVersion(String version) {
+    def components = version.split('\\.')
+
+    int major = components[0] as int
+    int minor = components[1] as int
+    int patch = components[2] as int
+
+    if (patch > 0) {
+        patch--
+    } else {
+        patch = 0
+        if (minor > 0) {
+            minor--
+        } else {
+            minor = 0
+            if (major > 0) {
+                major--
+            } else {
+                // Invalid state: Cannot calculate previous version if major version is already 0 or less
+                throw new IllegalArgumentException("Invalid version: $version")
+            }
+        }
+    }
+
+    return "${major}.${minor}.${patch}"
 }

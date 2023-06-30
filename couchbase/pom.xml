@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.talend.components</groupId>
     <artifactId>connectors-se</artifactId>
-    <version>1.45.0-SNAPSHOT</version>
+    <version>1.47.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>couchbase</artifactId>
@@ -14,6 +14,7 @@
 
   <properties>
     <couchbase.client.version>3.2.3</couchbase.client.version>
+    <couchbase.core.version>2.2.7</couchbase.core.version>
   </properties>
 
   <dependencies>
@@ -21,6 +22,17 @@
       <groupId>com.couchbase.client</groupId>
       <artifactId>java-client</artifactId>
       <version>${couchbase.client.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.couchbase.client</groupId>
+          <artifactId>core-io</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>com.couchbase.client</groupId>
+      <artifactId>core-io</artifactId>
+      <version>${couchbase.core.version}</version>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
