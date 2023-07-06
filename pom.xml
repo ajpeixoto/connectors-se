@@ -147,7 +147,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <commons-net.version>3.9.0</commons-net.version>
 
-        <bouncycastle.version>1.73</bouncycastle.version>
+        <bouncycastle.version>1.74</bouncycastle.version>
         <pgpainless.version>1.5.1</pgpainless.version>
 
         <!-- code quality enforcer default values.
