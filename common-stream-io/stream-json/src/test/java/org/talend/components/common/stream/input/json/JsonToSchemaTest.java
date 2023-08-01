@@ -19,26 +19,87 @@ import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.beam.spi.AvroRecordBuilderFactoryProvider;
 import org.talend.sdk.component.runtime.beam.spi.record.AvroSchema;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
+import org.talend.sdk.component.runtime.record.Schemas;
 
 class JsonToSchemaTest {
+
+    @Test
+    void forceType() throws IOException {
+        final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
+        final JsonObject object = this.load("geologists.json");
+        final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false,
+                Arrays.asList(
+                        new JsonConfiguration.PathType(".content_length", JsonConfiguration.ForcedType.FLOAT),
+                        new JsonConfiguration.PathType(".content.age", JsonConfiguration.ForcedType.STRING),
+                        new JsonConfiguration.PathType(".content.female", JsonConfiguration.ForcedType.STRING),
+                        new JsonConfiguration.PathType(".content.objects", JsonConfiguration.ForcedType.STRING),
+                        new JsonConfiguration.PathType(".content.bag", JsonConfiguration.ForcedType.FLOAT),
+                        new JsonConfiguration.PathType(".content.address.zipcode", JsonConfiguration.ForcedType.STRING)
+                ));
+
+        Schema schema = toSchema.inferSchema(object);
+
+        Optional<Schema.Type> contentLengthType = schema.getEntries().stream()
+                .filter(e -> "content_length".equals(e.getName()))
+                .map(e -> e.getType()).findFirst();
+        Assertions.assertTrue(contentLengthType.isPresent());
+        Assertions.assertEquals(Schema.Type.DOUBLE, contentLengthType.get());
+
+        Optional<Schema.Type> ageType = schema.getEntries().stream()
+                .filter(e -> "content".equals(e.getName()))
+                .flatMap(e -> e.getElementSchema().getEntries().stream())
+                .filter(e -> "age".equals(e.getName()))
+                .map(e -> e.getType()).findFirst();
+        Assertions.assertTrue(ageType.isPresent());
+        Assertions.assertEquals(Schema.Type.STRING, ageType.get());
+
+        Optional<Schema.Type> femaleType = schema.getEntries().stream()
+                .filter(e -> "content".equals(e.getName()))
+                .flatMap(e -> e.getElementSchema().getEntries().stream())
+                .filter(e -> "female".equals(e.getName()))
+                .map(e -> e.getType()).findFirst();
+        Assertions.assertTrue(femaleType.isPresent());
+        Assertions.assertEquals(Schema.Type.STRING, femaleType.get());
+
+       Optional<Schema.Type> bagContainsType = schema.getEntries().stream()
+                .filter(e -> "content".equals(e.getName()))
+                .flatMap(e -> e.getElementSchema().getEntries().stream())
+                .filter(e -> "bag".equals(e.getName()))
+                .map(e -> e.getElementSchema().getType()).findFirst();
+        Assertions.assertTrue(bagContainsType.isPresent());
+        Assertions.assertEquals(Schema.Type.DOUBLE, bagContainsType.get());
+
+        Optional<Schema.Type> objectsType = schema.getEntries().stream()
+                .filter(e -> "content".equals(e.getName()))
+                .flatMap(e -> e.getElementSchema().getEntries().stream())
+                .filter(e -> "objects".equals(e.getName()))
+                .map(e -> e.getElementSchema().getType()).findFirst();
+        Assertions.assertTrue(objectsType.isPresent());
+        Assertions.assertEquals(Schema.Type.STRING, objectsType.get());
+
+    }
 
     @Test
     void inferSchema() throws IOException {
         final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
         final JsonObject object = this.load("heterogeneousArray2.json");
-        final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false);
+        final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false, Collections.emptyList());
 
         final Schema schema = toSchema.inferSchema(object);
         Assertions.assertNotNull(schema);
@@ -55,7 +116,7 @@ class JsonToSchemaTest {
     void inferEmptyArray() throws IOException {
         final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
         final JsonObject object = this.load("emptyArray.json");
-        final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false);
+        final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false, Collections.emptyList());
 
         final Schema schema = toSchema.inferSchema(object);
         Assertions.assertNotNull(schema);
@@ -68,7 +129,7 @@ class JsonToSchemaTest {
     void inferEmptyArray1() throws IOException {
         final RecordBuilderFactory factory = new RecordBuilderFactoryImpl("test");
         final JsonObject object = this.load("emptyArray1.json");
-        final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false);
+        final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false, Collections.emptyList());
 
         final Schema schema = toSchema.inferSchema(object);
         Assertions.assertNotNull(schema);
@@ -91,7 +152,7 @@ class JsonToSchemaTest {
             final AvroRecordBuilderFactoryProvider provider = new AvroRecordBuilderFactoryProvider();
             final RecordBuilderFactory factory = provider.apply("test");
             final JsonObject object = this.load("vehicles.json");
-            final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false);
+            final JsonToSchema toSchema = new JsonToSchema(factory, this::getNumberType, false, Collections.emptyList());
             toSchema.inferSchema(object);
             final long start = System.nanoTime();
             final Schema schema = toSchema.inferSchema(object);
@@ -126,16 +187,16 @@ class JsonToSchemaTest {
 
     public static org.apache.avro.Schema unwrapUnion(final org.apache.avro.Schema schema) {
         switch (schema.getType()) {
-        case UNION:
-            return schema.getTypes().stream().filter(it -> it.getType() != NULL).findFirst().orElse(null);
-        default:
-            return schema;
+            case UNION:
+                return schema.getTypes().stream().filter(it -> it.getType() != NULL).findFirst().orElse(null);
+            default:
+                return schema;
         }
     }
 
     private JsonObject load(final String fileName) throws IOException {
         try (final InputStream inputStream =
-                Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
+                     Thread.currentThread().getContextClassLoader().getResourceAsStream(fileName)) {
             return Json.createReader(inputStream).readObject();
         }
     }

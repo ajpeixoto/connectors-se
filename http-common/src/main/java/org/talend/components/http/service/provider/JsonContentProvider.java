@@ -32,6 +32,7 @@ public interface JsonContentProvider {
                 JsonConfiguration jsonConfiguration = new JsonConfiguration();
                 jsonConfiguration.setJsonPointer(config.getDataset().getSelector());
                 jsonConfiguration.setForceDouble(config.getDataset().isJsonForceDouble());
+                jsonConfiguration.setPathTypeList(config.getDataset().getPathTypeList());
 
                 return jsonConfiguration;
             };

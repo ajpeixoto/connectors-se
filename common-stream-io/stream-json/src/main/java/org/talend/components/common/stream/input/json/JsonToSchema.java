@@ -13,8 +13,11 @@
 package org.talend.components.common.stream.input.json;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -25,6 +28,8 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 
+import org.talend.components.common.stream.format.json.JsonConfiguration;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -32,7 +37,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequiredArgsConstructor
 public class JsonToSchema {
 
     private final RecordBuilderFactory factory;
@@ -40,6 +44,20 @@ public class JsonToSchema {
     private final Function<JsonNumber, Schema.Type> numberOption;
 
     private final boolean emptyJsonAsString;
+
+    private final Map<String, JsonConfiguration.ForcedType> pathTypeList;
+
+    public JsonToSchema(final RecordBuilderFactory factory,
+                        final Function<JsonNumber, Schema.Type> numberOption,
+                        boolean emptyJsonAsString,
+                        final List<JsonConfiguration.PathType> pathTypeList) {
+        this.factory = factory;
+        this.numberOption = numberOption;
+        this.emptyJsonAsString = emptyJsonAsString;
+        this.pathTypeList = pathTypeList.stream()
+                .collect(Collectors.toMap(JsonConfiguration.PathType::getPath, JsonConfiguration.PathType::getType));
+
+    }
 
     /**
      * Guess schema from json object.
@@ -49,59 +67,75 @@ public class JsonToSchema {
      */
     public Schema inferSchema(final JsonObject json) {
         final Schema.Builder builder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
-        this.populateJsonObjectEntries(builder, json);
+        this.populateJsonObjectEntries(builder, json, "");
         return builder.build();
     }
 
-    private void populateJsonObjectEntries(Schema.Builder builder, JsonObject value) {
+    private void populateJsonObjectEntries(Schema.Builder builder, JsonObject value, String path) {
+        log.info("populateJsonObjectEntries : " + path);
         value.entrySet()
                 .stream() //
                 .filter(e -> this.emptyJsonAsString || e.getValue() != JsonValue.NULL) //
-                .map(s -> createEntry(s.getKey(), s.getValue())) //
+                .map(s -> createEntry(s.getKey(), s.getValue(), path + "." + s.getKey())) //
                 .forEach(builder::withEntry);
     }
 
-    private Schema.Entry createEntry(final String name, final JsonValue jsonValue) {
-        log.debug("[createEntry#{}] ({}) {} ", name, jsonValue.getValueType(), jsonValue);
+    private Schema.Entry createEntry(final String name, final JsonValue jsonValue, String path) {
+        ValueType valueType = jsonValue.getValueType();
+        log.info("[createEntry#{}] ({}) {} ", path, valueType, jsonValue);
 
         final Schema.Entry.Builder builder = this.factory.newEntryBuilder();
 
         // use comment to store the real element name, for example, "$oid"
         builder.withName(name).withComment(name).withNullable(true);
 
-        switch (jsonValue.getValueType()) {
-        case ARRAY:
-            final Schema subSchema = this.inferSchema(jsonValue.asJsonArray());
-            if (subSchema != null) {
-                builder.withElementSchema(subSchema).withType(Schema.Type.ARRAY);
-            }
-            break;
-        case OBJECT:
-            if (jsonValue.asJsonObject().entrySet().isEmpty() && this.emptyJsonAsString) {
-                builder.withType(Schema.Type.STRING);
-            } else {
-                builder.withType(Schema.Type.RECORD);
-                Schema.Builder nestedSchemaBuilder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
-                populateJsonObjectEntries(nestedSchemaBuilder, jsonValue.asJsonObject());
-                builder.withElementSchema(nestedSchemaBuilder.build());
-            }
-            break;
-        case STRING:
-        case NUMBER:
-        case TRUE:
-        case FALSE:
-        case NULL:
-            builder.withType(translateType(jsonValue));
-            break;
-        default:
-            log.warn("Unexpected json type " + jsonValue.getValueType());
+        Optional<JsonConfiguration.ForcedType> optionalForcedType = Optional.ofNullable(this.pathTypeList.get(path));
+        if (optionalForcedType.isPresent()) {
+            log.info("[createEntry{}] force type {} instead of {}.", path, optionalForcedType.get(), valueType);
+        }
+
+        switch (valueType) {
+            case ARRAY:
+                final Schema subSchema = this.inferSchema(jsonValue.asJsonArray(), path, optionalForcedType);
+                if (subSchema != null) {
+                    builder.withElementSchema(subSchema).withType(Schema.Type.ARRAY);
+                }
+                break;
+            case OBJECT:
+                if (jsonValue.asJsonObject().entrySet().isEmpty() && this.emptyJsonAsString) {
+                    builder.withType(Schema.Type.STRING);
+                } else {
+                    builder.withType(Schema.Type.RECORD);
+                    Schema.Builder nestedSchemaBuilder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
+                    populateJsonObjectEntries(nestedSchemaBuilder, jsonValue.asJsonObject(), path);
+                    builder.withElementSchema(nestedSchemaBuilder.build());
+                }
+                break;
+            case STRING:
+            case NUMBER:
+            case TRUE:
+            case FALSE:
+            case NULL:
+                builder.withType(translateType(jsonValue, optionalForcedType));
+                break;
+            default:
+                log.warn("Unexpected json type " + valueType);
         }
         Schema.Entry entry = builder.build();
         log.debug("[createEntry#{}] generated ({})", name, entry);
         return entry;
     }
 
-    private Schema inferSchema(final JsonArray array) {
+    private Schema inferSchema(final JsonArray array, String path) {
+        return inferSchema(array, path, Optional.empty());
+    }
+    private Schema inferSchema(final JsonArray array, String path, Optional<JsonConfiguration.ForcedType> optionalForcedType) {
+        log.info("inferSchema : " + path);
+
+        if (optionalForcedType.isPresent()) {
+            return this.factory.newSchemaBuilder(getTCKForcedType(optionalForcedType)).build();
+        }
+
         if (array == null || array.isEmpty()) {
             return this.factory.newSchemaBuilder(Schema.Type.LONG).build();
         }
@@ -115,10 +149,10 @@ public class JsonToSchema {
             // merge all object schemas.
             final JsonObject object = mergeAll(array);
             builder = this.factory.newSchemaBuilder(Schema.Type.RECORD);
-            this.populateJsonObjectEntries(builder, object);
+            this.populateJsonObjectEntries(builder, object, path);
         } else if (value.getValueType() == JsonValue.ValueType.ARRAY) {
             builder = this.factory.newSchemaBuilder(Schema.Type.ARRAY);
-            final Schema subSchema = inferSchema(value.asJsonArray());
+            final Schema subSchema = inferSchema(value.asJsonArray(), path);
             builder.withElementSchema(subSchema);
         } else {
             final Schema.Type type = this.translateType(value);
@@ -195,22 +229,50 @@ public class JsonToSchema {
     }
 
     private Schema.Type translateType(JsonValue value) {
-        switch (value.getValueType()) {
-        case STRING:
-            return Schema.Type.STRING;
-        case NUMBER:
-            return this.numberOption.apply((JsonNumber) value);
-        case TRUE:
-        case FALSE:
-            return Schema.Type.BOOLEAN;
-        case ARRAY:
-            return Schema.Type.ARRAY;
-        case OBJECT:
-            return Schema.Type.RECORD;
-        case NULL:
-            return Schema.Type.STRING;
+        return translateType(value, Optional.empty());
+    }
+    private Schema.Type translateType(JsonValue value, Optional<JsonConfiguration.ForcedType> optionalForcedType) {
+        ValueType valueType = value.getValueType();
+
+        if (optionalForcedType.isPresent()) {
+            return getTCKForcedType(optionalForcedType);
         }
-        throw new RuntimeException("The data type " + value.getValueType() + " is not handled.");
+
+        switch (valueType) {
+            case STRING:
+                return Schema.Type.STRING;
+            case NUMBER:
+                return this.numberOption.apply((JsonNumber) value);
+            case TRUE:
+            case FALSE:
+                return Schema.Type.BOOLEAN;
+            case ARRAY:
+                return Schema.Type.ARRAY;
+            case OBJECT:
+                return Schema.Type.RECORD;
+            case NULL:
+                return Schema.Type.STRING;
+        }
+        throw new RuntimeException("The data type " + valueType + " is not handled.");
+    }
+
+    private Schema.Type getTCKForcedType(Optional<JsonConfiguration.ForcedType> optionalForcedType) {
+        JsonConfiguration.ForcedType forcedType = optionalForcedType.get();
+        switch (forcedType) {
+            case BOOLEAN:
+                return Schema.Type.BOOLEAN;
+            case INT:
+                return Schema.Type.LONG;
+            case FLOAT:
+                return Schema.Type.DOUBLE;
+            case ARRAY:
+                return Schema.Type.ARRAY;
+            case RECORD:
+                return Schema.Type.RECORD;
+            case STRING:
+            default:
+                return Schema.Type.STRING;
+        }
     }
 
     private Schema.Type mixType(final Schema.Type t1, final Schema.Type t2) {

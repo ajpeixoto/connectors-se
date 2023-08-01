@@ -1,0 +1,132 @@
+{
+  "description": "List of some famous geologists",
+  "content_length": 5,
+  "author": "A. Smith",
+  "content": [
+    {
+      "name": "Maurice Krafft",
+      "age": 35,
+      "female": false,
+      "address": {
+        "city": "Mulhouse",
+        "zipcode": 68100
+      },
+      "bag": [
+        111,
+        true,
+        false,
+        "bbbb",
+        "aaa",
+        222,
+        333,
+        true,
+        "s111"
+      ],
+      "objects": [
+        {"aaa": 1, "bbb": "1bbbb", "ccc": true},
+        {"aaa": 11, "bbb": "11bbbb", "ccc": false},
+        {"aaa": 111, "bbb": "111bbbb", "ccc": true}
+      ]
+    },
+    {
+      "name": "Katia Krafft",
+      "age": 49,
+      "female": true,
+      "address": {
+        "city": "Soultz-Haut-Rhinxxx",
+        "zipcode": 6860
+      },
+      "bag": [
+        222,
+        333,
+        false,
+        true,
+        false,
+        "zzz",
+        "eeee",
+        444,
+        "2rrrr"
+      ],
+      "objects": [
+        {"aaa": 2, "bbb": "2bbbb", "ccc": false},
+        {"aaa": 22, "bbb": "22bbbb", "ccc": false},
+        {"aaa": 222, "bbb": "222bbbb", "ccc": true}
+      ]
+    },
+    {
+      "name": "Pline l'Ancien",
+      "age": 55,
+      "female": false,
+      "address": {
+        "city": "Côme",
+        "zipcode": 22100
+      },
+      "bag": [
+        333,
+        444,
+        true,
+        false,
+        false,
+        "qqqq",
+        "ssss",
+        555,
+        "s333"
+      ],
+      "objects": [
+        {"aaa": 3, "bbb": "3bbbb", "ccc": true},
+        {"aaa": 33, "bbb": "33bbbb", "ccc": false},
+        {"aaa": 333, "bbb": "333bbbb", "ccc": false}
+      ]
+    },
+    {
+      "name": "James Hutton",
+      "age": 70,
+      "female": false,
+      "address": {
+        "city": "Édimbourg",
+        "zipcode": 0
+      },
+      "bag": [
+        444,
+        555,
+        false,
+        "fffff",
+        "ggggg",
+        true,
+        true,
+        666,
+        "s555"
+      ],
+      "objects": [
+        {"aaa": 4, "bbb": "4bbbb", "ccc": false},
+        {"aaa": 44, "bbb": "44bbbb", "ccc": false},
+        {"aaa": 444, "bbb": "444bbbb", "ccc": false}
+      ]
+    },
+    {
+      "name": "Aline Peltier",
+      "age": 40,
+      "female": false,
+      "address": {
+        "city": "Saint-Pierre",
+        "zipcode": 97410
+      },
+      "bag": [
+        "vvvv",
+        "nnnnnn",
+        555,
+        666,
+        777,
+        "s555",
+        true,
+        true,
+        true
+      ],
+      "objects": [
+        {"aaa": 5, "bbb": "5bbbb", "ccc": true},
+        {"aaa": 55, "bbb": "55bbbb", "ccc": true},
+        {"aaa": 555, "bbb": "555bbbb", "ccc": true}
+      ]
+    }
+  ]
+}

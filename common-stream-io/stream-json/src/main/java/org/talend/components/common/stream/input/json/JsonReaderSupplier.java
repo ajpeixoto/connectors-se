@@ -29,7 +29,8 @@ public class JsonReaderSupplier implements RecordReaderSupplier {
 
         final JsonConfiguration jsonConfig = (JsonConfiguration) config;
         final JsonPointerParser parser = JsonPointerParser.of(jsonConfig.getJsonPointer());
-        final JsonToRecord toRecord = new JsonToRecord(factory, jsonConfig.isForceDouble());
+        final JsonToRecord toRecord =
+                new JsonToRecord(factory, jsonConfig.isForceDouble(), jsonConfig.getPathTypeList());
         return new JsonRecordReader(parser, toRecord);
     }
 }

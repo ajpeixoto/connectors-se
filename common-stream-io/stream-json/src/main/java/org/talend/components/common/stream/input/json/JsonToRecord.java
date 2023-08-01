@@ -20,12 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonNumber;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 import javax.json.JsonValue;
 
+import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -43,8 +45,15 @@ public class JsonToRecord {
 
     private final Schema givenSchema;
 
+    private final List<JsonConfiguration.PathType> pathTypeList;
+
     public JsonToRecord(final RecordBuilderFactory factory) {
-        this(factory, false, null, false);
+        this(factory, false, Collections.emptyList(), null, false);
+    }
+
+    public JsonToRecord(final RecordBuilderFactory factory, final boolean forceNumberAsDouble,
+            final List<JsonConfiguration.PathType> pathTypeList) {
+        this(factory, forceNumberAsDouble, pathTypeList, null, false);
     }
 
     public JsonToRecord(final RecordBuilderFactory factory, final boolean forceNumberAsDouble) {
@@ -55,6 +64,14 @@ public class JsonToRecord {
             final boolean forceNumberAsDouble,
             final Schema schema,
             final boolean emptyRecordAsString) {
+        this(factory, forceNumberAsDouble, Collections.emptyList(), schema, emptyRecordAsString);
+    }
+
+    public JsonToRecord(final RecordBuilderFactory factory,
+            final boolean forceNumberAsDouble,
+            final List<JsonConfiguration.PathType> pathTypeList,
+            final Schema schema,
+            final boolean emptyRecordAsString) {
         this.factory = factory;
         if (forceNumberAsDouble) {
             this.numberOption = NumberOption.FORCE_DOUBLE_TYPE;
@@ -63,6 +80,7 @@ public class JsonToRecord {
         }
         this.givenSchema = schema;
         this.emptyRecordAsString = emptyRecordAsString;
+        this.pathTypeList = pathTypeList;
     }
 
     /**
@@ -81,22 +99,23 @@ public class JsonToRecord {
      *
      * @param object: The source jsonObject
      * @param schema : The fixed schema which will be apply into jsonObject.
-     * @param emptyRecordAsString
-     * Whether convert empty record to a String type "{}", as TPD does not allowed empty record {}
+     * @param emptyRecordAsString Whether convert empty record to a String type "{}", as TPD does not allowed empty
+     * record {}
      */
     public Record toRecord(final JsonObject object,
             final Schema schema,
             final boolean emptyRecordAsString) {
 
         final JsonToRecord toRecord = new JsonToRecord(this.factory,
-                this.numberOption == NumberOption.FORCE_DOUBLE_TYPE, schema, emptyRecordAsString);
+                this.numberOption == NumberOption.FORCE_DOUBLE_TYPE, this.pathTypeList, schema, emptyRecordAsString);
         return toRecord.toRecord(object);
     }
 
     public Record toRecord(final JsonObject object,
             final Schema schema) {
         final JsonToRecord toRecord = new JsonToRecord(this.factory,
-                this.numberOption == NumberOption.FORCE_DOUBLE_TYPE, schema, this.emptyRecordAsString);
+                this.numberOption == NumberOption.FORCE_DOUBLE_TYPE, this.pathTypeList, schema,
+                this.emptyRecordAsString);
         return toRecord.toRecord(object);
     }
 
@@ -118,7 +137,8 @@ public class JsonToRecord {
             schema = this.givenSchema;
         } else {
             final JsonToSchema schemaBuilder =
-                    new JsonToSchema(this.factory, this.numberOption::getNumberType, emptyRecordAsString);
+                    new JsonToSchema(this.factory, this.numberOption::getNumberType, emptyRecordAsString,
+                            this.pathTypeList);
             schema = schemaBuilder.inferSchema(json);
         }
         return convertJsonObjectToRecord(schema, json);
