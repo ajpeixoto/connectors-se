@@ -154,7 +154,7 @@
     <commons-text.version>1.10.0</commons-text.version>
     <jettison.version>1.5.4</jettison.version>
     <protobuf-java.version>3.19.6</protobuf-java.version>
-
+    <snappy.version>1.1.10.1</snappy.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
 
     <!-- code quality enforcer default values.
@@ -607,6 +607,11 @@
         <groupId>commons-fileupload</groupId>
         <artifactId>commons-fileupload</artifactId>
         <version>${commons-fileupload.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.xerial.snappy</groupId>
+         <artifactId>snappy-java</artifactId>
+          <version>${snappy.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
