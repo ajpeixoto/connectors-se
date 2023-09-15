@@ -83,7 +83,7 @@ public class AdlsDataSetMigrationHandler implements MigrationHandler {
     static void migrateHeaderSetValueToDefault(Map<String, String> migratedConfiguration,
             String headerValueConfigPath) {
         String headerValueString = migratedConfiguration.get(headerValueConfigPath);
-        if (StringUtils.isNotEmpty(headerValueString) && Integer.parseInt(headerValueString) > 1) {
+        if (!DEFAULT_HEADER_SIZE.equals(headerValueString)) {
             migratedConfiguration.put(headerValueConfigPath, DEFAULT_HEADER_SIZE);
         }
     }

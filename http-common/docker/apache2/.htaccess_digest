@@ -1,0 +1,6 @@
+AuthType Digest
+AuthName "DigestSection"
+AuthDigestDomain  /var/www/digest_authent/
+AuthDigestProvider file
+AuthUserFile "/usr/local/apache2/passwds/passwords"
+Require valid-user

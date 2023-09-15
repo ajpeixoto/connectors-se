@@ -1,0 +1,5 @@
+AuthType Basic
+AuthName "Basic authent section"
+AuthBasicProvider file
+AuthUserFile "/usr/local/apache2/passwds/passwords"
+Require user peter

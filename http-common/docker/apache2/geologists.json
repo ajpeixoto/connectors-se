@@ -1,0 +1,55 @@
+{
+  "date": "2022/06/18",
+  "info": {
+    "Description": "This document contains a list of geologists",
+    "number": 5,
+    "complete": false
+  },
+  "geologists": [
+    {
+      "name": "Maurice Krafft",
+      "age": 35,
+      "female": false,
+      "address": {
+        "city": "Mulhouse",
+        "zipcode": 68100
+      }
+    },
+    {
+      "name": "Katia Krafft",
+      "age": 49,
+      "female": true,
+      "address": {
+        "city": "Soultz-Haut-Rhinxxx",
+        "zipcode": 6860
+      }
+    },
+    {
+      "name": "Pline l'Ancien",
+      "age": 55,
+      "female": false,
+      "address": {
+        "city": "Côme",
+        "zipcode": 22100
+      }
+    },
+    {
+      "name": "James Hutton",
+      "age": 70,
+      "female": false,
+      "address": {
+        "city": "Édimbourg",
+        "zipcode": 0
+      }
+    },
+    {
+      "name": "Aline Peltier",
+      "age": 40,
+      "female": false,
+      "address": {
+        "city": "Saint-Pierre",
+        "zipcode": 97410
+      }
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+------=_Part_0_1086013872.1681983244280
+Content-Type: text/xml; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Content-ID: <rootpart@soapui.org>
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:web="http://www.dataaccess.com/webservicesserver/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <web:NumberToDollarsResponse>
+         <web:NumberToDollarsResult>2</web:NumberToDollarsResult>
+      </web:NumberToDollarsResponse>
+   </soapenv:Body>
+</soapenv:Envelope>
+------=_Part_0_1086013872.1681983244280
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Content-ID: <1.txt>
+Content-Disposition: attachment; name="1.txt"
+
+123
+------=_Part_0_1086013872.1681983244280--

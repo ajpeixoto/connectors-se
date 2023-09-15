@@ -1,0 +1,13 @@
+{
+  "book": {
+    "title": "{.input.book.title}",
+    "price": {.input.book.market.price},
+    "author": "{.input.book.author{id = 1234}}",
+    "meta": {
+      "ids": {
+        "ID": {.input.book.identification.id},
+        "ISBN": "{.input.book.identification.isbn}"
+      }
+    }
+  }
+}

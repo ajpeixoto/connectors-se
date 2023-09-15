@@ -1,0 +1,10 @@
+{
+  "key": "INT",
+  "name": "Integration test",
+  "projectTypeKey": "business",
+  "projectTemplateKey": "com.atlassian.jira-core-project-templates:jira-core-project-management",
+  "description": "Example Project description",
+  "lead": "root",
+  "assigneeType": "PROJECT_LEAD",
+  "avatarId": 10200
+}

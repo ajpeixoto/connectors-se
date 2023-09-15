@@ -1,0 +1,5 @@
+{
+  "error": "invalid_client",
+  "error_description": "This is a description",
+  "error_uri": "https://somedocumentation.doc"
+}

@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.conf.ParseUnknownFunctions;
+import org.jooq.conf.Settings;
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultConfiguration;
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
@@ -96,7 +98,11 @@ public class JdbcService {
             return false;
         }
 
-        return DSL.using(new DefaultConfiguration()).parser().parse(query).queries().length > 1;
+        DefaultConfiguration jooqConf = new DefaultConfiguration();
+        Settings settings = jooqConf.settings()
+                .withParseUnknownFunctions(ParseUnknownFunctions.IGNORE);
+        jooqConf.setSettings(settings);
+        return DSL.using(jooqConf).parser().parse(query).queries().length > 1;
     }
 
     public static boolean checkTableExistence(final String tableName, final JdbcService.JdbcDatasource dataSource)

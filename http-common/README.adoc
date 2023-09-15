@@ -1,0 +1,106 @@
+= Talend httpclient-common module
+
+This module is used to write HTTP-based connectors in TCK
+
+== How to build
+From connectors-se root folder:
+
+```
+mvn clean install -pl http-common -am clean install
+```
+
+== How to write your own HTTP-based component
+
+* Add a http-common artifact as a dependency to your connector module.
+* Extend your runtime classes of AbstractHTTPInput, AbstractHTTPOutput or AbstractHTTPProcessor
+* Override the abstract method #translateConfiguration() to convert your component configuration class to a
+http-common:org.talend.components.http.configuration.RequestConfig instance specifiying the correct values to
+httpcommon Datastore and Dataset options
+* Inject a HTTPClientService to your component runtime as a service
+* Call an HTTPClientService#invoke(queryConfiguration, isDieOnError)
+
+Please note that DSSL features not supported when your component extends http-common in connectors-se.
+
+=== TCK dependencies
+Even if a `TCK` plugin has a dependency to another `TCK` plugin, all `TCK` stuff coming from the dependency will not be
+loaded. Indeed, at build time, classes that will have to be analyzed by the `component-manager`, are listed in the
+generated file `TALEND-INF/scanning.properties`.
+
+So, in `http` case, there is one `scanning.properties` generated for `http-common`, another one for `http-studio` and
+another one for `http-studio`. Classes coming from `http-common` are not part of the `scanning.properties` files of the two
+others module. So, at runtime, services coming from `http-common` will not be loaded for those two modules and they will fail.
+
+To solve this, we can tell to include `http-common` classes in `scanning.properties` files of two other modules:
+```
+<talend.scan.scannedDependencies>org.talend.components:http-common,org.talend.components:stream-api</talend.scan.scannedDependencies>
+```
+And since the `http-common` module has a `FakeInput` emitter (if no connector, a `TCK` is not loaded, it was necessary for `http-common` tests), we have to
+exclude it:
+```
+<talend.scan.filter.strategy>include-exclude</talend.scan.filter.strategy>
+<talend.scan.excludes>org.talend.components.http.input.FakeInput</talend.scan.excludes>
+```
+
+== Tests
+=== http-common generates a `test-jar`
+`http-common` module provides `AbstractProcessorTest` and `TestUtil` classes that are reused by `http-cloud` and `http-studio`.
+To be available, a `test-jar` is generated...
+```
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven-jar-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- Generate a test-jar to share some test classes with http-cloud & http-studio tests. -->
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+```
+... and added as dependency in those two module:
+```
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>http-common</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+```
+It is explained in `maven` documentation (_the 'preferred way' was not possible in that case_):
+https://maven.apache.org/plugins/maven-jar-plugin/examples/create-test-jar.html
+
+=== ClientTestWithHttpbinTest
+This unit tests class relies on an `httpbin` docker image, to have a local equivalent of this web site: https://httpbin.org/.
+You can execute those test using your own `httpbin` instance  setting this property: `org.talend.components.rest.httpbin_base`.
+
+For instance, if you want to execute tests with official `httpbin` web site:
+```
+mvn test -pl http-common -Dtest=ClientTestWithHttpbinTest -Dorg.talend.components.rest.httpbin_base="https://httpbin.org"
+```
+
+== Warning
+=== Dataset's name
+The dataset name is defined as `Batch` in `http-common/src/main/resources/org/talend/components/http/Messages.properties`.
+It makes sens in cloud since with the `Polling` extension, a `Streaming` dataset is created and so the user has the
+choice between `Batch` and `Streaming` datasets.
+
+But, in studio metadata, only a `Create Batch` entry is displayed. It has to be renamed to `Create Dataset`. To do this,
+we have duplicated the  `http-common/src/main/resources/org/talend/components/http/Messages.properties` file in `http-studio`
+and updated the `HTTP.dataset.Dataset._displayName` as expected.
+
+=== FakeInput
+For test purpose, the `http-common` has a `FakeInput` connector. It was not possible to only define it in the maven `test`
+section, we had to define it `main` one. It can't also be excluded from the `http-common/scanning.properties` file.
+So, this connector should be visible if `http-common` `TCK` plugin is loaded by a component manager. That should never happen.
+only `http-cloud` and `http-studio` should be used, and they exclude explicitly the `FakeInput` from their `scanning.properties`
+file, so it will not be loaded:
+```
+<talend.scan.filter.strategy>include-exclude</talend.scan.filter.strategy>
+<talend.scan.excludes>org.talend.components.http.input.FakeInput</talend.scan.excludes>
+```

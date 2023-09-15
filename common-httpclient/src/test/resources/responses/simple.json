@@ -1,0 +1,13 @@
+{
+  "message": "Hello",
+  "number": 42,
+  "really": true,
+  "user": {
+    "name": "peter",
+    "age": 30,
+    "address": {
+      "street": "sea street",
+      "zipcode": 123456
+    }
+  }
+}

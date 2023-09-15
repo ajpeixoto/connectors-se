@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
-        <version>1.47.0-SNAPSHOT</version>
+        <version>1.50.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>dynamics-crm</artifactId>
@@ -45,7 +45,7 @@
         TIP: it is recommended to set this property into your settings.xml in an active by default profile.
         -->
         <talend.component.studioHome />
-        <talend-mscrm.version>3.16-20230324</talend-mscrm.version>
+        <talend-mscrm.version>3.16-20230817</talend-mscrm.version>
     </properties>
 
     <dependencies>

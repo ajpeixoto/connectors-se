@@ -1,0 +1,14 @@
+{
+  "fields": {
+    "project": {
+      "id": "10200"
+    },
+    "summary": "Subtask test task",
+    "issuetype": {
+      "id": "10001"
+    },
+    "parent": {
+      "id": "10100"
+    }
+  }
+}
