@@ -953,7 +953,7 @@
             <plugin>
                 <groupId>org.talend.sdk.component</groupId>
                 <artifactId>talend-component-maven-plugin</artifactId>
-                <version>${component-runtime.version}</version>
+                <version>1.61.0</version>
                 <executions>
                     <execution>
                         <id>talend-svg2png</id>
