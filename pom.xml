@@ -82,7 +82,7 @@
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <component-runtime.version>1.61.0</component-runtime.version>
+        <component-runtime.version>1.61.0-TCOMP-2339-SNAPSHOT-20230905074058</component-runtime.version>
 
         <slf4j.version>1.7.36</slf4j.version>
         <log4j-api.version>2.20.0</log4j-api.version>
