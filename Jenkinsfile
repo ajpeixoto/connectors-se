@@ -333,7 +333,7 @@ pipeline {
                             script {
                                 final def pom = readMavenPom file: 'pom.xml'
                                 String pomVersion = pom.version
-                                String releaseVersion = pomVersion.split('-')[0]
+                                String releaseVersion = evaluatePreviousVersion(pomVersion.split('-')[0])
                                 String previousVersion = evaluatePreviousVersion(releaseVersion)
                                 sh """
                                     bash .jenkins/changelog.sh \
