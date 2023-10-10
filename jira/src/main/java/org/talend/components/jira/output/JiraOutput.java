@@ -15,13 +15,11 @@ package org.talend.components.jira.output;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.apache.cxf.common.util.StringUtils;
 import org.talend.components.common.httpclient.api.BodyFormat;
 import org.talend.components.common.httpclient.api.HTTPClient;
 import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.http.configuration.Dataset;
 import org.talend.components.http.configuration.Datastore;
-import org.talend.components.http.configuration.OutputContent;
 import org.talend.components.http.configuration.Param;
 import org.talend.components.http.configuration.RequestBody;
 import org.talend.components.http.configuration.RequestConfig;
@@ -167,7 +165,7 @@ public class JiraOutput extends AbstractHTTPOutput<JiraOutputConfiguration> {
                 StringBuilder errorMessage = new StringBuilder(response.getStatus().getCodeWithReason());
                 try {
                     String errorResponseBody = response.getBodyAsString();
-                    if (!StringUtils.isEmpty(errorResponseBody)) {
+                    if (!errorResponseBody.trim().isEmpty()) {
                         errorMessage.append(System.lineSeparator()).append(errorResponseBody);
                     }
                 } catch (HTTPClientException cantGetBodyAsStringException) {

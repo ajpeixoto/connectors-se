@@ -12,16 +12,23 @@
  */
 package org.talend.components.common.httpclient.impl.cxf;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.activation.FileDataSource;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedHashMap;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
@@ -40,6 +47,7 @@ import org.apache.cxf.transports.http.configuration.ProxyServerType;
 import org.talend.components.common.httpclient.api.BodyFormat;
 import org.talend.components.common.httpclient.api.HTTPClient;
 import org.talend.components.common.httpclient.api.HTTPClientException;
+import org.talend.components.common.httpclient.api.KeyValuePair;
 import org.talend.components.common.httpclient.api.QueryConfiguration;
 import org.talend.components.common.httpclient.api.authentication.AuthenticationType;
 import org.talend.components.common.httpclient.api.authentication.OAuth20FlowExecution;
@@ -149,6 +157,7 @@ public class CXFHTTPClientImpl implements HTTPClient<WebClient> {
             TLSClientParameters params = getTlsClientParameters(conduit);
             params.setTrustManagers(new TrustManager[] { new BlindTrustManager() });
             params.setDisableCNCheck(true);
+
         } else {
             // init TLS by JVM default SSLContext
             // difficult to mix with bypassCertificateValidation function, so here only disable it if that is true
@@ -317,6 +326,36 @@ public class CXFHTTPClientImpl implements HTTPClient<WebClient> {
         }
     }
 
+    private void manageAttachments() {
+        List<org.talend.components.common.httpclient.api.Attachment> attachments = queryConfiguration.getAttachments();
+        if (attachments.isEmpty()) {
+            return;
+        }
+
+        for (org.talend.components.common.httpclient.api.Attachment attachmentConf : attachments) {
+            MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
+            headers.add("Content-ID", attachmentConf.getName());
+            List<String> contentDispositionList = new ArrayList<>();
+            contentDispositionList.add("attachmentConf");
+            contentDispositionList.add("file=\"" + attachmentConf.getName() + "\"");
+            contentDispositionList.add("filename=\"" + attachmentConf.getFile().getName() + "\"");
+            try {
+                contentDispositionList.add(
+                        "filename*=UTF-8''\"" + URLEncoder.encode(attachmentConf.getFile().getName(), "UTF-8") + "\"");
+            } catch (UnsupportedEncodingException e) {
+                log.debug("Got an UnsupportedEncodingException for UTF-8, shouldn't be here", e);
+            }
+            headers.put("Content-Disposition", contentDispositionList);
+
+            List<String> contentTypeList = new ArrayList<>();
+            contentTypeList.add(attachmentConf.getContentType());
+            contentTypeList.add("charset=" + attachmentConf.getEncoding());
+            headers.put("Content-Type", contentTypeList);
+            Attachment attachment = new Attachment(attachmentConf.getName(),
+                    new FileDataSource(attachmentConf.getFile()), headers);
+        }
+    }
+
     private Response getResponse() {
         Response invoke;
 
@@ -350,9 +389,7 @@ public class CXFHTTPClientImpl implements HTTPClient<WebClient> {
                     .build();
         }).collect(Collectors.toList());
 
-        if (queryConfiguration.getAttachments() != null) {
-            attachments.addAll(queryConfiguration.getAttachments());
-        }
+        manageAttachments();
 
         return new MultipartBody(attachments);
     }

@@ -27,7 +27,6 @@ import javax.json.JsonValue;
 import javax.json.stream.JsonParser;
 import javax.json.stream.JsonParsingException;
 
-import org.apache.cxf.common.util.StringUtils;
 import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.http.configuration.Dataset;
 import org.talend.components.http.configuration.Datastore;
@@ -180,7 +179,7 @@ public class JiraInput extends AbstractHTTPInput<JiraInputConfiguration> {
 
     private boolean isGetAllProjects() {
         return configuration.getDataset().getResourceType() == ResourceType.PROJECT
-                && StringUtils.isEmpty(configuration.getProjectId());
+                && configuration.getProjectId().trim().isEmpty();
     }
 
     private boolean isJQLSearch() {
@@ -209,7 +208,7 @@ public class JiraInput extends AbstractHTTPInput<JiraInputConfiguration> {
         }
         try {
             String responseString = e.getResponse().getBodyAsString();
-            if (StringUtils.isEmpty(responseString)) {
+            if (responseString.trim().isEmpty()) {
                 return new ComponentException(getI18n()
                         .responseStatusIsNotOK(e.getResponse().getStatus().getCodeWithReason()));
             }

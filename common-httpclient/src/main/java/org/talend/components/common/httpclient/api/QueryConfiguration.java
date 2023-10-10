@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.talend.components.common.httpclient.api.authentication.AuthenticationType;
 import org.talend.components.common.httpclient.api.authentication.LoginPassword;
 

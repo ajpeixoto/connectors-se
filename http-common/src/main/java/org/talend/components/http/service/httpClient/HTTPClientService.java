@@ -27,7 +27,6 @@ import javax.json.stream.JsonParserFactory;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.talend.components.common.httpclient.api.HTTPClient;
 import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.common.httpclient.api.ProxyConfiguration;
@@ -50,7 +49,6 @@ import org.talend.components.http.service.ClassLoaderInvokeUtils;
 import org.talend.components.http.service.provider.DictionaryProvider;
 import org.talend.components.http.service.I18n;
 import org.talend.components.http.service.RecordBuilderService;
-import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -246,28 +244,9 @@ public class HTTPClientService {
                     log.error(messages.noUploadFileExists(uploadFile.getFilePath()));
                     continue;
                 }
-                MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
-                headers.add("Content-ID", uploadFile.getName());
 
-                List<String> contentDispositionList = new ArrayList<>();
-                contentDispositionList.add("attachment");
-                contentDispositionList.add("file=\"" + uploadFile.getName() + "\"");
-                contentDispositionList.add("filename=\"" + file.getName() + "\"");
-                try {
-                    contentDispositionList.add(
-                            "filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
-                } catch (UnsupportedEncodingException e) {
-                    log.debug("Got an UnsupportedEncodingException for UTF-8, shouldn't be here", e);
-                }
-                headers.put("Content-Disposition", contentDispositionList);
-
-                List<String> contentTypeList = new ArrayList<>();
-                contentTypeList.add(uploadFile.getContentType());
-                contentTypeList.add("charset=" + uploadFile.getEncoding());
-                headers.put("Content-Type", contentTypeList);
-                Attachment attachment = new Attachment(uploadFile.getName(),
-                        new FileDataSource(file), headers);
-                queryConfigurationBuilder.addAttachment(attachment);
+                queryConfigurationBuilder.addAttachment(uploadFile.getName(), file, uploadFile.getEncoding(),
+                        uploadFile.getContentType());
             }
         }
 

@@ -12,6 +12,7 @@
  */
 package org.talend.components.common.httpclient.api;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,7 +22,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.cxf.jaxrs.ext.multipart.Attachment;
 import org.talend.components.common.httpclient.api.authentication.APIKeyDestination;
 import org.talend.components.common.httpclient.api.authentication.AuthenticationType;
 import org.talend.components.common.httpclient.api.authentication.LoginPassword;
@@ -259,10 +259,11 @@ public class QueryConfigurationBuilder {
         return this;
     }
 
-    public QueryConfigurationBuilder addAttachment(Attachment att) {
+    public QueryConfigurationBuilder addAttachment(String name, File file, String encoding, String contentType) { // Attachment
+                                                                                                                  // att)
+                                                                                                                  // {
         checkBodyAlreadySet(BodyFormat.FORM_DATA);
-        queryConfiguration.getAttachments().add(att);
-
+        queryConfiguration.getAttachments().add(new Attachment(name, file, encoding, contentType));
         queryConfiguration.setBodyType(BodyFormat.FORM_DATA);
         return this;
     }

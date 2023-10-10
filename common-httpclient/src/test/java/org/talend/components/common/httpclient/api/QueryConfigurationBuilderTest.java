@@ -12,6 +12,7 @@
  */
 package org.talend.components.common.httpclient.api;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -437,13 +438,20 @@ class QueryConfigurationBuilderTest {
 
     @Test
     public void addAttachmentsTest() {
-        Attachment fakeAttachment = new Attachment("someMediaType", new Object());
+        String name = "attach1";
+        File file = new File("/tmp/fake.json");
+        String encoding = "UTF-8";
+        String contentType = "application/pdf";
         QueryConfiguration configuration = QueryConfigurationBuilder.create("https://myurl.com")
-                .addAttachment(fakeAttachment)
+                .addAttachment(name, file, encoding, contentType)
                 .build();
 
         Assertions.assertEquals(1, configuration.getAttachments().size());
-        Assertions.assertEquals(fakeAttachment, configuration.getAttachments().get(0));
+        org.talend.components.common.httpclient.api.Attachment actual = configuration.getAttachments().get(0);
+        Assertions.assertEquals(name, actual.getName());
+        Assertions.assertEquals(file, actual.getFile());
+        Assertions.assertEquals(encoding, actual.getEncoding());
+        Assertions.assertEquals(contentType, actual.getContentType());
         Assertions.assertEquals(BodyFormat.FORM_DATA.getContentType(), configuration.getBodyType().getContentType());
     }
 
