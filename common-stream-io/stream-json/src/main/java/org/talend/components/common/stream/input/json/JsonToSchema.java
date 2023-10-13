@@ -25,6 +25,9 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 import javax.json.JsonValue.ValueType;
 
+import org.talend.components.jsondecorator.api.DecoratedJsonValue;
+import org.talend.components.jsondecorator.api.JsonDecoratorBuilder;
+import org.talend.components.jsondecorator.impl.JsonDecoratorFactoryImpl;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -54,7 +57,7 @@ public class JsonToSchema {
     }
 
     private void populateJsonObjectEntries(Schema.Builder builder, JsonObject value) {
-        value.entrySet()
+        value.entrySet() //
                 .stream() //
                 .filter(e -> this.emptyJsonAsString || e.getValue() != JsonValue.NULL) //
                 .map(s -> createEntry(s.getKey(), s.getValue())) //
@@ -142,6 +145,15 @@ public class JsonToSchema {
                 .filter(JsonObject.class::isInstance)
                 .map(JsonValue::asJsonObject)
                 .reduce(emptyObject, this::merge);
+
+        if (DecoratedJsonValue.class.isInstance(array)) {
+            DecoratedJsonValue decoratedArray = (DecoratedJsonValue) array;
+            JsonDecoratorBuilder jsonDecoratorBuilder = JsonDecoratorFactoryImpl.getInstance()
+                    .createBuilder()
+                    .addDecorator(decoratedArray.getDecorator());
+            return jsonDecoratorBuilder.build(decoratedArray.getPath(), mergedObject).asJsonObject();
+        }
+
         return mergedObject;
     }
 

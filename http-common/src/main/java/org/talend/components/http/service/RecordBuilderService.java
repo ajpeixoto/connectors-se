@@ -13,12 +13,19 @@
 package org.talend.components.http.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+import javax.json.JsonValue;
+import javax.json.JsonWriter;
 import javax.json.stream.JsonParserFactory;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,6 +38,7 @@ import org.talend.components.common.stream.api.RecordIORepository;
 import org.talend.components.common.stream.api.input.RecordReader;
 import org.talend.components.common.stream.api.input.RecordReaderSupplier;
 import org.talend.components.common.stream.format.ContentFormat;
+import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.components.common.stream.format.rawtext.ExtendedRawTextConfiguration;
 import org.talend.components.common.stream.format.rawtext.RawTextConfiguration;
 import org.talend.components.http.configuration.Format;
@@ -39,6 +47,8 @@ import org.talend.components.http.configuration.Param;
 import org.talend.components.http.configuration.RequestConfig;
 import org.talend.components.http.service.provider.DictionaryProvider;
 import org.talend.components.http.service.provider.JsonContentProvider;
+import org.talend.components.jsondecorator.api.JsonDecoratorBuilder;
+import org.talend.components.jsondecorator.impl.JsonDecoratorFactoryImpl;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Record.Builder;
 import org.talend.sdk.component.api.record.Schema;
@@ -95,7 +105,7 @@ public class RecordBuilderService {
     /**
      * This methode generate an iterator that loop over all generated Record.
      * This will generate all the needs for the call to buildRecord(...)
-     * 
+     *
      * @param input The input record used for substitution if key/value pairs output.
      * @param response The reponse of the current HTTP call.
      * @param config The HTTP call configuration.
@@ -144,10 +154,32 @@ public class RecordBuilderService {
                     payload = notAttachmentPartOfMultipart;
                 }
             }
+
+            if (payload != null && config.getDataset().getFormat() == Format.JSON
+                    && config.getDataset().getFilterCastList() != null) {
+                JsonDecoratorBuilder builder = JsonDecoratorFactoryImpl.getInstance().createBuilder();
+                config.getDataset().getFilterCastList().forEach(e -> {
+                    if (e.getAction() == JsonConfiguration.FilterCastAction.CAST) {
+                        builder.cast(e.getPath(), JsonDecoratorBuilder.ValueTypeExtended.valueOf(e.getType().name()));
+                    } else {
+                        builder.filterByType(e.getPath(),
+                                JsonDecoratorBuilder.ValueTypeExtended.valueOf(e.getType().name()));
+                    }
+                });
+                JsonReader payloadReader = Json.createReader(new StringReader(payload));
+                JsonValue payloadValue = payloadReader.readValue();
+                JsonValue decoratedPayloadValue = builder.build(payloadValue);
+                StringWriter sw = new StringWriter();
+                JsonWriter payloadWriter = Json.createWriter(sw);
+                JsonObject obj = decoratedPayloadValue.asJsonObject();
+                payloadWriter.write(obj);
+                payload = sw.toString();
+            }
+
             // Inject null in reader if null or, the ByteArrayInputStream if it contains something.
             readIterator = reader.read(payload == null ? null : new ByteArrayInputStream(payload.getBytes()));
         } catch (RuntimeException | HTTPClientException e) {
-            int endSubstring = 100;
+            int endSubstring = 100000;
             payload = (payload == null || "".equals(payload)) ? i18n.emptyPayload() : payload.trim();
             // Display only first characters of the payload in the message
             endSubstring = endSubstring > payload.length() ? payload.length() : endSubstring;
@@ -166,7 +198,7 @@ public class RecordBuilderService {
                             .invalideBodyContent(
                                     sFormat,
                                     response.getStatus().getCodeWithReason(),
-                                    payload == null ? "" : payload.substring(0, endSubstring) + partial,
+                                    "\n" + (payload == null ? "" : payload.substring(0, endSubstring) + partial) + "\n",
                                     e.getMessage()),
                     e);
         }
@@ -185,7 +217,6 @@ public class RecordBuilderService {
     }
 
     /**
-     *
      * @param body The record generated using the body of the HTTP response
      * @param status The HTTP response status.
      * @param headers The HTTP response headers

@@ -12,6 +12,10 @@
  */
 package org.talend.components.common.stream.format.json;
 
+import org.talend.components.jsondecorator.api.JsonDecoratorBuilder;
+import org.talend.components.jsondecorator.impl.JsonDecoratorBuilderImpl;
+import org.talend.components.jsondecorator.impl.JsonDecoratorFactoryImpl;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -23,7 +27,7 @@ import javax.json.stream.JsonParser.Event;
 /**
  * Parse a json object with json pointer syntax.
  * This class allow to parse a json source progressivly
- * (low memory consuming / start quicly).
+ * (low memory consuming / start quickly).
  */
 public class JsonPointerParser {
 
@@ -56,21 +60,29 @@ public class JsonPointerParser {
         return new JsonPointerParser(rootGetter);
     }
 
+    public Iterator<JsonValue> values(JsonParser parser) {
+        return this.values(parser, JsonDecoratorFactoryImpl.getInstance().createBuilder());
+    }
+
     /**
      * Search iterator on json.
      * 
      * @param parser : json parser.
      * @return iterator on json value.
      */
-    public Iterator<JsonValue> values(JsonParser parser) {
+    public Iterator<JsonValue> values(JsonParser parser, JsonDecoratorBuilder jsonDecoratorBuilder) {
 
         final Iterator<JsonValue> valuesIterator;
         if (rootGetter.get(parser) && parser.hasNext()) {
             Event evt = parser.next();
             if (evt == Event.START_ARRAY) {
-                valuesIterator = new JsonIterator(parser);
+                valuesIterator = new JsonIterator(parser, jsonDecoratorBuilder);
             } else {
-                final JsonValue lonelyObject = parser.getValue();
+                JsonValue value = parser.getValue();
+                final JsonValue lonelyObject = jsonDecoratorBuilder == null ? value : jsonDecoratorBuilder.build(value); // parser.getValue();
+                                                                                                                         // //
+                                                                                                                         // jsonDecoratorBuilder.build(parser.getValue());
+                // final JsonValue lonelyObject = value;
                 valuesIterator = Collections.singletonList(lonelyObject).iterator();
             }
         } else {
@@ -95,8 +107,11 @@ public class JsonPointerParser {
         /** point to the current json value */
         private final JsonParser parser;
 
-        public JsonIterator(JsonParser parser) {
+        private final JsonDecoratorBuilder jsonDecoratorBuilder;
+
+        public JsonIterator(JsonParser parser, JsonDecoratorBuilder jsonDecoratorBuilder) {
             this.parser = parser;
+            this.jsonDecoratorBuilder = jsonDecoratorBuilder;
             this.current = this.findNext(parser);
         }
 
@@ -132,7 +147,7 @@ public class JsonPointerParser {
                 this.parser.close();
                 return null;
             }
-            return parser.getValue();
+            return parser.getValue(); // this.jsonDecoratorBuilder.build(parser.getValue());
         }
     }
 

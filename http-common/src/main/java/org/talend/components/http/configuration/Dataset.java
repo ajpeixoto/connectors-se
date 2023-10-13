@@ -13,6 +13,7 @@
 package org.talend.components.http.configuration;
 
 import lombok.Data;
+import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.components.extension.polling.api.PollableDuplicateDataset;
 import org.talend.components.http.configuration.pagination.Pagination;
 import org.talend.components.http.service.UIService;
@@ -61,6 +62,7 @@ import java.util.List;
         @GridLayout.Row({ "pagination" }), //
         // @GridLayout.Row({ "force302Redirect" }), // TODO: https://jira.talendforge.org/browse/TDI-48326
         @GridLayout.Row({ "jsonForceDouble" }),
+        @GridLayout.Row({ "filterCastList" }),
         @GridLayout.Row({ "enforceNumberAsString" }) })
 @Documentation("HTTP dataset configuration.")
 public class Dataset implements Serializable {
@@ -97,6 +99,11 @@ public class Dataset implements Serializable {
     @ActiveIf(target = "format", value = "JSON")
     @DefaultValue("true")
     private boolean jsonForceDouble = true;
+
+    @Option
+    @ActiveIf(target = "format", value = "JSON")
+    @Documentation("List of filters and casts Json configuration.")
+    private List<JsonConfiguration.FilterCast> filterCastList;
 
     @Option
     @Documentation("If answer body type is XML, force all numbers as string.")

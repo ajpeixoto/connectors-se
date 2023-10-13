@@ -29,6 +29,8 @@ import org.talend.components.common.stream.api.output.RecordWriterSupplier;
 import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.components.common.stream.input.json.JsonReaderSupplier;
 import org.talend.components.common.stream.output.json.JsonWriterSupplier;
+import org.talend.components.jsondecorator.api.JsonDecoratorBuilder;
+import org.talend.components.jsondecorator.impl.JsonDecoratorFactoryImpl;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
@@ -44,6 +46,10 @@ import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import lombok.extern.slf4j.Slf4j;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 @Slf4j
 @Environment(ContextualEnvironment.class)
@@ -226,6 +232,10 @@ class JsonFormatTest {
 
     @EnvironmentalTest
     void testHeterogeneousArraySameFieldWithDifferentTypes() {
+        JsonDecoratorBuilder builder = JsonDecoratorFactoryImpl.getInstance().createBuilder();
+        JsonObject jsObj = Json.createObjectBuilder().add("name", "Peter").build();
+        JsonValue decorated = builder.build(jsObj);
+
         config.setJsonFile("heterogeneousArray2.json");
         final List<Record> records = runPipeline();
         Assertions.assertEquals(1, records.size());

@@ -20,9 +20,12 @@ import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @GridLayout({ @GridLayout.Row("jsonPointer") })
-@GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("forceDouble") })
+@GridLayout(names = GridLayout.FormType.ADVANCED,
+        value = { @GridLayout.Row("forceDouble"), @GridLayout.Row("filterCastList") })
 @Documentation("Json Configuration with json pointer rules.")
 public class JsonConfiguration implements ContentFormat {
 
@@ -34,5 +37,42 @@ public class JsonConfiguration implements ContentFormat {
     @DefaultValue("true")
     @Documentation("Force json number to double.")
     private boolean forceDouble = true;
+
+    @Option
+    @Documentation("List of filter and cast configuration.")
+    private List<FilterCast> filterCastList;
+
+    @Data
+    @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "path", "action", "type" }) })
+    @Documentation("Json filter and cast configuration.")
+    public static class FilterCast {
+
+        @Option
+        @Documentation("Path to the attribute.")
+        private String path;
+
+        @Option
+        @Documentation("The action to execution: filter or cast.")
+        private FilterCastAction action;
+
+        @Option
+        @Documentation("The type to configure the action.")
+        private FilterCastType type;
+
+    }
+
+    public enum FilterCastAction {
+        FILTER,
+        CAST
+    }
+
+    public enum FilterCastType {
+        ARRAY,
+        BOOLEAN,
+        FLOAT,
+        INT,
+        OBJECT,
+        STRING
+    }
 
 }

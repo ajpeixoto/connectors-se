@@ -17,7 +17,12 @@ import org.talend.components.common.stream.api.input.RecordReaderSupplier;
 import org.talend.components.common.stream.format.ContentFormat;
 import org.talend.components.common.stream.format.json.JsonConfiguration;
 import org.talend.components.common.stream.format.json.JsonPointerParser;
+import org.talend.components.jsondecorator.api.JsonDecoratorBuilder;
+import org.talend.components.jsondecorator.api.JsonDecoratorFactory;
+import org.talend.components.jsondecorator.impl.JsonDecoratorFactoryImpl;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
+
+import javax.json.JsonValue;
 
 public class JsonReaderSupplier implements RecordReaderSupplier {
 
@@ -30,6 +35,40 @@ public class JsonReaderSupplier implements RecordReaderSupplier {
         final JsonConfiguration jsonConfig = (JsonConfiguration) config;
         final JsonPointerParser parser = JsonPointerParser.of(jsonConfig.getJsonPointer());
         final JsonToRecord toRecord = new JsonToRecord(factory, jsonConfig.isForceDouble());
-        return new JsonRecordReader(parser, toRecord);
+
+        JsonDecoratorBuilder jsonDecoratorBuilder = null;
+        if (jsonConfig.getFilterCastList() != null && !jsonConfig.getFilterCastList().isEmpty()) {
+            final JsonDecoratorBuilder jsonDecoratorBuilderLocal =
+                    JsonDecoratorFactoryImpl.getInstance().createBuilder();
+            jsonConfig.getFilterCastList().stream().forEach(e -> {
+                if (e.getAction() == JsonConfiguration.FilterCastAction.CAST) {
+                    jsonDecoratorBuilderLocal.cast(e.getPath(), getType(e.getType()));
+                } else if (e.getAction() == JsonConfiguration.FilterCastAction.FILTER) {
+                    jsonDecoratorBuilderLocal.filterByType(e.getPath(), getType(e.getType()));
+                }
+            });
+
+            jsonDecoratorBuilder = jsonDecoratorBuilderLocal;
+        }
+
+        return new JsonRecordReader(parser, toRecord, jsonDecoratorBuilder);
+    }
+
+    private static JsonDecoratorBuilder.ValueTypeExtended getType(JsonConfiguration.FilterCastType type) {
+        switch (type) {
+        case ARRAY:
+            return JsonDecoratorBuilder.ValueTypeExtended.ARRAY;
+        case BOOLEAN:
+            return JsonDecoratorBuilder.ValueTypeExtended.BOOLEAN;
+        case FLOAT:
+            return JsonDecoratorBuilder.ValueTypeExtended.FLOAT;
+        case INT:
+            return JsonDecoratorBuilder.ValueTypeExtended.INT;
+        case OBJECT:
+            return JsonDecoratorBuilder.ValueTypeExtended.OBJECT;
+        case STRING:
+            return JsonDecoratorBuilder.ValueTypeExtended.STRING;
+        }
+        throw new IllegalArgumentException(String.format("Not supported type '%s'", type));
     }
 }
