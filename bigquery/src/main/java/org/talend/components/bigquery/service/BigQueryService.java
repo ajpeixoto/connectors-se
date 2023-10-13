@@ -23,6 +23,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.talend.components.bigquery.datastore.AuthType;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.output.BigQueryOutputConfig;
 import org.talend.sdk.component.api.configuration.Option;
@@ -76,9 +78,6 @@ public class BigQueryService {
 
         if (connection.getProjectName() == null || "".equals(connection.getProjectName().trim())) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.projectNameRequired());
-        }
-        if (connection.getJsonCredentials() == null || "".equals(connection.getJsonCredentials().trim())) {
-            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.credentialsRequired());
         }
 
         try {
@@ -134,8 +133,10 @@ public class BigQueryService {
 
         BigQuery client = null;
 
-        if (connection.getJsonCredentials() != null && !"".equals(connection.getJsonCredentials().trim())) {
-            GoogleCredentials credentials = getCredentials(connection.getJsonCredentials());
+        if (connection.getAuthType().equals(AuthType.APPLICATION_DEFAULT_CREDENTIALS)
+                || (connection.getAuthType().equals(AuthType.SERVICE_ACCOUNT_KEY)
+                && connection.getJsonCredentials() != null && !"".equals(connection.getJsonCredentials().trim()))) {
+            GoogleCredentials credentials = getCredentials(connection);
 
             client = BigQueryOptions
                     .newBuilder()
@@ -514,11 +515,15 @@ public class BigQueryService {
                 .create();
     }
 
-    public GoogleCredentials getCredentials(String credentials) {
+    public GoogleCredentials getCredentials(BigQueryConnection connection) {
         try {
-            return GoogleCredentials
-                    .fromStream(new ByteArrayInputStream(credentials.getBytes()))
-                    .createScoped(BigqueryScopes.all());
+            if (connection.getAuthType().equals(AuthType.APPLICATION_DEFAULT_CREDENTIALS)) {
+                return GoogleCredentials.getApplicationDefault();
+            } else {
+                return GoogleCredentials
+                        .fromStream(new ByteArrayInputStream(connection.getJsonCredentials().getBytes()))
+                        .createScoped(BigqueryScopes.all());
+            }
         } catch (Exception e) {
             throw new BigQueryConnectorException(i18n.errorReadingCredentials(e.getMessage()), e);
         }

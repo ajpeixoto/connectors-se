@@ -17,6 +17,7 @@ import org.talend.components.bigquery.service.BigQueryService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
+import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -41,9 +42,13 @@ public class BigQueryConnection implements Serializable {
     private String projectName;
 
     @Option
+    @Documentation("")
+    private AuthType authType = AuthType.SERVICE_ACCOUNT_KEY;
+
+    @Option
     @Credential
-    @Required
     @Documentation("Google credential (JSON)")
+    @ActiveIf(target = "authType", value = "SERVICE_ACCOUNT_KEY")
     private String jsonCredentials;
 
 }

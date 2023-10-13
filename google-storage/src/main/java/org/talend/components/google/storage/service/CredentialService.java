@@ -66,9 +66,13 @@ public class CredentialService {
      */
     public GoogleCredentials getCredentials(final String jsonCredentials) {
         try {
-            return GoogleCredentials
-                    .fromStream(new ByteArrayInputStream(jsonCredentials.getBytes(Charset.defaultCharset())))
-                    .createScoped(StorageScopes.all());
+            if (jsonCredentials == null || jsonCredentials.isEmpty()) {
+                return GoogleCredentials.getApplicationDefault();
+            } else {
+                return GoogleCredentials
+                        .fromStream(new ByteArrayInputStream(jsonCredentials.getBytes(Charset.defaultCharset())))
+                        .createScoped(StorageScopes.all());
+            }
         } catch (IOException e) {
             String err = this.i18n.getCredentials(e.getMessage());
             log.error(err, e);
