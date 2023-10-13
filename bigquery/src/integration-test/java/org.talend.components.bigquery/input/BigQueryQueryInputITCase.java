@@ -19,15 +19,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.talend.components.bigquery.BigQueryTestUtil;
 import org.talend.components.bigquery.dataset.QueryDataSet;
+import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
-import org.talend.sdk.component.junit.SimpleCollector;
 import org.talend.sdk.component.junit.SimpleComponentRule;
-import org.talend.sdk.component.junit.environment.Environment;
-import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.io.IOException;
@@ -55,6 +52,41 @@ public class BigQueryQueryInputITCase {
     public void justTest() {
         QueryDataSet dataset = new QueryDataSet();
         dataset.setConnection(BigQueryTestUtil.getConnection());
+        dataset.setUseLegacySql(true);
+        dataset.setQuery("SELECT COUNT(ID) FROM dataset_rlecomte.TableWithData WHERE IS_TRUE = true");
+
+        BigQueryQueryInputConfig config = new BigQueryQueryInputConfig();
+        config.setQueryDataset(dataset);
+
+        String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+
+        try {
+            Job.components()
+                    .component("input", "BigQuery://BigQueryQueryInput?" + configURI)
+                    .component("output", "test://collector")
+                    .connections()
+                    .from("input")
+                    .to("output")
+                    .build()
+                    .run();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assertions.fail(e);
+        }
+
+        List<Record> records = COMPONENTS.getCollectedData(Record.class);
+
+        Assertions.assertNotNull(records);
+        Assertions.assertNotEquals(0, records.size());
+    }
+
+    @Test
+    public void testWithApplicationDefaultCredentials() {
+        QueryDataSet dataset = new QueryDataSet();
+        BigQueryConnection connection = BigQueryTestUtil.getConnection();
+        connection.setJsonCredentials(null);
+        connection.setAuthType(BigQueryConnection.AuthType.APPLICATION_DEFAULT_CREDENTIALS);
+        dataset.setConnection(connection);
         dataset.setUseLegacySql(true);
         dataset.setQuery("SELECT COUNT(ID) FROM dataset_rlecomte.TableWithData WHERE IS_TRUE = true");
 

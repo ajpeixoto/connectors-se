@@ -15,6 +15,7 @@ package org.talend.components.google.storage;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Storage;
 
+import org.talend.components.google.storage.datastore.GSDataStore;
 import org.talend.components.google.storage.service.CredentialService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,8 +33,8 @@ public class CredentialServiceFake extends CredentialService {
     }
 
     @Override
-    public GoogleCredentials getCredentials(String jsonCredentials) {
-        return this.wrappedService.getCredentials(jsonCredentials);
+    public GoogleCredentials getCredentials(GSDataStore connection) {
+        return this.wrappedService.getCredentials(connection);
     }
 
     @Override

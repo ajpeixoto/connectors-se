@@ -46,10 +46,10 @@ public class GSServiceFake extends GSService {
         return this.wrappedService.findBlobsName(dataStore, bucket);
     }
 
-    @Override
-    public StorageFacade buildStorage(String jsonCredentials) {
-        return new StorageFacadeFake(bucket, root);
-    }
+    // @Override
+    // public StorageFacade buildStorage(GSDataStore dataStore) {
+    // return new StorageFacadeFake(bucket, root);
+    // }
 
     @Override
     public StorageFacade buildStorage(final GSDataStore dataStore) {
