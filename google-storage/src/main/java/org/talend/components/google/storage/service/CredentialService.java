@@ -22,6 +22,8 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.StorageOptions;
 
+import org.talend.components.google.storage.datastore.AuthType;
+import org.talend.components.google.storage.datastore.GSDataStore;
 import org.talend.sdk.component.api.service.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -64,11 +66,16 @@ public class CredentialService {
      * 
      * @return google credential containing access token.
      */
-    public GoogleCredentials getCredentials(final String jsonCredentials) {
+    public GoogleCredentials getCredentials(final GSDataStore connection) {
         try {
-            return GoogleCredentials
-                    .fromStream(new ByteArrayInputStream(jsonCredentials.getBytes(Charset.defaultCharset())))
-                    .createScoped(StorageScopes.all());
+            if (connection.getAuthType().equals(AuthType.APPLICATION_DEFAULT_CREDENTIALS)) {
+                return GoogleCredentials.getApplicationDefault();
+            } else {
+                return GoogleCredentials
+                        .fromStream(new ByteArrayInputStream(
+                                connection.getJsonCredentials().getBytes(Charset.defaultCharset())))
+                        .createScoped(StorageScopes.all());
+            }
         } catch (IOException e) {
             String err = this.i18n.getCredentials(e.getMessage());
             log.error(err, e);

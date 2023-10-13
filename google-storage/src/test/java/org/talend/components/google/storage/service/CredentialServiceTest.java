@@ -22,6 +22,8 @@ import com.google.cloud.storage.Storage;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.talend.components.google.storage.datastore.AuthType;
+import org.talend.components.google.storage.datastore.GSDataStore;
 
 class CredentialServiceTest {
 
@@ -31,9 +33,24 @@ class CredentialServiceTest {
 
         final File fic = new File(resource.getPath());
         final String json = new String(Files.readAllBytes(fic.toPath()));
+        GSDataStore connection = new GSDataStore();
+        connection.setJsonCredentials(json);
 
         final CredentialService credentialService = new CredentialService();
-        final GoogleCredentials credentials = credentialService.getCredentials(json);
+        final GoogleCredentials credentials = credentialService.getCredentials(connection);
+        Assertions.assertNotNull(credentials);
+
+        final Storage storage = credentialService.newStorage(credentials);
+        Assertions.assertNotNull(storage);
+    }
+
+    @Test
+    void testApplicationDefaultCredentials() {
+        GSDataStore connection = new GSDataStore();
+        connection.setAuthType(AuthType.APPLICATION_DEFAULT_CREDENTIALS);
+
+        final CredentialService credentialService = new CredentialService();
+        final GoogleCredentials credentials = credentialService.getCredentials(connection);
         Assertions.assertNotNull(credentials);
 
         final Storage storage = credentialService.newStorage(credentials);

@@ -31,6 +31,7 @@ import com.google.cloud.storage.Storage.BucketField;
 import com.google.cloud.storage.Storage.BucketListOption;
 import com.google.cloud.storage.StorageException;
 
+import org.talend.components.google.storage.datastore.AuthType;
 import org.talend.components.google.storage.datastore.GSDataStore;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.exception.ComponentException;
@@ -64,11 +65,12 @@ public class GSService {
     @HealthCheck(ACTION_HEALTH_CHECK)
     public HealthCheckStatus healthCheck(@Option GSDataStore connection) {
 
-        if (connection.getJsonCredentials() == null || "".equals(connection.getJsonCredentials().trim())) {
+        if (connection.getAuthType().equals(AuthType.SERVICE_ACCOUNT_KEY)
+                && (connection.getJsonCredentials() == null || "".equals(connection.getJsonCredentials().trim()))) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.credentialsRequired());
         }
         try {
-            final GoogleCredentials credentials = credentialService.getCredentials(connection.getJsonCredentials());
+            final GoogleCredentials credentials = credentialService.getCredentials(connection);
             final Storage storage = credentialService.newStorage(credentials, getCustomEndpoint(connection));
             storage.list();
             return new HealthCheckStatus(HealthCheckStatus.Status.OK, i18n.successConnection());
@@ -125,18 +127,13 @@ public class GSService {
         }
     }
 
-    @Deprecated
-    public StorageFacade buildStorage(final String jsonCredentials) {
-        return new StorageImpl(this.credentialService, jsonCredentials, this.i18n);
-    }
-
     public StorageFacade buildStorage(final GSDataStore dataStore) {
-        return new StorageImpl(this.credentialService, dataStore.getJsonCredentials(), getCustomEndpoint(dataStore),
+        return new StorageImpl(this.credentialService, dataStore, getCustomEndpoint(dataStore),
                 this.i18n);
     }
 
     private Storage newStorage(GSDataStore dataStore) {
-        final GoogleCredentials credentials = credentialService.getCredentials(dataStore.getJsonCredentials());
+        final GoogleCredentials credentials = credentialService.getCredentials(dataStore);
         return credentialService.newStorage(credentials, getCustomEndpoint(dataStore));
     }
 

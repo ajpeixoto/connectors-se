@@ -32,7 +32,7 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 @Data
 @DataStore(GSDataStore.NAME)
 @Checkable(GSService.ACTION_HEALTH_CHECK)
-@GridLayout({ @GridLayout.Row({ "jsonCredentials" }) })
+@GridLayout({ @GridLayout.Row("authType"), @GridLayout.Row({ "jsonCredentials" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("usePrivateEndpoint"), @GridLayout.Row("privateEndpoint") })
 @Documentation("Connector for google cloud storage")
 public class GSDataStore implements Serializable {
@@ -44,8 +44,12 @@ public class GSDataStore implements Serializable {
     public static final String NAME = "GoogleStorageDataStore";
 
     @Option
+    @Documentation("")
+    private AuthType authType = AuthType.SERVICE_ACCOUNT_KEY;
+
+    @Option
     @Credential
-    @Required
+    @ActiveIf(target = "authType", value = "SERVICE_ACCOUNT_KEY")
     @Documentation("Google credential (JSON)")
     private String jsonCredentials;
 

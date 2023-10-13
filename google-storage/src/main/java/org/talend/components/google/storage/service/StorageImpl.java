@@ -29,6 +29,7 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.StorageException;
 
+import org.talend.components.google.storage.datastore.GSDataStore;
 import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.exception.ComponentException.ErrorOrigin;
 
@@ -53,19 +54,19 @@ public class StorageImpl implements StorageFacade {
 
     private transient Storage storage = null;
 
-    public StorageImpl(final CredentialService credentialService, final String jsonCredentials,
+    public StorageImpl(final CredentialService credentialService, final GSDataStore gsDataStore,
             final I18nMessage i18n) {
         this.credentialService = credentialService;
-        this.credentials = credentialService.getCredentials(jsonCredentials);
+        this.credentials = credentialService.getCredentials(gsDataStore);
         this.customEndpoint = DEFAULT_GS_HOST;
         this.i18n = i18n;
     }
 
-    public StorageImpl(final CredentialService credentialService, final String jsonCredentials,
+    public StorageImpl(final CredentialService credentialService, final GSDataStore dataStore,
             final String customEndpoint,
             final I18nMessage i18n) {
         this.credentialService = credentialService;
-        this.credentials = credentialService.getCredentials(jsonCredentials);
+        this.credentials = credentialService.getCredentials(dataStore);
         this.customEndpoint = customEndpoint;
         this.i18n = i18n;
     }

@@ -62,7 +62,7 @@ class StorageImplTest {
         final String content = "C1;C2\nL1;L2\nM1;M2\nP1;P2";
         final GSDataSet dataSet = storeContent("bucket", "blob", content);
 
-        StorageImpl st = new StorageImpl(this.credentialService, dataSet.getDataStore().getJsonCredentials(), i18n);
+        StorageImpl st = new StorageImpl(this.credentialService, dataSet.getDataStore(), i18n);
         final Supplier<InputStream> inputGetter = st.buildInput("bucket", "blob");
         Assertions.assertNotNull(inputGetter);
         try (InputStream input = inputGetter.get()) {
@@ -89,7 +89,7 @@ class StorageImplTest {
     @Test
     void buildOutput() throws IOException {
         final GSDataStore dataStore = buildDataStore();
-        StorageImpl st = new StorageImpl(this.credentialService, dataStore.getJsonCredentials(), i18n);
+        StorageImpl st = new StorageImpl(this.credentialService, dataStore, i18n);
         try (final OutputStream outputStream = st.buildOuput("output", "blob")) {
             outputStream.write("Hello".getBytes());
         }
@@ -106,7 +106,7 @@ class StorageImplTest {
     @Test
     void findBlobsName() throws IOException {
         final GSDataStore dataStore = buildDataStore();
-        final StorageImpl st = new StorageImpl(this.credentialService, dataStore.getJsonCredentials(), i18n);
+        final StorageImpl st = new StorageImpl(this.credentialService, dataStore, i18n);
 
         final BlobNameBuilder builder = new BlobNameBuilder();
         final String b1 = builder.generateName("blob");
@@ -127,7 +127,7 @@ class StorageImplTest {
     @Test
     void findBlobsNameWithExtension() throws IOException {
         final GSDataStore dataStore = buildDataStore();
-        final StorageImpl st = new StorageImpl(this.credentialService, dataStore.getJsonCredentials(), i18n);
+        final StorageImpl st = new StorageImpl(this.credentialService, dataStore, i18n);
 
         final BlobNameBuilder builder = new BlobNameBuilder();
         final String b1 = builder.generateName("blob.csv");
