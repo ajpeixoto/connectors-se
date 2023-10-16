@@ -65,10 +65,8 @@ public class GSService {
     @HealthCheck(ACTION_HEALTH_CHECK)
     public HealthCheckStatus healthCheck(@Option GSDataStore connection) {
 
-        if (connection.getAuthType().equals(AuthType.APPLICATION_DEFAULT_CREDENTIALS)
-                || (connection.getAuthType().equals(AuthType.SERVICE_ACCOUNT_KEY)
-                        && connection.getJsonCredentials() == null
-                        || "".equals(connection.getJsonCredentials().trim()))) {
+        if (connection.getAuthType().equals(AuthType.SERVICE_ACCOUNT_KEY)
+                && (connection.getJsonCredentials() == null || "".equals(connection.getJsonCredentials().trim()))) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.credentialsRequired());
         }
         try {

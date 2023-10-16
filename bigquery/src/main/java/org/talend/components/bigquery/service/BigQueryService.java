@@ -79,6 +79,10 @@ public class BigQueryService {
         if (connection.getProjectName() == null || "".equals(connection.getProjectName().trim())) {
             return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.projectNameRequired());
         }
+        if (connection.getAuthType().equals(AuthType.SERVICE_ACCOUNT_KEY)
+                && (connection.getJsonCredentials() == null || "".equals(connection.getJsonCredentials().trim()))) {
+            return new HealthCheckStatus(HealthCheckStatus.Status.KO, i18n.credentialsRequired());
+        }
 
         try {
             BigQuery client = createClient(connection);
