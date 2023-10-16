@@ -44,7 +44,12 @@ public class GSDataStore implements Serializable {
     public static final String NAME = "GoogleStorageDataStore";
 
     @Option
+    @Documentation("")
+    private AuthType authType = AuthType.SERVICE_ACCOUNT_KEY;
+
+    @Option
     @Credential
+    @ActiveIf(target = "authType", value = "SERVICE_ACCOUNT_KEY")
     @Documentation("Google credential (JSON)")
     private String jsonCredentials;
 
