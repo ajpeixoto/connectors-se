@@ -14,8 +14,8 @@ package org.talend.components.bigquery.datastore;
 
 public enum AuthType {
 
-    APPLICATION_DEFAULT_CREDENTIALS,
+    SERVICE_ACCOUNT_KEY,
 
-    SERVICE_ACCOUNT_KEY
+    APPLICATION_DEFAULT_CREDENTIALS
 
 }

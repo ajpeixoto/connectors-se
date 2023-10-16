@@ -48,7 +48,6 @@ public class BigQueryConnection implements Serializable {
 
     @Option
     @Credential
-    @Required
     @Documentation("Google credential (JSON)")
     @ActiveIf(target = "authType", value = "SERVICE_ACCOUNT_KEY")
     private String jsonCredentials;
