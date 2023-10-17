@@ -25,12 +25,14 @@ import org.junit.jupiter.api.Test;
 import org.talend.components.google.storage.datastore.AuthType;
 import org.talend.components.google.storage.datastore.GSDataStore;
 
+import static uk.org.webcompere.systemstubs.SystemStubs.withEnvironmentVariable;
+
 class CredentialServiceTest {
+
+    final URL resource = Thread.currentThread().getContextClassLoader().getResource("./engineering-test.json");
 
     @Test
     void newStorage() throws IOException {
-        final URL resource = Thread.currentThread().getContextClassLoader().getResource("./engineering-test.json");
-
         final File fic = new File(resource.getPath());
         final String json = new String(Files.readAllBytes(fic.toPath()));
         GSDataStore connection = new GSDataStore();
@@ -45,15 +47,19 @@ class CredentialServiceTest {
     }
 
     @Test
-    void testApplicationDefaultCredentials() {
-        GSDataStore connection = new GSDataStore();
-        connection.setAuthType(AuthType.APPLICATION_DEFAULT_CREDENTIALS);
+    void testApplicationDefaultCredentials() throws Exception {
+        withEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", resource.getPath())
+                .execute(() -> {
+                    GSDataStore connection = new GSDataStore();
+                    connection.setAuthType(AuthType.APPLICATION_DEFAULT_CREDENTIALS);
 
-        final CredentialService credentialService = new CredentialService();
-        final GoogleCredentials credentials = credentialService.getCredentials(connection);
-        Assertions.assertNotNull(credentials);
+                    final CredentialService credentialService = new CredentialService();
+                    final GoogleCredentials credentials = credentialService.getCredentials(connection);
+                    Assertions.assertNotNull(credentials);
 
-        final Storage storage = credentialService.newStorage(credentials);
-        Assertions.assertNotNull(storage);
+                    final Storage storage = credentialService.newStorage(credentials);
+                    Assertions.assertNotNull(storage);
+                });
+
     }
 }
