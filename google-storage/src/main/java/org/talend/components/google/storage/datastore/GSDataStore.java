@@ -20,6 +20,7 @@ import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
+import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;
@@ -49,7 +50,8 @@ public class GSDataStore implements Serializable {
     }
 
     @Option
-    @Documentation("")
+    @Documentation("Authentication method")
+    @DefaultValue("SERVICE_ACCOUNT_KEY")
     private AuthType authType = AuthType.SERVICE_ACCOUNT_KEY;
 
     @Option
