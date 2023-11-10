@@ -25,12 +25,12 @@ import java.io.Serializable;
 
 @Data
 @OptionsOrder({ "path" })
-@Documentation("")
+@Documentation("Driver.")
 public class Driver implements Serializable {
 
     @ModuleList
     @Option
-    @Documentation("")
+    @Documentation("Path.")
     private String path;
 
 }

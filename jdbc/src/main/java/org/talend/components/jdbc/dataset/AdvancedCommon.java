@@ -24,7 +24,7 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 
 @Data
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("fetchSize") })
-@Documentation("Advanced common dataset configuration")
+@Documentation("Advanced common dataset configuration.")
 public class AdvancedCommon implements Serializable {
 
     @Option

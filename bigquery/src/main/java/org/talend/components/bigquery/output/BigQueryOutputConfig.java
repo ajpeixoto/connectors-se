@@ -34,11 +34,11 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 public class BigQueryOutputConfig implements Serializable {
 
     @Option
-    @Documentation("BigQuery Dataset")
+    @Documentation("BigQuery Dataset.")
     private TableDataSet dataSet;
 
     @Option
-    @Documentation("The BigQuery table operation")
+    @Documentation("The BigQuery table operation.")
     @DefaultValue("NONE")
     private TableOperation tableOperation = TableOperation.NONE;
 

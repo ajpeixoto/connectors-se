@@ -32,39 +32,39 @@ import java.io.Serializable;
                 @GridLayout.Row({ "useAuthDatabase" }),
                 @GridLayout.Row({ "authDatabase" }), @GridLayout.Row({ "username" }),
                 @GridLayout.Row({ "password" }) }) })
-@Documentation("Path Mapping")
+@Documentation("Path Mapping.")
 public class Auth implements Serializable {
 
     @Option
-    @Documentation("Need auth")
+    @Documentation("Need auth.")
     private boolean needAuth;
 
     @Option
     @ActiveIf(target = "needAuth", value = "true")
-    @Documentation("Need auth")
+    @Documentation("Need auth.")
     private AuthMech authMech = AuthMech.NEGOTIATE;
 
     @Option
     @ActiveIf(target = "needAuth", value = "true")
     @ActiveIf(target = "authMech", value = { "NEGOTIATE", "SCRAM_SHA_1_SASL" })
-    @Documentation("Use auth database")
+    @Documentation("Use auth database.")
     private boolean useAuthDatabase;
 
     @Option
     @ActiveIf(target = "needAuth", value = "true")
     @ActiveIf(target = "authMech", value = { "NEGOTIATE", "SCRAM_SHA_1_SASL" })
     @ActiveIf(target = "useAuthDatabase", value = "true")
-    @Documentation("Auth database")
+    @Documentation("Auth database.")
     private String authDatabase;
 
     @Option
     @ActiveIf(target = "needAuth", value = "true")
-    @Documentation("Username")
+    @Documentation("Username.")
     private String username;
 
     @Option
     @ActiveIf(target = "needAuth", value = "true")
-    @Documentation("Password")
+    @Documentation("Password.")
     @Credential
     private String password;
 

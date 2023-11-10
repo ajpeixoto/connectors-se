@@ -60,7 +60,7 @@ public class AzureCloudConnection implements Serializable {
 
     @ActiveIfs({ @ActiveIf(target = "useAzureSharedSignature", value = "false"),
             @ActiveIf(target = "../accountConnection.authType", value = "MANAGED_IDENTITIES", negate = true) })
-    @Documentation("Region of Azure : Azure cloud, Azure China cloud, Azure German cloud, Azure US government")
+    @Documentation("Region of Azure : Azure cloud, Azure China cloud, Azure German cloud, Azure US government.")
     private Region region = Region.CUSTOM;
 
     @Option
@@ -93,6 +93,6 @@ public class AzureCloudConnection implements Serializable {
     @Option
     @ActiveIfs({ @ActiveIf(target = "region", value = "CUSTOM"),
             @ActiveIf(target = "../accountConnection.authType", value = "ACTIVE_DIRECTORY_CLIENT_CREDENTIAL") })
-    @Documentation("AuthorityHost for AD")
+    @Documentation("AuthorityHost for AD.")
     private String authorityHost = EndpointUtil.DEFAULT_AUTHORITY;
 }

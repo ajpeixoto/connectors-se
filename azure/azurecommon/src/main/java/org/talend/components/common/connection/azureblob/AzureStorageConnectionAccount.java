@@ -35,7 +35,7 @@ public class AzureStorageConnectionAccount implements Serializable {
     private String accountName;
 
     @Option
-    @Documentation("")
+    @Documentation("Azure auth type.")
     private AzureAuthType authType = AzureAuthType.BASIC;
 
     @Option
@@ -52,7 +52,7 @@ public class AzureStorageConnectionAccount implements Serializable {
 
     @Option
     @ActiveIf(target = "authType", value = "ACTIVE_DIRECTORY_CLIENT_CREDENTIAL")
-    @Documentation("")
+    @Documentation("Azure connection active directory.")
     private AzureConnectionActiveDir activeDirProperties;
 
 }

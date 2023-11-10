@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Version(1)
 @Icon(Icon.IconType.STAR)
 @Emitter(name = "jsonInput")
-@Documentation("")
+@Documentation("Json Input.")
 public class JsonEmitter implements Serializable {
 
     private JsonReaderFactory jsonReaderFactory;

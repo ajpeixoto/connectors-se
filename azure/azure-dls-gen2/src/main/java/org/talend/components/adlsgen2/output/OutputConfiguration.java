@@ -28,11 +28,11 @@ import lombok.Data;
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { //
         @GridLayout.Row({ "dataSet" }), //
         @GridLayout.Row({ "blobNameTemplate" }) })
-@Documentation("ADLS output configuration")
+@Documentation("ADLS output configuration.")
 public class OutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Dataset")
+    @Documentation("Dataset.")
     private AdlsGen2DataSet dataSet;
 
     @Option

@@ -39,7 +39,7 @@ import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVaria
 @Icon(value = Icon.IconType.CUSTOM, custom = "JDBCInput")
 @ReturnVariable(value = "QUERY", availability = AFTER, type = String.class)
 @Emitter(name = "Input")
-@Documentation("JDBC query input")
+@Documentation("JDBC query input.")
 public class QueryEmitter implements Serializable {
 
     private static final long serialVersionUID = 1;

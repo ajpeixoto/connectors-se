@@ -28,15 +28,15 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "host" }), @GridLayout.Row({ "port" }) }) })
-@Documentation("Address")
+@Documentation("Address.")
 public class Address implements Serializable {
 
     @Option
-    @Documentation("Host")
+    @Documentation("Host.")
     private String host;
 
     @Option
-    @Documentation("Port")
+    @Documentation("Port.")
     @DefaultValue("27017")
     @Min(1)
     private int port = 27017;

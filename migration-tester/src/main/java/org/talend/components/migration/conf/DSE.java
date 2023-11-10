@@ -34,7 +34,7 @@ import java.io.Serializable;
 public class DSE implements Serializable {
 
     @Option
-    @Documentation("The datastore")
+    @Documentation("The datastore.")
     DSO dso;
 
     @Option
@@ -46,25 +46,25 @@ public class DSE implements Serializable {
     String dse_legacy;
 
     @Option
-    @Documentation("Dataset migration handler callback")
+    @Documentation("Dataset migration handler callback.")
     String dse_migration_handler_callback;
 
     @Option
-    @Documentation("Incoming configuration")
+    @Documentation("Incoming configuration.")
     @Code("json")
     String dse_incoming;
 
     @Option
-    @Documentation("Outgoing configuration")
+    @Documentation("Outgoing configuration.")
     @Code("json")
     String dse_outgoing;
 
     @Option
-    @Documentation("Property updated from source migration handler")
+    @Documentation("Property updated from source migration handler.")
     String dse_from_source;
 
     @Option
-    @Documentation("Property updated from sink migration handler")
+    @Documentation("Property updated from sink migration handler.")
     String dse_from_sink;
 
 }

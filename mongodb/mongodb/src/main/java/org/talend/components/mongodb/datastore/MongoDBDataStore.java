@@ -42,7 +42,7 @@ import java.util.List;
                 @GridLayout.Row({ "replicaSetAddress" }), @GridLayout.Row({ "database" }),
                 @GridLayout.Row({ "auth" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectionParameter" }) })
-@Documentation("MongoDB connection")
+@Documentation("MongoDB connection.")
 public class MongoDBDataStore implements MongoCommonDataStore {
 
     @Option
@@ -71,7 +71,7 @@ public class MongoDBDataStore implements MongoCommonDataStore {
 
     @Option
     @Required
-    @Documentation("Database")
+    @Documentation("Database.")
     private String database;
 
     // TODO have to support the function for locate a file for cert if need cert? or trust any cert, not good for me?
@@ -79,16 +79,16 @@ public class MongoDBDataStore implements MongoCommonDataStore {
     /*
      * @Option
      *
-     * @Documentation("Use SSL")
+     * @Documentation("Use SSL.")
      * private boolean useSSL;
      */
 
     @Option
-    @Documentation("auth page")
+    @Documentation("Auth page.")
     private Auth auth;
 
     // advanced page
     @Option
-    @Documentation("Connection parameter")
+    @Documentation("Connection parameter.")
     private List<ConnectionParameter> connectionParameter = Collections.emptyList();
 }

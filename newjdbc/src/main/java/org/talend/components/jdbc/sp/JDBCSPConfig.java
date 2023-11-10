@@ -37,34 +37,34 @@ import java.util.List;
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("dataStore")
 })
-@Documentation("jdbc sp")
+@Documentation("JDBC SP config.")
 public class JDBCSPConfig implements Serializable {
 
     @Option
-    @Documentation("schema dataset")
+    @Documentation("Schema dataset.")
     private JDBCDataStore dataStore;
 
     @Option
     @Structure(type = Structure.Type.OUT)
-    @Documentation("schema")
+    @Documentation("Schema.")
     private List<SchemaInfo> schema;
 
     @Option
-    @Documentation("")
+    @Documentation("SP Name.")
     private String spName;
 
     @Option
-    @Documentation("")
+    @Documentation("Is Function.")
     private boolean isFunction;
 
     @Option
     @BuiltInSuggestable(BuiltInSuggestable.Name.CURRENT_SCHEMA_ENTRY_NAMES)
     @ActiveIf(target = "isFunction", value = { "true" })
-    @Documentation("")
+    @Documentation("Result Column.")
     private String resultColumn;
 
     @Option
-    @Documentation("")
+    @Documentation("SP Parameters.")
     private List<SPParameter> spParameters;
 
 }

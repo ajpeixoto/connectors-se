@@ -27,19 +27,19 @@ import java.io.Serializable;
 @NoArgsConstructor
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "column" }), @GridLayout.Row({ "originElement" }),
         @GridLayout.Row({ "parentNodePath" }) }) })
-@Documentation("Path mapping")
+@Documentation("Path mapping.")
 public class PathMapping implements Serializable {
 
     @Option
-    @Documentation("Field")
+    @Documentation("Field.")
     private String column;
 
     @Option
-    @Documentation("the mongodb's origin element name in bson")
+    @Documentation("the mongodb's origin element name in bson.")
     private String originElement;
 
     @Option
-    @Documentation("Path to locate the parent node in json, then append there")
+    @Documentation("Path to locate the parent node in json, then append there.")
     private String parentNodePath;
 
 }

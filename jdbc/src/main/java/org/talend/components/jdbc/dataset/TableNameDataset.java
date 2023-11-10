@@ -47,13 +47,13 @@ public class TableNameDataset implements BaseDataSet {
     private static final String QUERY_TEMPLATE = "select %s from %s";
 
     @Option
-    @Documentation("the connection information to execute the query")
+    @Documentation("The connection information to execute the query.")
     @Updatable(value = ACTION_DEFAULT_VALUES, parameters = { "." }, after = "setRawUrl")
     private JdbcConnection connection;
 
     @Option
     @Required
-    @Documentation("The table name")
+    @Documentation("The table name.")
     @Suggestable(value = ACTION_SUGGESTION_TABLE_NAMES, parameters = "connection")
     @Validable(ACTION_VALIDATION_SQL_INJECTION)
     private String tableName;
@@ -65,7 +65,7 @@ public class TableNameDataset implements BaseDataSet {
 
     @Option
     @Delegate
-    @Documentation("common input configuration")
+    @Documentation("Common input configuration.")
     private AdvancedCommon advancedCommon = new AdvancedCommon();
 
     @Override

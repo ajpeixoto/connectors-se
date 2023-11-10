@@ -34,40 +34,40 @@ import java.io.Serializable;
         @GridLayout.Row("setNullValue"),
         @GridLayout.Row("nullValue"),
 })
-@Documentation("jdbc bulk common")
+@Documentation("JDBC bulk common.")
 public class JDBCBulkCommonConfig implements Serializable {
 
     @Path
     @Option
-    @Documentation("")
+    @Documentation("Bulk File.")
     private String bulkFile;
 
     // advanced setting
 
     @Option
-    @Documentation("")
+    @Documentation("Row Separator.")
     private String rowSeparator = "\\n";
 
     @Option
-    @Documentation("")
+    @Documentation("FieldSeparator.")
     private String fieldSeparator = ";";
 
     @Option
-    @Documentation("")
+    @Documentation("Set Text Enclosure.")
     private boolean setTextEnclosure;
 
     @Option
     @ActiveIf(target = "setTextEnclosure", value = "true")
-    @Documentation("")
+    @Documentation("Text Enclosure.")
     private String textEnclosure = "\"";
 
     @Option
-    @Documentation("")
+    @Documentation("Set Null Value.")
     private boolean setNullValue;
 
     @Option
     @ActiveIf(target = "setNullValue", value = "true")
-    @Documentation("")
+    @Documentation("Null value.")
     private String nullValue;
 
 }

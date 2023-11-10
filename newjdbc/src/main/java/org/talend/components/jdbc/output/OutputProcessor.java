@@ -55,7 +55,7 @@ import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVaria
 @ReturnVariable(value = "QUERY", availability = AFTER, type = String.class)
 @Processor(name = "Output")
 @Icon(value = Icon.IconType.CUSTOM, custom = "JDBCOutput")
-@Documentation("JDBC Output component")
+@Documentation("JDBC Output component.")
 public class OutputProcessor implements Serializable {
 
     private static final long serialVersionUID = 1;

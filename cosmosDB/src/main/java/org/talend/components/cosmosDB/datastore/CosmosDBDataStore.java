@@ -35,35 +35,35 @@ import lombok.Data;
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectionMode" }),
         @GridLayout.Row({ "maxConnectionPoolSize" }), @GridLayout.Row({ "consistencyLevel" }) })
 
-@Documentation("cosmosDB connection")
+@Documentation("CosmosDB connection.")
 public class CosmosDBDataStore implements Serializable {
 
     @Option
     @Required
-    @Documentation("Service Endpoint")
+    @Documentation("Service Endpoint.")
     private String serviceEndpoint;
 
     @Option
     @Required
     @Credential
-    @Documentation("Primary Key")
+    @Documentation("Primary Key.")
     private String primaryKey;
 
     @Option
     @Required
-    @Documentation("Database ID")
+    @Documentation("Database ID.")
     private String databaseID;
 
     @Option
-    @Documentation("Connection Mode")
+    @Documentation("Connection Mode.")
     private ConnectionMode connectionMode = ConnectionMode.Gateway;
 
     @Option
-    @Documentation("Max Connection Pool Size")
+    @Documentation("Max Connection Pool Size.")
     private int maxConnectionPoolSize = 1000;
 
     @Option
-    @Documentation("Consistency Level")
+    @Documentation("Consistency Level.")
     private ConsistencyLevel consistencyLevel = ConsistencyLevel.Session;
 
 }

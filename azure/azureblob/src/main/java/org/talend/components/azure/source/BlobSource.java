@@ -26,7 +26,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-@Documentation("Azure Blob Storage reader")
+@Documentation("Azure Blob Storage reader.")
 public class BlobSource implements Serializable {
 
     private final BlobInputProperties configuration;

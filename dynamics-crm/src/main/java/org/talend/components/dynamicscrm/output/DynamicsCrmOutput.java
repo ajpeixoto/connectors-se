@@ -45,7 +45,7 @@ import org.talend.sdk.component.api.record.Record;
 @Version(value = 2, migrationHandler = DynamicsRuntimeMigrationHandler.class)
 @Icon(value = IconType.CUSTOM, custom = "azure-dynamics-connector")
 @Processor(name = "AzureDynamics365Output")
-@Documentation("Azure Dynamics 365 output")
+@Documentation("Azure Dynamics 365 output.")
 public class DynamicsCrmOutput implements Serializable {
 
     private final DynamicsCrmOutputConfiguration configuration;

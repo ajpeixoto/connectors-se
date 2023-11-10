@@ -28,15 +28,15 @@ import org.talend.sdk.component.api.meta.Documentation;
         @GridLayout.Row({ "query" }) //
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "datastore" }) })
-@Documentation("cosmosDB DataSet")
+@Documentation("CosmosDB DataSet.")
 public class QueryDataset extends CosmosDBDataset {
 
     @Option
-    @Documentation("use Query")
+    @Documentation("use Query.")
     private boolean useQuery;
 
     @Option
-    @Documentation("SimpleQuery")
+    @Documentation("SimpleQuery.")
     @TextArea
     @ActiveIf(target = "useQuery", value = "true")
     private String query = "SELECT * FROM c";

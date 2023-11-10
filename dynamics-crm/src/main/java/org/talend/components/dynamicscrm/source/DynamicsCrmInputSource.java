@@ -37,7 +37,7 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-@Documentation("Dynamics CRM input source")
+@Documentation("Dynamics CRM input source.")
 public class DynamicsCrmInputSource implements Serializable {
 
     private final DynamicsCrmInputMapperConfiguration configuration;

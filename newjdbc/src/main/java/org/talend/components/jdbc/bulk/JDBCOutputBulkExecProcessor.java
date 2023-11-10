@@ -37,7 +37,7 @@ import java.sql.SQLException;
 @Version(1)
 @Processor(name = "OutputBulkExec")
 @Icon(value = Icon.IconType.CUSTOM, custom = "JDBCOutputBulkExec")
-@Documentation("JDBC Output Bulk Exec component")
+@Documentation("JDBC Output Bulk Exec component.")
 public class JDBCOutputBulkExecProcessor implements Serializable {
 
     private static final long serialVersionUID = 1;

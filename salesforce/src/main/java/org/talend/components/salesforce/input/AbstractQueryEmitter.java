@@ -40,7 +40,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Documentation("Salesforce query input ")
+@Documentation("Salesforce query input.")
 public abstract class AbstractQueryEmitter implements Serializable {
 
     protected final SalesforceService service;

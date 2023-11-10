@@ -41,7 +41,7 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 
 @Data
 @DataSet
-@Documentation("Marketo Dataset")
+@Documentation("Marketo Dataset.")
 @ToString
 @GridLayout({ @GridLayout.Row("dataStore"), //
         @GridLayout.Row("leadAction"), //
@@ -54,28 +54,28 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 public class MarketoDataSet implements Serializable {
 
     @Option
-    @Documentation("Connection")
+    @Documentation("Connection.")
     private MarketoDataStore dataStore;
 
     @Option
-    @Documentation("Lead action")
+    @Documentation("Lead action.")
     private LeadAction leadAction = MarketoDataSet.LeadAction.getLeadsByList;
 
     @Option
     @Suggestable(value = LIST_NAMES, parameters = { "../dataStore" })
-    @Documentation("List")
+    @Documentation("List.")
     private String listId;
 
     @Option
     @ActiveIf(target = "leadAction", value = { "getLeadActivity" })
-    @Documentation("Date time mode")
+    @Documentation("Date time mode.")
     private DateTimeMode dateTimeMode = DateTimeMode.relative;
 
     @Option
     @ActiveIfs(operator = AND, value = { //
             @ActiveIf(target = "leadAction", value = { "getLeadActivity" }), //
             @ActiveIf(target = "dateTimeMode", value = { "relative" }) })
-    @Documentation("Since relative date time")
+    @Documentation("Since relative date time.")
     private DateTimeRelative sinceDateTimeRelative = PERIOD_AGO_2W;
 
     @Option
@@ -83,20 +83,20 @@ public class MarketoDataSet implements Serializable {
             @ActiveIf(target = "leadAction", value = { "getLeadActivity" }), //
             @ActiveIf(target = "dateTimeMode", value = { "absolute" }) })
     @Validable(VALIDATION_DATETIME_PATTERN)
-    @Documentation("Since absolute date time")
+    @Documentation("Since absolute date time.")
     private String sinceDateTimeAbsolute;
 
     @Option
     @ActiveIf(target = "leadAction", value = "getLeadActivity")
     @Suggestable(value = ACTIVITIES_LIST, parameters = { "../dataStore" })
     @Validable(VALIDATION_LIST_PROPERTY)
-    @Documentation("Activity type ids (10 max supported)")
+    @Documentation("Activity type ids (10 max supported).")
     private List<String> activityTypeIds = Collections.emptyList();
 
     @Option
     @ActiveIf(target = "leadAction", negate = true, value = { "getLeadActivity" })
     @Suggestable(value = FIELD_NAMES, parameters = { "../dataStore" })
-    @Documentation("Fields")
+    @Documentation("Fields.")
     private List<String> fields = Collections.emptyList();
 
     public enum LeadAction {

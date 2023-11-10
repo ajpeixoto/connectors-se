@@ -39,17 +39,17 @@ public class BatchConfig implements Serializable {
     @Version(1)
     @Data
     @DataSet("batchDatasetName")
-    @Documentation("batchDataset documentation")
+    @Documentation("batchDataset documentation.")
     @GridLayout({ @GridLayout.Row({ "dso" }), @GridLayout.Row({ "paramdse" }) })
     @PollableDuplicateDataset
     public class BatchDataset {
 
         @Option
-        @Documentation("The datastore")
+        @Documentation("The datastore.")
         BatchDatastore dso;
 
         @Option
-        @Documentation("Param of dataset")
+        @Documentation("Param of dataset.")
         int paramdse;
 
     }
@@ -57,12 +57,12 @@ public class BatchConfig implements Serializable {
     @Version(1)
     @Data
     @DataStore("batchDatastoreName")
-    @Documentation("batchDatastore documentation")
+    @Documentation("Batch Datastore.")
     @GridLayout({ @GridLayout.Row({ "paramdso" }) })
     public class BatchDatastore {
 
         @Option
-        @Documentation("Param of datastore")
+        @Documentation("Param of datastore.")
         String paramdso;
 
     }

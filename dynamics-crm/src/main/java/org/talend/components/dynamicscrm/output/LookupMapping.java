@@ -26,15 +26,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @OptionsOrder({ "inputColumn", "referenceEntitySet" })
-@Documentation("Lookup property mapping between field and referenced entity set")
+@Documentation("Lookup property mapping between field and referenced entity set.")
 public class LookupMapping implements Serializable {
 
     @Option
-    @Documentation("Field")
+    @Documentation("Field.")
     private String inputColumn;
 
     @Option
-    @Documentation("Referenced entity set")
+    @Documentation("Referenced entity set.")
     private String referenceEntitySet;
 
 }

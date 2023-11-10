@@ -37,50 +37,50 @@ import java.util.List;
         @GridLayout.Row({ "bulkWrite" }), @GridLayout.Row({ "bulkWriteType" }), @GridLayout.Row({ "dataAction" }),
         @GridLayout.Row({ "keyMappings" }), @GridLayout.Row({ "updateAllDocuments" }) }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }) }) })
-@Documentation("MongoDB sink configuration")
+@Documentation("MongoDB sink configuration.")
 public class MongoDBSinkConfiguration implements MongoCommonOutputConfiguration {
 
     @Option
-    @Documentation("Dataset")
+    @Documentation("Dataset.")
     private MongoDBReadAndWriteDataSet dataset;
 
     @Option
-    @Documentation("Set read preference")
+    @Documentation("Set read preference.")
     private boolean setWriteConcern;
 
     @Option
     @ActiveIf(target = "setWriteConcern", value = "true")
-    @Documentation("Write concern")
+    @Documentation("Write concern.")
     private WriteConcern writeConcern = WriteConcern.ACKNOWLEDGED;
 
     @Option
-    @Documentation("Bulk load")
+    @Documentation("Bulk load.")
     private boolean bulkWrite = false;
 
     @Option
     @ActiveIf(target = "bulkWrite", value = "true")
-    @Documentation("Bulk load type")
+    @Documentation("Bulk load type.")
     private BulkWriteType bulkWriteType = BulkWriteType.UNORDERED;
 
     @Option
-    @Documentation("Data action")
+    @Documentation("Data action.")
     private DataAction dataAction = DataAction.INSERT;
 
     @Option
     @ActiveIf(target = "dataAction", value = { "SET", "UPSERT_WITH_SET" })
-    @Documentation("Key mappings")
+    @Documentation("Key mappings.")
     private List<KeyMapping> keyMappings = Collections.emptyList();
 
     @Option
     @ActiveIf(target = "dataAction", value = { "SET", "UPSERT_WITH_SET" })
-    @Documentation("update all documents")
+    @Documentation("<update all documents.")
     private boolean updateAllDocuments = false;
 
     // this one for work for mapping mode, but seems not necessary now, only whole document(text) and json mode now
     /*
      * @Option
      * 
-     * @Documentation("not generate key without value in json if null")
+     * @Documentation("not generate key without value in json if null.")
      * private boolean skipNullValue = false;
      */
 }

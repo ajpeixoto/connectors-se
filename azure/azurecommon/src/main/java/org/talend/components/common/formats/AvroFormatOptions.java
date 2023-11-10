@@ -19,6 +19,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@Documentation("Avro Configuration")
+@Documentation("Avro Configuration.")
 public class AvroFormatOptions implements Serializable {
 }

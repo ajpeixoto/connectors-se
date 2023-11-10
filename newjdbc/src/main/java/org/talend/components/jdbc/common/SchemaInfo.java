@@ -43,7 +43,7 @@ public class SchemaInfo implements Serializable {
     private boolean key;
 
     @Option
-    @Documentation("DB Type like VARCHAR, or type in source system")
+    @Documentation("DB Type like VARCHAR, or type in source system.")
     private String type;
 
     @Option

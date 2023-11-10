@@ -25,10 +25,10 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 @Data
 @GridLayout(value = { @GridLayout.Row({ "dataSet" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row({ "dataSet" }) })
-@Documentation("ADLS input configuration")
+@Documentation("ADLS input configuration.")
 public class InputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Dataset")
+    @Documentation("Dataset.")
     private AdlsGen2DataSet dataSet;
 }

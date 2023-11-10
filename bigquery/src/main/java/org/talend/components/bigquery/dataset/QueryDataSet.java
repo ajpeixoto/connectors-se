@@ -33,16 +33,16 @@ import java.io.Serializable;
 public class QueryDataSet implements Serializable {
 
     @Option
-    @Documentation("The BigQuery connection")
+    @Documentation("The BigQuery connection.")
     private BigQueryConnection connection;
 
     @Option
     @Code("sql")
-    @Documentation("The BigQuery query")
+    @Documentation("The BigQuery query.")
     private String query;
 
     @Option
-    @Documentation("Should the query use legacy SQL")
+    @Documentation("Should the query use legacy SQL.")
     private boolean useLegacySql;
 
 }

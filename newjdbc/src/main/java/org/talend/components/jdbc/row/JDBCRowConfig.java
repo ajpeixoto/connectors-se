@@ -40,50 +40,50 @@ import java.util.List;
         @GridLayout.Row("useQueryTimeout"),
         @GridLayout.Row("queryTimeout")
 })
-@Documentation("jdbc row")
+@Documentation("JDBC row.")
 public class JDBCRowConfig implements Serializable {
 
     @Option
-    @Documentation("table dataset")
+    @Documentation("Table dataset.")
     private JDBCQueryDataSet dataSet;
 
     @Option
-    @Documentation("")
+    @Documentation("Die On Error.")
     private boolean dieOnError;
 
     @Option
-    @Documentation("")
+    @Documentation("Propagate Record Set.")
     private boolean propagateRecordSet;
 
     @BuiltInSuggestable(BuiltInSuggestable.Name.CURRENT_SCHEMA_ENTRY_NAMES)
     @Option
     @ActiveIf(target = "propagateRecordSet", value = { "true" })
-    @Documentation("")
+    @Documentation("Record Set Column.")
     private String recordSetColumn;
 
     @Option
-    @Documentation("")
+    @Documentation("Use Prepared Statement.")
     private boolean usePreparedStatement;
 
     @Option
     @ActiveIf(target = "usePreparedStatement", value = { "true" })
-    @Documentation("")
+    @Documentation("Use Prepared Statement.")
     private List<PreparedStatementParameter> preparedStatementParameters;
 
     @Option
-    @Documentation("")
+    @Documentation("Detect Error When Multi Statements.")
     private boolean detectErrorWhenMultiStatements;
 
     @Option
-    @Documentation("")
+    @Documentation("Commit Every.")
     private int commitEvery = 10000;
 
     @Option
-    @Documentation("")
+    @Documentation("use Query Timeout.")
     private boolean useQueryTimeout;
 
     @Option
     @ActiveIf(target = "useQueryTimeout", value = { "true" })
-    @Documentation("")
+    @Documentation("Query Timeout.")
     private int queryTimeout = 30;
 }

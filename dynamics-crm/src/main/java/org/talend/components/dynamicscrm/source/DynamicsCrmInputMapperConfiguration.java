@@ -30,39 +30,39 @@ import lombok.Data;
         @GridLayout.Row({ "filterConditions" }), @GridLayout.Row({ "filter" }),
         @GridLayout.Row({ "orderByConditionsList" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("dataset") })
-@Documentation("Dynamics CRM input configuration")
+@Documentation("Dynamics CRM input configuration.")
 public class DynamicsCrmInputMapperConfiguration implements Serializable {
 
     @Option
-    @Documentation("Dynamics CRM dataset")
+    @Documentation("Dynamics CRM dataset.")
     private DynamicsCrmDataset dataset;
 
     @Option
-    @Documentation("Use advanced filter string instead of filter conditions table")
+    @Documentation("Use advanced filter string instead of filter conditions table.")
     private boolean customFilter = false;
 
     @Option
     @ActiveIf(target = "customFilter", value = "false")
-    @Documentation("Logical operator used to combine conditions")
+    @Documentation("Logical operator used to combine conditions.")
     private Operator operator = Operator.AND;
 
     @Option
     @ActiveIf(target = "customFilter", value = "false")
-    @Documentation("Filter conditions")
+    @Documentation("Filter conditions.")
     private List<FilterCondition> filterConditions;
 
     @Option
     @ActiveIf(target = "customFilter", value = "true")
-    @Documentation("Filter")
+    @Documentation("Filter.")
     private String filter;
 
     @Option
-    @Documentation("Sorting conditions")
+    @Documentation("Sorting conditions.")
     private List<OrderByCondition> orderByConditionsList;
 
     @Option
     // @Structure(type = Type.OUT)
-    @Documentation("Fields to get from CRM")
+    @Documentation("Fields to get from CRM.")
     private List<String> columns;
 
     public enum Operator {

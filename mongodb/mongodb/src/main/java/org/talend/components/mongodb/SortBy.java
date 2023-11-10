@@ -26,16 +26,16 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "column" }), @GridLayout.Row({ "order" }) }) })
-@Documentation("Sort by")
+@Documentation("Sort by.")
 public class SortBy implements Serializable {
 
     // TODO make it to a closedlist to choose? not good as not flexable if driver change?
     @Option
-    @Documentation("sort by this key")
+    @Documentation("Sort by this key.")
     private String column;
 
     @Option
-    @Documentation("asc or desc")
+    @Documentation("Asc or Desc.")
     private SortOrder order = SortOrder.ASC;
 
 }

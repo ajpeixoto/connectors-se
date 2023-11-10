@@ -37,13 +37,13 @@ public class BigQueryConnection implements Serializable {
 
     @Option
     @Required
-    @Documentation("Google Cloud Platform Project")
+    @Documentation("Google Cloud Platform Project.")
     private String projectName;
 
     @Option
     @Credential
     @Required
-    @Documentation("Google credential (JSON)")
+    @Documentation("Google credential (JSON).")
     private String jsonCredentials;
 
 }

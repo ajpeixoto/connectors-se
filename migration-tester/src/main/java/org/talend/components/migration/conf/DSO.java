@@ -44,29 +44,29 @@ public class DSO implements Serializable {
     String dso_legacy;
 
     @Option
-    @Documentation("Datastore migration handler callback")
+    @Documentation("Datastore migration handler callback.")
     String dso_migration_handler_callback;
 
     @Option
-    @Documentation("Incoming configuration")
+    @Documentation("Incoming configuration.")
     @Code("json")
     String dso_incoming;
 
     @Option
-    @Documentation("Outgoing configuration")
+    @Documentation("Outgoing configuration.")
     @Code("json")
     String dso_outgoing;
 
     @Option
-    @Documentation("Property updated from dataset migration handler")
+    @Documentation("Property updated from dataset migration handler.")
     String dso_from_dataset;
 
     @Option
-    @Documentation("Property updated from source migration handler")
+    @Documentation("Property updated from source migration handler.")
     String dso_from_source;
 
     @Option
-    @Documentation("Property updated from sink migration handler")
+    @Documentation("Property updated from sink migration handler.")
     String dso_from_sink;
 
     @Option

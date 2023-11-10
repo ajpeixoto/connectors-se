@@ -36,23 +36,23 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
         @GridLayout.Row("dieOnError"), //
 })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row({ "connection" }) })
-@Documentation("ADLS delete configuration")
+@Documentation("ADLS delete configuration.")
 public class AdlsGen2DeleteConfiguration implements Serializable {
 
     @Option
     @Required
-    @Documentation("ADLS Gen2 Connection")
+    @Documentation("ADLS Gen2 Connection.")
     private AdlsGen2Connection connection;
 
     @Option
     @Required
     @Suggestable(value = ACTION_FILESYSTEMS, parameters = { "connection" })
-    @Documentation("FileSystem")
+    @Documentation("FileSystem.")
     private String filesystem;
 
     @Option
     @Required
-    @Documentation("Path to Blob Object")
+    @Documentation("Path to Blob Object.")
     private String blobPath;
 
     @Option

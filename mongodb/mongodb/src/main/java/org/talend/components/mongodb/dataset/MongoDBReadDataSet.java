@@ -32,21 +32,21 @@ import org.talend.sdk.component.api.meta.Documentation;
 @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "collection" }), @GridLayout.Row({ "mode" }),
         @GridLayout.Row({ "query" }) })
 // @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "enableExternalSort" }) })
-@Documentation("MongoDB DataSet for read only")
+@Documentation("MongoDB DataSet for read only.")
 public class MongoDBReadDataSet implements MongoCommonDataSet {
 
     @Option
-    @Documentation("Connection")
+    @Documentation("Connection.")
     private MongoDBDataStore datastore;
 
     @Option
     @Required
-    @Documentation("Collection")
+    @Documentation("Collection.")
     private String collection;
 
     @Option
     @Required
-    @Documentation("Mode")
+    @Documentation("Mode.")
     private Mode mode = Mode.JSON;
 
     // TODO almost impossible to split dataset with source and sink, the common part is almost no meaning as dataset
@@ -55,21 +55,21 @@ public class MongoDBReadDataSet implements MongoCommonDataSet {
      *
      * @ActiveIf(target = "mode", value = "MAPPING")
      *
-     * @Documentation("Path Mapping")
+     * @Documentation("Path Mapping.")
      * private List<PathMapping> pathMappings = Collections.emptyList();
      */
 
     /*
      * @Option
      *
-     * @Documentation("Query type")
+     * @Documentation("Query type.")
      * private QueryType queryType = QueryType.FIND;
      */
 
     @Option
     @Code("json")
     // @ActiveIf(target = "queryType", value = "FIND")
-    @Documentation("Query")
+    @Documentation("Query.")
     private String query = "{}";
 
     /*
@@ -86,17 +86,17 @@ public class MongoDBReadDataSet implements MongoCommonDataSet {
      *
      * @ActiveIf(target = "queryType", value = "AGGREGATION")
      *
-     * @Documentation("Aggregation stages")
+     * @Documentation("Aggregation stages.")
      * private List<AggregationStage> aggregationStages = Collections.emptyList();
      *
      * @Option
      *
-     * @Documentation("Sort by")
+     * @Documentation("Sort by.")
      * private List<SortBy> sortBy = Collections.emptyList();
      *
      * @Option
      *
-     * @Documentation("Maximum number of documents to be returned")
+     * @Documentation("Maximum number of documents to be returned.")
      * private int limit = -1;
      *
      * // TODO readonly and only for user view data
@@ -107,26 +107,26 @@ public class MongoDBReadDataSet implements MongoCommonDataSet {
      *
      * @ActiveIf(target = "mode", value = "DOCUMENT")
      *
-     * @Documentation("Sample for document json")
+     * @Documentation("Sample for document json.")
      * private String sample;
      *
      * @Option
      *
-     * @Documentation("Set read preference")
+     * @Documentation("Set read preference.")
      * private boolean setReadPreference;
      *
      * @Option
      *
      * @ActiveIf(target = "setReadPreference", value = "true")
      *
-     * @Documentation("Read preference")
+     * @Documentation("Read preference.")
      * private ReadPreference readPreference = ReadPreference.PRIMARY;
      *
      * @Option
      *
      * @ActiveIf(target = "queryType", value = "AGGREGATION")
      *
-     * @Documentation("Enable external sort")
+     * @Documentation("Enable external sort.")
      * private boolean enableExternalSort;
      */
 }

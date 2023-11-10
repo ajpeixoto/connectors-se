@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "AdlsGen2-get")
 @DriverRunner(name = "AdlsGen2Get")
-@Documentation("Fetch files from Azure Data Lake Storage Gen2")
+@Documentation("Fetch files from Azure Data Lake Storage Gen2.")
 public class AdlsGen2Get implements Serializable {
 
     @Service

@@ -17,6 +17,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@Documentation("Parquet Configuration")
+@Documentation("Parquet Configuration.")
 public class ParquetFormatOptions extends AvroFormatOptions {
 }

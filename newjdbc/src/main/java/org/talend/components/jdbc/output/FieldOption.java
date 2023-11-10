@@ -26,28 +26,28 @@ import java.io.Serializable;
 @OptionsOrder({ "columnName", "updateKey", "deleteKey", "updatable", "insertable" })
 @NoArgsConstructor
 @AllArgsConstructor
-@Documentation("")
+@Documentation("Field Option.")
 public class FieldOption implements Serializable {
 
     @BasedOnSchema
     @Option
-    @Documentation("")
+    @Documentation("Column Name.")
     private String columnName;
 
     @Option
-    @Documentation("")
+    @Documentation("Update Key.")
     private boolean updateKey;
 
     @Option
-    @Documentation("")
+    @Documentation("Delete Key.")
     private boolean deleteKey;
 
     @Option
-    @Documentation("")
+    @Documentation("Updatable.")
     private boolean updatable = true;
 
     @Option
-    @Documentation("")
+    @Documentation("Insertable.")
     private boolean insertable = true;
 
 }

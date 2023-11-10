@@ -34,36 +34,36 @@ import lombok.Data;
 @GridLayout({ @GridLayout.Row({ "dataset" }), @GridLayout.Row({ "action" }), @GridLayout.Row({ "lookupMapping" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("dataset"), @GridLayout.Row("emptyStringToNull"),
         @GridLayout.Row("ignoreNull") })
-@Documentation("Azure Dynamics 365 output configuration")
+@Documentation("Azure Dynamics 365 output configuration.")
 public class DynamicsCrmOutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Azure Dynamics 365 dataset")
+    @Documentation("Azure Dynamics 365 dataset.")
     private DynamicsCrmDataset dataset;
 
     @Option
-    @Documentation("Lookup fields mapping to entity set")
+    @Documentation("Lookup fields mapping to entity set.")
     @ActiveIf(target = "action", value = "DELETE", negate = true)
     private List<LookupMapping> lookupMapping;
 
     @Option
     @Required
-    @Documentation("Action to be performed on data")
+    @Documentation("Action to be performed on data.")
     private Action action = Action.INSERT;
 
     @Option
     @Required
-    @Documentation("Ignore null objects for insert and update operations")
+    @Documentation("Ignore null objects for insert and update operations.")
     private boolean ignoreNull;
 
     @Option
     @Required
-    @Documentation("Convert empty strings to null for lookup properties")
+    @Documentation("Convert empty strings to null for lookup properties.")
     private boolean emptyStringToNull;
 
     @Option
     // @Structure(type = Type.IN)
-    @Documentation("Fields to write to CRM")
+    @Documentation("Fields to write to CRM.")
     private List<String> columns;
 
     public enum Action {

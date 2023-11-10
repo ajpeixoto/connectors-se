@@ -31,57 +31,57 @@ import static java.util.Optional.ofNullable;
  */
 @Data
 @NoArgsConstructor
-@Documentation("Jdbc component configuration")
+@Documentation("JDBC component configuration.")
 public class JdbcConfiguration implements Serializable {
 
     @Option
-    @Documentation("supported table types. used in table name suggestions")
+    @Documentation("Supported table types. used in table name suggestions.")
     private Set<String> supportedTableTypes;
 
     @Option
-    @Documentation("list of driver meta data")
+    @Documentation("List of driver meta data.")
     private List<Driver> drivers = new ArrayList<>();
 
     @Data
     @NoArgsConstructor
     @EqualsAndHashCode(of = { "id", "className" })
-    @Documentation("Jdbc driver metadata")
+    @Documentation("JDBC driver metadata.")
     public static class Driver implements Serializable {
 
         @Option
-        @Documentation("Jdbc driver id. this is must be unique")
+        @Documentation("JDBC driver id. this is must be unique.")
         private String id;
 
         @Option
-        @Documentation("Jdbc driver display Name.")
+        @Documentation("JDBC driver display Name.")
         private String displayName;
 
         @Option
-        @Documentation("Jdbc driver order in the list")
+        @Documentation("JDBC driver order in the list.")
         private Integer order = Integer.MAX_VALUE;
 
         @Option
-        @Documentation("Jdbc driver class")
+        @Documentation("JDBC driver class.")
         private String className;
 
         @Option
-        @Documentation("Jdbc driver that can handle this db also")
+        @Documentation("JDBC driver that can handle this db also.")
         private List<String> handlers = new ArrayList<>();
 
         @Option
-        @Documentation("Jdbc driver and driver dependencies jar locations in mvn format")
+        @Documentation("JDBC driver and driver dependencies jar locations in mvn format.")
         private List<String> paths = new ArrayList<>();
 
         @Option
-        @Documentation("Fixed jdbc url parameters")
+        @Documentation("Fixed JDBC url parameters.")
         private List<KeyVal> fixedParameters = new ArrayList<>();
 
         @Option
-        @Documentation("JDBC default protocol")
+        @Documentation("JDBC default protocol.")
         private String protocol;
 
         @Option
-        @Documentation("Defaults values")
+        @Documentation("Defaults values.")
         private Defaults defaults;
 
         public String getDisplayName() {
@@ -92,37 +92,37 @@ public class JdbcConfiguration implements Serializable {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
-    @Documentation("Key/Value class")
+    @Documentation("Key/Value class.")
     public static class KeyVal implements Serializable {
 
         @Option
-        @Documentation("The key")
+        @Documentation("The key.")
         private String key;
 
         @Option
-        @Documentation("The value")
+        @Documentation("The value.")
         private String value;
     }
 
     @Data
     @NoArgsConstructor
-    @Documentation("Default Values for connection")
+    @Documentation("Default Values for connection.")
     public static class Defaults implements Serializable {
 
         @Option
-        @Documentation("JDBC default host")
+        @Documentation("JDBC default host.")
         private String host;
 
         @Option
-        @Documentation("JDBC default port")
+        @Documentation("JDBC default port.")
         private int port;
 
         @Option
-        @Documentation("JDBC default database")
+        @Documentation("JDBC default database.")
         private String database;
 
         @Option
-        @Documentation("JDBC default parameters")
+        @Documentation("JDBC default parameters.")
         private List<JdbcConfiguration.KeyVal> parameters = new ArrayList<>();
     }
 

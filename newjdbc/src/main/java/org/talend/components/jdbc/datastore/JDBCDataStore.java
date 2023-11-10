@@ -90,7 +90,7 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 })
 @DataStore("JDBCDataStore")
 @Checkable("CheckConnection")
-@Documentation("A connection to a database")
+@Documentation("A connection to a database.")
 public class JDBCDataStore implements Serializable {
 
     @Option
@@ -114,29 +114,29 @@ public class JDBCDataStore implements Serializable {
 
     @Option
     @ActiveIf(target = "enableDBType", value = { "true" })
-    @Documentation("Let user define complete jdbc url or not")
+    @Documentation("Let user define complete jdbc url or not.")
     @DefaultValue("true")
     private Boolean setRawUrl = true;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc host")
+    @Documentation("JDBC host.")
     private String host;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc port")
+    @Documentation("JDBC port.")
     @DefaultValue("80")
     private int port = 80;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc database")
+    @Documentation("JDBC database.")
     private String database;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc parameters")
+    @Documentation("JDBC parameters.")
     private List<JDBCConfiguration.KeyVal> parameters = new ArrayList<>();
 
     @Option
@@ -148,7 +148,7 @@ public class JDBCDataStore implements Serializable {
     @Option
     @ActiveIfs(value = { @ActiveIf(target = "setRawUrl", value = { "false" }),
             @ActiveIf(target = "defineProtocol", value = { "true" }) })
-    @Documentation("Protocol")
+    @Documentation("Protocol.")
     private String protocol;
 
     @Option
@@ -235,53 +235,53 @@ public class JDBCDataStore implements Serializable {
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "true" })
-    @Documentation("jdbc url")
+    @Documentation("JDBC url.")
     private String jdbcUrl = "jdbc:";
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
-    @Documentation("jdbc driver table")
+    @Documentation("JDBC driver table.")
     private List<Driver> jdbcDriver = Collections.emptyList();
 
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @Option
     @Suggestable(value = "GUESS_DRIVER_CLASS", parameters = { "jdbcDriver" })
-    @Documentation("driver class")
+    @Documentation("Driver class.")
     private String jdbcClass;
 
     @Option
     @ActiveIfs(value = { @ActiveIf(target = "dbType", value = "Snowflake", negate = true),
             @ActiveIf(target = "authenticationType", value = "OAUTH", negate = true) }, operator = OR)
-    @Documentation("database user")
+    @Documentation("Database user.")
     private String userId;
 
     @Option
     @ActiveIfs(value = { @ActiveIf(target = "dbType", value = "Snowflake", negate = true),
             @ActiveIf(target = "authenticationType", value = "BASIC") }, operator = OR)
     @Credential
-    @Documentation("database password")
+    @Documentation("Database password.")
     private String password;
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE })
-    @Documentation("use or register a shared DB connection")
+    @Documentation("Use or register a shared DB connection.")
     private boolean useSharedDBConnection;
 
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "useSharedDBConnection", value = { "true" }),
             @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE }) })
-    @Documentation("shared DB connection name for register or fetch")
+    @Documentation("Shared DB connection name for register or fetch.")
     private String sharedDBConnectionName;
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_COMPONENT_SCOPE })
-    @Documentation("use data source")
+    @Documentation("Use data source.")
     private boolean useDataSource;
 
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "useDataSource", value = { "true" }),
             @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_COMPONENT_SCOPE }) })
-    @Documentation("data source alias for fetch")
+    @Documentation("Data source alias for fetch.")
     private String dataSourceAlias;
 
     // now and future, only jdbc connector need this widget type : studio "widget.type.mappingType", so not generic, so
@@ -289,20 +289,20 @@ public class JDBCDataStore implements Serializable {
     // no need to provide tck framework support
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_METADATA_SCOPE })
-    @Documentation("select db mapping file for type convert")
+    @Documentation("Select db mapping file for type convert.")
     private String dbMapping;
 
     // advanced setting
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE })
-    @Documentation("decide if call auto commit method")
+    @Documentation("Decide if call auto commit method.")
     private boolean useAutoCommit = true;
 
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "useAutoCommit", value = { "true" }),
             @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_CONNECTION_COMPONENT_SCOPE }) })
-    @Documentation("if true, mean auto commit, else disable auto commit, as different database, default auto commit value is different")
+    @Documentation("If true, mean auto commit, else disable auto commit, as different database, default auto commit value is different.")
     private boolean autoCommit;
 
     public String getJdbcUrl() {

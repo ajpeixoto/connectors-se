@@ -27,15 +27,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @OptionsOrder({ "field", "order" })
-@Documentation("Order by condition")
+@Documentation("Order by condition.")
 public class OrderByCondition implements Serializable {
 
     @Option
-    @Documentation("Field to order by")
+    @Documentation("Field to order by.")
     private String field;
 
     @Option
-    @Documentation("Order")
+    @Documentation("Order.")
     public Order order;
 
     public enum Order {

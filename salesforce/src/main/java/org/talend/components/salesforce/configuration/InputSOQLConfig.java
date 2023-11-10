@@ -21,11 +21,11 @@ import lombok.Data;
 
 @Data
 @GridLayout(value = { @GridLayout.Row({ "dataSet" }) })
-@Documentation("Query input configuration")
+@Documentation("Query input configuration.")
 public class InputSOQLConfig implements InputConfig {
 
     @Option
-    @Documentation("SQL query dataset")
+    @Documentation("SQL query dataset.")
     private SOQLQueryDataSet dataSet;
 
 }

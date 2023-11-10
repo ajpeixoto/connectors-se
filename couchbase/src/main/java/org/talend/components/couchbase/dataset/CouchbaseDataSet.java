@@ -38,7 +38,7 @@ import lombok.Data;
         @GridLayout.Row({ "documentType" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "datastore" }) })
 
-@Documentation("Couchbase DataSet")
+@Documentation("Couchbase DataSet.")
 public class CouchbaseDataSet implements Serializable {
 
     @Option

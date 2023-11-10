@@ -24,12 +24,12 @@ import lombok.Data;
 @GridLayout({ @GridLayout.Row({ "dataset" }) })
 
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("blobNameTemplate") })
-@Documentation("Options for the output component")
+@Documentation("Options for the output component.")
 @Data
 public class BlobOutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Azure Blob connection")
+    @Documentation("Azure Blob connection.")
     private AzureBlobDataset dataset;
 
     @Option

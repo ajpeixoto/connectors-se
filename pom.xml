@@ -163,9 +163,9 @@
         <!-- component-runtime validations -->
         <talend.validation.locale>root</talend.validation.locale>
         <validation.model>true</validation.model>
-        <validation.placeholder>false</validation.placeholder>
+        <validation.placeholder>true</validation.placeholder>
         <validation.documentation>true</validation.documentation>
-        <validation.wording>false</validation.wording>
+        <validation.wording>true</validation.wording>
         <talend-component.icon.skip>true</talend-component.icon.skip>
         <!-- TODO: replace with a 'validation.svg' -->
         <validation.metadata>true</validation.metadata>

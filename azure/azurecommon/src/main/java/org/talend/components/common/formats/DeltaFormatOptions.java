@@ -18,6 +18,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import java.io.Serializable;
 
 @Data
-@Documentation("Delta Configuration")
+@Documentation("Delta Configuration.")
 public class DeltaFormatOptions implements Serializable {
 }

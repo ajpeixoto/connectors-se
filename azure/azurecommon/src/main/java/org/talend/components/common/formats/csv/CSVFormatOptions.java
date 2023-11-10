@@ -36,47 +36,47 @@ public class CSVFormatOptions implements Serializable {
     private static final long serialVersionUID = -3030939392498621435L;
 
     @Option
-    @Documentation("Symbol(s) used to separate records")
+    @Documentation("Symbol(s) used to separate records.")
     private CSVRecordDelimiter recordDelimiter = CSVRecordDelimiter.CRLF;
 
     @Option
     @ActiveIf(target = "recordDelimiter", value = "OTHER")
-    @Documentation("Your custom record delimiter")
+    @Documentation("Your custom record delimiter.")
     private String customRecordDelimiter;
 
     @Option
-    @Documentation("Symbol(s) used to separate fields")
+    @Documentation("Symbol(s) used to separate fields.")
     private CSVFieldDelimiter fieldDelimiter = CSVFieldDelimiter.SEMICOLON;
 
     @Option
     @ActiveIf(target = "fieldDelimiter", value = "OTHER")
-    @Documentation("Your custom field delimiter")
+    @Documentation("Your custom field delimiter.")
     private String customFieldDelimiter;
 
     @Option
-    @Documentation("Text enclosure character")
+    @Documentation("Text enclosure character.")
     private String textEnclosureCharacter;
 
     @Option
-    @Documentation("Escape character")
+    @Documentation("Escape character.")
     private String escapeCharacter;
 
     @Option
-    @Documentation("Encoding")
+    @Documentation("Encoding.")
     private Encoding encoding = Encoding.UTF8;
 
     @Option
     @ActiveIf(target = "encoding", value = "OTHER")
-    @Documentation("Your custom file encoding format")
+    @Documentation("Your custom file encoding format.")
     private String customEncoding;
 
     @Option
-    @Documentation("Set header size")
+    @Documentation("Set header size.")
     private boolean useHeader;
 
     @Option
     @ActiveIf(target = "useHeader", value = "true")
-    @Documentation("Header size")
+    @Documentation("Header size.")
     // @Min(-0.0)
     // TODO min doesn't work correctly yet
     private int header = 1;

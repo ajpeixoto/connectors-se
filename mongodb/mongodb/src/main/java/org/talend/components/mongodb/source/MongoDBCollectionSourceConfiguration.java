@@ -26,11 +26,11 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Data
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "dataset" }) }),
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }) }) })
-@Documentation("Simple MongoDB Source Configuration which not support query")
+@Documentation("Simple MongoDB Source Configuration which not support query.")
 public class MongoDBCollectionSourceConfiguration implements MongoCommonSourceConfiguration {
 
     @Option
-    @Documentation("dataset")
+    @Documentation("Dataset.")
     private MongoDBReadAndWriteDataSet dataset;
 
     private Long sampleLimit = -1L;

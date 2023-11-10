@@ -38,26 +38,26 @@ import java.util.List;
         @GridLayout.Row("dataStore")
 })
 @DataSet("JDBCQueryDataSet")
-@Documentation("A query dataset")
+@Documentation("A query dataset.")
 public class JDBCQueryDataSet implements CommonDataSet, Serializable {
 
     @Option
-    @Documentation("The connection information to execute")
+    @Documentation("The connection information to execute.")
     private JDBCDataStore dataStore;
 
     @Option
     @Suggestable(value = "FETCH_TABLES", parameters = { "dataStore" })
-    @Documentation("The table name")
+    @Documentation("The table name.")
     private String tableName;
 
     @Option
     @Structure(type = Structure.Type.OUT/* , discoverSchema = "JDBCQueryDataSet" */)
-    @Documentation("schema")
+    @Documentation("Schema.")
     private List<SchemaInfo> schema;
 
     @Option
     @Code("sql")
-    @Documentation("sql query")
+    @Documentation("Sql query.")
     private String sqlQuery = "select id, name from employee";
 
     @Override

@@ -25,21 +25,21 @@ import lombok.Data;
 @Data
 @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "collectionID" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "datastore" }) })
-@Documentation("cosmosDB DataSet")
+@Documentation("cosmosDB DataSet.")
 public class CosmosDBDataset implements Serializable {
 
     @Option
-    @Documentation("Connection")
+    @Documentation("Connection.")
     private CosmosDBDataStore datastore;
 
     // @Option
-    // @Documentation("Schema")
+    // @Documentation("Schema.")
     // @Structure(type = Structure.Type.OUT, discoverSchema = "discover")
     // private List<String> schema = new ArrayList<>();
 
     @Option
     @Required
-    @Documentation("Collection ID")
+    @Documentation("Collection ID.")
     private String collectionID;
 
 }

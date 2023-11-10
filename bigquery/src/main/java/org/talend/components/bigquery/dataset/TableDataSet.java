@@ -35,21 +35,21 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 public class TableDataSet implements Serializable {
 
     @Option
-    @Documentation("The BigQuery datastore")
+    @Documentation("The BigQuery datastore.")
     private BigQueryConnection connection;
 
     @Option
     @Suggestable(value = BigQueryService.ACTION_SUGGESTION_DATASET, parameters = { "connection" })
-    @Documentation("The BigQuery dataset")
+    @Documentation("The BigQuery dataset.")
     private String bqDataset;
 
     @Option
     @Suggestable(value = BigQueryService.ACTION_SUGGESTION_TABLES, parameters = { "connection", "bqDataset" })
-    @Documentation("The BigQuery table name")
+    @Documentation("The BigQuery table name.")
     private String tableName;
 
     @Option
-    @Documentation("Google Storage bucket for temporary files")
+    @Documentation("Google Storage bucket for temporary files.")
     private String gsBucket;
 
 }

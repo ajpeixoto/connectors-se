@@ -31,7 +31,7 @@ import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 public class BigQueryTableInputConfig implements Serializable {
 
     @Option
-    @Documentation("BigQuery Table Dataset")
+    @Documentation("BigQuery Table Dataset.")
     private TableDataSet tableDataset;
 
     public BigQueryConnection getDataStore() {

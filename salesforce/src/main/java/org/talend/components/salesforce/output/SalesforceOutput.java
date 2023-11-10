@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @Version
 @Icon(value = Icon.IconType.CUSTOM, custom = "file-salesforce-output")
 @Processor(name = "SalesforceOutput", family = "Salesforce")
-@Documentation("Salesforce output")
+@Documentation("Salesforce output.")
 public class SalesforceOutput implements Serializable {
 
     private final OutputConfig configuration;

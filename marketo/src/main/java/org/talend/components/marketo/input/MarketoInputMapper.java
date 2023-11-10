@@ -40,7 +40,7 @@ import static org.talend.components.marketo.MarketoApiConstants.REST_API_LIMIT;
 @Version
 @Icon(value = IconType.CUSTOM, custom = "marketo-input")
 @PartitionMapper(family = "Marketo", name = "Input")
-@Documentation("Marketo Input Component")
+@Documentation("Marketo Input Component.")
 public class MarketoInputMapper implements Serializable {
 
     private MarketoInputConfiguration configuration;

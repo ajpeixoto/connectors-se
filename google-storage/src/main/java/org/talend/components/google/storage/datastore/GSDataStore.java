@@ -34,7 +34,7 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 @Checkable(GSService.ACTION_HEALTH_CHECK)
 @GridLayout({ @GridLayout.Row({ "jsonCredentials" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("usePrivateEndpoint"), @GridLayout.Row("privateEndpoint") })
-@Documentation("Connector for google cloud storage")
+@Documentation("Connector for google cloud storage.")
 public class GSDataStore implements Serializable {
 
     /** Serialization */
@@ -46,7 +46,7 @@ public class GSDataStore implements Serializable {
     @Option
     @Credential
     @Required
-    @Documentation("Google credential (JSON)")
+    @Documentation("Google credential (JSON).")
     private String jsonCredentials;
 
     @Option
