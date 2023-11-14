@@ -160,15 +160,16 @@
              run build w/ -Pcode-quality to have a full validation -->
         <!-- should enforcing rules fail? Not yet, but soon! -->
         <enforcer.fail>false</enforcer.fail>
+
         <!-- component-runtime validations -->
         <talend.validation.locale>root</talend.validation.locale>
         <validation.model>true</validation.model>
         <validation.placeholder>true</validation.placeholder>
         <validation.documentation>true</validation.documentation>
         <validation.wording>true</validation.wording>
-        <talend-component.icon.skip>true</talend-component.icon.skip>
-        <!-- TODO: replace with a 'validation.svg' -->
+        <validation.svg>false</validation.svg>
         <validation.metadata>true</validation.metadata>
+        <validation.failOnInvalidExceptions>true</validation.failOnInvalidExceptions>
 
         <!-- plugin versions -->
         <spotless.version>2.22.5</spotless.version>
@@ -985,8 +986,10 @@
                             <validatePlaceholder>${validation.placeholder}</validatePlaceholder>
                             <validateDocumentation>${validation.documentation}</validateDocumentation>
                             <validateWording>${validation.wording}</validateWording>
-                            <!-- TODO: replace with a 'validateSvg' -->
+                            <validateWording>${validation.svg}</validateWording>
                             <validateMetadata>${validation.metadata}</validateMetadata>
+
+                            <failOnValidateExceptions>${validation.failOnInvalidExceptions}</failOnValidateExceptions>
                         </configuration>
                     </execution>
                     <execution>
