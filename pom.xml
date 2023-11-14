@@ -163,12 +163,14 @@
 
         <!-- component-runtime validations -->
         <talend.validation.locale>root</talend.validation.locale>
+
         <validation.model>true</validation.model>
         <validation.placeholder>true</validation.placeholder>
         <validation.documentation>true</validation.documentation>
         <validation.wording>true</validation.wording>
         <validation.svg>false</validation.svg>
         <validation.metadata>true</validation.metadata>
+
         <validation.failOnInvalidExceptions>true</validation.failOnInvalidExceptions>
 
         <!-- plugin versions -->
