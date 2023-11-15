@@ -988,7 +988,7 @@
                             <validatePlaceholder>${validation.component.placeholder}</validatePlaceholder>
                             <validateDocumentation>${validation.component.documentation}</validateDocumentation>
                             <validateWording>${validation.component.wording}</validateWording>
-                            <validateWording>${validation.component.svg}</validateWording>
+                            <validateSvg>${validation.component.svg}</validateSvg>
                             <validateMetadata>${validation.component.metadata}</validateMetadata>
 
                             <failOnValidateExceptions>${validation.component.failOnInvalidExceptions}</failOnValidateExceptions>

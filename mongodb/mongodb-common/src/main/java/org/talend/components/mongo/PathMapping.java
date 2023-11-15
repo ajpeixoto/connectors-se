@@ -35,7 +35,7 @@ public class PathMapping implements Serializable {
     private String column;
 
     @Option
-    @Documentation("the mongodb's origin element name in bson.")
+    @Documentation("The mongodb's origin element name in bson.")
     private String originElement;
 
     @Option

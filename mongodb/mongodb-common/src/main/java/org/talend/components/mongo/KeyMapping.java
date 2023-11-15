@@ -34,7 +34,7 @@ public class KeyMapping implements Serializable {
     private String column;
 
     @Option
-    @Documentation("the mongodb's origin element path in bson as key.")
+    @Documentation("The mongodb's origin element path in bson as key.")
     private String originElementPath;
 
 }
