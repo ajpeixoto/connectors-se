@@ -79,7 +79,7 @@ public class JDBCRowConfig implements Serializable {
     private int commitEvery = 10000;
 
     @Option
-    @Documentation("use Query Timeout.")
+    @Documentation("Use Query Timeout.")
     private boolean useQueryTimeout;
 
     @Option

@@ -73,7 +73,7 @@ public class MongoDBSinkConfiguration implements MongoCommonOutputConfiguration 
 
     @Option
     @ActiveIf(target = "dataAction", value = { "SET", "UPSERT_WITH_SET" })
-    @Documentation("<update all documents.")
+    @Documentation("Update all documents.")
     private boolean updateAllDocuments = false;
 
     // this one for work for mapping mode, but seems not necessary now, only whole document(text) and json mode now

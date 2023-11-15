@@ -47,17 +47,17 @@ public class MongoDBDataStore implements MongoCommonDataStore {
 
     @Option
     @Required
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+    @Documentation("Link: https://docs.mongodb.com/manual/reference/connection-string/ .")
     private AddressType addressType = AddressType.STANDALONE;
 
     @Option
     @ActiveIf(target = "addressType", value = "STANDALONE")
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+    @Documentation("Link: https://docs.mongodb.com/manual/reference/connection-string/ .")
     private Address address;
 
     @Option
     @ActiveIf(target = "addressType", value = "REPLICA_SET")
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+    @Documentation("Link: https://docs.mongodb.com/manual/reference/connection-string/ .")
     private List<Address> replicaSetAddress = Collections.emptyList();
 
     /*
@@ -65,7 +65,7 @@ public class MongoDBDataStore implements MongoCommonDataStore {
      *
      * @ActiveIf(target = "addressType", value = "SHARDED_CLUSTER")
      *
-     * @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+     * @Documentation("https://docs.mongodb.com/manual/reference/connection-string/ .")
      * private List<Address> shardedClusterAddress = Collections.emptyList();
      */
 

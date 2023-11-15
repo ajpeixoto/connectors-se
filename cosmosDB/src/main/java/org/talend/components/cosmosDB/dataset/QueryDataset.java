@@ -32,7 +32,7 @@ import org.talend.sdk.component.api.meta.Documentation;
 public class QueryDataset extends CosmosDBDataset {
 
     @Option
-    @Documentation("use Query.")
+    @Documentation("Use Query.")
     private boolean useQuery;
 
     @Option
