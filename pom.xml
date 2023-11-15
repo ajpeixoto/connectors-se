@@ -168,7 +168,7 @@
         <validation.component.placeholder>true</validation.component.placeholder>
         <validation.component.documentation>true</validation.component.documentation>
         <validation.component.wording>true</validation.component.wording>
-        <validation.component.svg>false</validation.component.svg>
+        <validation.component.icon>true</validation.component.icon>
         <validation.component.metadata>true</validation.component.metadata>
 
         <validation.component.failOnInvalidExceptions>true</validation.component.failOnInvalidExceptions>
@@ -988,7 +988,7 @@
                             <validatePlaceholder>${validation.component.placeholder}</validatePlaceholder>
                             <validateDocumentation>${validation.component.documentation}</validateDocumentation>
                             <validateWording>${validation.component.wording}</validateWording>
-                            <validateSvg>${validation.component.svg}</validateSvg>
+                            <validateIcon>${validation.component.icon}</validateIcon>
                             <validateMetadata>${validation.component.metadata}</validateMetadata>
 
                             <failOnValidateExceptions>${validation.component.failOnInvalidExceptions}</failOnValidateExceptions>
