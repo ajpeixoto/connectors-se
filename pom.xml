@@ -164,15 +164,15 @@
         <!-- component-runtime validations -->
         <talend.validation.locale>root</talend.validation.locale>
 
-        <validation.component.model>true</validation.component.model>
-        <validation.component.placeholder>true</validation.component.placeholder>
-        <validation.component.documentation>true</validation.component.documentation>
-        <validation.component.wording>true</validation.component.wording>
-        <validation.component.svg>true</validation.component.svg>
-        <validation.component.familyIcon>true</validation.component.familyIcon>
-        <validation.component.metadata>true</validation.component.metadata>
+        <validation.model>true</validation.model>
+        <validation.placeholder>true</validation.placeholder>
+        <validation.documentation>true</validation.documentation>
+        <validation.wording>true</validation.wording>
+        <validation.svg>true</validation.svg>
+        <validation.familyIcon>true</validation.familyIcon>
+        <validation.metadata>true</validation.metadata>
 
-        <validation.component.failOnInvalidExceptions>true</validation.component.failOnInvalidExceptions>
+        <validation.failOnInvalidExceptions>true</validation.failOnInvalidExceptions>
 
         <!-- plugin versions -->
         <spotless.version>2.22.5</spotless.version>
@@ -985,15 +985,15 @@
                             <goal>validate</goal>
                         </goals>
                         <configuration>
-                            <validateModel>${validation.component.model}</validateModel>
-                            <validatePlaceholder>${validation.component.placeholder}</validatePlaceholder>
-                            <validateDocumentation>${validation.component.documentation}</validateDocumentation>
-                            <validateWording>${validation.component.wording}</validateWording>
-                            <validateSvg>${validation.component.svg}</validateSvg>
-                            <validateFamily>${validation.component.familyIcon}</validateFamily>
-                            <validateMetadata>${validation.component.metadata}</validateMetadata>
+                            <validateModel>${validation.model}</validateModel>
+                            <validatePlaceholder>${validation.placeholder}</validatePlaceholder>
+                            <validateDocumentation>${validation.documentation}</validateDocumentation>
+                            <validateWording>${validation.wording}</validateWording>
+                            <validateSvg>${validation.svg}</validateSvg>
+                            <validateFamily>${validation.familyIcon}</validateFamily>
+                            <validateMetadata>${validation.metadata}</validateMetadata>
 
-                            <failOnValidateExceptions>${validation.component.failOnInvalidExceptions}</failOnValidateExceptions>
+                            <failOnValidateExceptions>${validation.failOnInvalidExceptions}</failOnValidateExceptions>
                         </configuration>
                     </execution>
                     <execution>
