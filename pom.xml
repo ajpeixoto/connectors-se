@@ -124,7 +124,7 @@
     <jersey-common.version>2.33</jersey-common.version>
 
     <json-smart.version>2.4.11</json-smart.version>
-    <json.version>20230227</json.version>
+    <json.version>20231013</json.version>
 
     <talend_oss_snapshots>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceSnapshot/
     </talend_oss_snapshots>
