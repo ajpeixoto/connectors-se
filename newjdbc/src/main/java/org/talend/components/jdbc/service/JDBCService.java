@@ -794,8 +794,17 @@ public class JDBCService implements Serializable {
         try (final DataSourceWrapper dataSource = createConnection(dataSet.getDataStore(), false);
                 final Connection conn = dataSource.getConnection()) {
             JDBCTableMetadata tableMetadata = new JDBCTableMetadata();
-            // TODO no need to set catalog/schema here? maybe an old studio jdbc connector bug?
-            tableMetadata.setDatabaseMetaData(conn.getMetaData()).setTablename(dataSet.getTableName());
+
+            String database_schema = getDatabaseSchema(dataSet.getDataStore());
+            if (database_schema == null) {
+                // from jdbc api to get the runtime jdbc schema, but it may not be right?
+                database_schema = getDatabaseSchema(conn);
+            }
+
+            tableMetadata.setDatabaseMetaData(conn.getMetaData())
+                    .setCatalog(conn.getCatalog())
+                    .setDbSchema(database_schema)
+                    .setTablename(dataSet.getTableName());
 
             Schema schema = SchemaInferer.infer(recordBuilderFactory, tableMetadata, mapping, false, false);
 

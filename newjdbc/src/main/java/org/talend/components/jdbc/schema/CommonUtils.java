@@ -36,21 +36,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CommonUtils {
 
-    private static Set<String> getPrimaryKeys(DatabaseMetaData databaseMetdata, String catalogName, String schemaName,
-            String tableName) throws SQLException {
-        Set<String> result = new HashSet<>();
-
-        try (ResultSet resultSet = databaseMetdata.getPrimaryKeys(catalogName, schemaName, tableName)) {
-            if (resultSet != null) {
-                while (resultSet.next()) {
-                    result.add(resultSet.getString("COLUMN_NAME"));
-                }
-            }
-        }
-
-        return result;
-    }
-
     /**
      * computer the real database type by driver jar and class, this is useful for the tjdbcxxx
      *
