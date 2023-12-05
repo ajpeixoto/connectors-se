@@ -18,10 +18,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class HttpClientMigrationTest {
+public class HttpClientMigrationTest {
 
     @Test
-    void testMigrateDatasetProxy() {
+    public void testMigrateDatasetProxy() {
         Map<String, String> version1ProxyConfig = new HashMap<>();
 
         String typeValue = "valueType";
@@ -45,4 +45,17 @@ class HttpClientMigrationTest {
         Assertions.assertEquals(loginValue, version1ProxyConfig.get("proxyConfiguration.proxyLogin"));
         Assertions.assertEquals(passwordValue, version1ProxyConfig.get("proxyConfiguration.proxyPassword"));
     }
+
+    public void testMigrateOAuthScopesToAdditionalParams() {
+        Map<String, String> version2ProxyConfig = new HashMap<>();
+        version2ProxyConfig.put("authentication.oauth20.scopes[0]", "scopeA");
+        version2ProxyConfig.put("authentication.oauth20.scopes[1]", "scopeA");
+        version2ProxyConfig.put("authentication.oauth20.scopes[2]", "scopeA");
+
+        HttpClientDatastoreMigrationHandler migrationHandler = new HttpClientDatastoreMigrationHandler();
+        Map<String, String> migrated = migrationHandler.migrate(2, version2ProxyConfig);
+
+        Assertions.assertNotNull(migrated);
+    }
+
 }
