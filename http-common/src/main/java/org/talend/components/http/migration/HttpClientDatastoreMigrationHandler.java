@@ -12,6 +12,8 @@
  */
 package org.talend.components.http.migration;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,10 +24,6 @@ public class HttpClientDatastoreMigrationHandler implements MigrationHandler {
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
-
-        incomingData.entrySet().stream().forEach(e -> System.out.println("**** " + e.getKey() + " => " + e.getValue()));
-        System.out.println("===================================================================");
-
         if (incomingVersion < 2) {
             migrateProxyConfig(incomingData, "");
         }
@@ -52,19 +50,28 @@ public class HttpClientDatastoreMigrationHandler implements MigrationHandler {
     static void migrateOAuthScopesToAdditionalParams(Map<String, String> incomingData,
             String version1ProxyConfigPathPrefix) {
 
+        List<String> toRemove = new ArrayList<>();
         // Scopes are added in oauth20.params
         String scopes = incomingData.entrySet()
                 .stream()
+                .sorted(Comparator.comparing(Map.Entry::getKey))
                 .filter(e -> e.getKey().startsWith(version1ProxyConfigPathPrefix + "authentication.oauth20.scopes"))
-                .peek(e -> System.out.println(e.getKey() + " ====> " + e.getValue()))
+                .peek(e -> toRemove.add(e.getKey()))
                 .map(e -> e.getValue())
+                .map(e -> {
+                    if (e.charAt(0) == '"' && e.charAt(e.length() - 1) == '"') {
+                        return e.substring(1, e.length() - 1);
+                    }
+                    return e;
+                })
                 .collect(Collectors.joining(" "));
 
         if (!scopes.trim().isEmpty()) {
             incomingData.put(version1ProxyConfigPathPrefix + "authentication.oauth20.params[0].key", "scope");
-            incomingData.put(version1ProxyConfigPathPrefix + "authentication.oauth20.params[1].value", scopes);
+            incomingData.put(version1ProxyConfigPathPrefix + "authentication.oauth20.params[0].value", scopes);
         }
 
+        toRemove.stream().forEach(k -> incomingData.remove(k));
     }
 
     private static void putIfNotNull(Map<String, String> configMap, String from, String to) {

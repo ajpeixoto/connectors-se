@@ -17,6 +17,7 @@ import java.util.Map;
 import org.talend.sdk.component.api.component.MigrationHandler;
 
 import static org.talend.components.http.migration.HttpClientDatastoreMigrationHandler.migrateProxyConfig;
+import static org.talend.components.http.migration.HttpClientDatastoreMigrationHandler.migrateOAuthScopesToAdditionalParams;
 
 public class HttpClientRuntimeMigrationHandler implements MigrationHandler {
 
@@ -24,6 +25,10 @@ public class HttpClientRuntimeMigrationHandler implements MigrationHandler {
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
         if (incomingVersion < 2) {
             migrateProxyConfig(incomingData, "configuration.dataset.datastore.");
+        }
+
+        if (incomingVersion < 3) {
+            migrateOAuthScopesToAdditionalParams(incomingData, "configuration.dataset.datastore.");
         }
 
         return incomingData;

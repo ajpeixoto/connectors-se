@@ -46,16 +46,26 @@ public class HttpClientMigrationTest {
         Assertions.assertEquals(passwordValue, version1ProxyConfig.get("proxyConfiguration.proxyPassword"));
     }
 
+    @Test
     public void testMigrateOAuthScopesToAdditionalParams() {
         Map<String, String> version2ProxyConfig = new HashMap<>();
+        version2ProxyConfig.put("authentication.name", "peter");
         version2ProxyConfig.put("authentication.oauth20.scopes[0]", "scopeA");
-        version2ProxyConfig.put("authentication.oauth20.scopes[1]", "scopeA");
-        version2ProxyConfig.put("authentication.oauth20.scopes[2]", "scopeA");
+        version2ProxyConfig.put("authentication.oauth20.scopes[2]", "scopeC");
+        version2ProxyConfig.put("authentication.oauth20.scopes[1]", "scopeB");
+        version2ProxyConfig.put("authentication.oauth20.scopes[4]", "scopeE");
+        version2ProxyConfig.put("authentication.oauth20.scopes[3]", "scopeD");
+        version2ProxyConfig.put("authentication.pwd", "aze123");
 
         HttpClientDatastoreMigrationHandler migrationHandler = new HttpClientDatastoreMigrationHandler();
         Map<String, String> migrated = migrationHandler.migrate(2, version2ProxyConfig);
 
         Assertions.assertNotNull(migrated);
+        Assertions.assertEquals("scopeA scopeB scopeC scopeD scopeE", migrated.get("authentication.oauth20.params[0].value"));
+        Assertions.assertEquals("scope", migrated.get("authentication.oauth20.params[0].key"));
+        Assertions.assertEquals("peter", migrated.get("authentication.name"));
+        Assertions.assertEquals("aze123", migrated.get("authentication.pwd"));
+        Assertions.assertEquals(4, migrated.size());
     }
 
 }
