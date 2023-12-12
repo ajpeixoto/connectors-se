@@ -16,7 +16,6 @@
     <properties>
         <xbean-finder-shaded.version>4.8</xbean-finder-shaded.version>
         <HikariCP.version>3.4.2-talend20200325</HikariCP.version>
-        <bouncycastle.version>1.70</bouncycastle.version>
         <jooq.version>3.12.0</jooq.version>
         <!-- test version -->
         <derby.version>10.12.1.1</derby.version>
@@ -144,13 +143,11 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcmail-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
+            <artifactId>bcmail-jdk18on</artifactId>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15on</artifactId>
-            <version>${bouncycastle.version}</version>
+            <artifactId>bcprov-jdk18on</artifactId>
         </dependency>
         <dependency>
             <groupId>net.java.dev.jna</groupId>
