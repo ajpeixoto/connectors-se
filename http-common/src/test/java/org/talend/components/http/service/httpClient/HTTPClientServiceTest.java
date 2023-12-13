@@ -434,7 +434,7 @@ class HTTPClientServiceTest {
         Assertions.assertEquals(expectedAttachmentFileName, attachment.getContentDisposition().getFilename());
         // assert the filename* value is encoded
         Assertions.assertEquals("filename*=UTF-8''\"%E4%BD%A0%E5%A5%BD.txt\"",
-                Arrays.stream(attachment.getHeader("Content-Disposition").split(","))
+                Arrays.stream(attachment.getHeader("Content-Disposition").split(";"))
                         .filter(parameter -> parameter.startsWith("filename*"))
                         .collect(Collectors.joining()));
         // the decoded value is correct

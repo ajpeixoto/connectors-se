@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,17 +238,20 @@ public class HTTPClientService {
                 }
                 MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
                 headers.add("Content-ID", uploadFile.getName());
+                StringBuilder contentDispositionString = new StringBuilder();
+                contentDispositionString.append("file=\"").append(uploadFile.getName()).append("\"");
+                contentDispositionString.append(";name=\"").append(uploadFile.getName()).append("\"");
+                contentDispositionString.append(";filename=\"").append(file.getName()).append("\"");
 
-                List<String> contentDispositionList = new ArrayList<>();
-                contentDispositionList.add("attachment");
-                contentDispositionList.add("file=\"" + uploadFile.getName() + "\"");
-                contentDispositionList.add("filename=\"" + file.getName() + "\"");
                 try {
-                    contentDispositionList.add(
-                            "filename*=UTF-8''\"" + URLEncoder.encode(file.getName(), "UTF-8") + "\"");
+                    contentDispositionString.append(";filename*=UTF-8''\"")
+                            .append(URLEncoder.encode(file.getName(), "UTF-8"))
+                            .append("\"");
                 } catch (UnsupportedEncodingException e) {
                     log.debug("Got an UnsupportedEncodingException for UTF-8, shouldn't be here", e);
                 }
+
+                List<String> contentDispositionList = Collections.singletonList(contentDispositionString.toString());
                 headers.put("Content-Disposition", contentDispositionList);
 
                 List<String> contentTypeList = new ArrayList<>();

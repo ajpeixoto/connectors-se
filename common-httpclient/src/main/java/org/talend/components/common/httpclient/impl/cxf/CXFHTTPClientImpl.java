@@ -22,6 +22,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.apache.cxf.configuration.jsse.TLSClientParameters;
 import org.apache.cxf.configuration.security.AuthorizationPolicy;
@@ -354,7 +355,7 @@ public class CXFHTTPClientImpl implements HTTPClient<WebClient> {
             attachments.addAll(queryConfiguration.getAttachments());
         }
 
-        return new MultipartBody(attachments);
+        return new MultipartBody(attachments, MediaType.MULTIPART_FORM_DATA_TYPE, false);
     }
 
     private Form buildForm() {
