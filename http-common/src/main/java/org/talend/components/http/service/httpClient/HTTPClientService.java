@@ -239,12 +239,13 @@ public class HTTPClientService {
                 MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
                 headers.add("Content-ID", uploadFile.getName());
                 StringBuilder contentDispositionString = new StringBuilder();
-                contentDispositionString.append("file=\"").append(uploadFile.getName()).append("\"");
-                contentDispositionString.append(";name=\"").append(uploadFile.getName()).append("\"");
-                contentDispositionString.append(";filename=\"").append(file.getName()).append("\"");
+                contentDispositionString.append("form-data");
+                contentDispositionString.append("; file=\"").append(uploadFile.getName()).append("\"");
+                contentDispositionString.append("; name=\"").append(uploadFile.getName()).append("\"");
+                contentDispositionString.append("; filename=\"").append(file.getName()).append("\"");
 
                 try {
-                    contentDispositionString.append(";filename*=UTF-8''\"")
+                    contentDispositionString.append("; filename*=UTF-8''\"")
                             .append(URLEncoder.encode(file.getName(), "UTF-8"))
                             .append("\"");
                 } catch (UnsupportedEncodingException e) {
