@@ -40,4 +40,23 @@ public interface JdbcTestContainer extends AutoCloseable {
 
     boolean isRunning();
 
+    /**
+     * Just to make a Delegate on containers with narrow scope
+     */
+    interface DelegatedMembers {
+
+        String getUsername();
+
+        String getPassword();
+
+        String getJdbcUrl();
+
+        String getDriverClassName();
+
+        void start();
+
+        void stop();
+
+        boolean isRunning();
+    }
 }

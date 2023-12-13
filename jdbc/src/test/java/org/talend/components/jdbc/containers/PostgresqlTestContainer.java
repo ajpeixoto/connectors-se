@@ -12,16 +12,14 @@
  */
 package org.talend.components.jdbc.containers;
 
-import lombok.experimental.Delegate;
-import org.testcontainers.containers.ContainerState;
-import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.JdbcDatabaseContainer;
 import org.testcontainers.containers.PostgreSQLContainer;
 
+import lombok.experimental.Delegate;
+
 public class PostgresqlTestContainer implements JdbcTestContainer {
 
-    @Delegate(types = { JdbcDatabaseContainer.class, GenericContainer.class,
-            ContainerState.class }, excludes = AutoCloseable.class)
+    @Delegate(types = { DelegatedMembers.class })
     private final JdbcDatabaseContainer container = new PostgreSQLContainer("postgres:12.1");
 
     @Override

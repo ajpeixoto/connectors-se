@@ -119,7 +119,7 @@
         <commons-codec.version>1.14</commons-codec.version>
         <commons-io.version>2.8.0</commons-io.version>
         <mockito.version>1.10.19</mockito.version>
-        <testcontainers.version>1.18.0</testcontainers.version>
+        <testcontainers.version>1.19.3</testcontainers.version>
         <jna.version>5.5.0</jna.version>
 
         <jersey.version>2.22.2</jersey.version>
