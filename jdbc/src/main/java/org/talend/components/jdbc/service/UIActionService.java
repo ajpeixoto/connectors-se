@@ -282,7 +282,8 @@ public class UIActionService {
         return new ValidationResult(ValidationResult.Status.OK, "");
     }
 
-    // TODO this method never been used in jdbc connector inside code, but seems called by platform?
+    // This method never been used in jdbc connector inside code, but can be called by platform.
+    // For example: Called by DataPrep when there is no data in source and therefore no sample available.
     @DiscoverSchema(value = ACTION_DISCOVER_SCHEMA)
     public Schema guessSchema(@Option final TableNameDataset dataset) {
         try (JdbcService.JdbcDatasource dataSource = jdbcService.createDataSource(dataset.getConnection());
