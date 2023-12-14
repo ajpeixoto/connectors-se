@@ -68,7 +68,7 @@ public class OutputConfig implements Serializable {
     @Required
     @ActiveIf(target = "../createTableIfNotExists", value = { "true" })
     @Documentation("The length of varchar types. This value will be used to create varchar columns in this table."
-            + "\n-1 means that the max supported length of the targeted database will be used.")
+            + " -1 means that the max supported length of the targeted database will be used.")
     private int varcharLength = -1;
 
     @Option
