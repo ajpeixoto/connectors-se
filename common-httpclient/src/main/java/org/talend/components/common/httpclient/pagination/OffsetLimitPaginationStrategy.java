@@ -18,25 +18,25 @@ import org.talend.components.common.httpclient.api.KeyValuePair;
 import org.talend.components.common.httpclient.api.QueryConfiguration;
 import org.talend.components.common.httpclient.api.pagination.OffsetLimitPagination;
 import org.talend.components.common.httpclient.api.pagination.PaginationParametersLocation;
+import org.talend.components.common.httpclient.pagination.location.*;
 
 import javax.json.*;
-import javax.json.stream.JsonParser;
-import javax.swing.text.html.Option;
 import java.io.StringReader;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class OffsetLimitPaginationStrategy implements PaginationStrategy {
 
     private QueryConfiguration queryConfiguration;
 
+    private PaginationLocation paginationLocation;
+
     private int lastCount = -1;
 
     public OffsetLimitPaginationStrategy(final QueryConfiguration queryConfiguration) {
         this.queryConfiguration = queryConfiguration;
+        this.paginationLocation = PaginationLocationFactory
+                .getPaginationLocation(queryConfiguration.getOffsetLimitPagination().getLocation());
     }
 
     @Override
@@ -44,73 +44,10 @@ public class OffsetLimitPaginationStrategy implements PaginationStrategy {
         if (queryConfiguration.isInitPaginationDone()) {
             return queryConfiguration; // Pagination already initiated.
         }
-
-        OffsetLimitPagination offsetLimitPagination = this.queryConfiguration.getOffsetLimitPagination();
-        if (offsetLimitPagination.getLocation() == PaginationParametersLocation.BODY) {
-            String limitPath = this.queryConfiguration.getOffsetLimitPagination().getLimitParamName();
-            String limitValue = this.queryConfiguration.getOffsetLimitPagination().getLimitValue();
-            String offsetPath = this.queryConfiguration.getOffsetLimitPagination().getOffsetParamName();
-            String offsetValue = this.queryConfiguration.getOffsetLimitPagination().getOffsetValue();
-            setPaginationToBody(limitPath, limitValue);
-            setPaginationToBody(offsetPath, offsetValue);
-            System.out.println("body: " + this.queryConfiguration.getPlainTextBody());
-        } else {
-            List<KeyValuePair> keyValuePairs = null;
-            if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
-                keyValuePairs = this.queryConfiguration.getHeaders();
-            } else {
-                keyValuePairs = this.queryConfiguration.getQueryParams();
-            }
-            List<KeyValuePair> updatedKeyValuePairs = initKeyValuePairs(keyValuePairs, offsetLimitPagination);
-            if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
-                this.queryConfiguration.setHeaders(updatedKeyValuePairs);
-            } else {
-                this.queryConfiguration.setQueryParams(updatedKeyValuePairs);
-            }
-        }
+        paginationLocation.setPagination(queryConfiguration);
         this.queryConfiguration.setInitPaginationDone(true);
 
         return this.queryConfiguration;
-    }
-
-    private void setPaginationToBody(String path, String value) {
-        // Remove trailing '.' characters.
-        while (path.startsWith(".")) {
-            path = path.substring(1);
-        }
-
-        while (path.endsWith(".")) {
-            path = path.substring(0, path.length() - 1);
-        }
-
-        // Retrieve all segment
-        List<String> paths = Arrays.stream(path.split("\\.")).collect(Collectors.toList());
-        Collections.reverse(paths);
-        if (queryConfiguration.getPlainTextBody() != null) {
-            JsonParser parser = Json.createParser(new StringReader(queryConfiguration.getPlainTextBody()));
-            JsonObjectBuilder requestBuilder = Json.createObjectBuilder();
-            JsonObject sourceJsonObject = parser.getObject().asJsonObject();
-            sourceJsonObject.forEach(requestBuilder::add);
-
-            JsonObject currentObject = null;
-            if (paths.size() > 1) {
-                for (int i = 0; i < paths.size() - 1; i++) {
-                    if (currentObject == null) {
-                        currentObject = Json.createObjectBuilder().add(paths.get(i), value).build();
-                    } else {
-                        currentObject = Json.createObjectBuilder().add(paths.get(i), currentObject).build();
-                    }
-                }
-                requestBuilder.add(paths.get(paths.size() - 1), currentObject);
-                System.out.println("currentObject: " + currentObject);
-            } else {
-                requestBuilder.add(paths.get(0), Json.createValue(value));
-            }
-            queryConfiguration.setPlainTextBody(requestBuilder.build().toString());
-
-            parser.close();
-        }
-
     }
 
     @Override
@@ -122,24 +59,7 @@ public class OffsetLimitPaginationStrategy implements PaginationStrategy {
             // If last call didn't receive any data, then stop the pagination.
             return Optional.empty();
         }
-
-        OffsetLimitPagination offsetLimitPagination = this.queryConfiguration.getOffsetLimitPagination();
-
-        List<KeyValuePair> keyValuePairs = null;
-        if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
-            keyValuePairs = this.queryConfiguration.getHeaders();
-        } else {
-            keyValuePairs = this.queryConfiguration.getQueryParams();
-        }
-
-        List<KeyValuePair> updatedKeyValuePairs =
-                updateListKeyValuePair(keyValuePairs, offsetLimitPagination, nbReceived);
-
-        if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
-            this.queryConfiguration.setHeaders(updatedKeyValuePairs);
-        } else {
-            this.queryConfiguration.setQueryParams(updatedKeyValuePairs);
-        }
+        paginationLocation.updatePagination(queryConfiguration, nbReceived);
 
         return Optional.ofNullable(this.queryConfiguration);
     }
@@ -150,44 +70,6 @@ public class OffsetLimitPaginationStrategy implements PaginationStrategy {
             this.lastCount = computeNbReceivedElement(response);
         }
         return this.lastCount;
-    }
-
-    private List<KeyValuePair> initKeyValuePairs(final List<KeyValuePair> kvps,
-            final OffsetLimitPagination offsetLimitPagination) {
-        kvps.add(new KeyValuePair(offsetLimitPagination.getOffsetParamName(), offsetLimitPagination.getOffsetValue()));
-        kvps.add(new KeyValuePair(offsetLimitPagination.getLimitParamName(), offsetLimitPagination.getLimitValue()));
-
-        return kvps;
-    }
-
-    private List<KeyValuePair> updateListKeyValuePair(final List<KeyValuePair> kvps,
-            final OffsetLimitPagination offsetLimitPagination,
-            final int nbReceivedElements) {
-        String offsetParamName = offsetLimitPagination.getOffsetParamName();
-        String limitParamName = offsetLimitPagination.getLimitParamName();
-
-        Optional<KeyValuePair> existingOffset =
-                kvps.stream().filter(h -> h.getKey().equals(offsetParamName)).findFirst();
-
-        if (existingOffset.isPresent()) {
-            existingOffset.get()
-                    .setValue(nextOffset(existingOffset.get().getValue(), nbReceivedElements));
-        } else {
-            kvps.add(new KeyValuePair(offsetParamName, offsetLimitPagination.getOffsetValue()));
-        }
-
-        Optional<KeyValuePair> existingLimit = kvps.stream().filter(h -> h.getKey().equals(limitParamName)).findFirst();
-        if (!existingLimit.isPresent()) {
-            kvps.add(new KeyValuePair(limitParamName, offsetLimitPagination.getLimitValue()));
-        }
-
-        return kvps;
-    }
-
-    private String nextOffset(String previousOffset, int lastNbElements) {
-        long previousOffsetLong = Long.parseLong(previousOffset);
-
-        return String.valueOf(previousOffsetLong + lastNbElements);
     }
 
     /*
