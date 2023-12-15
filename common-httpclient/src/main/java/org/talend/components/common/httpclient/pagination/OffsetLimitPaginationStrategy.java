@@ -19,14 +19,15 @@ import org.talend.components.common.httpclient.api.QueryConfiguration;
 import org.talend.components.common.httpclient.api.pagination.OffsetLimitPagination;
 import org.talend.components.common.httpclient.api.pagination.PaginationParametersLocation;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+import javax.json.*;
+import javax.json.stream.JsonParser;
 import javax.swing.text.html.Option;
 import java.io.StringReader;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class OffsetLimitPaginationStrategy implements PaginationStrategy {
 
@@ -46,7 +47,13 @@ public class OffsetLimitPaginationStrategy implements PaginationStrategy {
 
         OffsetLimitPagination offsetLimitPagination = this.queryConfiguration.getOffsetLimitPagination();
         if (offsetLimitPagination.getLocation() == PaginationParametersLocation.BODY) {
-
+            String limitPath = this.queryConfiguration.getOffsetLimitPagination().getLimitParamName();
+            String limitValue = this.queryConfiguration.getOffsetLimitPagination().getLimitValue();
+            String offsetPath = this.queryConfiguration.getOffsetLimitPagination().getOffsetParamName();
+            String offsetValue = this.queryConfiguration.getOffsetLimitPagination().getOffsetValue();
+            setPaginationToBody(limitPath, limitValue);
+            setPaginationToBody(offsetPath, offsetValue);
+            System.out.println("body: " + this.queryConfiguration.getPlainTextBody());
         } else {
             List<KeyValuePair> keyValuePairs = null;
             if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
@@ -66,7 +73,43 @@ public class OffsetLimitPaginationStrategy implements PaginationStrategy {
         return this.queryConfiguration;
     }
 
-    private void setPaginationToBody() {
+    private void setPaginationToBody(String path, String value) {
+        // Remove trailing '.' characters.
+        while (path.startsWith(".")) {
+            path = path.substring(1);
+        }
+
+        while (path.endsWith(".")) {
+            path = path.substring(0, path.length() - 1);
+        }
+
+        // Retrieve all segment
+        List<String> paths = Arrays.stream(path.split("\\.")).collect(Collectors.toList());
+        Collections.reverse(paths);
+        if (queryConfiguration.getPlainTextBody() != null) {
+            JsonParser parser = Json.createParser(new StringReader(queryConfiguration.getPlainTextBody()));
+            JsonObjectBuilder requestBuilder = Json.createObjectBuilder();
+            JsonObject sourceJsonObject = parser.getObject().asJsonObject();
+            sourceJsonObject.forEach(requestBuilder::add);
+
+            JsonObject currentObject = null;
+            if (paths.size() > 1) {
+                for (int i = 0; i < paths.size() - 1; i++) {
+                    if (currentObject == null) {
+                        currentObject = Json.createObjectBuilder().add(paths.get(i), value).build();
+                    } else {
+                        currentObject = Json.createObjectBuilder().add(paths.get(i), currentObject).build();
+                    }
+                }
+                requestBuilder.add(paths.get(paths.size() - 1), currentObject);
+                System.out.println("currentObject: " + currentObject);
+            } else {
+                requestBuilder.add(paths.get(0), Json.createValue(value));
+            }
+            queryConfiguration.setPlainTextBody(requestBuilder.build().toString());
+
+            parser.close();
+        }
 
     }
 
@@ -176,12 +219,14 @@ public class OffsetLimitPaginationStrategy implements PaginationStrategy {
             JsonObject current = jsonReader.readObject();
             for (int i = 0; i < paths.length; i++) {
                 boolean last = i == (paths.length - 1);
-                if (last) {
-                    // The last segment must be an array
-                    nbElements = current.getJsonArray(paths[i]).size();
-                } else {
-                    // Intermediate segment must be an object
-                    current = current.getJsonObject(paths[i]);
+                if (current.getJsonArray(paths[i]) != null) {
+                    if (last) {
+                        // The last segment must be an array
+                        nbElements = current.getJsonArray(paths[i]).size();
+                    } else {
+                        // Intermediate segment must be an object
+                        current = current.getJsonObject(paths[i]);
+                    }
                 }
             }
         }
