@@ -154,7 +154,7 @@
     <commons-text.version>1.10.0</commons-text.version>
     <jettison.version>1.5.4</jettison.version>
     <protobuf-java.version>3.19.6</protobuf-java.version>
-    <snappy.version>1.1.10.1</snappy.version>
+    <snappy.version>1.1.10.5</snappy.version>
     <commons-fileupload.version>1.5</commons-fileupload.version>
 
     <!-- code quality enforcer default values.
