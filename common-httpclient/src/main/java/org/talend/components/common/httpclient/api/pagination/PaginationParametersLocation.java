@@ -14,5 +14,6 @@ package org.talend.components.common.httpclient.api.pagination;
 
 public enum PaginationParametersLocation {
     QUERY_PARAMETERS,
-    HEADERS
+    HEADERS,
+    BODY
 }

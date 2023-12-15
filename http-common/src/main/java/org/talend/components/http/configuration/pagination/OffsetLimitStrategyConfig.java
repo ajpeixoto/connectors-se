@@ -56,6 +56,7 @@ public class OffsetLimitStrategyConfig implements Serializable {
 
     public enum Location {
         QUERY_PARAMETERS,
-        HEADERS
+        HEADERS,
+        BODY
     }
 }

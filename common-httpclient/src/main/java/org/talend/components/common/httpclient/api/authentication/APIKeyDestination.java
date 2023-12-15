@@ -14,5 +14,6 @@ package org.talend.components.common.httpclient.api.authentication;
 
 public enum APIKeyDestination {
     QUERY_PARAMETERS,
-    HEADERS
+    HEADERS,
+    BODY
 }

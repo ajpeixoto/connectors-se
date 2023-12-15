@@ -267,10 +267,22 @@ public class HTTPClientService {
             switch (strategy) {
             case OFFSET_LIMIT:
                 OffsetLimitStrategyConfig offsetLimitStrategyConfig = pagination.getOffsetLimitStrategyConfig();
+
+                PaginationParametersLocation paginationParametersLocation;
+
+                switch (offsetLimitStrategyConfig.getLocation()) {
+                case BODY:
+                    paginationParametersLocation = PaginationParametersLocation.BODY;
+                    break;
+                case QUERY_PARAMETERS:
+                    paginationParametersLocation = PaginationParametersLocation.HEADERS;
+                    break;
+                default:
+                    paginationParametersLocation = PaginationParametersLocation.QUERY_PARAMETERS;
+                }
+
                 queryConfigurationBuilder.setOffsetLimitPagination(
-                        offsetLimitStrategyConfig.getLocation() == OffsetLimitStrategyConfig.Location.HEADERS
-                                ? PaginationParametersLocation.HEADERS
-                                : PaginationParametersLocation.QUERY_PARAMETERS,
+                        paginationParametersLocation,
                         offsetLimitStrategyConfig.getOffsetParamName(), offsetLimitStrategyConfig.getOffsetValue(),
                         offsetLimitStrategyConfig.getLimitParamName(), offsetLimitStrategyConfig.getLimitValue(),
                         offsetLimitStrategyConfig.getElementsPath());

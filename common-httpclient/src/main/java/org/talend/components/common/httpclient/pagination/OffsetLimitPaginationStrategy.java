@@ -45,21 +45,29 @@ public class OffsetLimitPaginationStrategy implements PaginationStrategy {
         }
 
         OffsetLimitPagination offsetLimitPagination = this.queryConfiguration.getOffsetLimitPagination();
-        List<KeyValuePair> keyValuePairs = null;
-        if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
-            keyValuePairs = this.queryConfiguration.getHeaders();
+        if (offsetLimitPagination.getLocation() == PaginationParametersLocation.BODY) {
+
         } else {
-            keyValuePairs = this.queryConfiguration.getQueryParams();
-        }
-        List<KeyValuePair> updatedKeyValuePairs = initKeyValuePairs(keyValuePairs, offsetLimitPagination);
-        if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
-            this.queryConfiguration.setHeaders(updatedKeyValuePairs);
-        } else {
-            this.queryConfiguration.setQueryParams(updatedKeyValuePairs);
+            List<KeyValuePair> keyValuePairs = null;
+            if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
+                keyValuePairs = this.queryConfiguration.getHeaders();
+            } else {
+                keyValuePairs = this.queryConfiguration.getQueryParams();
+            }
+            List<KeyValuePair> updatedKeyValuePairs = initKeyValuePairs(keyValuePairs, offsetLimitPagination);
+            if (offsetLimitPagination.getLocation() == PaginationParametersLocation.HEADERS) {
+                this.queryConfiguration.setHeaders(updatedKeyValuePairs);
+            } else {
+                this.queryConfiguration.setQueryParams(updatedKeyValuePairs);
+            }
         }
         this.queryConfiguration.setInitPaginationDone(true);
 
         return this.queryConfiguration;
+    }
+
+    private void setPaginationToBody() {
+
     }
 
     @Override
