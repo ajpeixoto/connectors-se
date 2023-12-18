@@ -91,7 +91,7 @@ public class CosmosDBInput implements Serializable {
             } else {
                 Record record = builderFactory.newRecordBuilder()
                         .withString(configuration.getStudioSchema().get(0).getLabel(),
-                                next.toJson())
+                                next.toString())
                         .build();
                 return record;
             }
