@@ -79,10 +79,17 @@
     </distributionManagement>
 
     <properties>
+        <!-- Build profile config -->
+        <!-- Use this property to lower the maven-enforcer rules set for lighter build.
+             This allows to select between profiles maven-enforcer-full/maven-enforcer-light -->
+        <use-maven-enforcer-light-rules>false</use-maven-enforcer-light-rules>
+
+        <!-- project config -->
         <timestamp.year>${maven.build.timestamp}</timestamp.year>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
+        <!-- tck version management -->
         <component-runtime.version>1.63.0</component-runtime.version>
 
         <slf4j.version>1.7.36</slf4j.version>
@@ -154,7 +161,7 @@
 
         <bouncycastle.version>1.74</bouncycastle.version>
         <pgpainless.version>1.5.1</pgpainless.version>
-        <snappy.version>1.1.10.1</snappy.version>
+        <snappy.version>1.1.10.5</snappy.version>
 
         <!-- code quality enforcer default values.
              run build w/ -Pcode-quality to have a full validation -->
@@ -1327,21 +1334,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>${maven.enforcer.version}</version>
-                <executions>
-                    <execution>
-                        <id>mandatory-checks-on-project</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <banDistributionManagement/>
-                                <banDuplicatePomDependencyVersions/>
-                                <dependencyConvergence/>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -1404,23 +1396,93 @@
         </plugins>
     </reporting>
 
-    <profiles>
-        <!--
-            BEGIN: CI profiles to optimize builds
-            Mapped on Jenkinsfile's step
-         -->
+    <profiles><!-- BEGIN: maven-enforcer profiles -->
+        <profile>
+            <id>maven-enforcer-full</id>
+            <!--
+                This profile will activate all default projects chosen maven-enforcer rules used on build.
+                Managed by the property <use-maven-enforcer-light-rules>.
+                <use-maven-enforcer-light-rules> is set to false by default so developers will always have it but the
+                CI can use maven-enforcer-light profile if needed.
+                REM: rules details are here https://maven.apache.org/enforcer/enforcer-rules/index.html
+             -->
+            <activation>
+                <property>
+                    <name>!use-maven-enforcer-light-rules</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>mandatory-checks-on-project</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <rules>
+                                <!-- enforces that project doesn't have distributionManagement. -->
+                                <banDistributionManagement/>
+                                <!-- enforces that the project doesn't have duplicate declared dependencies. -->
+                                <banDuplicatePomDependencyVersions/>
+                                <!-- ensure all dependencies converge to the same version. -->
+                                <dependencyConvergence/>
+                            </rules>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>maven-enforcer-light</id>
+            <!--
+                This profile will activate light selection of maven-enforcer rules used for lighter build.
+                Managed by the property <use-maven-enforcer-light-rules>.
+                CI use it to not run all rules on master or maintenance branch.
+                REM: rules details are here https://maven.apache.org/enforcer/enforcer-rules/index.html
+             -->
+            <activation>
+                <property>
+                    <name>use-maven-enforcer-light-rules</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>mandatory-checks-on-project</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <rules>
+                                <!-- enforces that project doesn't have distributionManagement. -->
+                                <banDistributionManagement/>
+                                <!-- enforces that the project doesn't have duplicate declared dependencies. -->
+                                <banDuplicatePomDependencyVersions/>
+                                <!-- ensure all dependencies converge to the same version. -->
+                                <!-- No more convergence test during CI build https://jira.talendforge.org/browse/TDI-49473 -->
+                            </rules>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- END: maven-enforcer profiles -->
+
+        <!-- BEGIN: CI profiles to optimize builds -->
         <profile>
             <id>STANDARD</id>
-            <!--
-                This is the phase, that execute followings maven phase:
-                -> validate - validate the project is correct
-                -> compile - compile the source code of the project
-                -> test - test the compiled source code using a suitable unit testing framework
-                -> package - take the compiled code and package it in its distributable format, such as a JAR
-                -> verify - run any checks on results of integration tests to ensure quality criteria are met
-                -> install - install the package into the local repository, for use as a dependency in other projects locally
-                -x deploy - done in the build environment, copies the final package to the remote repository for sharing with other developers and projects.
-             -->
             <properties>
                 <!-- Skips javadoc TODO Explain why https://jira.talendforge.org/browse/TDI-49191-->
                 <maven.javadoc.skip>true</maven.javadoc.skip>
@@ -1428,16 +1490,6 @@
         </profile>
         <profile>
             <id>DEPLOY</id>
-            <!--
-                This is the phase, that execute followings maven phase:
-                -x validate - validate the project is correct
-                -x compile - compile the source code of the project
-                -x test - test the compiled source code using a suitable unit testing framework
-                -x package - take the compiled code and package it in its distributable format, such as a JAR
-                -x verify - run any checks on results of integration tests to ensure quality criteria are met
-                -x install - install the package into the local repository
-                -> deploy - copies the final package to the remote repository
-             -->
             <properties>
                 <!-- Skips enforcer, already executed during mvn_build.sh -->
                 <enforcer.skip>true</enforcer.skip>

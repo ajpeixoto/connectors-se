@@ -323,9 +323,10 @@ pipeline {
                         sh "bash .jenkins/mvn_set_versions.sh ${finalVersion}"
                     }
 
-                    // No need to use snapshot update because se don't have dependencies to others Talend snapshot
+                    // build extraBuildParams
                     extraBuildParams = extraBuildParams_assembly(fail_at_end,
-                                                                 params.UPDATE_SNAPSHOT as Boolean)
+                                                                 params.UPDATE_SNAPSHOT as Boolean,
+                                                                 isOnMasterOrMaintenanceBranch)
 
                     job_description_append("Final parameters used for maven:  ")
                     job_description_append("`$extraBuildParams`")
@@ -766,11 +767,13 @@ private void CleanM2Corruption(String logContent) {
  *
  * @param Boolean fail_at_end, if set to true, --fail-at-end will be added
  * @param Boolean snapshot_update, if set to true, --update-snapshots will be added
+ * @param Boolean use_light_maven_enforcer, if set to true, --define use-maven-enforcer-light-rules
  *
  * @return extraBuildParams as a string ready for mvn cmd
  */
 private String extraBuildParams_assembly(Boolean fail_at_end,
-                                         Boolean snapshot_update) {
+                                         Boolean snapshot_update,
+                                         Boolean use_light_maven_enforcer) {
     String extraBuildParams
 
     println 'Processing extraBuildParams'
@@ -791,6 +794,11 @@ private String extraBuildParams_assembly(Boolean fail_at_end,
     println 'Manage the --update-snapshots option'
     if (snapshot_update) {
         buildParamsAsArray.add('--update-snapshots')
+    }
+
+    println 'Manage the maven-enforcer profile'
+    if (use_light_maven_enforcer) {
+        buildParamsAsArray.add('--define use-maven-enforcer-light-rules')
     }
 
     println 'Construct extraBuildParams'
