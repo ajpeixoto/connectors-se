@@ -30,13 +30,13 @@ public class HttpClientDatasetMigrationHandler implements MigrationHandler {
     }
 
     static void migrateHeaders(Map<String, String> incomingData,
-            String version1ProxyConfigPathPrefix) {
+            String prefix) {
         List<String> toAdd = new ArrayList<>();
         // Add headers destination
         incomingData.entrySet()
                 .stream()
-                .filter(e -> e.getKey().startsWith("headers[") && e.getKey().endsWith("].key"))
-                .forEach(e -> e.getKey().substring(0, e.getKey().length() - 3));
+                .filter(e -> e.getKey().startsWith(prefix + "headers[") && e.getKey().endsWith("].key"))
+                .forEach(e -> toAdd.add((e.getKey().substring(0, e.getKey().length() - 3))));
         toAdd.stream().forEach(e -> incomingData.put(e + "query", "MAIN"));
     }
 

@@ -18,6 +18,7 @@ import org.talend.sdk.component.api.component.MigrationHandler;
 
 import static org.talend.components.http.migration.HttpClientDatastoreMigrationHandler.migrateProxyConfig;
 import static org.talend.components.http.migration.HttpClientDatastoreMigrationHandler.migrateOAuthScopesToAdditionalParams;
+import static org.talend.components.http.migration.HttpClientDatasetMigrationHandler.migrateHeaders;
 
 public class HttpClientRuntimeMigrationHandler implements MigrationHandler {
 
@@ -29,6 +30,7 @@ public class HttpClientRuntimeMigrationHandler implements MigrationHandler {
 
         if (incomingVersion < 3) {
             migrateOAuthScopesToAdditionalParams(incomingData, "configuration.dataset.datastore.");
+            migrateHeaders(incomingData, "configuration.dataset.");
         }
 
         return incomingData;

@@ -48,14 +48,14 @@ public class HttpClientDatastoreMigrationHandler implements MigrationHandler {
     }
 
     static void migrateOAuthScopesToAdditionalParams(Map<String, String> incomingData,
-            String version1ProxyConfigPathPrefix) {
+            String prefix) {
 
         List<String> toRemove = new ArrayList<>();
         // Scopes are added in oauth20.params
         String scopes = incomingData.entrySet()
                 .stream()
                 .sorted(Comparator.comparing(Map.Entry::getKey))
-                .filter(e -> e.getKey().startsWith(version1ProxyConfigPathPrefix + "authentication.oauth20.scopes"))
+                .filter(e -> e.getKey().startsWith(prefix + "authentication.oauth20.scopes"))
                 .peek(e -> toRemove.add(e.getKey()))
                 .map(e -> e.getValue())
                 .map(e -> {
@@ -67,8 +67,8 @@ public class HttpClientDatastoreMigrationHandler implements MigrationHandler {
                 .collect(Collectors.joining(" "));
 
         if (!scopes.trim().isEmpty()) {
-            incomingData.put(version1ProxyConfigPathPrefix + "authentication.oauth20.params[0].key", "scope");
-            incomingData.put(version1ProxyConfigPathPrefix + "authentication.oauth20.params[0].value", scopes);
+            incomingData.put(prefix + "authentication.oauth20.params[0].key", "scope");
+            incomingData.put(prefix + "authentication.oauth20.params[0].value", scopes);
         }
 
         toRemove.stream().forEach(k -> incomingData.remove(k));

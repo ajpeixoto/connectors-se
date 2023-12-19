@@ -18,7 +18,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class HttpClientMigrationTest {
+public class HttpClientDatastoreMigrationTest {
 
     @Test
     public void testMigrateDatasetProxy() {
@@ -48,20 +48,21 @@ public class HttpClientMigrationTest {
 
     @Test
     public void testMigrateOAuthScopesToAdditionalParams() {
-        Map<String, String> version2ProxyConfig = new HashMap<>();
-        version2ProxyConfig.put("authentication.name", "peter");
-        version2ProxyConfig.put("authentication.oauth20.scopes[0]", "scopeA");
-        version2ProxyConfig.put("authentication.oauth20.scopes[2]", "scopeC");
-        version2ProxyConfig.put("authentication.oauth20.scopes[1]", "scopeB");
-        version2ProxyConfig.put("authentication.oauth20.scopes[4]", "scopeE");
-        version2ProxyConfig.put("authentication.oauth20.scopes[3]", "scopeD");
-        version2ProxyConfig.put("authentication.pwd", "aze123");
+        Map<String, String> inputConfig = new HashMap<>();
+        inputConfig.put("authentication.name", "peter");
+        inputConfig.put("authentication.oauth20.scopes[0]", "scopeA");
+        inputConfig.put("authentication.oauth20.scopes[2]", "scopeC");
+        inputConfig.put("authentication.oauth20.scopes[1]", "scopeB");
+        inputConfig.put("authentication.oauth20.scopes[4]", "scopeE");
+        inputConfig.put("authentication.oauth20.scopes[3]", "scopeD");
+        inputConfig.put("authentication.pwd", "aze123");
 
         HttpClientDatastoreMigrationHandler migrationHandler = new HttpClientDatastoreMigrationHandler();
-        Map<String, String> migrated = migrationHandler.migrate(2, version2ProxyConfig);
+        Map<String, String> migrated = migrationHandler.migrate(2, inputConfig);
 
         Assertions.assertNotNull(migrated);
-        Assertions.assertEquals("scopeA scopeB scopeC scopeD scopeE", migrated.get("authentication.oauth20.params[0].value"));
+        Assertions.assertEquals("scopeA scopeB scopeC scopeD scopeE",
+                migrated.get("authentication.oauth20.params[0].value"));
         Assertions.assertEquals("scope", migrated.get("authentication.oauth20.params[0].key"));
         Assertions.assertEquals("peter", migrated.get("authentication.name"));
         Assertions.assertEquals("aze123", migrated.get("authentication.pwd"));
