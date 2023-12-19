@@ -13,7 +13,6 @@
 package org.talend.components.cosmosDB;
 
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +21,11 @@ import org.talend.components.cosmosDB.input.CosmosDBInputConfiguration;
 import org.talend.components.cosmosDB.input.SchemaInfo;
 import org.talend.sdk.component.api.record.Record;
 
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,8 +91,11 @@ public class CosmosInputTestIT extends CosmosDbTestBase {
         Record next = input.next();
         log.info(next.toString());
         input.release();
-        Assertions.assertEquals("Wakefield.7",
-                new JSONObject(next.getString("doc")).getJSONObject("Family").getString("Name"));
+
+        JsonReader reader = Json.createReader(new StringReader(next.getString("doc")));
+        JsonObject jsonObject = reader.readObject();
+
+        Assertions.assertEquals("Wakefield.7", jsonObject.getJsonObject("Family").getString("Name"));
 
     }
 
