@@ -128,12 +128,12 @@ public class ClientTestWithBasicHTTPServer {
         config.getDataset().setHasHeaders(true);
         config.getDataset()
                 .setHeaders(Arrays.asList(
-                        new Header("header1", "for main query", Header.HEADER_QUERY_DESTINATION.MAIN),
-                        new Header("header2", "for authent query", Header.HEADER_QUERY_DESTINATION.AUTHENT),
-                        new Header("header3", "for main & authent query", Header.HEADER_QUERY_DESTINATION.BOTH),
-                        new Header("header4", "for main query 2", Header.HEADER_QUERY_DESTINATION.MAIN),
-                        new Header("header5", "for authent query 2", Header.HEADER_QUERY_DESTINATION.AUTHENT),
-                        new Header("header6", "for main & authent query 2", Header.HEADER_QUERY_DESTINATION.BOTH)));
+                        new Header("header1", "for main query", Header.HeaderQueryDestination.MAIN),
+                        new Header("header2", "for authent query", Header.HeaderQueryDestination.AUTHENT),
+                        new Header("header3", "for main & authent query", Header.HeaderQueryDestination.BOTH),
+                        new Header("header4", "for main query 2", Header.HeaderQueryDestination.MAIN),
+                        new Header("header5", "for authent query 2", Header.HeaderQueryDestination.AUTHENT),
+                        new Header("header6", "for main & authent query 2", Header.HeaderQueryDestination.BOTH)));
 
         Authentication auth = new Authentication();
         auth.setType(Authorization.AuthorizationType.OAuth20);

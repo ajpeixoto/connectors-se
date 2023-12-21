@@ -200,7 +200,7 @@ public class ClientTestWithHttpbinTest {
         config.getDataset().setQueryParams(queryParams);
 
         List<Header> headerParams = new ArrayList<>();
-        headerParams.add(new Header("Header1", "simple value", Header.HEADER_QUERY_DESTINATION.MAIN));
+        headerParams.add(new Header("Header1", "simple value", Header.HeaderQueryDestination.MAIN));
         config.getDataset().setHasHeaders(false);
         config.getDataset().setHeaders(headerParams);
 
@@ -237,9 +237,9 @@ public class ClientTestWithHttpbinTest {
             config.getDataset().setQueryParams(queryParams);
 
             List<Header> headerParams = new ArrayList<>();
-            headerParams.add(new Header("Header1", "simple value", Header.HEADER_QUERY_DESTINATION.MAIN));
+            headerParams.add(new Header("Header1", "simple value", Header.HeaderQueryDestination.MAIN));
             headerParams.add(
-                    new Header("Header2", "<name>header Dupont & Dupond</name>", Header.HEADER_QUERY_DESTINATION.MAIN));
+                    new Header("Header2", "<name>header Dupont & Dupond</name>", Header.HeaderQueryDestination.MAIN));
             config.getDataset().setHasHeaders(true);
             config.getDataset().setHeaders(headerParams);
 

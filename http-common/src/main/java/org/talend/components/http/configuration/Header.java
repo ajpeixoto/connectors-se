@@ -30,7 +30,7 @@ import java.io.Serializable;
 @Documentation("Header configuration.")
 public class Header implements Serializable {
 
-    public enum HEADER_QUERY_DESTINATION {
+    public enum HeaderQueryDestination {
         MAIN,
         AUTHENT,
         BOTH
@@ -48,6 +48,6 @@ public class Header implements Serializable {
     @Option
     @Documentation("Value of the parameter.")
     @DefaultValue("MAIN")
-    private HEADER_QUERY_DESTINATION query = HEADER_QUERY_DESTINATION.MAIN;
+    private HeaderQueryDestination query = HeaderQueryDestination.MAIN;
 
 }

@@ -25,9 +25,7 @@ import org.talend.components.common.httpclient.api.BodyFormat;
 import org.talend.components.common.httpclient.api.HTTPClient;
 import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.common.httpclient.api.HTTPMethod;
-import org.talend.components.common.httpclient.api.KeyValuePair;
 import org.talend.components.common.httpclient.api.QueryConfiguration;
-import org.talend.components.http.TestUtil;
 import org.talend.components.http.configuration.Dataset;
 import org.talend.components.http.configuration.Datastore;
 import org.talend.components.http.configuration.Header;
@@ -52,11 +50,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -360,10 +355,10 @@ class HTTPClientServiceTest {
         this.config.getDataset().setHasHeaders(true);
         this.config.getDataset()
                 .getHeaders()
-                .add(new Header("Accept", "application/{.input.site._format}", Header.HEADER_QUERY_DESTINATION.MAIN));
+                .add(new Header("Accept", "application/{.input.site._format}", Header.HeaderQueryDestination.MAIN));
         this.config.getDataset()
                 .getHeaders()
-                .add(new Header("Authorization", "Baerer {.input.site._key}", Header.HEADER_QUERY_DESTINATION.MAIN));
+                .add(new Header("Authorization", "Baerer {.input.site._key}", Header.HeaderQueryDestination.MAIN));
 
         this.config.getDataset().setHasBody(true);
         this.config.getDataset().setBody(new RequestBody());

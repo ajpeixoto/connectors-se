@@ -199,8 +199,8 @@ public class HTTPClientService {
                     .getHeaders()
                     .stream()
                     .filter(h -> h.getKey() != null && !h.getKey().trim().isEmpty())
-                    .filter(h -> h.getQuery() == Header.HEADER_QUERY_DESTINATION.MAIN
-                            || h.getQuery() == Header.HEADER_QUERY_DESTINATION.BOTH)
+                    .filter(h -> h.getQuery() == Header.HeaderQueryDestination.MAIN
+                            || h.getQuery() == Header.HeaderQueryDestination.BOTH)
                     .forEach(p -> queryConfigurationBuilder.addHeader(p.getKey(), p.getValue()));
         }
 
@@ -333,8 +333,8 @@ public class HTTPClientService {
                     .getHeaders()
                     .stream()
                     .filter(h -> h.getKey() != null && !h.getKey().trim().isEmpty())
-                    .filter(h -> h.getQuery() == Header.HEADER_QUERY_DESTINATION.AUTHENT
-                            || h.getQuery() == Header.HEADER_QUERY_DESTINATION.BOTH)
+                    .filter(h -> h.getQuery() == Header.HeaderQueryDestination.AUTHENT
+                            || h.getQuery() == Header.HeaderQueryDestination.BOTH)
                     .map(h -> new KeyValuePair(h.getKey(), h.getValue()))
                     .forEach(h -> headers.add(h));
         }

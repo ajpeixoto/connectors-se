@@ -33,7 +33,6 @@ import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.http.configuration.Dataset;
 import org.talend.components.http.configuration.Datastore;
 import org.talend.components.http.configuration.Header;
-import org.talend.components.http.configuration.Param;
 import org.talend.components.http.configuration.RequestBody;
 import org.talend.components.http.configuration.RequestConfig;
 import org.talend.components.http.output.AbstractHTTPOutput;
@@ -96,7 +95,7 @@ public class SplunkEventCollector extends AbstractHTTPOutput<SplunkEventCollecto
         requestConfigDataset.setDatastore(requestConfigDatastore);
         requestConfigDataset.setHasHeaders(true);
         requestConfigDataset.setHeaders(Collections.singletonList(new Header("Authorization",
-                "Splunk " + config.getDataset().getDatastore().getToken(), Header.HEADER_QUERY_DESTINATION.MAIN)));
+                "Splunk " + config.getDataset().getDatastore().getToken(), Header.HeaderQueryDestination.MAIN)));
         requestConfigDataset.setMethodType("POST");
         requestConfigDataset.setResource("services/collector");
 
