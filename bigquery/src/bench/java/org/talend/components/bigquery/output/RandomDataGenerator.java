@@ -12,11 +12,11 @@
  */
 package org.talend.components.bigquery.output;
 
-import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
-
 import java.io.Serializable;
 import java.util.Iterator;
+
+import org.talend.sdk.component.api.record.Record;
+import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class RandomDataGenerator implements Iterable<Record>, Serializable {
 

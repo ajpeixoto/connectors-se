@@ -12,8 +12,6 @@
  */
 package org.talend.components.bigquery.output;
 
-import org.apache.beam.sdk.options.PipelineOptions;
-import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.junit.Rule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,13 +25,8 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit.SimpleComponentRule;
-import org.talend.sdk.component.junit.environment.Environment;
-import org.talend.sdk.component.junit.environment.EnvironmentConfiguration;
-import org.talend.sdk.component.junit.environment.Environments;
-import org.talend.sdk.component.junit.environment.builtin.beam.SparkRunnerEnvironment;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
-import org.talend.sdk.component.junit5.environment.EnvironmentalTest;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
 import java.io.BufferedInputStream;
@@ -41,13 +34,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @WithComponents(value = "org.talend.components.bigquery")
 public class BigQueryOutputITCase {
 
@@ -89,12 +82,11 @@ public class BigQueryOutputITCase {
 
         long start = System.currentTimeMillis();
 
-        Job.components().component("source", "test://emitter").component("output", "BigQuery://BigQueryOutput?" + configURI)
-                .connections().from("source").to("output").build().run();
+        runOutputPipeline(configURI);
 
         long end = System.currentTimeMillis();
 
-        System.out.println(nbrecords + " in " + (end - start) + " ms");
+        log.info(nbrecords + " in " + (end - start) + " ms");
 
     }
 
@@ -127,11 +119,11 @@ public class BigQueryOutputITCase {
         config.setDataSet(dataset);
         config.setTableOperation(BigQueryOutputConfig.TableOperation.CREATE_IF_NOT_EXISTS);
         String schema = "[\r\n{\"name\":\"k\", \"type\":\"STRING\"},\r\n{\"name\":\"v\", \"type\":\"STRING\"}\r\n]";
-        System.out.println(schema);
+        log.info(schema);
         config.setTableSchemaFields(schema);
 
         String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-        System.out.println(configURI);
+        log.info(configURI);
 
         List<Record> inputData = new ArrayList<>();
         inputData.add(rbf.newRecordBuilder().withString("k", "entry1").withString("v", "value1").build());
@@ -139,8 +131,7 @@ public class BigQueryOutputITCase {
 
         COMPONENTS.setInputData(inputData);
 
-        Job.components().component("source", "test://emitter").component("output", "BigQuery://BigQueryOutput?" + configURI)
-                .connections().from("source").to("output").build().run();
+        runOutputPipeline(configURI);
 
     }
 
@@ -165,22 +156,57 @@ public class BigQueryOutputITCase {
 
         List<Record> inputData = new ArrayList<>();
 
+        final String columnName0 = "field0";
+        final String columnName1 = "field1";
         Schema schema = rbf.newSchemaBuilder(Schema.Type.RECORD)
-                .withEntry(rbf.newEntryBuilder().withName("field0").withType(Schema.Type.STRING).build())
-                .withEntry(rbf.newEntryBuilder().withName("field1").withType(Schema.Type.STRING).build())
+                .withEntry(rbf.newEntryBuilder().withName(columnName0).withType(Schema.Type.STRING).build())
+                .withEntry(rbf.newEntryBuilder().withName(columnName1).withType(Schema.Type.STRING).build())
                 .build();
 
-        inputData.add(rbf.newRecordBuilder(schema).withString("field0", "entry3").withString("field1", "value3").build());
-        inputData.add(rbf.newRecordBuilder(schema).withString("field0", "entry4").withString("field1", "value4").build());
-        inputData.add(rbf.newRecordBuilder(schema).withString("field0", "entry5").withString("field1", "value5").build());
-        inputData.add(rbf.newRecordBuilder(schema).withString("field0", "entry6").withString("field1", "value6").build());
-        inputData.add(rbf.newRecordBuilder(schema).withString("field0", "entry7").withString("field1", "value7").build());
-        inputData.add(rbf.newRecordBuilder(schema).withString("field0", "entry8").withString("field1", "value8").build());
-
+        inputData.add(
+                rbf.newRecordBuilder(schema)
+                        .withString(columnName0, "entry3")
+                        .withString(columnName1, "value3")
+                        .build());
+        inputData.add(
+                rbf.newRecordBuilder(schema)
+                        .withString(columnName0, "entry4")
+                        .withString(columnName1, "value4")
+                        .build());
+        inputData.add(
+                rbf.newRecordBuilder(schema)
+                        .withString(columnName0, "entry5")
+                        .withString(columnName1, "value5")
+                        .build());
+        inputData.add(
+                rbf.newRecordBuilder(schema)
+                        .withString(columnName0, "entry6")
+                        .withString(columnName1, "value6")
+                        .build());
+        inputData.add(
+                rbf.newRecordBuilder(schema)
+                        .withString(columnName0, "entry7")
+                        .withString(columnName1, "value7")
+                        .build());
+        inputData.add(
+                rbf.newRecordBuilder(schema)
+                        .withString(columnName0, "entry8")
+                        .withString(columnName1, "value8")
+                        .build());
 
         COMPONENTS.setInputData(inputData);
 
-        Job.components().component("source", "test://emitter").component("output", "BigQuery://BigQueryOutput?" + configURI)
-                .connections().from("source").to("output").build().run();
+        runOutputPipeline(configURI);
+    }
+
+    private static void runOutputPipeline(final String configURI) {
+        Job.components()
+                .component("source", "test://emitter")
+                .component("output", "BigQuery://BigQueryOutput?" + configURI)
+                .connections()
+                .from("source")
+                .to("output")
+                .build()
+                .run();
     }
 }

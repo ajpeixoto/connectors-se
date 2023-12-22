@@ -44,7 +44,7 @@ import com.google.cloud.bigquery.FieldValueList;
 import com.google.cloud.bigquery.LegacySQLTypeName;
 import com.google.cloud.storage.Storage;
 
-public class BigQueryTableExtractInputTest {
+class BigQueryTableExtractInputTest {
 
     public static class SimpleGenericRecord implements GenericRecord {
 
@@ -178,7 +178,7 @@ public class BigQueryTableExtractInputTest {
     }
 
     @Test
-    public void justRun() throws Exception {
+    void justRun() throws Exception {
 
         Mockito.when(dataStream.hasNext()).thenReturn(true, false);
         Mockito.when(dataStream.next()).thenReturn(getGenericRecord(), null);
@@ -254,7 +254,7 @@ public class BigQueryTableExtractInputTest {
     }
 
     @Test
-    public void ifBlobNullCallDelegate() throws Exception {
+    void ifBlobNullCallDelegate() throws Exception {
         BigQueryTableExtractInput beanUnderTest =
                 new BigQueryTableExtractInput(configuration, service, storageService, i18n,
                         builderFactory, null, null);

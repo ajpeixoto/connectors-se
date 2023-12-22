@@ -45,6 +45,9 @@ import java.util.OptionalDouble;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.IntStream;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Environments({ @Environment(SparkRunnerEnvironment.class) })
 @WithComponents("org.talend.components.bigquery")
 public class BigQueryTableExtractInputITCase {
@@ -56,7 +59,7 @@ public class BigQueryTableExtractInputITCase {
         @ProcessElement
         public void processElement(ProcessContext c) {
             if (counter.incrementAndGet() % 10000 == 0) {
-                System.out.println(counter.get());
+                log.info(counter.get());
             }
         }
 
@@ -91,12 +94,11 @@ public class BigQueryTableExtractInputITCase {
                 return run();
             } catch (Exception e) {
                 e.printStackTrace();
-                ;
-                return 0l;
+                return 0L;
             }
         }).average();
 
-        avg.ifPresent(System.out::println);
+        avg.ifPresent(log::info);
     }
 
     // @Test
@@ -133,7 +135,7 @@ public class BigQueryTableExtractInputITCase {
         // records.stream().limit(1000).forEach(System.out::println);
 
         // Assertions.assertNotNull(records);
-        System.out.println(counter.getCounter() + " in " + (end - start) + "ms");
+        log.info(counter.getCounter() + " in " + (end - start) + "ms");
         // Assertions.assertNotEquals(0, records.size());
 
         return end - start;

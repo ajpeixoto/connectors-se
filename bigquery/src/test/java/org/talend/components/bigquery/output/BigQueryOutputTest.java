@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class BigQueryOutputTest {
+class BigQueryOutputTest {
 
     private BigQueryOutputConfig configuration;
 
@@ -74,7 +74,7 @@ public class BigQueryOutputTest {
     }
 
     @Test
-    public void runTest() throws Exception {
+    void runTest() throws Exception {
 
         InsertAllResponse response = Mockito.mock(InsertAllResponse.class);
         Mockito.when(bigQuery.insertAll(Mockito.any(InsertAllRequest.class))).thenReturn(response);
@@ -89,9 +89,8 @@ public class BigQueryOutputTest {
 
         beanUnderTest.beforeGroup();
         List<Record> records = getRecordsToStore();
-        records.stream().forEach(beanUnderTest::onElement);
+        records.forEach(beanUnderTest::onElement);
         beanUnderTest.afterGroup();
-
     }
 
     private List<Record> getRecordsToStore() {

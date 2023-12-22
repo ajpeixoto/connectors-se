@@ -20,6 +20,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class RandomDataGeneratorIterator implements Iterator<Record>, Serializable {
 
     private int nbRecords;
@@ -50,7 +53,7 @@ public class RandomDataGeneratorIterator implements Iterator<Record>, Serializab
 
         int countVal = count.incrementAndGet();
 
-        // System.out.println(countVal + " / " + nbRecords);
+        // log.info(countVal + " / " + nbRecords);
 
         return rbf.newRecordBuilder().withInt("ID", countVal)
                 .withString("NAME", Thread.currentThread().getName() + "_" + countVal).withFloat("VALUE_F", (float) Math.random())

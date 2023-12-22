@@ -95,7 +95,7 @@ public class BigQueryTableExtractInput implements Serializable {
 
     @PostConstruct
     public void init() {
-
+        /* NOP */
     }
 
     @Producer
@@ -119,7 +119,7 @@ public class BigQueryTableExtractInput implements Serializable {
             }
         }
 
-        Record record = null;
+        Record recordInput = null;
 
         if (dataStream != null && !dataStream.hasNext()) {
             try {
@@ -129,10 +129,10 @@ public class BigQueryTableExtractInput implements Serializable {
             }
         } else if (dataStream != null) {
             GenericRecord rec = dataStream.next();
-            record = converter.toRecord(rec);
+            recordInput = converter.toRecord(rec);
         }
 
-        return record;
+        return recordInput;
     }
 
     @PreDestroy

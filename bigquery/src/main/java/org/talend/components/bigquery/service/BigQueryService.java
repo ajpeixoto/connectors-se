@@ -35,7 +35,6 @@ import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -60,6 +59,24 @@ public class BigQueryService {
     private static final String FIELDS = "\"fields\"";
 
     private static final String SUB_FIELDS = "\"subFields\"";
+
+    public static final String TYPE_RECORD = "RECORD";
+
+    public static final String TYPE_BOOLEAN = "BOOLEAN";
+
+    public static final String TYPE_BYTES = "BYTES";
+
+    public static final String TYPE_DATETIME = "DATETIME";
+
+    public static final String TYPE_TIMESTAMP = "TIMESTAMP";
+
+    public static final String TYPE_FLOAT = "FLOAT";
+
+    public static final String TYPE_INTEGER = "INTEGER";
+
+    public static final String TYPE_TIME = "TIME";
+
+    public static final String TYPE_DATE = "DATE";
 
     @Service
     private RecordBuilderFactory recordBuilderFactoryService;
@@ -163,10 +180,10 @@ public class BigQueryService {
         }
     }
 
-    public com.google.cloud.bigquery.Schema guessSchema(Record record) {
+    public com.google.cloud.bigquery.Schema guessSchema(Record inputRecord) {
 
-        if (record.getSchema() != null) {
-            return convertToGoogleSchema(record.getSchema());
+        if (inputRecord.getSchema() != null) {
+            return convertToGoogleSchema(inputRecord.getSchema());
         }
 
         return null;
@@ -275,20 +292,20 @@ public class BigQueryService {
         }
 
         switch (type.name()) {
-        case "RECORD":
+        case TYPE_RECORD:
             return org.talend.sdk.component.api.record.Schema.Type.RECORD;
-        case "BOOLEAN":
+        case TYPE_BOOLEAN:
             return org.talend.sdk.component.api.record.Schema.Type.BOOLEAN;
-        case "BYTES":
+        case TYPE_BYTES:
             return org.talend.sdk.component.api.record.Schema.Type.BYTES;
-        case "DATETIME":
-        case "DATE":
-        case "TIMESTAMP":
-        case "TIME":
+        case TYPE_DATETIME:
+        case TYPE_DATE:
+        case TYPE_TIMESTAMP:
+        case TYPE_TIME:
             return org.talend.sdk.component.api.record.Schema.Type.DATETIME;
-        case "FLOAT":
+        case TYPE_FLOAT:
             return org.talend.sdk.component.api.record.Schema.Type.DOUBLE;
-        case "INTEGER":
+        case TYPE_INTEGER:
             return org.talend.sdk.component.api.record.Schema.Type.LONG;
         default:
             return org.talend.sdk.component.api.record.Schema.Type.STRING;
@@ -324,7 +341,7 @@ public class BigQueryService {
 
                 switch (type.name()) {
 
-                case "RECORD":
+                case TYPE_RECORD:
 
                     rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
                         FieldValueList ifv = fv.getRecordValue();
@@ -344,22 +361,22 @@ public class BigQueryService {
 
                     }).collect(Collectors.toList()));
                     break;
-                case "BOOLEAN":
+                case TYPE_BOOLEAN:
                     rb
                             .withArray(entry,
                                     ((FieldValueList) value.getValue())
                                             .stream()
-                                            .map(fv -> fv.getBooleanValue())
+                                            .map(FieldValue::getBooleanValue)
                                             .collect(Collectors.toList()));
                     break;
-                case "BYTES":
+                case TYPE_BYTES:
                     rb
                             .withArray(entry, ((FieldValueList) value.getValue())
                                     .stream()
                                     .map(fv -> Base64.decodeBase64(fv.getStringValue()))
                                     .collect(Collectors.toList()));
                     break;
-                case "TIMESTAMP":
+                case TYPE_TIMESTAMP:
                     rb
                             .withArray(entry,
                                     ((FieldValueList) value.getValue())
@@ -367,7 +384,7 @@ public class BigQueryService {
                                             .map(fv -> fv.getTimestampValue() / 1000)
                                             .collect(Collectors.toList()));
                     break;
-                case "DATE":
+                case TYPE_DATE:
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                     rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
                         try {
@@ -378,7 +395,7 @@ public class BigQueryService {
                         }
                     }).collect(Collectors.toList()));
                     break;
-                case "DATETIME":
+                case TYPE_DATETIME:
                     sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
                     rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
                         try {
@@ -389,22 +406,22 @@ public class BigQueryService {
                         }
                     }).collect(Collectors.toList()));
                     break;
-                case "FLOAT":
+                case TYPE_FLOAT:
                     rb
                             .withArray(entry,
                                     ((FieldValueList) value.getValue())
                                             .stream()
-                                            .map(fv -> fv.getDoubleValue())
+                                            .map(FieldValue::getDoubleValue)
                                             .collect(Collectors.toList()));
                     break;
-                case "INTEGER":
+                case TYPE_INTEGER:
                     rb
                             .withArray(entry, ((FieldValueList) value.getValue())
                                     .stream()
-                                    .map(fv -> fv.getLongValue())
+                                    .map(FieldValue::getLongValue)
                                     .collect(Collectors.toList()));
                     break;
-                case "TIME":
+                case TYPE_TIME:
                     sdf = new SimpleDateFormat("HH:mm:ss");
                     rb.withArray(entry, ((FieldValueList) value.getValue()).stream().map(fv -> {
                         try {
@@ -420,13 +437,13 @@ public class BigQueryService {
                             .withArray(entry,
                                     ((FieldValueList) value.getValue())
                                             .stream()
-                                            .map(fv -> fv.getStringValue())
+                                            .map(FieldValue::getStringValue)
                                             .collect(Collectors.toList()));
                 }
             } else {
                 switch (type.name()) {
 
-                case "RECORD":
+                case TYPE_RECORD:
                     FieldValueList innerFieldsValue = value.getRecordValue();
                     FieldList innerFields = f.getSubFields();
 
@@ -446,44 +463,41 @@ public class BigQueryService {
                     Record.Builder innerRecordBuilder = recordBuilderFactoryService
                             .newRecordBuilder(convertToTckSchema(subSchema));
 
-                    innerFields
-                            .stream()
-                            .forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
-                                    innerField, subSchema));
+                    innerFields.forEach(innerField -> convertToTckField(innerFieldsValueWithSchema, innerRecordBuilder,
+                            innerField, subSchema));
                     rb.withRecord(name, innerRecordBuilder.build());
                     break;
-                case "BOOLEAN":
+                case TYPE_BOOLEAN:
                     rb.withBoolean(name, value.getBooleanValue());
                     break;
-                case "BYTES":
+                case TYPE_BYTES:
                     rb.withBytes(name, Base64.decodeBase64(value.getStringValue()));
                     break;
-                case "TIMESTAMP":
+                case TYPE_TIMESTAMP:
                     rb.withTimestamp(name, value.getTimestampValue() / 1000);
                     break;
-                case "DATE":
+                case TYPE_DATE:
                     try {
                         rb.withDateTime(name, new SimpleDateFormat("yyyy-MM-dd").parse(value.getStringValue()));
                     } catch (ParseException e) {
                         log.warn("Cannot parse date {}", value.getStringValue());
                     }
                     break;
-                case "DATETIME":
+                case TYPE_DATETIME:
                     try {
-                        rb
-                                .withDateTime(name,
-                                        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.getStringValue()));
+                        rb.withDateTime(name,
+                                new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(value.getStringValue()));
                     } catch (ParseException e) {
                         log.warn("Cannot parse time {}", value.getStringValue());
                     }
                     break;
-                case "FLOAT":
+                case TYPE_FLOAT:
                     rb.withDouble(name, value.getDoubleValue());
                     break;
-                case "INTEGER":
+                case TYPE_INTEGER:
                     rb.withLong(name, value.getLongValue());
                     break;
-                case "TIME":
+                case TYPE_TIME:
                     try {
                         rb.withDateTime(name, new SimpleDateFormat("HH:mm:ss").parse(value.getStringValue()));
                     } catch (ParseException e) {
@@ -498,9 +512,8 @@ public class BigQueryService {
     }
 
     private Gson createGsonBuilder() {
-        JsonDeserializer<LegacySQLTypeName> typeDeserializer = (jsonElement, type, deserializationContext) -> {
-            return LegacySQLTypeName.valueOf(jsonElement.getAsString());
-        };
+        JsonDeserializer<LegacySQLTypeName> typeDeserializer =
+                (jsonElement, type, deserializationContext) -> LegacySQLTypeName.valueOf(jsonElement.getAsString());
 
         JsonDeserializer<FieldList> subFieldsDeserializer = (jsonElement, type, deserializationContext) -> {
             Field[] fields = deserializationContext.deserialize(jsonElement.getAsJsonArray(), Field[].class);

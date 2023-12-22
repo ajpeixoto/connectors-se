@@ -105,11 +105,11 @@ public class BigQueryQueryInputTest {
     }
 
     @Test
-    public void justCrash() {
+    void justCrash() {
+        queryDataSet.setQuery(null);
+        beanUnderTest = new BigQueryQueryInput(config, bigQueryService, i18nMessage, builderFactory);
+        beanUnderTest.init();
         try {
-            queryDataSet.setQuery(null);
-            beanUnderTest = new BigQueryQueryInput(config, bigQueryService, i18nMessage, builderFactory);
-            beanUnderTest.init();
             beanUnderTest.next();
             Assertions.fail("Should have thrown a RuntimeException");
         } catch (RuntimeException re) {
@@ -118,7 +118,7 @@ public class BigQueryQueryInputTest {
     }
 
     @Test
-    public void justRun() throws Exception {
+    void justRun() throws Exception {
         Mockito.when(queryResult.hasNext()).thenReturn(true, false);
         Mockito.when(queryResult.next()).thenReturn(getRecord(), null);
 

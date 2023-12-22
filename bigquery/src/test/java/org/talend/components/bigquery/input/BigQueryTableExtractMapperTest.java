@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class BigQueryTableExtractMapperTest {
+class BigQueryTableExtractMapperTest {
 
     private BigQueryTableExtractInputConfig configuration;
 
@@ -112,7 +112,7 @@ public class BigQueryTableExtractMapperTest {
     }
 
     @Test
-    public void testSplit() {
+    void testSplit() {
         BigQueryTableExtractMapper beanUnderTest =
                 new BigQueryTableExtractMapper(configuration, service, storageService, i18n,
                         builderFactory);

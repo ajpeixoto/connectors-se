@@ -185,10 +185,10 @@ public class BigQueryOutput implements Serializable {
     private RecordWriter buildWriter(WriteChannel writerChannel) throws IOException {
         final ContentFormat contentFormat = new CSVConfiguration();
         final RecordWriterSupplier recordWriterSupplier = this.ioRepository.findWriter(contentFormat.getClass());
-        final RecordWriter writer =
+        final RecordWriter recWriter =
                 recordWriterSupplier.getWriter(() -> Channels.newOutputStream(writerChannel), contentFormat);
-        writer.init(contentFormat);
-        return writer;
+        recWriter.init(contentFormat);
+        return recWriter;
     }
 
     @ElementListener

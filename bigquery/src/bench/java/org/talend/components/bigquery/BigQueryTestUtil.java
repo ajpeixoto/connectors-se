@@ -12,6 +12,8 @@
  */
 package org.talend.components.bigquery;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
@@ -24,16 +26,20 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BigQueryTestUtil {
 
-    public static String GOOGLE_APPLICATION_CREDENTIALS;
+    public static final String GOOGLE_APPLICATION_CREDENTIALS;
 
-    public static String GOOGLE_PROJECT;
+    public static final String GOOGLE_PROJECT;
+
+    private static final String GOOGLE_APPLICATION_CREDENTIALS1 = "GOOGLE_APPLICATION_CREDENTIALS";
 
     static {
-        GOOGLE_APPLICATION_CREDENTIALS = Optional.ofNullable(System.getProperty("GOOGLE_APPLICATION_CREDENTIALS"))
-                .orElseGet(() -> Optional.ofNullable(System.getenv("GOOGLE_APPLICATION_CREDENTIALS"))
-                        .orElseGet(() -> Optional.ofNullable(new MavenDecrypter().find("GOOGLE_APPLICATION_CREDENTIALS").getPassword())
+        GOOGLE_APPLICATION_CREDENTIALS = Optional.ofNullable(System.getProperty(GOOGLE_APPLICATION_CREDENTIALS1))
+                .orElseGet(() -> Optional.ofNullable(System.getenv(GOOGLE_APPLICATION_CREDENTIALS1))
+                        .orElseGet(() -> Optional
+                                .ofNullable(new MavenDecrypter().find(GOOGLE_APPLICATION_CREDENTIALS1).getPassword())
                                 .orElseThrow(() -> new RuntimeException("GOOGLE_APPLICATION_CREDENTIALS not set"))));
 
         GOOGLE_PROJECT = Optional.ofNullable(System.getProperty("GOOGLE_PROJECT")).orElse("engineering-152721");

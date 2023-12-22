@@ -69,6 +69,7 @@ public class BigQueryQueryInput implements Serializable {
 
     @PostConstruct
     public void init() {
+        /* NOP */
     }
 
     @Producer
@@ -94,7 +95,7 @@ public class BigQueryQueryInput implements Serializable {
             }
         }
 
-        Record record = null;
+        Record rec = null;
 
         if (queryResult != null && queryResult.hasNext()) {
             FieldValueList fieldValueList = queryResult.next();
@@ -104,10 +105,10 @@ public class BigQueryQueryInput implements Serializable {
                 service.convertToTckField(fieldValueList, rb, f, tableSchema);
             }
 
-            record = rb.build();
+            rec = rb.build();
         }
 
-        return record;
+        return rec;
     }
 
 }

@@ -37,6 +37,9 @@ import java.util.stream.IntStream;
 
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Environment(SparkRunnerEnvironment.class)
 @WithComponents(value = "org.talend.components.bigquery")
 public class BigQueryTableInputITCase {
@@ -51,12 +54,11 @@ public class BigQueryTableInputITCase {
                 return run();
             } catch (Exception e) {
                 e.printStackTrace();
-                ;
                 return 0l;
             }
         }).average();
 
-        avg.ifPresent(System.out::println);
+        avg.ifPresent(log::info);
     }
 
     // @Test

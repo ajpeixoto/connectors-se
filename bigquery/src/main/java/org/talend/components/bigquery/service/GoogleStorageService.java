@@ -22,9 +22,7 @@ import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.io.DatumReader;
-import org.talend.components.bigquery.avro.AvroConverter;
 import org.talend.sdk.component.api.service.Service;
-import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.io.IOException;
 import java.io.InputStream;

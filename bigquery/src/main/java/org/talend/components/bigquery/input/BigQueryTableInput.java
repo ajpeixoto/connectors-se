@@ -69,7 +69,7 @@ public class BigQueryTableInput implements Serializable {
 
     @PostConstruct
     public void init() {
-
+        /* NOP */
     }
 
     @Producer
@@ -97,7 +97,7 @@ public class BigQueryTableInput implements Serializable {
             }
         }
 
-        Record record = null;
+        Record recordInput = null;
 
         if (queryResult != null && queryResult.hasNext()) {
             FieldValueList fieldValueList = queryResult.next();
@@ -109,10 +109,10 @@ public class BigQueryTableInput implements Serializable {
 
             }
 
-            record = rb.build();
+            recordInput = rb.build();
         }
 
-        return record;
+        return recordInput;
     }
 
 }
