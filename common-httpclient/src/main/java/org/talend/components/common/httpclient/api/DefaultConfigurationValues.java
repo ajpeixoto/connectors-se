@@ -16,46 +16,46 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * Load default configuration value.
- *
+ * <p>
  * Key are given with '.' as separator, but environment variable will be also retrieve. It is the same key with '.'
- * repalced by '_' and uppercase.
+ * replaced by '_' and uppercase.
  * For instance "org.talend.a.key" will be "ORG_TALEND_A_KEY".
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DefaultConfigurationValues {
 
-    private DefaultConfigurationValues() {
-        /* Don't instantiate. */
-    }
+    public static final String HTTP_CLIENT_CONNECT_TIMEOUT = "org.talend.http.client.connection.timeout";
 
-    public final static String HTTP_CLIENT_CONNECT_TIMEOUT = "org.talend.http.client.connection.timeout";
-
-    public final static String HTTP_CLIENT_RECEIVE_TIMEOUT = "org.talend.http.client.receive.timeout";
+    public static final String HTTP_CLIENT_RECEIVE_TIMEOUT = "org.talend.http.client.receive.timeout";
 
     /**
      * Duration to substract to expiresin of token to let time to do the call.
      */
-    public final static String HTTP_CLIENT_EXPIRESIN_TOKEN_SECURITY_DURATION =
+    public static final String HTTP_CLIENT_EXPIRESIN_TOKEN_SECURITY_DURATION =
             "org.talend.http.client.token.expiresin.security.duration";
 
-    public final static String HTTP_CLIENT_URL_PLACE_HOLDER_BEGIN = "org.talend.http.client.url.place.holder.begin";
+    public static final String HTTP_CLIENT_URL_PLACE_HOLDER_BEGIN = "org.talend.http.client.url.place.holder.begin";
 
-    public final static String HTTP_CLIENT_URL_PLACE_HOLDER_END = "org.talend.http.client.url.place.holder.end";
+    public static final String HTTP_CLIENT_URL_PLACE_HOLDER_END = "org.talend.http.client.url.place.holder.end";
 
-    public final static String HTTP_CLIENT_ACCEPT_REDIRECTIONS =
+    public static final String HTTP_CLIENT_ACCEPT_REDIRECTIONS =
             "org.talend.http.client.accept.redirection";
 
-    public final static String HTTP_CLIENT_MAX_NUMBER_REDIRECTIONS_ON_SAME_URI =
+    public static final String HTTP_CLIENT_MAX_NUMBER_REDIRECTIONS_ON_SAME_URI =
             "org.talend.http.client.max.number.redirections.on.same.host";
 
-    public final static String HTTP_CLIENT_ACCEPT_ONLY_SAME_HOST_REDIRECTIONS =
+    public static final String HTTP_CLIENT_ACCEPT_ONLY_SAME_HOST_REDIRECTIONS =
             "org.talend.http.client.accept.only.same.host.redirections";
 
-    public final static String HTTP_CLIENT_ACCEPT_RELATIVE_REDIRECTIONS =
+    public static final String HTTP_CLIENT_ACCEPT_RELATIVE_REDIRECTIONS =
             "org.talend.http.client.accept.relative.redirections";
 
-    public final static String HTTP_CLIENT_OAUTH_TOKEN_FORCED_EXPIRES_IN =
+    public static final String HTTP_CLIENT_OAUTH_TOKEN_FORCED_EXPIRES_IN =
             "org.talend.http.client.oauth.token.forced.expires_in";
 
     // Need to wait for https://issues.apache.org/jira/browse/CXF-8752
@@ -87,25 +87,25 @@ public final class DefaultConfigurationValues {
 
     public static long HTTP_CLIENT_OAUTH_TOKEN_FORCED_EXPIRES_IN_VALUE;
 
-    public final static int HTTP_CLIENT_CONNECT_TIMEOUT_DEFAULT_VALUE = 30000;
+    public static final int HTTP_CLIENT_CONNECT_TIMEOUT_DEFAULT_VALUE = 30000;
 
-    public final static int HTTP_CLIENT_RECEIVE_TIMEOUT_DEFAULT_VALUE = 120000;
+    public static final int HTTP_CLIENT_RECEIVE_TIMEOUT_DEFAULT_VALUE = 120000;
 
-    public final static int HTTP_CLIENT_EXPIRESIN_TOKEN_SECURITY_DURATION_DEFAULT_VALUE = 5000;
+    public static final int HTTP_CLIENT_EXPIRESIN_TOKEN_SECURITY_DURATION_DEFAULT_VALUE = 5000;
 
-    public final static boolean HTTP_CLIENT_ACCEPT_REDIRECTIONS_DEFAULT_VALUE = true;
+    public static final boolean HTTP_CLIENT_ACCEPT_REDIRECTIONS_DEFAULT_VALUE = true;
 
-    public final static int HTTP_CLIENT_MAX_NUMBER_REDIRECTIONS_ON_SAME_URI_DEFAULT_VALUE = 3;
+    public static final int HTTP_CLIENT_MAX_NUMBER_REDIRECTIONS_ON_SAME_URI_DEFAULT_VALUE = 3;
 
-    public final static boolean HTTP_CLIENT_ACCEPT_ONLY_SAME_HOST_REDIRECTIONS_DEFAULT_VALUE = false;
+    public static final boolean HTTP_CLIENT_ACCEPT_ONLY_SAME_HOST_REDIRECTIONS_DEFAULT_VALUE = false;
 
-    public final static boolean HTTP_CLIENT_ACCEPT_RELATIVE_REDIRECTIONS_DEFAULT_VALUE = true;
+    public static final boolean HTTP_CLIENT_ACCEPT_RELATIVE_REDIRECTIONS_DEFAULT_VALUE = true;
 
-    public final static long HTTP_CLIENT_OAUTH_TOKEN_FORCED_EXPIRES_IN_DEFAULT_VALUE = Long.MIN_VALUE;
+    public static final long HTTP_CLIENT_OAUTH_TOKEN_FORCED_EXPIRES_IN_DEFAULT_VALUE = Long.MIN_VALUE;
 
-    public final static String HTTP_CLIENT_URL_PLACE_HOLDER_BEGIN_DEFAULT_VALUE = "{";
+    public static final String HTTP_CLIENT_URL_PLACE_HOLDER_BEGIN_DEFAULT_VALUE = "{";
 
-    public final static String HTTP_CLIENT_URL_PLACE_HOLDER_END_DEFAULT_VALUE = "}";
+    public static final String HTTP_CLIENT_URL_PLACE_HOLDER_END_DEFAULT_VALUE = "}";
 
     static {
         reload();

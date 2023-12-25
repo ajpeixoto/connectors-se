@@ -69,7 +69,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
                     throw new ComponentException(getMessageService().fileIsNotValidExcelHTML());
                 }
                 rowIterator = rows.iterator();
-                if (rows.first().getElementsByTag("th").size() > 0) {
+                if (!rows.first().getElementsByTag("th").isEmpty()) {
                     // infer schema of html header row and ignore result
                     convertToRecord(rowIterator.next());
                 }

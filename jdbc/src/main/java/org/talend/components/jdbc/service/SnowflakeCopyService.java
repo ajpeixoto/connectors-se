@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SnowflakeCopyService implements Serializable {
 
-    private static final long MAX_CHUNK = 16 * 1024 * 1024; // 16MB
+    private static final long MAX_CHUNK = 16L * 1024 * 1024; // 16MB
 
     private static final String TIMESTAMP_FORMAT_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
@@ -160,7 +160,7 @@ public class SnowflakeCopyService implements Serializable {
     }
 
     private List<Reject> toReject(RecordChunk chunk, String error, final String state, final Integer code) {
-        return chunk.getRecords().stream().map(record -> new Reject(error, state, code, record)).collect(toList());
+        return chunk.getRecords().stream().map(rec -> new Reject(error, state, code, rec)).collect(toList());
     }
 
     private List<CopyError> doCopy(final String fqStageName, final String fqTableName, final Connection connection,
@@ -286,11 +286,11 @@ public class SnowflakeCopyService implements Serializable {
         final Map<Integer, RecordChunk> chunks = new HashMap<>();
         records
                 .stream()
-                .map(record -> record
+                .map(rec -> rec
                         .getSchema()
                         .getEntries()
                         .stream()
-                        .map(entry -> format(record, entry))
+                        .map(entry -> format(rec, entry))
                         .collect(joining(",")))
                 .forEach(line -> {
                     if (size.addAndGet(line.getBytes(StandardCharsets.UTF_8).length) > MAX_CHUNK) {
@@ -367,25 +367,25 @@ public class SnowflakeCopyService implements Serializable {
         }
     }
 
-    private String format(final Record record, final Schema.Entry entry) {
+    private String format(final Record rec, final Schema.Entry entry) {
         switch (entry.getType()) {
         case INT:
         case LONG:
         case BOOLEAN:
-            return QueryManagerImpl.valueOf(record, entry).map(String::valueOf).orElse("");
+            return QueryManagerImpl.valueOf(rec, entry).map(String::valueOf).orElse("");
         case FLOAT:
-            return QueryManagerImpl.valueOf(record, entry).map(v -> Float.toHexString((Float) v)).orElse("");
+            return QueryManagerImpl.valueOf(rec, entry).map(v -> Float.toHexString((Float) v)).orElse("");
         case DOUBLE:
-            return QueryManagerImpl.valueOf(record, entry).map(v -> Double.toHexString((Double) v)).orElse("");
+            return QueryManagerImpl.valueOf(rec, entry).map(v -> Double.toHexString((Double) v)).orElse("");
         case BYTES:
-            return QueryManagerImpl.valueOf(record, entry).map(v -> Hex.encodeHexString((byte[]) v)).orElse("");
+            return QueryManagerImpl.valueOf(rec, entry).map(v -> Hex.encodeHexString((byte[]) v)).orElse("");
         case DATETIME:
             return QueryManagerImpl
-                    .valueOf(record, entry)
+                    .valueOf(rec, entry)
                     .map(v -> ((ZonedDateTime) v).format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT_PATTERN)))
                     .orElse("");
         case STRING:
-            return escape(record.getString(entry.getName()));
+            return escape(rec.getString(entry.getName()));
         case ARRAY:
         case RECORD:
         default:

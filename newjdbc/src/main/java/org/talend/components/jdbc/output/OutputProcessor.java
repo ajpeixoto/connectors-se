@@ -109,7 +109,7 @@ public class OutputProcessor implements Serializable {
     }
 
     @ElementListener
-    public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success,
+    public void elementListener(@Input final Record rec, @Output final OutputEmitter<Record> success,
             @Output("reject") final OutputEmitter<Record> reject)
             throws SQLException {
         if (!init) {
@@ -182,7 +182,7 @@ public class OutputProcessor implements Serializable {
 
         if (queryManager != null) {
             batchCount++;
-            records.add(record);
+            records.add(rec);
             if (batchCount < batchSize) {
 
             } else {
@@ -201,11 +201,11 @@ public class OutputProcessor implements Serializable {
         }
 
         // as output component, it's impossible that record is null
-        if (record == null) {
+        if (rec == null) {
             return;
         }
 
-        writer.write(record);
+        writer.write(rec);
 
         List<Record> successfulWrites = writer.getSuccessfulWrites();
         for (Record r : successfulWrites) {
@@ -245,6 +245,7 @@ public class OutputProcessor implements Serializable {
 
     @PostConstruct
     public void init() {
+        /* NOP */
     }
 
     @PreDestroy

@@ -12,20 +12,16 @@
  */
 package org.talend.components.bigquery.output;
 
-import lombok.Data;
+import java.io.Serializable;
+
 import org.talend.components.bigquery.dataset.TableDataSet;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.OptionsOrder;
-import org.talend.sdk.component.api.configuration.ui.widget.Code;
-import org.talend.sdk.component.api.configuration.ui.widget.TextArea;
 import org.talend.sdk.component.api.meta.Documentation;
 
-import java.io.Serializable;
-
-import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
+import lombok.Data;
 
 @Data
 @Icon(value = Icon.IconType.CUSTOM, custom = "bigquery-connector")

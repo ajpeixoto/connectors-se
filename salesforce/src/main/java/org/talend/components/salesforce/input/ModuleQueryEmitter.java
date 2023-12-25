@@ -102,7 +102,7 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
     @Override
     List<String> getColumnNames() {
         List<String> selectedFields = ((ModuleDataSet) inputConfig.getDataSet()).getSelectColumnNames();
-        if (selectedFields != null && selectedFields.size() > 0) {
+        if (selectedFields != null && !selectedFields.isEmpty()) {
             return ((ModuleDataSet) inputConfig.getDataSet()).getSelectColumnNames();
         } else {
             return getAllModuleFields();
@@ -125,11 +125,9 @@ public class ModuleQueryEmitter extends AbstractQueryEmitter implements Serializ
                     allModuleFields.add(field.getName());
                 }
                 return allModuleFields;
+            } catch (ApiFault e) {
+                throw new IllegalStateException(e.getExceptionMessage(), e);
             } catch (ConnectionException e) {
-                if (ApiFault.class.isInstance(e)) {
-                    ApiFault fault = ApiFault.class.cast(e);
-                    throw new IllegalStateException(fault.getExceptionMessage(), e);
-                }
                 throw new IllegalStateException(e);
             }
         }

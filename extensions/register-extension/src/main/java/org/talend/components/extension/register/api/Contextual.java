@@ -99,7 +99,7 @@ public class Contextual implements InvocationHandler, Serializable {
 
     public static <T> T proxy(final Class<T> type, final String plugin, final Object delegate,
             final ResultWrapper methodsHandler) {
-        final Stream<Class<?>> additionalImpl = Delegated.class.isInstance(delegate) ? Stream.of(Delegated.class)
+        final Stream<Class<?>> additionalImpl = delegate instanceof Delegated ? Stream.of(Delegated.class)
                 : Stream.empty();
         return type
                 .cast(Proxy

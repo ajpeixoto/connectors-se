@@ -83,8 +83,8 @@ public class AvroBlobFileWriter extends BlobFileWriter {
         DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>();
         DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
         dataFileWriter.create(converter.fromRecordSchema(getSchema()), byteBuffer);
-        for (Record record : getBatch()) {
-            dataFileWriter.append(converter.fromRecord(record));
+        for (Record rec : getBatch()) {
+            dataFileWriter.append(converter.fromRecord(rec));
         }
         dataFileWriter.flush();
         return byteBuffer.toByteArray();

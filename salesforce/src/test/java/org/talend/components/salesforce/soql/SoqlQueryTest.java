@@ -24,13 +24,13 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit-tests for {@link SoqlQuery} class
  */
-public class SoqlQueryTest {
+class SoqlQueryTest {
 
     /**
      * Checks {@link SoqlQuery#getFieldDescriptions()} returns correct field description in case of simple query
      */
     @Test
-    public void testGetFieldDescriptions() {
+    void testGetFieldDescriptions() {
         String queryString = "SELECT Name, Account.Name, Account.Owner.Name FROM Contact";
         SoqlQuery soqlQuery = SoqlQuery.getInstance();
         soqlQuery.init(queryString);
@@ -62,7 +62,7 @@ public class SoqlQueryTest {
      * WITH clauses
      */
     @Test
-    public void testGetFieldDescriptionsWithRemaining() {
+    void testGetFieldDescriptionsWithRemaining() {
         String queryString =
                 "SELECT Id FROM Contact WHERE Name LIKE 'A%' WITH DATA CATEGORY Product__c AT mobile_phones__c";
         SoqlQuery soqlQuery = SoqlQuery.getInstance();
@@ -83,7 +83,7 @@ public class SoqlQueryTest {
      * query
      */
     @Test
-    public void testGetFieldDescriptionsWithSubquery() {
+    void testGetFieldDescriptionsWithSubquery() {
         String queryString = "SELECT Name, (SELECT CreatedBy.Name FROM Notes) FROM Account";
         SoqlQuery soqlQuery = SoqlQuery.getInstance();
         soqlQuery.init(queryString);
@@ -109,7 +109,7 @@ public class SoqlQueryTest {
      * clause
      */
     @Test
-    public void testGetDrivingEntityName() {
+    void testGetDrivingEntityName() {
         String queryString = "SELECT Name, (SELECT CreatedBy.Name FROM Notes) FROM Account";
         SoqlQuery soqlQuery = SoqlQuery.getInstance();
         soqlQuery.init(queryString);

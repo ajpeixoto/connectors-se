@@ -25,10 +25,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Assume;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.talend.components.adlsgen2.common.format.FileFormat;
 import org.talend.components.adlsgen2.dataset.AdlsGen2DataSet;
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
@@ -52,6 +49,7 @@ import com.azure.storage.file.datalake.DataLakeServiceClient;
 import com.azure.storage.file.datalake.DataLakeServiceClientBuilder;
 import com.azure.storage.file.datalake.models.ListPathsOptions;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.adlsgen2")
 @WithMavenServers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

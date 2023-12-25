@@ -12,12 +12,15 @@
  */
 package org.talend.components.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.sql.SQLException;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.talend.components.jdbc.commit.JDBCCommitConfig;
-import org.talend.components.jdbc.commit.JDBCCommitProcessor;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.components.jdbc.rollback.JDBCRollbackConfig;
 import org.talend.components.jdbc.rollback.JDBCRollbackProcessor;
@@ -28,14 +31,10 @@ import org.talend.sdk.component.junit.BaseComponentsHandler;
 import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 
-import java.sql.SQLException;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC rollback component")
-public class JDBCRollbackTestIT {
+class JDBCRollbackTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -54,7 +53,7 @@ public class JDBCRollbackTestIT {
     }
 
     @Test
-    public void testRollback() throws SQLException {
+    void testRollback() throws SQLException {
         JDBCRollbackConfig config = new JDBCRollbackConfig();
 
         JDBCRollbackProcessor processor = new JDBCRollbackProcessor(config, jdbcService, recordBuilderFactory);
@@ -65,14 +64,14 @@ public class JDBCRollbackTestIT {
     }
 
     @Test
-    public void testClose() throws SQLException {
+    void testClose() throws SQLException {
         JDBCRollbackConfig config = new JDBCRollbackConfig();
         config.setClose(false);
 
         JDBCRollbackProcessor processor = new JDBCRollbackProcessor(config, jdbcService, recordBuilderFactory);
         try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             processor.doRollback(dataSourceWrapper.getConnection());
-            assertTrue(!dataSourceWrapper.getConnection().isClosed());
+            assertFalse(dataSourceWrapper.getConnection().isClosed());
         }
     }
 

@@ -280,7 +280,7 @@ public class MongoCommonService {
             }
         } else {
             // use parent path to locate
-            String objNames[] = parentNodePath.split("\\.");
+            String[] objNames = parentNodePath.split("\\.");
             Document currentObj = document;
             for (int i = 0; i < objNames.length; i++) {
                 currentObj = (Document) currentObj.get(objNames[i]);
@@ -297,7 +297,7 @@ public class MongoCommonService {
         return value;
     }
 
-    private Schema defineSchemaForArray(List jsonArray) {
+    private Schema defineSchemaForArray(List<?> jsonArray) {
         Object firstValueInArray = jsonArray.get(0);
         Schema.Builder schemaBuilder = builderFactory.newSchemaBuilder(RECORD);
         if (firstValueInArray == null) {

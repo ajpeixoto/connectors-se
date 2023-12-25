@@ -40,7 +40,7 @@ class AvroReaderTest {
     }
 
     @Test
-    public void testSupplier() {
+    void testSupplier() {
         final AvroReaderSupplier supplier = new AvroReaderSupplier();
         final RecordReader reader = supplier.getReader(AvroReaderTest.factory, new AvroConfiguration());
 
@@ -49,7 +49,7 @@ class AvroReaderTest {
     }
 
     @Test
-    public void read() throws IOException {
+    void read() throws IOException {
 
         try (AvroReader reader = new AvroReader(toRecord);
                 InputStream in =
@@ -78,7 +78,7 @@ class AvroReaderTest {
      * @throws IOException : if can't read file.
      */
     @Test
-    public void readArraysWithNullElements() throws IOException {
+    void readArraysWithNullElements() throws IOException {
 
         try (AvroReader reader = new AvroReader(toRecord);
                 InputStream in =
@@ -100,7 +100,7 @@ class AvroReaderTest {
     }
 
     @Test
-    public void readBadFormat() {
+    void readBadFormat() {
         boolean toException = false;
         try (AvroReader reader = new AvroReader(toRecord);
                 InputStream in = Thread

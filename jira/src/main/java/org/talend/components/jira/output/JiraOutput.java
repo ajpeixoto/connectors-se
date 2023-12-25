@@ -162,20 +162,18 @@ public class JiraOutput extends AbstractHTTPOutput<JiraOutputConfiguration> {
 
     private void processRequestResult() {
         HTTPClient.HTTPResponse response = getLastServerResponse();
-        if (response != null) {
-            if (response.getStatus().getCode() / 100 > 3) {
-                StringBuilder errorMessage = new StringBuilder(response.getStatus().getCodeWithReason());
-                try {
-                    String errorResponseBody = response.getBodyAsString();
-                    if (!StringUtils.isEmpty(errorResponseBody)) {
-                        errorMessage.append(System.lineSeparator()).append(errorResponseBody);
-                    }
-                } catch (HTTPClientException cantGetBodyAsStringException) {
-                    log.debug("Can't read error response body, just code would be in error message",
-                            cantGetBodyAsStringException);
+        if (response != null && response.getStatus().getCode() / 100 > 3) {
+            StringBuilder errorMessage = new StringBuilder(response.getStatus().getCodeWithReason());
+            try {
+                String errorResponseBody = response.getBodyAsString();
+                if (!StringUtils.isEmpty(errorResponseBody)) {
+                    errorMessage.append(System.lineSeparator()).append(errorResponseBody);
                 }
-                throw new ComponentException(getI18n().responseStatusIsNotOK(errorMessage.toString()));
+            } catch (HTTPClientException cantGetBodyAsStringException) {
+                log.debug("Can't read error response body, just code would be in error message",
+                        cantGetBodyAsStringException);
             }
+            throw new ComponentException(getI18n().responseStatusIsNotOK(errorMessage.toString()));
         }
     }
 

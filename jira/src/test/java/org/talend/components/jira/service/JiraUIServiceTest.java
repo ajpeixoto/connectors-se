@@ -20,13 +20,13 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.jira")
-public class JiraUIServiceTest {
+class JiraUIServiceTest {
 
     @Service
     private JiraUIService jiraUIService;
 
     @Test
-    public void testDiscoverSchemaReturnsStaticOneStringColumn() {
+    void testDiscoverSchemaReturnsStaticOneStringColumn() {
         JiraDataset fakeJiraDataset = new JiraDataset();
 
         Schema schema = jiraUIService.discoverSchema(fakeJiraDataset);

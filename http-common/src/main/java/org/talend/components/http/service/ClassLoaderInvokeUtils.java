@@ -14,8 +14,11 @@ package org.talend.components.http.service;
 
 import java.util.concurrent.Callable;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ClassLoaderInvokeUtils {
 
     @SneakyThrows

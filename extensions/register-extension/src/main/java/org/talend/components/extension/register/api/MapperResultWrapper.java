@@ -37,9 +37,9 @@ public class MapperResultWrapper implements Contextual.ResultWrapper, Serializab
 
     @Override
     public Object wrap(final Object value) {
-        if (Input.class.isInstance(value)) { // create()
+        if (value instanceof Input) { // create()
             return Contextual.proxy(Input.class, plugin, Input.class.cast(value), null);
-        } else if (Collection.class.isInstance(value)) { // split()
+        } else if (value instanceof Collection) { // split()
             final Collection<Mapper> mappers = Collection.class.cast(value);
             return mappers
                     .stream()
@@ -54,6 +54,6 @@ public class MapperResultWrapper implements Contextual.ResultWrapper, Serializab
     }
 
     private boolean isAlreadyWrapped(final Mapper mapper) {
-        return Proxy.class.isInstance(mapper) && Contextual.class.isInstance(Proxy.getInvocationHandler(mapper));
+        return mapper instanceof Proxy && Proxy.getInvocationHandler(mapper) instanceof Contextual;
     }
 }

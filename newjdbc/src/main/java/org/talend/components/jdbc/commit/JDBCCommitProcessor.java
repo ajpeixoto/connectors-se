@@ -62,11 +62,11 @@ public class JDBCCommitProcessor implements Serializable {
     }
 
     @ElementListener
-    public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success)
+    public void elementListener(@Input final Record rec, @Output final OutputEmitter<Record> success)
             throws SQLException {
         doCommit(connection);
 
-        success.emit(record);
+        success.emit(rec);
     }
 
     public void doCommit(java.sql.Connection connection) throws SQLException {

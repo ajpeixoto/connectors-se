@@ -29,7 +29,7 @@ class AdlsDataSetMigrationHandlerTest {
     }
 
     @Test
-    public void testMigrationAfterRefactoringVersion1() {
+    void testMigrationAfterRefactoringVersion1() {
         Map<String, String> oldConfigMap = new HashMap<>();
 
         oldConfigMap.put("csvConfiguration.fileEncoding", "UTF8");

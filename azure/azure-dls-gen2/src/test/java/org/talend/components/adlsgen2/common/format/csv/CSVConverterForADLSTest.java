@@ -36,7 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Slf4j
 @WithComponents("org.talend.components.adlsgen2")
-public class CSVConverterForADLSTest extends AdlsGen2TestBase {
+class CSVConverterForADLSTest extends AdlsGen2TestBase {
 
     private CSVFormatOptionsWithSchema csvConfiguration;
 
@@ -48,7 +48,7 @@ public class CSVConverterForADLSTest extends AdlsGen2TestBase {
     }
 
     @Test
-    public void csvWithPipeAsDelimiterCase() throws Exception {
+    void csvWithPipeAsDelimiterCase() throws Exception {
         InputStream sample = getClass().getResource("/common/format/csv/pipe-separated.csv").openStream();
         csvConfiguration.getCsvFormatOptions().setFieldDelimiter(CSVFieldDelimiter.OTHER);
         csvConfiguration.getCsvFormatOptions().setCustomFieldDelimiter("|");
@@ -63,7 +63,7 @@ public class CSVConverterForADLSTest extends AdlsGen2TestBase {
     }
 
     @Test
-    public void csvWithTextEnclosureAndEscapeCase() throws Exception {
+    void csvWithTextEnclosureAndEscapeCase() throws Exception {
         InputStream sample = getClass().getResource("/common/format/csv/wicked-separated.csv").openStream();
         String result = "\"1\";\"1000.2\";\"ant\\\"ique\"\n" + "\"2\";\"2000.3\";\"stroll\"\n"
                 + "\"3\";\"3000.3\";\"ant\\\\ique\"\n";
@@ -142,8 +142,9 @@ public class CSVConverterForADLSTest extends AdlsGen2TestBase {
 
     @Test
     void invalidEncoding() {
-        csvConfiguration.getCsvFormatOptions().setEncoding(Encoding.OTHER);
-        csvConfiguration.getCsvFormatOptions().setCustomEncoding("BZH");
-        assertThrows(RuntimeException.class, () -> csvConfiguration.getCsvFormatOptions().effectiveFileEncoding());
+        final CSVFormatOptions options = csvConfiguration.getCsvFormatOptions();
+        options.setEncoding(Encoding.OTHER);
+        options.setCustomEncoding("BZH");
+        assertThrows(RuntimeException.class, options::effectiveFileEncoding);
     }
 }

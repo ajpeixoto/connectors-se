@@ -91,27 +91,27 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
     }
 
     @Override
-    public Schema inferSchema(GenericRecord record) {
+    public Schema inferSchema(GenericRecord rec) {
         Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Type.RECORD);
-        record.getSchema().getFields().stream().map(this::inferAvroField).forEach(builder::withEntry);
+        rec.getSchema().getFields().stream().map(this::inferAvroField).forEach(builder::withEntry);
         return builder.build();
     }
 
     @Override
-    public Record toRecord(GenericRecord record) {
+    public Record toRecord(GenericRecord rec) {
         if (recordSchema == null) {
-            recordSchema = inferSchema(record);
+            recordSchema = inferSchema(rec);
         }
-        return avroToRecord(record, record.getSchema().getFields(),
+        return avroToRecord(rec, rec.getSchema().getFields(),
                 recordBuilderFactory.newRecordBuilder(recordSchema));
     }
 
     @Override
-    public GenericRecord fromRecord(Record record) {
+    public GenericRecord fromRecord(Record rec) {
         if (avroSchema == null) {
-            avroSchema = inferAvroSchema(record.getSchema());
+            avroSchema = inferAvroSchema(rec.getSchema());
         }
-        return recordToAvro(record, new GenericData.Record(avroSchema));
+        return recordToAvro(rec, new GenericData.Record(avroSchema));
     }
 
     protected GenericRecord recordToAvro(Record fromRecord, GenericRecord toRecord) {
@@ -473,8 +473,8 @@ public class AvroConverter implements RecordConverter<GenericRecord>, Serializab
 
             Collection<Record> recs = ((Collection<GenericRecord>) value)
                     .stream()
-                    .map(record -> avroToRecord(record,
-                            record.getSchema().getFields(),
+                    .map(rec -> avroToRecord(rec,
+                            rec.getSchema().getFields(),
                             recordBuilderFactory.newRecordBuilder(entry.getElementSchema())))
                     .collect(toList());
             recordBuilder.withArray(entry, recs);

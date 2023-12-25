@@ -12,6 +12,7 @@
  */
 package org.talend.components.adlsgen2.service;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.talend.components.adlsgen2.AdlsGen2IntegrationTestBase;
@@ -25,6 +26,7 @@ import org.talend.sdk.component.junit5.WithComponents;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.adlsgen2")
 class UIActionServiceTestIT extends AdlsGen2IntegrationTestBase {
 

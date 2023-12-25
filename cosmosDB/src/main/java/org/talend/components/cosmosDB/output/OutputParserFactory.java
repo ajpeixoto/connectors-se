@@ -56,8 +56,8 @@ public class OutputParserFactory {
         }
     }
 
-    public String getJsonString(Record record) {
-        String delegate = record.toString();
+    public String getJsonString(Record rec) {
+        String delegate = rec.toString();
         log.debug("delegate: " + delegate);
         if (delegate.startsWith("AvroRecord")) {
             // To avoid import dependence of AvroRecord
@@ -68,7 +68,7 @@ public class OutputParserFactory {
 
     interface IOutputParser {
 
-        void output(Record record);
+        void output(Record rec);
     }
 
     class Insert implements IOutputParser {
@@ -78,8 +78,8 @@ public class OutputParserFactory {
         boolean disAbleautoID = !configuration.isAutoIDGeneration();
 
         @Override
-        public void output(Record record) {
-            String jsonString = getJsonString(record);
+        public void output(Record rec) {
+            String jsonString = getJsonString(rec);
             try {
                 Document document = new Document(jsonString);
                 client.createDocument(collectionLink, document, new RequestOptions(), disAbleautoID);
@@ -102,22 +102,22 @@ public class OutputParserFactory {
         }
 
         @Override
-        public void output(Record record) {
-            String id = record.getString("id");
+        public void output(Record rec) {
+            String id = rec.getString("id");
             final String documentLink = String.format("/dbs/%s/colls/%s/docs/%s", databaseName, collectionName, id);
             try {
-                client.deleteDocument(documentLink, getPartitionKey(record));
+                client.deleteDocument(documentLink, getPartitionKey(rec));
             } catch (DocumentClientException e) {
                 throw new IllegalArgumentException(e);
             }
         }
 
-        public RequestOptions getPartitionKey(Record record) {
+        public RequestOptions getPartitionKey(Record rec) {
             RequestOptions requestOptions = null;
             if (StringUtils.isNotEmpty(partitionKey)) {
                 // TODO support complex partition key
                 requestOptions = new RequestOptions();
-                requestOptions.setPartitionKey(new PartitionKey(record.get(Object.class, partitionKey)));
+                requestOptions.setPartitionKey(new PartitionKey(rec.get(Object.class, partitionKey)));
 
             }
             return requestOptions;
@@ -127,10 +127,10 @@ public class OutputParserFactory {
     class Update implements IOutputParser {
 
         @Override
-        public void output(Record record) {
-            String id = record.getString("id");
+        public void output(Record rec) {
+            String id = rec.getString("id");
             final String documentLink = String.format("/dbs/%s/colls/%s/docs/%s", databaseName, collectionName, id);
-            String jsonString = getJsonString(record);
+            String jsonString = getJsonString(rec);
             try {
                 client.replaceDocument(documentLink, new Document(jsonString), new RequestOptions());
             } catch (DocumentClientException e) {
@@ -146,8 +146,8 @@ public class OutputParserFactory {
         String collectionLink = String.format("/dbs/%s/colls/%s", databaseName, collectionName);
 
         @Override
-        public void output(Record record) {
-            String jsonString = getJsonString(record);
+        public void output(Record rec) {
+            String jsonString = getJsonString(rec);
             try {
                 client.upsertDocument(collectionLink, new Document(jsonString), new RequestOptions(), disAbleautoID);
             } catch (DocumentClientException e) {

@@ -97,9 +97,7 @@ public class MarketoProcessor extends MarketoSourceOrProcessor {
                 .getValuesAs(JsonObject.class)
                 .stream()
                 .filter(strategy::isRejected)
-                .forEach(e -> {
-                    log.error(getErrors(e.getJsonArray(ATTR_REASONS)));
-                });
+                .forEach(e -> log.error(getErrors(e.getJsonArray(ATTR_REASONS))));
     }
 
 }

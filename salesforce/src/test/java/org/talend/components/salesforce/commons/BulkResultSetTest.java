@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -39,16 +40,16 @@ import org.junit.jupiter.api.Test;
 /**
  *
  */
-public class BulkResultSetTest {
+class BulkResultSetTest {
 
     @Test
     @DisplayName("Test resultset")
-    public void testResultSet() throws IOException {
+    void testResultSet() throws IOException {
 
         final int recordCount = 100;
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new BufferedOutputStream(out), ',', Charset.forName("UTF-8"));
+        CsvWriter csvWriter = new CsvWriter(new BufferedOutputStream(out), ',', StandardCharsets.UTF_8);
 
         for (int i = 0; i < recordCount; i++) {
             csvWriter.writeRecord(new String[] { "fieldValueA" + i, "fieldValueB" + i, "fieldValueC" + i });
@@ -56,7 +57,7 @@ public class BulkResultSetTest {
         csvWriter.close();
 
         CsvReader csvReader = new CsvReader(new BufferedInputStream(new ByteArrayInputStream(out.toByteArray())), ',',
-                Charset.forName("UTF-8"));
+                StandardCharsets.UTF_8);
 
         BulkResultSet resultSet = new BulkResultSet(csvReader, Arrays.asList("fieldA", "fieldB", "fieldC"));
 
@@ -75,7 +76,7 @@ public class BulkResultSetTest {
 
     @Test
     @DisplayName("Test resultset")
-    public void testSafetySwitchTrueFailure() {
+    void testSafetySwitchTrueFailure() {
         try {
             prepareSafetySwitchTest(true, 100_001);
         } catch (Exception ioe) {
@@ -85,14 +86,14 @@ public class BulkResultSetTest {
 
     @Test
     @DisplayName("Test safetySwitch false success")
-    public void testSafetySwitchFalseSuccess() throws IOException {
+    void testSafetySwitchFalseSuccess() throws IOException {
         final int columnLength = 200_000;
         Assertions.assertEquals(columnLength, prepareSafetySwitchTest(false, columnLength));
     }
 
     private int prepareSafetySwitchTest(boolean safetySwitchParameter, int columnLength) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        CsvWriter csvWriter = new CsvWriter(new BufferedOutputStream(out), ',', Charset.forName("UTF-8"));
+        CsvWriter csvWriter = new CsvWriter(new BufferedOutputStream(out), ',', StandardCharsets.UTF_8);
 
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < columnLength; i++) {
@@ -103,7 +104,7 @@ public class BulkResultSetTest {
         csvWriter.close();
 
         CsvReader csvReader = new CsvReader(new BufferedInputStream(new ByteArrayInputStream(out.toByteArray())), ',',
-                Charset.forName("UTF-8"));
+                StandardCharsets.UTF_8);
         csvReader.setSafetySwitch(safetySwitchParameter);
         BulkResultSet resultSet = new BulkResultSet(csvReader, Arrays.asList("fieldA", "fieldB", "fieldC"));
         Map<String, String> result = resultSet.next();
@@ -112,16 +113,16 @@ public class BulkResultSetTest {
 
     @Test
     @DisplayName("Test resultset IOException")
-    public void testResultSetIOError() throws IOException {
+    void testResultSetIOError() throws IOException {
+        InputStream in = mock(InputStream.class);
+        doThrow(new IOException("I/O ERROR")).when(in).read();
+        when(in.read(any(byte[].class))).thenThrow(new IOException("I/O ERROR"));
+
+        CsvReader csvReader = new CsvReader(in, ',', StandardCharsets.UTF_8);
+
+        BulkResultSet resultSet = new BulkResultSet(csvReader, Arrays.asList("fieldA", "fieldB", "fieldC"));
+
         assertThrows(IllegalStateException.class, () -> {
-            InputStream in = mock(InputStream.class);
-            doThrow(new IOException("I/O ERROR")).when(in).read();
-            when(in.read(any(byte[].class))).thenThrow(new IOException("I/O ERROR"));
-
-            CsvReader csvReader = new CsvReader(in, ',', Charset.forName("UTF-8"));
-
-            BulkResultSet resultSet = new BulkResultSet(csvReader, Arrays.asList("fieldA", "fieldB", "fieldC"));
-
             while (resultSet.next() != null) {
             }
         });

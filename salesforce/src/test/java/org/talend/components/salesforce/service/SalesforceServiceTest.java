@@ -22,7 +22,7 @@ import org.talend.sdk.component.api.service.configuration.LocalConfiguration;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.salesforce")
-public class SalesforceServiceTest {
+class SalesforceServiceTest {
 
     @Service
     private SalesforceService service;

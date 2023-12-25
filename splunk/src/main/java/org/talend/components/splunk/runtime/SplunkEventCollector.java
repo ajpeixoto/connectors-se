@@ -71,7 +71,7 @@ public class SplunkEventCollector extends AbstractHTTPOutput<SplunkEventCollecto
 
     protected static final String RESPONSE_CODE_AFTER_VARIABLE_KEY = "RESPONSE_CODE";
 
-    private transient final SplunkMessages splunkI18N;
+    private final transient SplunkMessages splunkI18N;
 
     private Collection<Record> bulk;
 
@@ -124,8 +124,8 @@ public class SplunkEventCollector extends AbstractHTTPOutput<SplunkEventCollecto
     @AfterGroup
     public void processBulk() {
         StringBuilder bodyBuilder = new StringBuilder();
-        for (Record record : bulk) {
-            JsonObject jsonObject = convertRecordToJsonObjectBody(record);
+        for (Record input : bulk) {
+            JsonObject jsonObject = convertRecordToJsonObjectBody(input);
 
             bodyBuilder.append(jsonObject).append(System.lineSeparator());
 
@@ -144,94 +144,94 @@ public class SplunkEventCollector extends AbstractHTTPOutput<SplunkEventCollecto
 
     }
 
-    private JsonObject convertRecordToJsonObjectBody(Record record) {
+    private JsonObject convertRecordToJsonObjectBody(Record input) {
         JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
 
         JsonObjectBuilder eventObjectBuilder = Json.createObjectBuilder();
-        record.getSchema()
+        input.getSchema()
                 .getAllEntries()
                 .filter(entry -> !SplunkMetadataFields.isMetadataField(entry.getName()))
-                .forEach(entry -> putValueToJsonBuilder(eventObjectBuilder, entry.getName(), record));
+                .forEach(entry -> putValueToJsonBuilder(eventObjectBuilder, entry.getName(), input));
 
         JsonObject eventObject = eventObjectBuilder.build();
         if (!eventObject.isEmpty()) {
             jsonObjectBuilder.add("event", eventObjectBuilder.build());
         }
 
-        addMetadataIfPresent(jsonObjectBuilder, record);
+        addMetadataIfPresent(jsonObjectBuilder, input);
 
         return jsonObjectBuilder.build();
     }
 
     private void putValueToJsonBuilder(JsonObjectBuilder jsonObjectBuilder,
-            String jsonKey, Record record) {
+            String jsonKey, Record input) {
         if (jsonObjectBuilder == null ||
                 jsonKey == null ||
-                record.get(Object.class, jsonKey) == null) {
+                input.get(Object.class, jsonKey) == null) {
             return;
         }
 
-        Schema.Type columnType = record.getSchema().getEntry(jsonKey).getType();
+        Schema.Type columnType = input.getSchema().getEntry(jsonKey).getType();
 
         switch (columnType) {
         case STRING:
-            jsonObjectBuilder.add(jsonKey, record.getString(jsonKey));
+            jsonObjectBuilder.add(jsonKey, input.getString(jsonKey));
             break;
         case INT:
-            jsonObjectBuilder.add(jsonKey, record.getInt(jsonKey));
+            jsonObjectBuilder.add(jsonKey, input.getInt(jsonKey));
             break;
         case LONG:
-            jsonObjectBuilder.add(jsonKey, record.getLong(jsonKey));
+            jsonObjectBuilder.add(jsonKey, input.getLong(jsonKey));
             break;
         case BOOLEAN:
-            jsonObjectBuilder.add(jsonKey, record.getBoolean(jsonKey));
+            jsonObjectBuilder.add(jsonKey, input.getBoolean(jsonKey));
             break;
         case DOUBLE:
         case FLOAT:
-            jsonObjectBuilder.add(jsonKey, record.getDouble(jsonKey));
+            jsonObjectBuilder.add(jsonKey, input.getDouble(jsonKey));
             break;
         case BYTES:
             JsonArrayBuilder jsonArrayBuilder = Json.createArrayBuilder();
-            for (byte b : record.getBytes(jsonKey)) {
+            for (byte b : input.getBytes(jsonKey)) {
                 jsonArrayBuilder.add(b);
             }
             jsonObjectBuilder.add(jsonKey, jsonArrayBuilder);
             break;
         case DATETIME:
-            ZonedDateTime timeInRecord = record.getDateTime(jsonKey);
+            ZonedDateTime timeInRecord = input.getDateTime(jsonKey);
             if (timeInRecord != null) {
                 long secondsLongValue = timeInRecord.toEpochSecond();
                 jsonObjectBuilder.add(jsonKey, secondsLongValue);
             }
             break;
         case DECIMAL:
-            jsonObjectBuilder.add(jsonKey, record.getDecimal(jsonKey));
+            jsonObjectBuilder.add(jsonKey, input.getDecimal(jsonKey));
             break;
         }
     }
 
-    private void addMetadataIfPresent(JsonObjectBuilder parentJsonBuilder, Record record) {
-        for (Schema.Entry item : record.getSchema()
+    private void addMetadataIfPresent(JsonObjectBuilder parentJsonBuilder, Record input) {
+        for (Schema.Entry item : input.getSchema()
                 .getEntries()
                 .stream()
                 .filter(entry -> !entry.getName().equals(SplunkMetadataFields.TIME.getName()))
                 .filter(entry -> SplunkMetadataFields.isMetadataField(entry.getName()))
                 .collect(Collectors.toList())) {
-            String metadataValue = record.getString(item.getName());
+            String metadataValue = input.getString(item.getName());
             if (metadataValue != null) {
                 parentJsonBuilder.add(item.getName(), metadataValue);
             }
         }
-        if (record.getSchema().getEntry(SplunkMetadataFields.TIME.getName()) != null &&
-                record.get(Object.class, SplunkMetadataFields.TIME.getName()) != null) {
+        if (input.getSchema().getEntry(SplunkMetadataFields.TIME.getName()) != null &&
+                input.get(Object.class, SplunkMetadataFields.TIME.getName()) != null) {
             long millisValue;
-            if (record.getSchema()
+            if (input.getSchema()
                     .getEntry(SplunkMetadataFields.TIME.getName())
                     .getType() == Schema.Type.DATETIME) {
-                millisValue = record.getDateTime(SplunkMetadataFields.TIME.getName()).toInstant().toEpochMilli();
+                millisValue = input.getDateTime(SplunkMetadataFields.TIME.getName()).toInstant().toEpochMilli();
             } else {
-                Object timeInRecord = record.get(Object.class, SplunkMetadataFields.TIME.getName());
-                String pattern = record.getSchema()
+                Object timeInRecord = input.get(Object.class, SplunkMetadataFields.TIME.getName());
+                String pattern = input.getSchema()
                         .getEntry(SplunkMetadataFields.TIME.getName())
                         .getProps()
                         .get(SchemaProperty.PATTERN);

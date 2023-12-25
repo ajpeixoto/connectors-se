@@ -67,6 +67,7 @@ import org.talend.components.jdbc.dataset.TableNameDataset;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.output.platforms.Platform;
 import org.talend.components.jdbc.service.JdbcService;
+import org.talend.components.jdbc.service.UIActionService;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.SchemaProperty;
@@ -124,7 +125,7 @@ public abstract class JDBCBaseContainerTest {
     @Nested
     @DisplayName("Platforms")
     @WithComponents("org.talend.components.jdbc")
-    public class PlatformTests extends AbstractBaseJDBC {
+    protected class PlatformTests extends AbstractBaseJDBC {
 
         private final ZonedDateTime date =
                 ZonedDateTime.of(LocalDateTime.of(2018, 12, 6, 12, 0, 0), ZoneId.systemDefault());
@@ -230,7 +231,7 @@ public abstract class JDBCBaseContainerTest {
     @Nested
     @DisplayName("UIActionService")
     @WithComponents("org.talend.components.jdbc")
-    public class UIActionServiceTest extends AbstractBaseJDBC {
+    protected class UIActionServiceTest extends AbstractBaseJDBC {
 
         @Override
         public JdbcTestContainer getContainer() {
@@ -441,7 +442,8 @@ public abstract class JDBCBaseContainerTest {
             final TableNameDataset tableNameDataset = new TableNameDataset();
             tableNameDataset.setTableName("tableNeverExist159");
             tableNameDataset.setConnection(datastore);
-            assertThrows(IllegalStateException.class, () -> getUiActionService().guessSchema(tableNameDataset));
+            final UIActionService service = getUiActionService();
+            assertThrows(IllegalStateException.class, () -> service.guessSchema(tableNameDataset));
         }
 
     }
@@ -449,7 +451,7 @@ public abstract class JDBCBaseContainerTest {
     @Nested
     @DisplayName("Input")
     @WithComponents("org.talend.components.jdbc")
-    public class InputTest extends AbstractBaseJDBC {
+    protected class InputTest extends AbstractBaseJDBC {
 
         @Override
         public JdbcTestContainer getContainer() {
@@ -472,15 +474,7 @@ public abstract class JDBCBaseContainerTest {
             final InputQueryConfig config = new InputQueryConfig();
             config.setDataSet(sqlQueryDataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            Job
-                    .components()
-                    .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                    .component("collector", "test://collector")
-                    .connections()
-                    .from("jdbcInput")
-                    .to("collector")
-                    .build()
-                    .run();
+            runQueryInputPipeline(configURI);
 
             final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
             assertEquals(rowCount, collectedData.size());
@@ -497,16 +491,7 @@ public abstract class JDBCBaseContainerTest {
             final InputQueryConfig config = new InputQueryConfig();
             config.setDataSet(sqlQueryDataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            assertThrows(IllegalStateException.class,
-                    () -> Job
-                            .components()
-                            .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                            .component("collector", "test://collector")
-                            .connections()
-                            .from("jdbcInput")
-                            .to("collector")
-                            .build()
-                            .run());
+            assertThrows(IllegalStateException.class, () -> runQueryInputPipeline(configURI));
         }
 
         @Test
@@ -518,16 +503,7 @@ public abstract class JDBCBaseContainerTest {
             final InputQueryConfig config = new InputQueryConfig();
             config.setDataSet(dataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            assertThrows(IllegalArgumentException.class,
-                    () -> Job
-                            .components()
-                            .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                            .component("collector", "test://collector")
-                            .connections()
-                            .from("jdbcInput")
-                            .to("collector")
-                            .build()
-                            .run());
+            assertThrows(IllegalArgumentException.class, () -> runQueryInputPipeline(configURI));
         }
 
         @Test
@@ -539,16 +515,7 @@ public abstract class JDBCBaseContainerTest {
             final InputQueryConfig config = new InputQueryConfig();
             config.setDataSet(dataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            assertThrows(IllegalArgumentException.class,
-                    () -> Job
-                            .components()
-                            .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                            .component("collector", "test://collector")
-                            .connections()
-                            .from("jdbcInput")
-                            .to("collector")
-                            .build()
-                            .run());
+            assertThrows(IllegalArgumentException.class, () -> runQueryInputPipeline(configURI));
         }
 
         @Test
@@ -564,16 +531,7 @@ public abstract class JDBCBaseContainerTest {
             final InputQueryConfig config = new InputQueryConfig();
             config.setDataSet(dataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            assertThrows(IllegalArgumentException.class,
-                    () -> Job
-                            .components()
-                            .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                            .component("collector", "test://collector")
-                            .connections()
-                            .from("jdbcInput")
-                            .to("collector")
-                            .build()
-                            .run());
+            assertThrows(IllegalArgumentException.class, () -> runQueryInputPipeline(configURI));
         }
 
         @Test
@@ -585,15 +543,7 @@ public abstract class JDBCBaseContainerTest {
             final InputTableNameConfig config = new InputTableNameConfig();
             config.setDataSet(newTableNameDataset(testTableName));
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            Job
-                    .components()
-                    .component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
-                    .component("collector", "test://collector")
-                    .connections()
-                    .from("jdbcInput")
-                    .to("collector")
-                    .build()
-                    .run();
+            runTableInputPipeline(configURI);
 
             final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
             assertEquals(rowCount, collectedData.size());
@@ -609,16 +559,7 @@ public abstract class JDBCBaseContainerTest {
             final InputTableNameConfig config = new InputTableNameConfig();
             config.setDataSet(dataset);
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-            assertThrows(IllegalStateException.class,
-                    () -> Job
-                            .components()
-                            .component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
-                            .component("collector", "test://collector")
-                            .connections()
-                            .from("jdbcInput")
-                            .to("collector")
-                            .build()
-                            .run());
+            assertThrows(IllegalStateException.class, () -> runTableInputPipeline(configURI));
         }
 
         @Test
@@ -630,6 +571,14 @@ public abstract class JDBCBaseContainerTest {
             final InputTableNameConfig config = new InputTableNameConfig();
             config.setDataSet(newTableNameDataset(testTableName));
             final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
+            runTableInputPipeline(configURI);
+
+            final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
+            assertEquals(rowCount, collectedData.size());
+
+        }
+
+        private void runTableInputPipeline(final String configURI) {
             Job
                     .components()
                     .component("jdbcInput", "Jdbc://TableNameInput?" + configURI)
@@ -639,18 +588,24 @@ public abstract class JDBCBaseContainerTest {
                     .to("collector")
                     .build()
                     .run();
-
-            final List<Record> collectedData = getComponentsHandler().getCollectedData(Record.class);
-            assertEquals(rowCount, collectedData.size());
-
         }
 
+        private void runQueryInputPipeline(final String configURI) {
+            Job.components()
+                    .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                    .component("collector", "test://collector")
+                    .connections()
+                    .from("jdbcInput")
+                    .to("collector")
+                    .build()
+                    .run();
+        }
     }
 
     @Nested
     @DisplayName("Output")
     @WithComponents("org.talend.components.jdbc")
-    public class OutputTest extends AbstractBaseJDBC {
+    protected class OutputTest extends AbstractBaseJDBC {
 
         private boolean withBoolean;
 

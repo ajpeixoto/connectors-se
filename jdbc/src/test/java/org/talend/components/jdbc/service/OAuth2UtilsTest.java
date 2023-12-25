@@ -26,7 +26,7 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.jdbc")
-public class OAuth2UtilsTest {
+class OAuth2UtilsTest {
 
     @Service
     private I18nMessage i18n;
@@ -35,7 +35,7 @@ public class OAuth2UtilsTest {
 
     @ParameterizedTest
     @CsvFileSource(files = "src/test/resources/test-data-for-oauth-utils-test.csv")
-    public void testFailedToGetAccessToken(ArgumentsAccessor arguments) {
+    void testFailedToGetAccessToken(ArgumentsAccessor arguments) {
         Exception exception = assertThrows(ComponentException.class,
                 () -> OAuth2Utils.getAccessToken(createJdbcConnectionProperties(arguments), tokenClientFake, i18n));
         assertEquals(arguments.getString(7), exception.getMessage());
@@ -43,7 +43,7 @@ public class OAuth2UtilsTest {
 
     @ParameterizedTest
     @CsvSource(value = { "https://talend.com,correct,correct,CLIENT_CREDENTIALS,correct" })
-    public void testAccessTokenSuccess(ArgumentsAccessor arguments) {
+    void testAccessTokenSuccess(ArgumentsAccessor arguments) {
         assertEquals(TokenClientFake.ACCESS_TOKEN,
                 OAuth2Utils.getAccessToken(createJdbcConnectionProperties(arguments), tokenClientFake, i18n));
     }

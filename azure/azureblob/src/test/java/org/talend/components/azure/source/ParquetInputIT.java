@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
@@ -33,6 +34,7 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 import com.microsoft.azure.storage.StorageException;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.azure")
 class ParquetInputIT extends BaseIT {
 
@@ -141,7 +143,7 @@ class ParquetInputIT extends BaseIT {
     }
 
     @Test
-    public void testInputReadFilesOnlyFromOneDir() throws Exception {
+    void testInputReadFilesOnlyFromOneDir() throws Exception {
         final int recordSize = 1;
         // ignored dir
         blobInputProperties.getDataset().setDirectory("parquet_ignored");

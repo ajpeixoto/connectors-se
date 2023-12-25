@@ -49,7 +49,7 @@ public class RowWriter {
             debugUtil = new DebugUtil(sql);
         }
 
-        List<TypeWriter> writers = new ArrayList<TypeWriter>();
+        List<TypeWriter> writers = new ArrayList<>();
 
         int statementIndex = 0;
 
@@ -154,6 +154,7 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             String inputValue = input.getString(inputValueName);
             if (inputValue == null) {
@@ -174,13 +175,14 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Integer inputValue = input.get(Integer.class, inputValueName);
             if (inputValue == null) {
                 statement.setNull(statementIndex, java.sql.Types.INTEGER);
                 writeDebugColumnNullContent();
             } else {
-                statement.setInt(statementIndex, (int) inputValue);
+                statement.setInt(statementIndex, inputValue);
                 if (debug) {
                     debugUtil.writeColumn(inputValue.toString(), false);
                 }
@@ -198,6 +200,7 @@ public class RowWriter {
             this.pattern = pattern;
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Instant inputValue = input.getInstant(inputValueName);
             if (inputValue == null) {
@@ -232,6 +235,7 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             BigDecimal inputValue = input.get(BigDecimal.class, inputValueName);
             if (inputValue == null) {
@@ -253,13 +257,14 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Long inputValue = input.get(Long.class, inputValueName);
             if (inputValue == null) {
                 statement.setNull(statementIndex, java.sql.Types.INTEGER);
                 writeDebugColumnNullContent();
             } else {
-                statement.setLong(statementIndex, (long) inputValue);
+                statement.setLong(statementIndex, inputValue);
                 if (debug) {
                     debugUtil.writeColumn(inputValue.toString(), false);
                 }
@@ -274,13 +279,14 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Double inputValue = input.get(Double.class, inputValueName);
             if (inputValue == null) {
                 statement.setNull(statementIndex, java.sql.Types.DOUBLE);
                 writeDebugColumnNullContent();
             } else {
-                statement.setDouble(statementIndex, (double) inputValue);
+                statement.setDouble(statementIndex, inputValue);
                 if (debug) {
                     debugUtil.writeColumn(inputValue.toString(), false);
                 }
@@ -295,13 +301,14 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Float inputValue = input.get(Float.class, inputValueName);
             if (inputValue == null) {
                 statement.setNull(statementIndex, java.sql.Types.FLOAT);
                 writeDebugColumnNullContent();
             } else {
-                statement.setFloat(statementIndex, (float) inputValue);
+                statement.setFloat(statementIndex, inputValue);
                 if (debug) {
                     debugUtil.writeColumn(inputValue.toString(), false);
                 }
@@ -316,13 +323,14 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Boolean inputValue = input.get(Boolean.class, inputValueName);
             if (inputValue == null) {
                 statement.setNull(statementIndex, java.sql.Types.BOOLEAN);
                 writeDebugColumnNullContent();
             } else {
-                statement.setBoolean(statementIndex, (boolean) inputValue);
+                statement.setBoolean(statementIndex, inputValue);
                 if (debug) {
                     debugUtil.writeColumn(inputValue.toString(), false);
                 }
@@ -337,6 +345,7 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Short inputValue = input.get(Short.class, inputValueName);
             if (inputValue == null) {
@@ -358,6 +367,7 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Object inputValue = input.get(Byte.class, inputValueName);
             if (inputValue == null) {
@@ -383,6 +393,7 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Character inputValue = input.get(Character.class, inputValueName);
             if (inputValue == null) {
@@ -404,6 +415,7 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Object inputValue = input.get(Object.class, inputValueName);
             if (inputValue == null) {
@@ -425,6 +437,7 @@ public class RowWriter {
             super(statement, statementIndex, inputValueName);
         }
 
+        @Override
         public void write(Record input) throws SQLException {
             Object inputValue = input.get(Object.class, inputValueName);
             if (inputValue == null) {
@@ -437,7 +450,5 @@ public class RowWriter {
                 }
             }
         }
-
     }
-
 }

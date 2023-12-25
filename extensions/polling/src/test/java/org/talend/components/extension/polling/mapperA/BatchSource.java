@@ -13,8 +13,9 @@
 package org.talend.components.extension.polling.mapperA;
 
 import lombok.AllArgsConstructor;
+
+import org.talend.components.extension.polling.TestConstants;
 import org.talend.components.extension.polling.api.Pollable;
-import org.talend.components.extension.polling.internal.PollingComponentExtensionTest;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
@@ -43,12 +44,12 @@ public class BatchSource implements Serializable {
     public Data next() {
         // Only for test to wait enough for the polling
         try {
-            Thread.sleep(PollingComponentExtensionTest.TEST_POLLING_DELAY + 50);
+            Thread.sleep(TestConstants.TEST_POLLING_DELAY + 50);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        if (currentRow < PollingComponentExtensionTest.TEST_NB_EXPECTED_ROWS) {
+        if (currentRow < TestConstants.TEST_NB_EXPECTED_ROWS) {
             currentRow++;
             return new Data("Data/" + config.getParam1() + currentRow + "/" + resumeInc,
                     config.getParam0() + currentRow);

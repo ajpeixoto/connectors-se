@@ -74,10 +74,8 @@ public class AdlsGen2Get implements Serializable {
                         service.getBlobInputstream(configuration.getConnection(), configuration.getFilesystem(),
                                 blobInfo)) {
                     String resultFileName = blobInfo.getBlobPath();
-                    if (!configuration.isKeepRemoteDirStructure()) {
-                        if (resultFileName.contains("/")) {
-                            resultFileName = resultFileName.substring(resultFileName.lastIndexOf("/"));
-                        }
+                    if (!configuration.isKeepRemoteDirStructure() && resultFileName.contains("/")) {
+                        resultFileName = resultFileName.substring(resultFileName.lastIndexOf("/"));
                     }
                     File file = new File(folder + "/" + resultFileName);
                     if (!file.getParentFile().exists()) {

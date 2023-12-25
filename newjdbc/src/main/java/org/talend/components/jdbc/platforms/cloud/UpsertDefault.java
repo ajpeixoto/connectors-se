@@ -66,7 +66,7 @@ public class UpsertDefault extends QueryManagerImpl {
                 .collect(toList());
 
         final Schema.Builder schemaBuilder = getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD);
-        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        entries.forEach(schemaBuilder::withEntry);
         final Schema inputSchema = schemaBuilder.build();
 
         final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
@@ -110,19 +110,19 @@ public class UpsertDefault extends QueryManagerImpl {
         final PreparedStatement statement = buildQuery(records, connection);
         final List<Reject> discards = new ArrayList<>();
         try {
-            for (final Record record : records) {
+            for (final Record rec : records) {
                 statement.clearParameters();
 
-                String sql_fact = rowWriter.write(record);
-                if (getConfiguration().isDebugQuery() && sql_fact != null) {
-                    log.debug("'" + sql_fact.trim() + "'.");
+                String sqlFact = rowWriter.write(rec);
+                if (getConfiguration().isDebugQuery() && sqlFact != null) {
+                    log.debug("'" + sqlFact.trim() + "'.");
                 }
 
                 try (final ResultSet result = statement.executeQuery()) {
                     if (result.next() && result.getInt(1) > 0) {
-                        needUpdate.add(record);
+                        needUpdate.add(rec);
                     } else {
-                        needInsert.add(record);
+                        needInsert.add(rec);
                     }
                 }
             }

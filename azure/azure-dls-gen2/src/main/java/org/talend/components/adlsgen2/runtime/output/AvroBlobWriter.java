@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AvroBlobWriter extends BlobWriter {
 
-    public final String EXT_AVRO = ".avro";
+    public static final String EXT_AVRO = ".avro";
 
     private RecordToAvro converter;
 
@@ -65,8 +65,8 @@ public class AvroBlobWriter extends BlobWriter {
             DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>();
             DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
             dataFileWriter.create(converter.fromRecordSchema(getSchema()), byteBuffer);
-            for (Record record : getBatch()) {
-                dataFileWriter.append(converter.fromRecord(record));
+            for (Record rec : getBatch()) {
+                dataFileWriter.append(converter.fromRecord(rec));
             }
             dataFileWriter.flush();
             return byteBuffer.toByteArray();

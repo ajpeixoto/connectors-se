@@ -53,7 +53,7 @@ class DatasetGeneratorTest {
         }
 
         @Override
-        public Consumer<String> endRecord(int id, Record record) {
+        public Consumer<String> endRecord(int id, Record rec) {
             return (String f) -> Assertions.assertNotNull(f);
         }
     }

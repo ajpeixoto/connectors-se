@@ -40,7 +40,7 @@ public class CSVRecordWriter implements RecordWriter {
         this.config = config;
     }
 
-    private void firstRecord(Record record) throws IOException {
+    private void firstRecord(Record rec) throws IOException {
         CSVFormat csvFormat = CSVHelper.getCsvFormat(config);
 
         int nbeHeaderLine = this.config.getLineConfiguration().calcHeader();
@@ -50,7 +50,7 @@ public class CSVRecordWriter implements RecordWriter {
                 final String headers = String.join("", Collections.nCopies(nbeHeaderLine - 2, "\n"));
                 csvFormat = csvFormat.withHeaderComments(headers);
             }
-            final List<String> headers = RecordSerializerLineHelper.schemaFrom(record.getSchema());
+            final List<String> headers = RecordSerializerLineHelper.schemaFrom(rec.getSchema());
             csvFormat = csvFormat.withHeader(headers.toArray(new String[] {}));
         }
 
@@ -61,11 +61,11 @@ public class CSVRecordWriter implements RecordWriter {
     }
 
     @Override
-    public void add(Record record) throws IOException {
+    public void add(Record rec) throws IOException {
         if (this.printer == null) {
-            this.firstRecord(record);
+            this.firstRecord(rec);
         }
-        final List<String> values = RecordSerializerLineHelper.valuesFrom(record);
+        final List<String> values = RecordSerializerLineHelper.valuesFrom(rec);
         this.printer.printRecord(values);
     }
 

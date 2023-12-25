@@ -33,7 +33,8 @@ public abstract class AbstractTestMigrationHandler implements MigrationHandler {
     public abstract String getCallbackPropertyName();
 
     public void specificMigration(int incomingVersion, Map<String, String> incomingData) {
-    };
+        /* NOP */
+    }
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
@@ -41,7 +42,7 @@ public abstract class AbstractTestMigrationHandler implements MigrationHandler {
 
         incomingData
                 .put(getPrefix() + getCallbackPropertyName(),
-                        getMigrationVersions(incomingVersion) + " | " + this.current);
+                        getMigrationVersions(incomingVersion) + " | " + AbstractTestMigrationHandler.current);
 
         copyFromLegacyToDuplication(incomingData);
 

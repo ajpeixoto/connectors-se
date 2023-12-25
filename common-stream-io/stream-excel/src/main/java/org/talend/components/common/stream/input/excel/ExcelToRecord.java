@@ -24,7 +24,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
-import org.talend.sdk.component.api.record.Schema.Type;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public class ExcelToRecord {

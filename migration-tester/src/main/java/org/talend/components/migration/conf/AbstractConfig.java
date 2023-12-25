@@ -12,21 +12,12 @@
  */
 package org.talend.components.migration.conf;
 
-import lombok.Data;
-import org.talend.sdk.component.api.component.Version;
-import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Suggestable;
-import org.talend.sdk.component.api.configuration.action.Updatable;
-import org.talend.sdk.component.api.configuration.condition.ActiveIf;
-import org.talend.sdk.component.api.configuration.type.DataStore;
-import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
-import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.meta.Documentation;
-import org.talend.sdk.component.api.configuration.type.DataSet;
-
-import org.talend.sdk.component.api.configuration.Option;
-
 import java.io.Serializable;
+
+import org.talend.sdk.component.api.configuration.Option;
+import org.talend.sdk.component.api.meta.Documentation;
+
+import lombok.Data;
 
 @Data
 public class AbstractConfig implements Serializable {

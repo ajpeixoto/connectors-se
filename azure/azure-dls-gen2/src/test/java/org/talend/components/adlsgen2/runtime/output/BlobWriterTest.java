@@ -19,7 +19,7 @@ import org.talend.components.adlsgen2.AdlsGen2TestBase;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.adlsgen2")
-public class BlobWriterTest extends AdlsGen2TestBase {
+class BlobWriterTest extends AdlsGen2TestBase {
 
     static BlobWriter blobWriter;
 
@@ -30,7 +30,7 @@ public class BlobWriterTest extends AdlsGen2TestBase {
     }
 
     @Test
-    public void testCompleteOnZeroInputRecords() {
+    void testCompleteOnZeroInputRecords() {
         /*
          * There was a NPE issue.
          * No batch was created, since the {@link BlobWriter#newBatch()} was not called.

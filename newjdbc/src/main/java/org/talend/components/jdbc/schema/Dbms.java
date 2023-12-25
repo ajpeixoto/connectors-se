@@ -18,16 +18,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.Getter;
+
 /**
  * Provides information of type mapping for Database Management System (DBMS)
  * This data is retrieved from external configuration for JDBC components
  */
 public class Dbms {
 
+    @Getter
     private final String id;
 
+    @Getter
     private final String product;
 
+    @Getter
     private final String label;
 
     private final boolean isDefaultDbms;
@@ -59,34 +64,7 @@ public class Dbms {
      * @return the dbmsTypes
      */
     public List<String> getDbmsTypes() {
-        return new ArrayList<String>(types.keySet());
-    }
-
-    /**
-     * Getter for id.
-     * 
-     * @return the id
-     */
-    public String getId() {
-        return this.id;
-    }
-
-    /**
-     * Getter for label.
-     * 
-     * @return the label
-     */
-    public String getLabel() {
-        return this.label;
-    }
-
-    /**
-     * Getter for product.
-     * 
-     * @return the product
-     */
-    public String getProduct() {
-        return this.product;
+        return new ArrayList<>(types.keySet());
     }
 
     /**
@@ -100,7 +78,7 @@ public class Dbms {
     }
 
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append("Dbms["); //$NON-NLS-1$
         buffer.append("product = ").append(product); //$NON-NLS-1$
         buffer.append(", id = ").append(id); //$NON-NLS-1$

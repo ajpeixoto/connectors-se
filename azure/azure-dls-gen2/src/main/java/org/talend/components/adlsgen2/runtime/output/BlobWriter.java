@@ -74,11 +74,11 @@ public abstract class BlobWriter {
 
     protected abstract void generateFile();
 
-    public void writeRecord(Record record) {
+    public void writeRecord(Record rec) {
         if (schema == null) {
-            schema = record.getSchema();
+            schema = rec.getSchema();
         }
-        batch.add(record);
+        batch.add(rec);
     }
 
     protected void uploadContent(byte[] content) {

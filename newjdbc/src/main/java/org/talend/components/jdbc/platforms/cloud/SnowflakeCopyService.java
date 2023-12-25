@@ -83,7 +83,7 @@ public class SnowflakeCopyService implements Serializable {
                 .collect(toList());
 
         final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
-        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        entries.forEach(schemaBuilder::withEntry);
         final Schema inputSchema = schemaBuilder.build();
 
         final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(
@@ -158,7 +158,7 @@ public class SnowflakeCopyService implements Serializable {
     }
 
     private List<Reject> toReject(RecordChunk chunk, String error, final String state, final Integer code) {
-        return chunk.getRecords().stream().map(record -> new Reject(error, state, code, record)).collect(toList());
+        return chunk.getRecords().stream().map(rec -> new Reject(error, state, code, rec)).collect(toList());
     }
 
     private List<CopyError> doCopy(final String fqStageName, final String fqTableName, final Connection connection,
@@ -285,10 +285,10 @@ public class SnowflakeCopyService implements Serializable {
         final Map<Integer, RecordChunk> chunks = new HashMap<>();
         records
                 .stream()
-                .map(record -> currentSchema
+                .map(rec -> currentSchema
                         .getEntries()
                         .stream()
-                        .map(entry -> format(record, entry))
+                        .map(entry -> format(rec, entry))
                         .collect(joining(",")))
                 .forEach(line -> {
                     if (size.addAndGet(line.getBytes(StandardCharsets.UTF_8).length) > MAX_CHUNK) {
@@ -367,25 +367,25 @@ public class SnowflakeCopyService implements Serializable {
         }
     }
 
-    private String format(final Record record, final Schema.Entry entry) {
+    private String format(final Record input, final Schema.Entry entry) {
         switch (entry.getType()) {
         case INT:
         case LONG:
         case BOOLEAN:
-            return SnowflakeCopyService.valueOf(record, entry).map(String::valueOf).orElse("");
+            return SnowflakeCopyService.valueOf(input, entry).map(String::valueOf).orElse("");
         case FLOAT:
-            return SnowflakeCopyService.valueOf(record, entry).map(v -> Float.toHexString((Float) v)).orElse("");
+            return SnowflakeCopyService.valueOf(input, entry).map(v -> Float.toHexString((Float) v)).orElse("");
         case DOUBLE:
-            return SnowflakeCopyService.valueOf(record, entry).map(v -> Double.toHexString((Double) v)).orElse("");
+            return SnowflakeCopyService.valueOf(input, entry).map(v -> Double.toHexString((Double) v)).orElse("");
         case BYTES:
-            return SnowflakeCopyService.valueOf(record, entry).map(v -> Hex.encodeHexString((byte[]) v)).orElse("");
+            return SnowflakeCopyService.valueOf(input, entry).map(v -> Hex.encodeHexString((byte[]) v)).orElse("");
         case DATETIME:
             return SnowflakeCopyService
-                    .valueOf(record, entry)
+                    .valueOf(input, entry)
                     .map(v -> ((ZonedDateTime) v).format(DateTimeFormatter.ofPattern(TIMESTAMP_FORMAT_PATTERN)))
                     .orElse("");
         case STRING:
-            return escape(record.getString(entry.getName()));
+            return escape(input.getString(entry.getName()));
         case ARRAY:
         case RECORD:
         default:
@@ -394,50 +394,50 @@ public class SnowflakeCopyService implements Serializable {
         }
     }
 
-    private static Optional<Object> valueOf(final Record record, final Schema.Entry entry) {
+    private static Optional<Object> valueOf(final Record input, final Schema.Entry entry) {
         switch (entry.getType()) {
         case INT:
-            OptionalInt optionalInt = record.getOptionalInt(entry.getName());
+            OptionalInt optionalInt = input.getOptionalInt(entry.getName());
             return optionalInt.isPresent()
                     ? of(optionalInt.getAsInt())
                     : empty();
         case LONG:
-            OptionalLong optionalLong = record.getOptionalLong(entry.getName());
+            OptionalLong optionalLong = input.getOptionalLong(entry.getName());
             return optionalLong.isPresent()
                     ? of(optionalLong.getAsLong())
                     : empty();
         case FLOAT:
-            OptionalDouble optionalFloat = record.getOptionalFloat(entry.getName());
+            OptionalDouble optionalFloat = input.getOptionalFloat(entry.getName());
             return optionalFloat.isPresent()
                     ? of(optionalFloat.getAsDouble())
                     : empty();
         case DOUBLE:
-            OptionalDouble optionalDouble = record.getOptionalDouble(entry.getName());
+            OptionalDouble optionalDouble = input.getOptionalDouble(entry.getName());
             return optionalDouble.isPresent()
                     ? of(optionalDouble.getAsDouble())
                     : empty();
         case BOOLEAN:
-            Optional<Boolean> optionalBoolean = record.getOptionalBoolean(entry.getName());
+            Optional<Boolean> optionalBoolean = input.getOptionalBoolean(entry.getName());
             return optionalBoolean.isPresent()
                     ? of(optionalBoolean.get())
                     : empty();
         case BYTES:
-            Optional<byte[]> optionalBytes = record.getOptionalBytes(entry.getName());
+            Optional<byte[]> optionalBytes = input.getOptionalBytes(entry.getName());
             return optionalBytes.isPresent()
                     ? of(optionalBytes.get())
                     : empty();
         case DATETIME:
-            Optional<ZonedDateTime> optionalDateTime = record.getOptionalDateTime(entry.getName());
+            Optional<ZonedDateTime> optionalDateTime = input.getOptionalDateTime(entry.getName());
             return optionalDateTime.isPresent()
                     ? of(optionalDateTime.get())
                     : empty();
         case STRING:
-            Optional<String> optionalString = record.getOptionalString(entry.getName());
+            Optional<String> optionalString = input.getOptionalString(entry.getName());
             return optionalString.isPresent()
                     ? of(optionalString.get())
                     : empty();
         case RECORD:
-            Optional<Record> optionalRecord = record.getOptionalRecord(entry.getName());
+            Optional<Record> optionalRecord = input.getOptionalRecord(entry.getName());
             return optionalRecord.isPresent()
                     ? of(optionalRecord.get())
                     : empty();

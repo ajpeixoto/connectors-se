@@ -14,6 +14,7 @@ package org.talend.components.adlsgen2.datastore;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -227,9 +228,9 @@ public final class SharedKeyUtils {
              */
             Mac hmacSha256 = Mac.getInstance("HmacSHA256");
             hmacSha256.init(new SecretKeySpec(this.accountKey, "HmacSHA256"));
-            byte[] utf8Bytes = stringToSign.getBytes(Constants.UTF8_CHARSET);
+            byte[] utf8Bytes = stringToSign.getBytes(StandardCharsets.UTF_8);
             return Base64.getEncoder().encodeToString(hmacSha256.doFinal(utf8Bytes));
-        } catch (final UnsupportedEncodingException | NoSuchAlgorithmException e) {
+        } catch (final NoSuchAlgorithmException e) {
             throw new AdlsGen2RuntimeException(e.getMessage());
         }
     }

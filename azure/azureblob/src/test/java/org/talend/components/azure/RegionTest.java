@@ -23,10 +23,10 @@ import org.talend.components.azure.service.RegionUtils;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 
-public class RegionTest {
+class RegionTest {
 
     @Test
-    public void testAccountAuthDefaultRegion() throws URISyntaxException {
+    void testAccountAuthDefaultRegion() throws URISyntaxException {
         AzureStorageConnectionAccount accountConnection = new AzureStorageConnectionAccount();
         accountConnection.setAccountName("myaccount");
         accountConnection.setAccountKey("myaccountkey");
@@ -40,7 +40,7 @@ public class RegionTest {
     }
 
     @Test
-    public void testAccountAuthNotDefaultRegion() throws URISyntaxException {
+    void testAccountAuthNotDefaultRegion() throws URISyntaxException {
         AzureStorageConnectionAccount accountConnection = new AzureStorageConnectionAccount();
         accountConnection.setAccountName("myaccount");
         accountConnection.setAccountKey("myaccountkey");
@@ -54,7 +54,7 @@ public class RegionTest {
     }
 
     @Test
-    public void testSignatureAuthDefaultRegion() throws URISyntaxException {
+    void testSignatureAuthDefaultRegion() throws URISyntaxException {
         AzureStorageConnectionSignature accountConnection = new AzureStorageConnectionSignature();
         accountConnection.setAzureSharedAccessSignature("https://myaccount.blob.core.windows.net/mytoken");
 
@@ -66,7 +66,7 @@ public class RegionTest {
     }
 
     @Test
-    public void testSignatureAuthNotDefaultRegion() throws URISyntaxException {
+    void testSignatureAuthNotDefaultRegion() throws URISyntaxException {
         AzureStorageConnectionSignature accountConnection = new AzureStorageConnectionSignature();
         accountConnection.setAzureSharedAccessSignature("https://myaccount.blob.core.chinacloudapi.cn/mytoken");
 
@@ -78,7 +78,7 @@ public class RegionTest {
     }
 
     @Test
-    public void testRegionUtils() throws URISyntaxException {
+    void testRegionUtils() throws URISyntaxException {
         String[] regions = { "core.chinacloudapi.cn", "core.windows.net" };
         for (String region : regions) {
             AzureStorageConnectionSignature accountConnection = new AzureStorageConnectionSignature();

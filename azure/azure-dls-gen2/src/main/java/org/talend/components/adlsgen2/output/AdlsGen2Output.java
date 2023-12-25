@@ -93,14 +93,14 @@ public class AdlsGen2Output implements Serializable {
     }
 
     @ElementListener
-    public void onNext(@Input final Record record) {
+    public void onNext(@Input final Record rec) {
         // skip empty record
-        if (record != null && record.getSchema().getEntries().isEmpty()) {
+        if (rec != null && rec.getSchema().getEntries().isEmpty()) {
             log.info("[onNext] Skipping empty record.");
             return;
         }
 
-        blobWriter.writeRecord(record);
+        blobWriter.writeRecord(rec);
     }
 
     @AfterGroup

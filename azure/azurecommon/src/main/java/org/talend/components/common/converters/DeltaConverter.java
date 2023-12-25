@@ -46,38 +46,38 @@ public class DeltaConverter implements RecordConverter<RowRecord>, Serializable 
     }
 
     @Override
-    public Schema inferSchema(RowRecord record) {
-        Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
+    public Schema inferSchema(final RowRecord rec) {
+        final Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
 
-        StructType schema = record.getSchema();
-        for (StructField field : schema.getFields()) {
+        final StructType structure = rec.getSchema();
+        for (StructField field : structure.getFields()) {
             builder.withEntry(inferField(field));
         }
         return builder.build();
     }
 
-    private static Map<Class, Schema.Type> deltaType2SchemaType = new HashMap<>();
+    private static final Map<Class<?>, Schema.Type> DELTA_TYPE_2_SCHEMA_TYPE = new HashMap<>();
 
-    {
-        deltaType2SchemaType.put(StringType.class, Schema.Type.STRING);
-        deltaType2SchemaType.put(IntegerType.class, Schema.Type.INT);
-        deltaType2SchemaType.put(LongType.class, Schema.Type.LONG);
+    static {
+        DELTA_TYPE_2_SCHEMA_TYPE.put(StringType.class, Schema.Type.STRING);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(IntegerType.class, Schema.Type.INT);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(LongType.class, Schema.Type.LONG);
         // use string for decimal for not missing precision?
-        deltaType2SchemaType.put(DecimalType.class, Schema.Type.STRING);
-        deltaType2SchemaType.put(DateType.class, Schema.Type.DATETIME);
-        deltaType2SchemaType.put(ShortType.class, Schema.Type.INT);
-        deltaType2SchemaType.put(ByteType.class, Schema.Type.INT);
-        deltaType2SchemaType.put(DoubleType.class, Schema.Type.DOUBLE);
-        deltaType2SchemaType.put(FloatType.class, Schema.Type.FLOAT);
-        deltaType2SchemaType.put(BooleanType.class, Schema.Type.BOOLEAN);
-        deltaType2SchemaType.put(ArrayType.class, Schema.Type.ARRAY);
-        deltaType2SchemaType.put(BinaryType.class, Schema.Type.BYTES);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(DecimalType.class, Schema.Type.STRING);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(DateType.class, Schema.Type.DATETIME);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(ShortType.class, Schema.Type.INT);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(ByteType.class, Schema.Type.INT);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(DoubleType.class, Schema.Type.DOUBLE);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(FloatType.class, Schema.Type.FLOAT);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(BooleanType.class, Schema.Type.BOOLEAN);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(ArrayType.class, Schema.Type.ARRAY);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(BinaryType.class, Schema.Type.BYTES);
 
         // TODO make sure them
-        deltaType2SchemaType.put(NullType.class, Schema.Type.STRING);
-        deltaType2SchemaType.put(TimestampType.class, Schema.Type.DATETIME);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(NullType.class, Schema.Type.STRING);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(TimestampType.class, Schema.Type.DATETIME);
 
-        deltaType2SchemaType.put(StructType.class, Schema.Type.RECORD);
+        DELTA_TYPE_2_SCHEMA_TYPE.put(StructType.class, Schema.Type.RECORD);
 
         // TODO how to map map?
         // deltaType2SchemaType.put(MapType.class, Schema.Type.STRING);
@@ -96,7 +96,7 @@ public class DeltaConverter implements RecordConverter<RowRecord>, Serializable 
             DataType elementType = arrayType.getElementType();
             builder.withType(Schema.Type.ARRAY);
 
-            Schema.Type eType = deltaType2SchemaType.get(elementType.getClass());
+            Schema.Type eType = DELTA_TYPE_2_SCHEMA_TYPE.get(elementType.getClass());
             if (eType == null) {
                 throw new RuntimeException("Not supported format:" + elementType.getTypeName());
             }
@@ -123,7 +123,7 @@ public class DeltaConverter implements RecordConverter<RowRecord>, Serializable 
             Arrays.stream(structType.getFields()).map(this::inferField).forEach(subBuilder::withEntry);
             builder.withElementSchema(subBuilder.build());
         } else {
-            Schema.Type stype = deltaType2SchemaType.get(type.getClass());
+            Schema.Type stype = DELTA_TYPE_2_SCHEMA_TYPE.get(type.getClass());
             if (stype == null) {
                 // TODO should impossible execution here, only for safe
                 throw new RuntimeException("Not supported format:" + type.getTypeName());
@@ -171,7 +171,7 @@ public class DeltaConverter implements RecordConverter<RowRecord>, Serializable 
             if (!isNull) {
                 List<RowRecord> records = rowRecord.getList(name);
                 Collection<Record> recs = records.stream()
-                        .map(record -> rowRecordToRecord(record, record.getSchema().getFields(),
+                        .map(rec -> rowRecordToRecord(rec, rec.getSchema().getFields(),
                                 recordBuilderFactory.newRecordBuilder()))
                         .collect(toList());
                 recordBuilder.withArray(entry, recs);
@@ -294,7 +294,7 @@ public class DeltaConverter implements RecordConverter<RowRecord>, Serializable 
     }
 
     @Override
-    public RowRecord fromRecord(Record record) {
+    public RowRecord fromRecord(Record rec) {
         throw new UnsupportedOperationException("#fromRecord()");
     }
 

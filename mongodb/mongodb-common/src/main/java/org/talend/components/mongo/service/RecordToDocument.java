@@ -52,14 +52,14 @@ public class RecordToDocument {
         return document;
     }
 
-    private List toArray(Collection<Object> objects, DocumentToRecord.DataType origin_datatype) {
+    private List toArray(Collection<Object> objects, DocumentToRecord.DataType originDatatype) {
         List array = new ArrayList();
         for (Object obj : objects) {
             if (obj instanceof Collection) {
-                List subArray = toArray((Collection) obj, origin_datatype);
+                List subArray = toArray((Collection) obj, originDatatype);
                 array.add(subArray);
             } else if (obj instanceof String) {
-                array.add(convertToMongoDataTypeIfNecessary((String) obj, origin_datatype));
+                array.add(convertToMongoDataTypeIfNecessary((String) obj, originDatatype));
             } else if (obj instanceof Record) {
                 Document subObject = convertRecordToDocument((Record) obj);
                 array.add(subObject);
@@ -80,44 +80,44 @@ public class RecordToDocument {
         return array;
     }
 
-    private void addField(Document document, Record record, Entry entry) {
+    private void addField(Document document, Record rec, Entry entry) {
         final String fieldName = entry.getName();
         switch (entry.getType()) {
         case RECORD:
-            final Record subRecord = record.getRecord(fieldName);
+            final Record subRecord = rec.getRecord(fieldName);
             document.put(fieldName, convertRecordToDocument(subRecord));
             break;
         case ARRAY:
-            final Collection<Object> list = record.getArray(Object.class, fieldName);
+            final Collection<Object> list = rec.getArray(Object.class, fieldName);
             final List array = toArray(list, getOriginDataType(entry));
             document.put(fieldName, array);
             break;
         case STRING:
         case DECIMAL:
-            DocumentToRecord.DataType origin_datatype = getOriginDataType(entry);
-            document.put(fieldName, convertToMongoDataTypeIfNecessary(record.getString(fieldName), origin_datatype));
+            DocumentToRecord.DataType originDataType = getOriginDataType(entry);
+            document.put(fieldName, convertToMongoDataTypeIfNecessary(rec.getString(fieldName), originDataType));
             break;
         case BYTES:
             // TODO check it
-            document.put(fieldName, new String(record.getBytes(fieldName)));
+            document.put(fieldName, new String(rec.getBytes(fieldName)));
             break;
         case INT:
-            document.put(fieldName, record.getInt(fieldName));
+            document.put(fieldName, rec.getInt(fieldName));
             break;
         case LONG:
-            document.put(fieldName, record.getLong(fieldName));
+            document.put(fieldName, rec.getLong(fieldName));
             break;
         case FLOAT:
-            document.put(fieldName, record.getFloat(fieldName));
+            document.put(fieldName, rec.getFloat(fieldName));
             break;
         case DOUBLE:
-            document.put(fieldName, record.getDouble(fieldName));
+            document.put(fieldName, rec.getDouble(fieldName));
             break;
         case BOOLEAN:
-            document.put(fieldName, record.getBoolean(fieldName));
+            document.put(fieldName, rec.getBoolean(fieldName));
             break;
         case DATETIME:
-            document.put(fieldName, record.get(Date.class, fieldName));
+            document.put(fieldName, rec.get(Date.class, fieldName));
             break;
         }
     }
@@ -126,12 +126,12 @@ public class RecordToDocument {
         // now use comment to store origin name and origin type information, not good, TODO move to framework
         final String comment = entry.getComment();
         if (comment != null && comment.contains(DocumentToRecord.TYPE_SPLIT_CHARS)) {
-            String origin_data_type = comment.substring(comment.lastIndexOf(DocumentToRecord.TYPE_SPLIT_CHARS) + 2);
-            if (DocumentToRecord.DataType.OBJECTID.origin_type.equals(origin_data_type)) {
+            String originDataType = comment.substring(comment.lastIndexOf(DocumentToRecord.TYPE_SPLIT_CHARS) + 2);
+            if (DocumentToRecord.DataType.OBJECTID.origin_type.equals(originDataType)) {
                 return DocumentToRecord.DataType.OBJECTID;
-            } else if (DocumentToRecord.DataType.CODE.origin_type.equals(origin_data_type)) {
+            } else if (DocumentToRecord.DataType.CODE.origin_type.equals(originDataType)) {
                 return DocumentToRecord.DataType.CODE;
-            } else if (DocumentToRecord.DataType.DECIMAL128.origin_type.equals(origin_data_type)) {
+            } else if (DocumentToRecord.DataType.DECIMAL128.origin_type.equals(originDataType)) {
                 return DocumentToRecord.DataType.DECIMAL128;
             }
         }
@@ -139,20 +139,20 @@ public class RecordToDocument {
         return null;
     }
 
-    private Object convertToMongoDataTypeIfNecessary(String content, DocumentToRecord.DataType origin_datatype) {
-        if (content == null || origin_datatype == null) {
+    private Object convertToMongoDataTypeIfNecessary(String content, DocumentToRecord.DataType originDatatype) {
+        if (content == null || originDatatype == null) {
             return content;
         }
 
-        if (DocumentToRecord.DataType.OBJECTID == origin_datatype) {
+        if (DocumentToRecord.DataType.OBJECTID == originDatatype) {
             return new ObjectId(content);
         }
 
-        if (DocumentToRecord.DataType.CODE == origin_datatype) {
+        if (DocumentToRecord.DataType.CODE == originDatatype) {
             return new Code(content);
         }
 
-        if (DocumentToRecord.DataType.DECIMAL128 == origin_datatype) {
+        if (DocumentToRecord.DataType.DECIMAL128 == originDatatype) {
             return Decimal128.parse(content);
         }
 

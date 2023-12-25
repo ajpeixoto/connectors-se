@@ -77,9 +77,9 @@ public class JsonBlobFileWriter extends BlobFileWriter {
 
     private byte[] convertBatchToBytes() {
         JsonArrayBuilder b = jsonBuilderFactory.createArrayBuilder();
-        for (Record record : getBatch()) {
+        for (Record rec : getBatch()) {
 
-            b.add(converter.fromRecord(record));
+            b.add(converter.fromRecord(rec));
         }
 
         return b.build().asJsonArray().toString().getBytes();

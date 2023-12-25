@@ -12,11 +12,15 @@
  */
 package org.talend.components.common.formats;
 
-import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.formats.csv.CSVFieldDelimiter;
+import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.formats.csv.CSVRecordDelimiter;
 import org.talend.components.common.formats.excel.ExcelFormatOptions;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FormatUtils {
 
     public static String getUsedEncodingValue(CSVFormatOptions csvFormat) {

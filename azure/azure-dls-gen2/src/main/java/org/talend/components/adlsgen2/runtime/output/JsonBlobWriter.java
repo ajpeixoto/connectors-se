@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JsonBlobWriter extends BlobWriter {
 
-    protected final String EXT_JSON = ".json";
+    protected static final String EXT_JSON = ".json";
 
     private JsonContentFormatter formatter;
 

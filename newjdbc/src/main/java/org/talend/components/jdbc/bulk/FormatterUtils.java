@@ -16,13 +16,17 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class FormatterUtils {
 
-    public static final String dateDefaultPattern = "dd-MM-yyyy";
+    public static final String DATE_DEFAULT_PATTERN = "dd-MM-yyyy";
 
     public static String formatDate(Date date, String pattern) {
         if (date != null) {
-            DateFormat format = FastDateParser.getInstance(pattern == null ? dateDefaultPattern : pattern);
+            DateFormat format = FastDateParser.getInstance(pattern == null ? DATE_DEFAULT_PATTERN : pattern);
             format.setTimeZone(TimeZone.getDefault());
             return format.format(date);
         } else {

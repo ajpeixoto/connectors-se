@@ -40,7 +40,7 @@ public class AvroReader implements RecordReader {
 
         try {
             final DatumReader<GenericRecord> userDatumReader = new GenericDatumReader<>();
-            this.genericRecordReader = new DataFileStream<GenericRecord>(input, userDatumReader);
+            this.genericRecordReader = new DataFileStream<>(input, userDatumReader);
 
             return new IteratorMap<>(this.genericRecordReader, this.convertor::toRecord);
         } catch (IOException exIO) {

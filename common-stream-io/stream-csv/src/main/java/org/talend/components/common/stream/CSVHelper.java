@@ -15,6 +15,10 @@ package org.talend.components.common.stream;
 import org.apache.commons.csv.CSVFormat;
 import org.talend.components.common.stream.format.csv.CSVConfiguration;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CSVHelper {
 
     public static CSVFormat getCsvFormat(CSVConfiguration config) {

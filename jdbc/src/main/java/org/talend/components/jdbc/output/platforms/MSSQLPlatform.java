@@ -37,6 +37,7 @@ public class MSSQLPlatform extends Platform {
 
     public static final String MSSQL_JTDS = "mssql_jtds";
 
+    @Override
     protected String buildUrlFromPattern(final String protocol, final String host, final int port,
             final String database,
             String params) {
@@ -100,6 +101,7 @@ public class MSSQLPlatform extends Platform {
         ;
     }
 
+    @Override
     protected String isRequired(final Column column) {
         return column.isNullable() && !column.isPrimaryKey() ? "" : "NOT NULL";
     }

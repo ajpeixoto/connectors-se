@@ -41,4 +41,30 @@
         <property name="baseName" value="^Messages.*$"/>
         <property name="requiredTranslations" value="en, fr, de, ja"/>
     </module>
+
+    <module name="TreeWalker">
+        <!-- Checks for redundant import statements. -->
+        <!-- https://checkstyle.sourceforge.io/checks/imports/redundantimport.html#RedundantImport -->
+        <module name="RedundantImport"/>
+
+        <!-- Checks for unused import statements -->
+        <!-- https://checkstyle.sourceforge.io/checks/imports/unusedimports.html#UnusedImports -->
+        <module name="UnusedImports"/>
+
+        <!-- Checks for imports from a set of illegal packages. -->
+        <!-- https://checkstyle.sourceforge.io/checks/imports/illegalimport.html#IllegalImport -->
+        <module name="IllegalImport"/>
+
+        <!-- Checks that local, non-final variable names conform to a specified pattern.  -->
+        <!-- https://checkstyle.sourceforge.io/checks/naming/localvariablename.html#LocalVariableName -->
+        <module name="LocalVariableName"/>
+
+        <!-- Checks that local final variable names conform to a specified pattern -->
+        <!-- https://checkstyle.sourceforge.io/checks/naming/localfinalvariablename.html#LocalFinalVariableName -->
+        <module name="LocalFinalVariableName"/>
+
+        <!-- Checks that the order of modifiers conforms to the suggestions in the Java Language specification, § 8.1.1, 8.3.1, 8.4.3 and 9.4. -->
+        <!-- https://checkstyle.sourceforge.io/checks/modifier/modifierorder.html#ModifierOrder -->
+        <module name="ModifierOrder"/>
+    </module>
 </module>

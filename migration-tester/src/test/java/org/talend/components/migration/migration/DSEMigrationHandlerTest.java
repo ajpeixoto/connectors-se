@@ -43,8 +43,8 @@ class DSEMigrationHandlerTest {
         DatasetMigrationHandler dsmh = new DatasetMigrationHandler();
         final Map<String, String> migrated = dsmh.migrate(1, incomingData);
 
-        assertEquals(migrated.get("dse_legacy"), "legacy data");
-        assertEquals(migrated.get("dse_duplication"), "legacy data");
+        assertEquals("legacy data", migrated.get("dse_legacy"));
+        assertEquals("legacy data", migrated.get("dse_duplication"));
         assertFalse(migrated.get("dse_migration_handler_callback").isEmpty());
 
         assertEquals(migrated.get("dse_incoming"),
@@ -54,7 +54,7 @@ class DSEMigrationHandlerTest {
                         + "}");
         assertFalse(migrated.get("dse_outgoing").isEmpty());
 
-        assertEquals(migrated.get("dso.dso_legacy"), "legacy data");
+        assertEquals("legacy data", migrated.get("dso.dso_legacy"));
         assertNull(migrated.get("dso.dso_duplication"));
         assertTrue(migrated.get("dso.dso_migration_handler_callback").isEmpty());
     }

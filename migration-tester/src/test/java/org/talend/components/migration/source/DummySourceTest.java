@@ -77,7 +77,7 @@ class DummySourceTest {
     // TODO : raised an uncatched bug on conversion of POJOs (not implementing IpersistableRow) having inherited fields.
     // Bug in JsonRecordGenerator (TCOMP-1857).
     // Should be re-enabled once 1.31.0 released.
-    @Disabled
+    @Disabled("raised an uncatched bug on conversion of POJOs (not implementing IpersistableRow) having inherited fields")
     void testInput() {
 
         config.getDse().getDso().setDso_shouldNotBeEmpty("set !");

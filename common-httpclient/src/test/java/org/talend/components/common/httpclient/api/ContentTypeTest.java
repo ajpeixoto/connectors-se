@@ -34,7 +34,7 @@ class ContentTypeTest {
             "application/json; another valueA; ,; another valueB; another valueB;",
             ",; another valueB; another valueB",
             "," }, ignoreLeadingAndTrailingWhitespace = false)
-    public void getCharsetName(String prefix, String suffix) {
+    void getCharsetName(String prefix, String suffix) {
         prefix = prefix == null ? "" : prefix;
         suffix = suffix == null ? "" : suffix;
         Map<String, String> headers = new HashMap<>();

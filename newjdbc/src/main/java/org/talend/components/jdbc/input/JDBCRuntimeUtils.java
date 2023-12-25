@@ -12,6 +12,8 @@
  */
 package org.talend.components.jdbc.input;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.PreparedStatementParameter;
 import org.talend.components.jdbc.common.Type;
@@ -22,12 +24,12 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JDBCRuntimeUtils {
 
     public static void setPreparedStatement(final PreparedStatement pstmt,
             final List<PreparedStatementParameter> preparedStatementParameters) throws SQLException {
-        for (int i = 0; i < preparedStatementParameters.size(); i++) {
-            PreparedStatementParameter parameter = preparedStatementParameters.get(i);
+        for (PreparedStatementParameter parameter : preparedStatementParameters) {
             int index = parameter.getIndex();
             Type type = parameter.getType();
             Object value = parameter.getDataValue();

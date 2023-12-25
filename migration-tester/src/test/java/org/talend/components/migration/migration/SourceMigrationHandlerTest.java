@@ -45,20 +45,20 @@ class SourceMigrationHandlerTest {
         SourceMigrationHandler dsmh = new SourceMigrationHandler();
         final Map<String, String> migrated = dsmh.migrate(1, incomingData);
 
-        assertEquals(migrated.get("configuration.dse.dse_legacy"), "legacy data");
+        assertEquals("legacy data", migrated.get("configuration.dse.dse_legacy"));
         assertNull(migrated.get("configuration.dse.dse_duplication"));
         assertTrue(migrated.get("configuration.dse.dse_migration_handler_callback").isEmpty());
 
-        assertEquals(migrated.get("configuration.dse.dso.dso_legacy"), "legacy data");
+        assertEquals("legacy data", migrated.get("configuration.dse.dso.dso_legacy"));
         assertNull(migrated.get("configuration.dse.dso.dso_duplication"));
         assertTrue(migrated.get("configuration.dse.dso.dso_migration_handler_callback").isEmpty());
 
-        assertEquals(migrated.get("configuration.source_legacy"), "legacy data");
-        assertEquals(migrated.get("configuration.source_duplication"), "legacy data");
+        assertEquals("legacy data", migrated.get("configuration.source_legacy"));
+        assertEquals("legacy data", migrated.get("configuration.source_duplication"));
         assertFalse(migrated.get("configuration.source_migration_handler_callback").isEmpty());
 
-        assertEquals(migrated.get("configuration.dse.dse_from_source"), "from source");
-        assertEquals(migrated.get("configuration.dse.dso.dso_from_source"), "from source");
+        assertEquals("from source", migrated.get("configuration.dse.dse_from_source"));
+        assertEquals("from source", migrated.get("configuration.dse.dso.dso_from_source"));
 
         assertEquals("{\n" + "\t\"configuration.source_legacy\" : \"legacy data\",\n"
                 + "\t\"configuration.dse.dse_migration_handler_callback\" : \"\",\n"

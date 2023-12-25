@@ -25,6 +25,10 @@ import java.util.Date;
 
 import static org.talend.sdk.component.api.record.Schema.Type.*;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SchemaInferer {
 
     public static Schema infer(RecordBuilderFactory recordBuilderFactory, ResultSetMetaData metadata, Dbms mapping,
@@ -633,7 +637,7 @@ public class SchemaInferer {
             }
         }
 
-        runtimeSchema.getProps().forEach((key, value) -> schemaBuilder.withProp(key, value));
+        runtimeSchema.getProps().forEach(schemaBuilder::withProp);
 
         return schemaBuilder.build();
     }

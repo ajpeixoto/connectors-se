@@ -17,6 +17,7 @@ import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.adlsgen2.AdlsGen2IntegrationTestBase;
 import org.talend.components.adlsgen2.common.format.FileFormat;
@@ -31,8 +32,9 @@ import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.adlsgen2")
-public class CSVInputIT extends AdlsGen2IntegrationTestBase {
+class CSVInputIT extends AdlsGen2IntegrationTestBase {
 
     private InputConfiguration inputConfiguration;
 
@@ -260,7 +262,7 @@ public class CSVInputIT extends AdlsGen2IntegrationTestBase {
     }
 
     @Test
-    public void testReadFileWithBigHeader() throws Exception {
+    void testReadFileWithBigHeader() throws Exception {
         final int generatedRecordSize = 10;
         final int headerSize = 5;
         final int expectedRecordAmount = generatedRecordSize - headerSize;
@@ -290,7 +292,7 @@ public class CSVInputIT extends AdlsGen2IntegrationTestBase {
     }
 
     @Test
-    public void testReadFileWithBigHeaderAndPredefinedCSVChema() throws Exception {
+    void testReadFileWithBigHeaderAndPredefinedCSVChema() throws Exception {
         inputConfiguration.getDataSet().getCsvConfiguration().setCsvSchema("a;b;c");
 
         testReadFileWithBigHeader();

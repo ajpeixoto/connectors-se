@@ -33,7 +33,7 @@ import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 class CSVRecordWriterTest {
 
     @Test
-    public void writeCSV() throws IOException {
+    void writeCSV() throws IOException {
         final RecordWriterSupplier recordWriterSupplier = new CSVWriterSupplier();
 
         final CSVConfiguration config = createCsvConfiguration();

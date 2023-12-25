@@ -195,21 +195,21 @@ public class JDBCOutputInsertOrUpdateWriter extends JDBCOutputWriter {
 
         try {
             if (dataExists) {// do update
-                String sql_fact = rowWriter4Update.write(input);
-                if (sql_fact != null) {
-                    context.set("QUERY", sql_fact);
+                String sqlFact = rowWriter4Update.write(input);
+                if (sqlFact != null) {
+                    context.set("QUERY", sqlFact);
                     if (config.isDebugQuery()) {
-                        log.debug("'" + sql_fact.trim() + "'.");
+                        log.debug("'" + sqlFact.trim() + "'.");
                     }
                 }
 
                 updateCount += execute(input, statementUpdate);
             } else {// do insert
-                String sql_fact = rowWriter4Insert.write(input);
-                if (sql_fact != null) {
-                    context.set("QUERY", sql_fact);
+                String sqlFact = rowWriter4Insert.write(input);
+                if (sqlFact != null) {
+                    context.set("QUERY", sqlFact);
                     if (config.isDebugQuery()) {
-                        log.debug("'" + sql_fact.trim() + "'.");
+                        log.debug("'" + sqlFact.trim() + "'.");
                     }
                 }
 

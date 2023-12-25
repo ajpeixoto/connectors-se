@@ -12,17 +12,15 @@
  */
 package org.talend.components.pgp.encrypt;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
-import org.pgpainless.algorithm.DocumentSignatureType;
-import org.pgpainless.algorithm.SignatureType;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.action.Proposable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
+
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor

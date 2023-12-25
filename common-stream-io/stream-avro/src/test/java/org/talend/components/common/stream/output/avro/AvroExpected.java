@@ -43,7 +43,7 @@ public class AvroExpected implements AssertionsBuilder<GenericRecord> {
     }
 
     @Override
-    public Consumer<GenericRecord> endRecord(int id, Record record) {
+    public Consumer<GenericRecord> endRecord(int id, Record rec) {
         final List<Consumer<GenericRecord>> copy = new ArrayList<>(this.verifiers.size());
         copy.addAll(this.verifiers);
         return new AvroChecker(copy);

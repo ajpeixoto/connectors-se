@@ -69,7 +69,7 @@ public class SchemaToAvro {
             org.apache.avro.Schema.Field field;
             try {
                 field = new org.apache.avro.Schema.Field(name, unionWithNull, e.getComment(),
-                        (Object) e.getDefaultValue());
+                        e.getDefaultValue());
             } catch (AvroTypeException ex) {
                 field = new org.apache.avro.Schema.Field(name, unionWithNull, e.getComment());
             }

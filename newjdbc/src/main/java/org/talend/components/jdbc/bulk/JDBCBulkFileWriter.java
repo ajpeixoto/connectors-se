@@ -22,7 +22,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**

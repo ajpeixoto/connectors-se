@@ -24,7 +24,8 @@ class ExcelWriterSupplierTest {
         ExcelConfiguration config = new ExcelConfiguration();
         config.setExcelFormat(ExcelFormat.HTML);
 
+        final ExcelWriterSupplier writerSupplier = new ExcelWriterSupplier();
         Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new ExcelWriterSupplier().getWriter(() -> null, config));
+                () -> writerSupplier.getWriter(() -> null, config));
     }
 }

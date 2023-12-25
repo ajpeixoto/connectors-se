@@ -42,8 +42,8 @@ public class AvroIterator implements Iterator<Record>, Serializable {
     private AvroIterator(AvroToRecord converter, InputStream inputStream) {
         this.converter = converter;
         try {
-            DatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>();
-            reader = new DataFileStream<GenericRecord>(inputStream, datumReader);
+            DatumReader<GenericRecord> datumReader = new GenericDatumReader<>();
+            reader = new DataFileStream<>(inputStream, datumReader);
         } catch (IOException e) {
             log.error("[AvroIterator] {}", e.getMessage());
             throw new FileFormatRuntimeException(e.getMessage());

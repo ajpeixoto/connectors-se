@@ -57,8 +57,7 @@ public class UIActionService {
     }
 
     @Suggestions(ACTION_ENTITY_SETS_DYNAMICS365)
-    public SuggestionValues entitySetsList(@Option final DynamicsCrmConnection connection)
-            throws AuthenticationException {
+    public SuggestionValues entitySetsList(@Option final DynamicsCrmConnection connection) {
         List<SuggestionValues.Item> items = service
                 .getEntitySetNames(connection)
                 .stream()

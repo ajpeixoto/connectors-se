@@ -65,7 +65,7 @@ public class SalesforceOutput implements Serializable {
     }
 
     @ElementListener
-    public void onNext(@Input final Record record) throws IOException {
+    public void onNext(@Input final Record input) throws IOException {
         if (outputService == null) {
             try {
                 final ConnectionFacade cnx = this.service
@@ -79,7 +79,7 @@ public class SalesforceOutput implements Serializable {
                 throw service.handleConnectionException(e);
             }
         }
-        outputService.write(record);
+        outputService.write(input);
     }
 
     @PreDestroy

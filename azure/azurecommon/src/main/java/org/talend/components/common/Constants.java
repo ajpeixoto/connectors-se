@@ -16,31 +16,10 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 public class Constants {
-
-    public static final String DFS_URL_PATTERN = "https://%s.%s";
-
-    public static final String DFS_DEFAULT_ENDPOINT_SUFFIX = "dfs.core.windows.net";
-
-    public static final String TOKEN_URL = "https://login.microsoftonline.com";
-
-    public static final String TOKEN_FORM =
-            "grant_type=client_credentials&client_id=%s&client_secret=%s&scope=https://storage.azure.com/.default";
-
-    public static final String STATIC_SAS_TOKEN_KEY = "fs.azure.sas.token.static";
-
-    public static final DateTimeFormatter RFC1123GMTDateFormatter = DateTimeFormatter
-            .ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ROOT)
-            .withZone(ZoneId.of("GMT"));
-
-    public static final DateTimeFormatter ISO8601UTCDateFormatter = DateTimeFormatter
-            .ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ROOT)
-            .withZone(ZoneId.of("UTC"));
-
-    /**
-     * Stores a reference to the UTC time zone.
-     */
-    public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
 
     /**
      * Stores a reference to the date/time pattern with the greatest precision Java.util.Date is capable of expressing.
@@ -61,6 +40,30 @@ public class Constants {
      * The length of a datestring that matches the MAX_PRECISION_PATTERN.
      */
     private static final int MAX_PRECISION_DATESTRING_LENGTH = MAX_PRECISION_PATTERN.replaceAll("'", "").length();
+
+    public static final String DFS_URL_PATTERN = "https://%s.%s";
+
+    public static final String DFS_DEFAULT_ENDPOINT_SUFFIX = "dfs.core.windows.net";
+
+    public static final String TOKEN_URL = "https://login.microsoftonline.com";
+
+    public static final String TOKEN_FORM =
+            "grant_type=client_credentials&client_id=%s&client_secret=%s&scope=https://storage.azure.com/.default";
+
+    public static final String STATIC_SAS_TOKEN_KEY = "fs.azure.sas.token.static";
+
+    public static final DateTimeFormatter RFC1123GMTDateFormatter = DateTimeFormatter
+            .ofPattern("EEE, dd MMM yyyy HH:mm:ss z", Locale.ROOT)
+            .withZone(ZoneId.of("GMT"));
+
+    public static final DateTimeFormatter ISO8601UTCDateFormatter = DateTimeFormatter
+            .ofPattern(ISO8601_PATTERN, Locale.ROOT)
+            .withZone(ZoneId.of("UTC"));
+
+    /**
+     * Stores a reference to the UTC time zone.
+     */
+    public static final ZoneId UTC_ZONE = ZoneId.of("UTC");
 
     /**
      * The master Microsoft Azure Storage header prefix.
@@ -155,6 +158,7 @@ public class Constants {
         // Private to prevent construction.
     }
 
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
     public static final class MethodConstants {
 
         public static final String GET = "GET";
@@ -265,8 +269,8 @@ public class Constants {
 
         /**
          * The current storage version header value.
+         * previous version value: "2018-03-28"
          */
-        // public static final String TARGET_STORAGE_VERSION = "2018-03-28";
         public static final String TARGET_STORAGE_VERSION = "2018-11-09";
 
         /**

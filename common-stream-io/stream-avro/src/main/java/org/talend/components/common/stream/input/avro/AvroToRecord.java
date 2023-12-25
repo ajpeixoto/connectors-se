@@ -49,20 +49,20 @@ public class AvroToRecord {
         this.recordBuilderFactory = recordBuilderFactory;
     }
 
-    public Schema inferSchema(final GenericRecord record) {
-        return new AvroToSchema(this.recordBuilderFactory).inferSchema(record.getSchema());
+    public Schema inferSchema(final GenericRecord rec) {
+        return new AvroToSchema(this.recordBuilderFactory).inferSchema(rec.getSchema());
     }
 
-    public Record toRecord(final GenericRecord record) {
-        if (record == null) {
+    public Record toRecord(final GenericRecord rec) {
+        if (rec == null) {
             return null;
         }
-        if (recordSchema == null || !(Objects.equals(record.getSchema(), this.cachedAvroSchema))) {
-            this.cachedAvroSchema = record.getSchema();
-            this.recordSchema = this.inferSchema(record);
+        if (recordSchema == null || !(Objects.equals(rec.getSchema(), this.cachedAvroSchema))) {
+            this.cachedAvroSchema = rec.getSchema();
+            this.recordSchema = this.inferSchema(rec);
         }
-        return avroToRecord(record,
-                record.getSchema().getFields(),
+        return avroToRecord(rec,
+                rec.getSchema().getFields(),
                 recordBuilderFactory.newRecordBuilder(recordSchema),
                 this.recordSchema);
     }
@@ -85,8 +85,8 @@ public class AvroToRecord {
             }
 
         }
-        final Record record = recordBuilder.build();
-        return record;
+        final Record rec = recordBuilder.build();
+        return rec;
     }
 
     private static boolean isArray(final org.apache.avro.Schema schema) {
@@ -109,7 +109,7 @@ public class AvroToRecord {
         switch (arrayInnerType.getType()) {
         case RECORD:
             objectArray = ((Collection<GenericRecord>) value).stream()
-                    .map(record -> avroToRecord(record,
+                    .map(rec -> avroToRecord(rec,
                             arrayInnerType.getFields(), recordBuilderFactory.newRecordBuilder(elementSchema),
                             elementSchema))
                     .collect(Collectors.toList());

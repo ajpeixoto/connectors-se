@@ -44,10 +44,10 @@ public class MongoDBService extends MongoCommonService {
         configuration.setDataset(dataset);
         MongoDBReader reader = new MongoDBReader(configuration, this, super.builderFactory, i18n, null);
         reader.init();
-        Record record = reader.next();
+        Record rec = reader.next();
         reader.release();
 
-        return record.getSchema();
+        return rec.getSchema();
     }
 
 }

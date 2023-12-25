@@ -20,13 +20,13 @@ import java.util.Optional;
 
 public class ContentType {
 
-    final static String DEFAULT_ENCODING = System
+    static final String DEFAULT_ENCODING = System
             .getProperty("org.talend.components.rest.default_encoding",
                     StandardCharsets.UTF_8.name());
 
-    public final static String HEADER_KEY = "Content-Type";
+    public static final String HEADER_KEY = "Content-Type";
 
-    public final static String CHARSET_KEY = "charset=";
+    public static final String CHARSET_KEY = "charset=";
 
     private ContentType() {
         /* Don't instantiate */

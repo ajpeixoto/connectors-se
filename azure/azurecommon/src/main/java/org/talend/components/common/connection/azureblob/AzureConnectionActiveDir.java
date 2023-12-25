@@ -15,7 +15,6 @@ package org.talend.components.common.connection.azureblob;
 import java.io.Serializable;
 
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.configuration.ui.widget.Credential;
 import org.talend.sdk.component.api.meta.Documentation;

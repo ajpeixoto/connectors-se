@@ -25,7 +25,7 @@ public class JsonAllReaderSupplier implements RecordReaderSupplier {
 
     @Override
     public RecordReader getReader(RecordBuilderFactory factory, ContentFormat config, Object extraParameter) {
-        if (!JsonAllConfiguration.class.isInstance(config)) {
+        if (!(config instanceof JsonAllConfiguration)) {
             throw new ComponentException(ErrorOrigin.BACKEND,
                     "try to get json-all-reader with other than json-all-config");
         }

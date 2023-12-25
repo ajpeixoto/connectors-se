@@ -12,12 +12,13 @@
  */
 package org.talend.components.jira.output;
 
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -37,12 +38,10 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ExtendWith({ JiraIntTestExtension.class })
 @WithComponents("org.talend.components.jira")
-public class JiraOutputIntTest extends JiraIntTestBase {
+class JiraOutputIntTest extends JiraIntTestBase {
 
     @Injected
     protected BaseComponentsHandler componentsHandler;
@@ -65,7 +64,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(1)
-    public void testCreateProject() {
+    void testCreateProject() {
         outputConfiguration.getDataset().setResourceType(ResourceType.PROJECT);
         outputConfiguration.setOutputAction(OutputAction.CREATE);
 
@@ -81,28 +80,14 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         componentsHandler.setInputData(Collections.singletonList(testRecord));
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run();
+        runOutputPipeline(outputConfig);
 
         JiraInputConfiguration inputConfiguration = new JiraInputConfiguration();
         inputConfiguration.setDataset(outputConfiguration.getDataset());
         inputConfiguration.setProjectId("INT");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runInputPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
@@ -112,7 +97,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(2)
-    public void testUpdateProject() {
+    void testUpdateProject() {
         outputConfiguration.getDataset().setResourceType(ResourceType.PROJECT);
         outputConfiguration.setOutputAction(OutputAction.UPDATE);
 
@@ -129,28 +114,14 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         componentsHandler.setInputData(Collections.singletonList(testRecord));
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run();
+        runOutputPipeline(outputConfig);
 
         JiraInputConfiguration inputConfiguration = new JiraInputConfiguration();
         inputConfiguration.setDataset(outputConfiguration.getDataset());
         inputConfiguration.setProjectId("INT");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runInputPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
@@ -160,7 +131,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(3)
-    public void testCreateIssue() {
+    void testCreateIssue() {
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.CREATE);
 
@@ -176,14 +147,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         componentsHandler.setInputData(Collections.singletonList(testRecord));
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run();
+        runOutputPipeline(outputConfig);
 
         JiraInputConfiguration inputConfiguration = new JiraInputConfiguration();
         inputConfiguration.setDataset(outputConfiguration.getDataset());
@@ -191,14 +155,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         inputConfiguration.setIssueId("INT-1");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runInputPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
@@ -208,7 +165,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(4)
-    public void testUpdateIssue() {
+    void testUpdateIssue() {
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.UPDATE);
 
@@ -225,14 +182,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         componentsHandler.setInputData(Collections.singletonList(testRecord));
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run();
+        runOutputPipeline(outputConfig);
 
         JiraInputConfiguration inputConfiguration = new JiraInputConfiguration();
         inputConfiguration.setDataset(outputConfiguration.getDataset());
@@ -240,14 +190,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         inputConfiguration.setIssueId("INT-1");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runInputPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
@@ -257,7 +200,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(5)
-    public void testDeleteIssueWithSubtaskWithoutCheckboxEnabledFailed() {
+    void testDeleteIssueWithSubtaskWithoutCheckboxEnabledFailed() {
         // create subtask
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.CREATE);
@@ -274,14 +217,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         componentsHandler.setInputData(Collections.singletonList(testRecord));
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run();
+        runOutputPipeline(outputConfig);
 
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.DELETE);
@@ -300,14 +236,8 @@ public class JiraOutputIntTest extends JiraIntTestBase {
                 .forInstance(outputConfiguration)
                 .configured()
                 .toQueryString();
-        ComponentException exception = Assertions.assertThrows(ComponentException.class, () -> Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfigForDelete)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run());
+        ComponentException exception =
+                Assertions.assertThrows(ComponentException.class, () -> runOutputPipeline(outputConfigForDelete));
 
         Assertions.assertTrue(exception.getMessage()
                 .contains("You must specify the 'deleteSubtasks' parameter to delete this issue and all its subtasks"),
@@ -317,7 +247,7 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(6)
-    public void testDeleteIssue() {
+    void testDeleteIssue() {
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.DELETE);
         outputConfiguration.setDeleteSubtasks(true);
@@ -332,33 +262,19 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         componentsHandler.setInputData(Collections.singletonList(testRecord));
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run();
+        runOutputPipeline(outputConfig);
 
         JiraInputConfiguration inputConfiguration = new JiraInputConfiguration();
         inputConfiguration.setDataset(outputConfiguration.getDataset());
         inputConfiguration.setIssueId("INT-1");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Assertions.assertThrows(ComponentException.class, () -> Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run());
+        Assertions.assertThrows(ComponentException.class, () -> runInputPipeline(inputConfig));
     }
 
     @Test
     @Order(7)
-    public void testDeleteProject() {
+    void testDeleteProject() {
         outputConfiguration.getDataset().setResourceType(ResourceType.PROJECT);
         outputConfiguration.setOutputAction(OutputAction.DELETE);
 
@@ -372,33 +288,19 @@ public class JiraOutputIntTest extends JiraIntTestBase {
         componentsHandler.setInputData(Collections.singletonList(testRecord));
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run();
+        runOutputPipeline(outputConfig);
 
         JiraInputConfiguration inputConfiguration = new JiraInputConfiguration();
         inputConfiguration.setDataset(outputConfiguration.getDataset());
         inputConfiguration.setProjectId("INT");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Assertions.assertThrows(ComponentException.class, () -> Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run());
+        Assertions.assertThrows(ComponentException.class, () -> runInputPipeline(inputConfig));
     }
 
     @Test
     @Order(8)
-    public void testRequestFailedIncorrectPassword() {
+    void testRequestFailedIncorrectPassword() {
         outputConfiguration.getDataset().getDatastore().setPass("fakeIncorrectPass");
 
         Record testRecord = componentsHandler
@@ -415,21 +317,15 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
-        ComponentException thrownException = Assertions.assertThrows(ComponentException.class, () -> Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run());
+        ComponentException thrownException =
+                Assertions.assertThrows(ComponentException.class, () -> runOutputPipeline(outputConfig));
 
         Assertions.assertTrue(thrownException.getMessage().contains("401 Unauthorized"));
     }
 
     @Test
     @Order(9)
-    public void testInvalidSchemaForCreate() {
+    void testInvalidSchemaForCreate() {
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.CREATE);
 
@@ -444,19 +340,12 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
-        Assertions.assertThrows(ComponentException.class, () -> Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run());
+        Assertions.assertThrows(ComponentException.class, () -> runOutputPipeline(outputConfig));
     }
 
     @Test
     @Order(10)
-    public void testInvalidSchemaForUpdate() {
+    void testInvalidSchemaForUpdate() {
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.UPDATE);
 
@@ -471,19 +360,12 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
-        Assertions.assertThrows(ComponentException.class, () -> Job.components()
-                .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
-                .connections()
-                .from("inputFlow")
-                .to("outputComponent")
-                .build()
-                .run());
+        Assertions.assertThrows(ComponentException.class, () -> runOutputPipeline(outputConfig));
     }
 
     @Test
     @Order(11)
-    public void testInvalidSchemaForDelete() {
+    void testInvalidSchemaForDelete() {
         outputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
         outputConfiguration.setOutputAction(OutputAction.DELETE);
 
@@ -498,13 +380,28 @@ public class JiraOutputIntTest extends JiraIntTestBase {
 
         String outputConfig = configurationByExample().forInstance(outputConfiguration).configured().toQueryString();
 
-        Assertions.assertThrows(ComponentException.class, () -> Job.components()
+        Assertions.assertThrows(ComponentException.class, () -> runOutputPipeline(outputConfig));
+    }
+
+    private static void runInputPipeline(final String inputConfig) {
+        Job.components()
+                .component("jiraInput", "JIRA://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("jiraInput")
+                .to("collector")
+                .build()
+                .run();
+    }
+
+    private static void runOutputPipeline(final String outputConfigForDelete) {
+        Job.components()
                 .component("inputFlow", "test://emitter")
-                .component("outputComponent", "JIRA://Output?" + outputConfig)
+                .component("outputComponent", "JIRA://Output?" + outputConfigForDelete)
                 .connections()
                 .from("inputFlow")
                 .to("outputComponent")
                 .build()
-                .run());
+                .run();
     }
 }

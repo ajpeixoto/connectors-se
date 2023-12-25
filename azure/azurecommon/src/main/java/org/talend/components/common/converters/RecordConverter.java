@@ -20,11 +20,11 @@ import org.talend.sdk.component.api.record.Schema;
 // TODO should be extracted to common library
 public interface RecordConverter<T> {
 
-    Schema inferSchema(T record);
+    Schema inferSchema(T rec);
 
-    Record toRecord(T record);
+    Record toRecord(T rec);
 
-    T fromRecord(Record record);
+    T fromRecord(Record rec);
 
     /**
      * correct the field name and make it valid for AVRO schema

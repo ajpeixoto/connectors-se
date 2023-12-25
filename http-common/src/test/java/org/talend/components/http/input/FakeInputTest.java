@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class FakeInputTest {
 
     @Test
-    public void testFakeInput() {
+    void testFakeInput() {
         FakeInput fakeInput = new FakeInput(null);
         Record next = fakeInput.next();
         Assertions.assertNull(null);

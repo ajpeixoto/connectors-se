@@ -13,8 +13,6 @@
 package org.talend.components.http.input;
 
 import org.talend.components.http.configuration.RequestConfig;
-import org.talend.components.http.service.RecordBuilderService;
-import org.talend.components.http.service.httpClient.HTTPClientService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
@@ -22,7 +20,6 @@ import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.Service;
 
 import java.io.Serializable;
 

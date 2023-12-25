@@ -16,6 +16,10 @@ import org.talend.sdk.component.api.record.Schema;
 
 import static org.talend.sdk.component.api.record.Schema.Type.*;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TalendTypeAndTckTypeConverter {
 
     public static Schema.Type convertTalendType2TckType(TalendType talendType) {

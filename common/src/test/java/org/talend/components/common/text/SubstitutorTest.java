@@ -51,7 +51,7 @@ class SubstitutorTest {
     }
 
     @Test
-    public void testFinder() {
+    void testFinder() {
         Substitutor.KeyFinder finder = new Substitutor.KeyFinder("${", "}");
         Iterator<Substitutor.FindResult> res = finder.search("${hello} ${world:-tdi}");
         Assertions.assertTrue(res.hasNext());

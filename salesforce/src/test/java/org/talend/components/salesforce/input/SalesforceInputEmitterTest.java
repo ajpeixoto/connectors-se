@@ -40,7 +40,7 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 @Disabled("Salesforce credentials is not ready on ci")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WithComponents("org.talend.components.salesforce")
-public class SalesforceInputEmitterTest extends SalesforceTestBase {
+class SalesforceInputEmitterTest extends SalesforceTestBase {
 
     private static final String UNIQUE_ID;
 
@@ -79,15 +79,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(records);
-        Job
-                .components()
-                .component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
-                .connections()
-                .from("emitter")
-                .to("salesforce-output")
-                .build()
-                .run();
+        runOutputPipeline(config);
         getComponentsHandler().resetState();
         // 2. prepare Contact data
 
@@ -109,23 +101,15 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
                 .build();
         final String outputContactConfig =
                 configurationByExample().forInstance(configuration).configured().toQueryString();
-        getComponentsHandler().setInputData(asList(record));
-        Job
-                .components()
-                .component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputContactConfig)
-                .connections()
-                .from("emitter")
-                .to("salesforce-output")
-                .build()
-                .run();
+        getComponentsHandler().setInputData(singletonList(record));
+        runOutputPipeline(outputContactConfig);
         getComponentsHandler().resetState();
     }
 
     // Module Query part
     @Test
     @DisplayName("Test query with module name")
-    public void testModuleQuery() {
+    void testModuleQuery() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
         moduleDataSet.setSelectColumnNames(Arrays.asList("Id", "Name"));
@@ -136,15 +120,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runModuleQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         assertEquals(300, records.size());
         Record record = records.get(0);
@@ -155,7 +131,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test query null value with primitive type")
-    public void testQueryNullValues() {
+    void testQueryNullValues() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
         moduleDataSet.setSelectColumnNames(Arrays.asList("Id", "Name", "NumberOfEmployees", "AnnualRevenue"));
@@ -169,15 +145,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runModuleQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         assertEquals(5, records.size());
         Record record = records.get(0);
@@ -192,7 +160,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test query module record with limit")
-    public void testModuleQueryWithLimit() {
+    void testModuleQueryWithLimit() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
         moduleDataSet.setSelectColumnNames(Arrays.asList("Name"));
@@ -203,24 +171,16 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runModuleQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(10, records.size());
 
-        records.stream().forEach(r -> assertTrue(records.iterator().next().getString("Name").contains("TestName")));
+        records.forEach(r -> assertTrue(records.iterator().next().getString("Name").contains("TestName")));
     }
 
     @Test
     @DisplayName("Test query module record with all types")
-    public void testQueryAllType() {
+    void testQueryAllType() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
         moduleDataSet
@@ -246,15 +206,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runModuleQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(8, records.size());
         Record record = records.get(0);
@@ -263,7 +215,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test query with bad credential")
-    public void testQueryWithBadCredential() {
+    void testQueryWithBadCredential() {
         final BasicDataStore datstore = new BasicDataStore();
         datstore.setEndpoint(URL);
         datstore.setUserId("badUser");
@@ -277,21 +229,12 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        assertThrows(IllegalStateException.class,
-                () -> Job
-                        .components()
-                        .component("salesforce-input", "Salesforce://Input?" + config)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("salesforce-input")
-                        .to("collector")
-                        .build()
-                        .run());
+        assertThrows(IllegalStateException.class, () -> runInputPipeline(config));
     }
 
     @Test
     @DisplayName("Test module query with invalid name")
-    public void testModuleQueryWithInvalideName() {
+    void testModuleQueryWithInvalideName() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("invalid0");
         moduleDataSet.setDataStore(getDataStore());
@@ -301,21 +244,13 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
         ComponentException ex = assertThrows(ComponentException.class,
-                () -> Job
-                        .components()
-                        .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("salesforce-input")
-                        .to("collector")
-                        .build()
-                        .run());
+                () -> runModuleQueryInputPipeline(config));
         assertTrue(ex.getMessage().contains("java.lang.IllegalStateException"), ex.getMessage());
     }
 
     @Test
     @DisplayName("Test module query with invalid field")
-    public void testModuleQueryWithInvalidField() {
+    void testModuleQueryWithInvalidField() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("account");
         moduleDataSet.setSelectColumnNames(singletonList("InvalidField10x"));
@@ -326,21 +261,13 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
         assertThrows(IllegalStateException.class,
-                () -> Job
-                        .components()
-                        .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("salesforce-input")
-                        .to("collector")
-                        .build()
-                        .run());
+                () -> runModuleQueryInputPipeline(config));
     }
 
     // SOQL Query part
     @Test
     @DisplayName("Test basic SOQL query")
-    public void testSOQLQueryBasicCase() {
+    void testSOQLQueryBasicCase() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
         soqlQueryDataSet
                 .setQuery("select Id,Name,IsDeleted from account where Name Like 'TestName_%" + UNIQUE_ID + "%'");
@@ -350,15 +277,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runSOQQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(300, records.size());
         Record record = records.get(0);
@@ -370,7 +289,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test SOQL query return empty result")
-    public void testSOQLQueryWithEmptyResult() {
+    void testSOQLQueryWithEmptyResult() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
         soqlQueryDataSet.setQuery("select  name from account where name = 'this name will never exist $'");
         soqlQueryDataSet.setDataStore(getDataStore());
@@ -379,22 +298,14 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runSOQQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(0, records.size());
     }
 
     @Test
     @DisplayName("Test SOQL query with Invalid query")
-    public void testSOQLQueryWithInvalidQuery() {
+    void testSOQLQueryWithInvalidQuery() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
         soqlQueryDataSet.setQuery("from account");
         soqlQueryDataSet.setDataStore(getDataStore());
@@ -404,20 +315,12 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
         assertThrows(IllegalStateException.class,
-                () -> Job
-                        .components()
-                        .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("salesforce-input")
-                        .to("collector")
-                        .build()
-                        .run());
+                () -> runSOQQueryInputPipeline(config));
     }
 
     @Test
     @DisplayName("Test SOQL query with relationship")
-    public void testSOQLQueryChildToParent() {
+    void testSOQLQueryChildToParent() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
         soqlQueryDataSet
                 .setQuery(
@@ -428,15 +331,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runSOQQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(1, records.size());
         Record record = records.get(0);
@@ -445,7 +340,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test SOQL query with relationship without name")
-    public void testSOQLQueryChildToParentWithoutName() {
+    void testSOQLQueryChildToParentWithoutName() {
         final SOQLQueryDataSet soqlQueryDataSet = new SOQLQueryDataSet();
         soqlQueryDataSet
                 .setQuery(
@@ -457,15 +352,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(soqlQueryDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runSOQQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(1, records.size());
         Record record = records.get(0);
@@ -475,7 +362,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test query module with empty selected fields")
-    public void testModuleQueryEmptySelectedFields() {
+    void testModuleQueryEmptySelectedFields() {
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
         moduleDataSet.setSelectColumnNames(Collections.emptyList());
@@ -486,15 +373,7 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         inputConfig.setDataSet(moduleDataSet);
 
         final String config = configurationByExample().forInstance(inputConfig).configured().toQueryString();
-        Job
-                .components()
-                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
-                .component("collector", "test://collector")
-                .connections()
-                .from("salesforce-input")
-                .to("collector")
-                .build()
-                .run();
+        runModuleQueryInputPipeline(config);
         final List<Record> records = getComponentsHandler().getCollectedData(Record.class);
         Assertions.assertEquals(10, records.size());
         Schema schema = records.iterator().next().getSchema();
@@ -510,4 +389,51 @@ public class SalesforceInputEmitterTest extends SalesforceTestBase {
         checkModuleData("Contact", "Email Like '%" + UNIQUE_ID + "%'", 0);
     }
 
+    private static void runInputPipeline(final String config) {
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://Input?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
+    }
+
+    private static void runOutputPipeline(final String outputContactConfig) {
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputContactConfig)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
+    }
+
+    private static void runModuleQueryInputPipeline(final String config) {
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://ModuleQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
+    }
+
+    private static void runSOQQueryInputPipeline(final String config) {
+        Job
+                .components()
+                .component("salesforce-input", "Salesforce://SOQLQueryInput?" + config)
+                .component("collector", "test://collector")
+                .connections()
+                .from("salesforce-input")
+                .to("collector")
+                .build()
+                .run();
+    }
 }

@@ -12,7 +12,6 @@
  */
 package org.talend.components.bigquery.output;
 
-import com.google.api.services.bigquery.model.TableReference;
 import com.google.cloud.WriteChannel;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.storage.Blob;
@@ -38,7 +37,6 @@ import org.talend.sdk.component.api.processor.BeforeGroup;
 import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Processor;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -48,8 +46,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.talend.sdk.component.api.component.Icon.IconType.BIGQUERY;
 
 @Slf4j
 @Version(1)
@@ -110,11 +106,11 @@ public class BigQueryOutput implements Serializable {
 
     private JobId getNewUniqueJobId() {
         bigQuery = service.createClient(connection);
-        JobId jobId;
+        JobId id;
         do {
-            jobId = JobId.of(UUID.randomUUID().toString());
-        } while (bigQuery.getJob(jobId) != null);
-        return jobId;
+            id = JobId.of(UUID.randomUUID().toString());
+        } while (bigQuery.getJob(id) != null);
+        return id;
     }
 
     @PostConstruct
@@ -196,11 +192,11 @@ public class BigQueryOutput implements Serializable {
     }
 
     @ElementListener
-    public void onElement(Record record) {
+    public void onElement(Record rec) {
         if (!init) {
             lazyInit();
         }
-        records.add(record);
+        records.add(rec);
     }
 
     private void lazyInit() {
@@ -284,15 +280,15 @@ public class BigQueryOutput implements Serializable {
                     .forEach(recordsBuffer::add);
 
             InsertAllRequest.Builder insertAllRequestBuilder = InsertAllRequest.newBuilder(tableId);
-            recordsBuffer.stream().forEach(insertAllRequestBuilder::addRow);
+            recordsBuffer.forEach(insertAllRequestBuilder::addRow);
             InsertAllResponse response = bigQuery.insertAll(insertAllRequestBuilder.build());
 
             if (response.hasErrors()) {
-                // response.getInsertErrors();
+                // response.getInsertErrors()
                 // rejected no handled by TCK
                 log.warn(i18n.warnRejected(response.getInsertErrors().size()));
                 // log errors for first row
-                response.getInsertErrors().values().iterator().next().stream().forEach(e -> log.warn(e.getMessage()));
+                response.getInsertErrors().values().iterator().next().forEach(e -> log.warn(e.getMessage()));
                 if (response.getInsertErrors().size() == recordsBuffer.size()) {
                     // All rows were rejected : there's an issue with schema ?
                     log.warn(records.get(0).getSchema().toString());

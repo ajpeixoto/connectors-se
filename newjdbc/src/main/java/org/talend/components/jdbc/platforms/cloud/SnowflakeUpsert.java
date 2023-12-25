@@ -51,7 +51,7 @@ public class SnowflakeUpsert extends UpsertDefault {
                 .collect(toList());
 
         final Schema.Builder schemaBuilder = getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD);
-        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        entries.forEach(schemaBuilder::withEntry);
         final Schema inputSchema = schemaBuilder.build();
 
         final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class DocumentToRecord {
 
-    /** record facotry */
+    /** record factory */
     private final RecordBuilderFactory recordBuilderFactory;
 
     public DocumentToRecord(RecordBuilderFactory recordBuilderFactory) {
@@ -75,7 +75,7 @@ public class DocumentToRecord {
         return convertDocumentToRecord(schema, document);
     }
 
-    private Schema inferSchema(final List array, DatatypeHolder data_type_holder) {
+    private Schema inferSchema(final List<?> array, DatatypeHolder dataTypeHolder) {
         Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Type.ARRAY);
         final Schema subSchema;
 
@@ -97,9 +97,9 @@ public class DocumentToRecord {
             final Document document = mergeAll(array);
             subSchema = inferSchema(document);
         } else if (isArray(value)) {
-            subSchema = inferSchema((List) value, data_type_holder);
+            subSchema = inferSchema((List<?>) value, dataTypeHolder);
         } else {
-            final Type type = translateType(value, data_type_holder);
+            final Type type = translateType(value, dataTypeHolder);
             subSchema = recordBuilderFactory.newSchemaBuilder(type).build();
         }
         builder.withElementSchema(subSchema);
@@ -123,12 +123,12 @@ public class DocumentToRecord {
      * allow array of differents document.
      * [ { "f1": "v1"}, {"f1":"v11", "f2": "V2"} ]
      */
-    private Document mergeAll(List array) {
+    private Document mergeAll(List<?> array) {
         final Document document = new Document();
 
-        array.stream().filter((Object v) -> v instanceof Document).forEach(doc -> {
-            document.putAll((Map<String, Object>) doc);
-        });
+        array.stream()
+                .filter(Document.class::isInstance)
+                .forEach(doc -> document.putAll((Map<String, Object>) doc));
 
         return document;
     }
@@ -151,17 +151,17 @@ public class DocumentToRecord {
             builder.withNullable(true);
         }
 
-        DatatypeHolder data_type_holder = new DatatypeHolder();
+        DatatypeHolder dataTypeHolder = new DatatypeHolder();
 
         if (isNull(value)) {
             // use String type for null value which no way to detect type
             builder.withType(Type.STRING);
         } else if (isArray(value)) {
-            final Schema subSchema = this.inferSchema((List) value, data_type_holder);
+            final Schema subSchema = this.inferSchema((List<?>) value, dataTypeHolder);
             if (subSchema != null) {
                 builder.withElementSchema(subSchema).withType(Type.ARRAY);
-                if (data_type_holder.data_type != null) {
-                    builder.withComment(name + TYPE_SPLIT_CHARS + data_type_holder.data_type.origin_type);
+                if (dataTypeHolder.data_type != null) {
+                    builder.withComment(name + TYPE_SPLIT_CHARS + dataTypeHolder.data_type.origin_type);
                 }
             }
         } else if (isDocument(value)) {
@@ -170,11 +170,11 @@ public class DocumentToRecord {
             populateDocumentEntries(nestedSchemaBuilder, (Document) value);
             builder.withElementSchema(nestedSchemaBuilder.build());
         } else {
-            Type type = translateType(value, data_type_holder);
+            Type type = translateType(value, dataTypeHolder);
             builder.withType(type);
-            if (data_type_holder.data_type != null) {
+            if (dataTypeHolder.data_type != null) {
                 // now use comment to store the origin name and origin data type, TODO should move it to framework
-                builder.withComment(name + TYPE_SPLIT_CHARS + data_type_holder.data_type.origin_type);
+                builder.withComment(name + TYPE_SPLIT_CHARS + dataTypeHolder.data_type.origin_type);
             }
         }
 
@@ -216,8 +216,8 @@ public class DocumentToRecord {
         switch (entry.getType()) {
         case RECORD: {
             final Document subDocument = document.get(getElementName(entry), Document.class);
-            final Record record = convertDocumentToRecord(entry.getElementSchema(), subDocument);
-            builder.withRecord(entry, record);
+            final Record rec = convertDocumentToRecord(entry.getElementSchema(), subDocument);
+            builder.withRecord(entry, rec);
             break;
         }
         case ARRAY:
@@ -321,7 +321,7 @@ public class DocumentToRecord {
             } else {
                 // String.cast can process null, so ok here, not sure how this process empty array
                 result = new ArrayList<>();
-                array.stream().forEach(v -> {
+                array.forEach(v -> {
                     if (isNull(v)) {
                         result.add((String) v);
                     } else if (v instanceof ObjectId) {
@@ -376,7 +376,7 @@ public class DocumentToRecord {
         return result;
     }
 
-    private Type translateType(Object value, DatatypeHolder data_type_holder) {
+    private Type translateType(Object value, DatatypeHolder dataTypeHolder) {
         if (value instanceof String) {
             return Type.STRING;
         } else if (value instanceof Integer) {
@@ -394,13 +394,13 @@ public class DocumentToRecord {
         } else if (value instanceof Date) {
             return Type.DATETIME;
         } else if (value instanceof ObjectId) {
-            data_type_holder.data_type = DataType.OBJECTID;
+            dataTypeHolder.data_type = DataType.OBJECTID;
             return Type.STRING;
         } else if (value instanceof Code) {
-            data_type_holder.data_type = DataType.CODE;
+            dataTypeHolder.data_type = DataType.CODE;
             return Type.STRING;
         } else if (value instanceof Decimal128) {
-            data_type_holder.data_type = DataType.DECIMAL128;
+            dataTypeHolder.data_type = DataType.DECIMAL128;
             return Type.STRING;
         } else {
             return Type.STRING;
@@ -416,13 +416,13 @@ public class DocumentToRecord {
 
         final String origin_type;
 
-        DataType(String origin_type) {
-            this.origin_type = origin_type;
+        DataType(String originType) {
+            this.origin_type = originType;
         }
 
     }
 
-    class DatatypeHolder {
+    static class DatatypeHolder {
 
         DataType data_type;
     }

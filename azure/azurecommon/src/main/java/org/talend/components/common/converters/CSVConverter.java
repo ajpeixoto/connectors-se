@@ -84,13 +84,13 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
     }
 
     @Override
-    public Schema inferSchema(CSVRecord record) {
+    public Schema inferSchema(CSVRecord rec) {
         Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
         Set<String> existNames = new HashSet<>();
         int index = 0;
-        for (int i = 0; i < record.size(); i++) {
+        for (int i = 0; i < rec.size(); i++) {
             Schema.Entry.Builder entryBuilder = recordBuilderFactory.newEntryBuilder();
-            String fieldName = record.get(i);
+            String fieldName = rec.get(i);
             if (!isHeaderUsed || fieldName == null || fieldName.isEmpty()) {
                 fieldName = "field" + i;
             }
@@ -148,7 +148,7 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
     }
 
     @Override
-    public CSVRecord fromRecord(Record record) {
+    public CSVRecord fromRecord(Record rec) {
         throw new UnsupportedOperationException("#fromRecord()");
     }
 }

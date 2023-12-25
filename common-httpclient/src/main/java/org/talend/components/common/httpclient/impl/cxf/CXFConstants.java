@@ -12,20 +12,20 @@
  */
 package org.talend.components.common.httpclient.impl.cxf;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CXFConstants {
 
-    public final static String AUTO_REDIRECT_SAME_HOST_ONLY = "http.redirect.same.host.only";
+    public static final String AUTO_REDIRECT_SAME_HOST_ONLY = "http.redirect.same.host.only";
 
-    public final static String AUTO_REDIRECT_ALLOW_REL_URI = "http.redirect.relative.uri";
+    public static final String AUTO_REDIRECT_ALLOW_REL_URI = "http.redirect.relative.uri";
 
-    public final static String AUTO_REDIRECT_ALLOWED_URI = "http.redirect.allowed.uri";
+    public static final String AUTO_REDIRECT_ALLOWED_URI = "http.redirect.allowed.uri";
 
-    public final static String AUTO_REDIRECT_MAX_SAME_URI_COUNT = "http.redirect.max.same.uri.count";
+    public static final String AUTO_REDIRECT_MAX_SAME_URI_COUNT = "http.redirect.max.same.uri.count";
 
     // TODO: Need to wait for https://issues.apache.org/jira/browse/CXF-8752
     // public final static String AUTHORIZED_REDIRECTED_HTTP_VERBS = "http.redirect.allowed.verbs";
-
-    private CXFConstants() {
-    }
-
 }

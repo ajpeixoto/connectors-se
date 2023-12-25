@@ -61,7 +61,7 @@ public abstract class QueryManagerImpl implements QueryManager {
 
     protected PreparedStatement buildQuery(List<Record> records, Connection connection) throws SQLException {
         return null;
-    };
+    }
 
     @Override
     public List<Reject> execute(final List<Record> records, final JDBCService.DataSourceWrapper dataSource)
@@ -83,13 +83,13 @@ public abstract class QueryManagerImpl implements QueryManager {
                 final Map<Integer, Integer> batchOrder = new HashMap<>();
                 int recordIndex = -1;
                 int batchNumber = -1;
-                for (final Record record : records) {
+                for (final Record rec : records) {
                     recordIndex++;
                     statement.clearParameters();
 
-                    String sql_fact = rowWriter.write(record);
-                    if (configuration.isDebugQuery() && sql_fact != null) {
-                        log.debug("'" + sql_fact.trim() + "'.");
+                    String sqlFact = rowWriter.write(rec);
+                    if (configuration.isDebugQuery() && sqlFact != null) {
+                        log.debug("'" + sqlFact.trim() + "'.");
                     }
 
                     statement.addBatch();

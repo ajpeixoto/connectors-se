@@ -19,6 +19,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -40,7 +41,7 @@ import org.talend.sdk.component.runtime.output.Processor;
 @Disabled("Salesforce credentials is not ready on ci")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @WithComponents("org.talend.components.salesforce")
-public class SalesforceOutputProcessorTest extends SalesforceTestBase {
+class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
     private static final String UNIQUE_ID;
 
@@ -71,22 +72,14 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(records);
-        Job
-                .components()
-                .component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
-                .connections()
-                .from("emitter")
-                .to("salesforce-output")
-                .build()
-                .run();
+        runSalesforceOutputPipeline(config);
         getComponentsHandler().resetState();
         checkModuleData("Account", "Name Like '%" + UNIQUE_ID + "%'", 10);
     }
 
     @Test
     @DisplayName("Test insert supported types")
-    public void testInsertTypes() {
+    void testInsertTypes() {
         final OutputConfig configuration = new OutputConfig();
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Contact");
@@ -106,16 +99,8 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
                 .withDateTime("Birthdate", new Date())
                 .build();
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
-        getComponentsHandler().setInputData(asList(record));
-        Job
-                .components()
-                .component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
-                .connections()
-                .from("emitter")
-                .to("salesforce-output")
-                .build()
-                .run();
+        getComponentsHandler().setInputData(Collections.singletonList(record));
+        runSalesforceOutputPipeline(config);
         getComponentsHandler().resetState();
         checkModuleData("Contact",
                 "MailingLongitude != null and MailingLongitude !=null and Birthdate !=null and Name Like 'F_test_types_%"
@@ -125,7 +110,7 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test insert object without field value set")
-    public void testInsertNoFieldSet() {
+    void testInsertNoFieldSet() {
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
         datasore.setUserId(USER_ID);
@@ -146,23 +131,15 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
 
-        getComponentsHandler().setInputData(asList(record));
-        Job
-                .components()
-                .component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
-                .connections()
-                .from("emitter")
-                .to("salesforce-output")
-                .build()
-                .run();
+        getComponentsHandler().setInputData(Collections.singletonList(record));
+        runSalesforceOutputPipeline(config);
         getComponentsHandler().resetState();
         checkModuleData("Account", "Name Like 'test_Wrong_Field_Name_%" + UNIQUE_ID + "%'", 0);
     }
 
     @Test
     @DisplayName("Test exception on error")
-    public void testExceptionOnError() {
+    void testExceptionOnError() {
         final OutputConfig configuration = new OutputConfig();
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
@@ -175,24 +152,16 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
         final String config = configurationByExample().forInstance(configuration).configured().toQueryString();
 
-        getComponentsHandler().setInputData(asList(record));
+        getComponentsHandler().setInputData(Collections.singletonList(record));
         // run the pipeline and ensure the execution was successful
         assertThrows(ComponentException.class,
-                () -> Job
-                        .components()
-                        .component("emitter", "test://emitter")
-                        .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
-                        .connections()
-                        .from("emitter")
-                        .to("salesforce-output")
-                        .build()
-                        .run());
+                () -> runSalesforceOutputPipeline(config));
         getComponentsHandler().resetState();
     }
 
     @Test
     @DisplayName("Test update object with `Id`")
-    public void testUpdate() {
+    void testUpdate() {
         // 1. read data from salesforce
         final ModuleDataSet inputDataSet = new ModuleDataSet();
         inputDataSet.setModuleName("Account");
@@ -217,7 +186,6 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         // 2. update record
         final List<Record> updateRecord = new ArrayList<>();
         records
-                .stream()
                 .forEach(record -> updateRecord
                         .add(factory
                                 .newRecordBuilder()
@@ -236,15 +204,7 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(updateRecord);
-        Job
-                .components()
-                .component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig)
-                .connections()
-                .from("emitter")
-                .to("salesforce-output")
-                .build()
-                .run();
+        runSalesforceOutputPipeline(outputConfig);
         getComponentsHandler().resetState();
 
         // 4. check the update
@@ -253,7 +213,7 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test upsert with upsert key")
-    public void testUpsert() {
+    void testUpsert() {
         final OutputConfig configuration = new OutputConfig();
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Contact");
@@ -271,16 +231,8 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
                 .build();
 
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
-        getComponentsHandler().setInputData(asList(record));
-        Job
-                .components()
-                .component("emitter", "test://emitter")
-                .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig)
-                .connections()
-                .from("emitter")
-                .to("salesforce-output")
-                .build()
-                .run();
+        getComponentsHandler().setInputData(Collections.singletonList(record));
+        runSalesforceOutputPipeline(outputConfig);
 
         getComponentsHandler().resetState();
         checkModuleData("Contact", "FirstName = 'F1_UPDATE_" + UNIQUE_ID + "'", 1);
@@ -288,7 +240,7 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test batch mode with exception on error checked")
-    public void testBatchModeExceptionOnError() {
+    void testBatchModeExceptionOnError() {
         final OutputConfig configuration = new OutputConfig();
         final ModuleDataSet moduleDataSet = new ModuleDataSet();
         moduleDataSet.setModuleName("Account");
@@ -308,15 +260,7 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         final String outputConfig = configurationByExample().forInstance(configuration).configured().toQueryString();
         getComponentsHandler().setInputData(asList(record_1, record_2, record_3));
         assertThrows(ComponentException.class,
-                () -> Job
-                        .components()
-                        .component("emitter", "test://emitter")
-                        .component("salesforce-output", "Salesforce://SalesforceOutput?" + outputConfig)
-                        .connections()
-                        .from("emitter")
-                        .to("salesforce-output")
-                        .build()
-                        .run());
+                () -> runSalesforceOutputPipeline(outputConfig));
 
         checkModuleData("Account", "Name Like 'test_batch_%" + UNIQUE_ID + "%'", 1);
         getComponentsHandler().resetState();
@@ -331,4 +275,15 @@ public class SalesforceOutputProcessorTest extends SalesforceTestBase {
         checkModuleData("Contact", "Email Like '%" + UNIQUE_ID + "%'", 0);
     }
 
+    private static void runSalesforceOutputPipeline(final String config) {
+        Job
+                .components()
+                .component("emitter", "test://emitter")
+                .component("salesforce-output", "Salesforce://SalesforceOutput?" + config)
+                .connections()
+                .from("emitter")
+                .to("salesforce-output")
+                .build()
+                .run();
+    }
 }

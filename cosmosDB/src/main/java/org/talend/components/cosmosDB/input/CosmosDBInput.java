@@ -72,8 +72,8 @@ public class CosmosDBInput implements Serializable {
             Document next = iterator.next();
             JsonReader reader = Json.createReader(new StringReader(next.toJson()));
             JsonObject jsonObject = reader.readObject();
-            Record record = jsonToRecord.toRecord(jsonObject);
-            return record;
+            Record rec = jsonToRecord.toRecord(jsonObject);
+            return rec;
         }
         return null;
     }

@@ -29,18 +29,18 @@ public class ParquetConverter implements RecordConverter<GenericRecord> {
     private RecordToAvro recordToAvro;
 
     @Override
-    public Schema inferSchema(GenericRecord record) {
-        return avroToRecord.inferSchema(record);
+    public Schema inferSchema(GenericRecord rec) {
+        return avroToRecord.inferSchema(rec);
     }
 
     @Override
-    public Record toRecord(GenericRecord record) {
-        return avroToRecord.toRecord(record);
+    public Record toRecord(GenericRecord rec) {
+        return avroToRecord.toRecord(rec);
     }
 
     @Override
-    public GenericRecord fromRecord(Record record) {
-        return recordToAvro.fromRecord(record);
+    public GenericRecord fromRecord(Record rec) {
+        return recordToAvro.fromRecord(rec);
     }
 
     public static ParquetConverter of(RecordBuilderFactory recordBuilderFactory) {

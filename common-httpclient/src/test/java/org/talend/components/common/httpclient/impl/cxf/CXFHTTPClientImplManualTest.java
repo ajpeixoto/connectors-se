@@ -27,7 +27,7 @@ import org.talend.components.common.httpclient.factory.HTTPClientFactory;
  * These are manuel tests I have made but complicated to reproduce as automated unit tests.
  */
 @Disabled
-public class CXFHTTPClientImplManualTest {
+class CXFHTTPClientImplManualTest {
 
     /**
      * I have followed this tutorial https://linuxize.com/post/how-to-install-and-configure-squid-proxy-on-ubuntu-20-04/
@@ -35,7 +35,7 @@ public class CXFHTTPClientImplManualTest {
      * to set a local HTTP proxy in my Ubuntu.
      */
     @Test
-    public void proxyHTTPTest() throws HTTPClientException {
+    void proxyHTTPTest() throws HTTPClientException {
         // Need to add this jvm option to have basic authent working: -Djdk.http.auth.tunneling.disabledSchemes=""
         // https://ec.europa.eu/digital-building-blocks/wikis/display/CEKB/Proxy+Authentication+failure+on+invoking+HTTPS+end+points
         QueryConfiguration config = QueryConfigurationBuilder.create("https://httpbin.org/get?q=avalue")
@@ -57,7 +57,7 @@ public class CXFHTTPClientImplManualTest {
      * whereas curl is successful.
      */
     @Test
-    public void proxySOCKSTest() throws HTTPClientException {
+    void proxySOCKSTest() throws HTTPClientException {
         QueryConfiguration config = QueryConfigurationBuilder.create("https://httpbin.org/get?q=avalue")
                 .setMethod("GET")
                 // .setProxy(ProxyConfiguration.ProxyType.SOCKS, "localhost", 1080, "peter", "aze123_=KLM") // currently
@@ -78,7 +78,7 @@ public class CXFHTTPClientImplManualTest {
      * @throws HTTPClientException
      */
     @Test
-    public void bypassCertificateValidationTest() throws HTTPClientException {
+    void bypassCertificateValidationTest() throws HTTPClientException {
         // TODO : need a HTTPS server with self signed certificate.
         final QueryConfiguration config =
                 QueryConfigurationBuilder.create("https://restimprove:45300/digest_authent.json")
@@ -92,7 +92,7 @@ public class CXFHTTPClientImplManualTest {
     }
 
     @Test
-    public void NTLMAuthent() throws HTTPClientException {
+    void NTLMAuthent() throws HTTPClientException {
         final QueryConfiguration config =
                 QueryConfigurationBuilder
                         .create(System.getProperty("mscrm.onpremise.url.root") + "/accounts?$select=name")

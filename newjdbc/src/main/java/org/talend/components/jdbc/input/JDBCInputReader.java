@@ -182,12 +182,12 @@ public class JDBCInputReader {
             if (driverClass != null && driverClass.toLowerCase().contains("mysql")) {
                 if (usePreparedStatement) {
                     log.debug("Prepared statement: " + query);
-                    PreparedStatement prepared_statement = conn.getConnection()
+                    PreparedStatement preparedStatement = conn.getConnection()
                             .prepareStatement(query,
                                     ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                    JDBCRuntimeUtils.setPreparedStatement(prepared_statement,
+                    JDBCRuntimeUtils.setPreparedStatement(preparedStatement,
                             config.getConfig().getPreparedStatementParameters());
-                    statement = prepared_statement;
+                    statement = preparedStatement;
                 } else {
                     log.debug("Create statement.");
                     statement = conn.getConnection()
@@ -206,11 +206,11 @@ public class JDBCInputReader {
             } else {
                 if (usePreparedStatement) {
                     log.debug("Prepared statement: " + query);
-                    PreparedStatement prepared_statement =
+                    PreparedStatement preparedStatement =
                             conn.getConnection().prepareStatement(query);
-                    JDBCRuntimeUtils.setPreparedStatement(prepared_statement,
+                    JDBCRuntimeUtils.setPreparedStatement(preparedStatement,
                             config.getConfig().getPreparedStatementParameters());
-                    statement = prepared_statement;
+                    statement = preparedStatement;
 
                 } else {
                     statement = conn.getConnection().createStatement();

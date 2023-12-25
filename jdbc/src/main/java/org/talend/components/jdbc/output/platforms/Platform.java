@@ -55,9 +55,9 @@ public abstract class Platform implements Serializable {
         this.i18n = i18n;
     }
 
-    abstract public String name();
+    public abstract String name();
 
-    abstract protected String delimiterToken();
+    protected abstract String delimiterToken();
 
     protected abstract String buildQuery(final Connection connection, final Table table,
             final boolean useOriginColumnName) throws SQLException;

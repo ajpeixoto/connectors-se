@@ -20,6 +20,7 @@ import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,7 +32,7 @@ public class BulkFormatter {
     private boolean useTextEnclosure;
 
     public BulkFormatter(Schema inputSchema, Schema currentSchema, boolean useTextEnclosure) {
-        List<Formatter> writers = new ArrayList<Formatter>();
+        List<Formatter> writers = new ArrayList<>();
         List<Schema.Entry> fields = currentSchema.getEntries();
 
         for (Schema.Entry field : fields) {
@@ -98,6 +99,7 @@ public class BulkFormatter {
             super(inputValueLocation);
         }
 
+        @Override
         public void format(Record input, String nullValue, CSVWriter writer) {
             Object inputValue = input.get(Object.class, inputValueName);
             if (inputValue == null) {
@@ -117,6 +119,7 @@ public class BulkFormatter {
             this.pattern = pattern;
         }
 
+        @Override
         public void format(Record input, String nullValue, CSVWriter writer) {
             Object inputValue = input.get(Object.class, inputValueName);
             if (inputValue == null) {
@@ -136,12 +139,13 @@ public class BulkFormatter {
 
         // always use utf8? bytes array can't mean a lob object?
         // now use utf8, not use platform default as easy migration if fix it in future
-        private Charset charset = Charset.forName("UTF-8");
+        private Charset charset = StandardCharsets.UTF_8;
 
         BytesTypeWriter(String inputValueLocation) {
             super(inputValueLocation);
         }
 
+        @Override
         public void format(Record input, String nullValue, CSVWriter writer) {
             Object inputValue = input.get(Object.class, inputValueName);
             if (inputValue == null) {

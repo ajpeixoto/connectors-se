@@ -33,9 +33,9 @@ public interface RecordWriter extends AutoCloseable {
     /**
      * add record to writer.
      * 
-     * @param record : input record.
+     * @param rec : input record.
      */
-    void add(Record record) throws IOException;
+    void add(Record rec) throws IOException;
 
     /**
      * add records to writer.
@@ -43,8 +43,8 @@ public interface RecordWriter extends AutoCloseable {
      * @param records : input record.
      */
     default void add(Iterable<Record> records) throws IOException {
-        for (Record record : records) {
-            this.add(record);
+        for (Record rec : records) {
+            this.add(rec);
         }
     }
 

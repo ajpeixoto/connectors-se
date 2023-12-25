@@ -67,10 +67,11 @@ public class JDBCSPProcessor implements Serializable {
 
     @PostConstruct
     public void init() {
+        /* NOP */
     }
 
     @ElementListener
-    public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success)
+    public void elementListener(@Input final Record input, @Output final OutputEmitter<Record> success)
             throws SQLException {
         if (!init) {
             boolean useExistedConnection = false;
@@ -93,7 +94,7 @@ public class JDBCSPProcessor implements Serializable {
 
         // as output component which have input line, it's impossible that record is null
         // as standalone or input component, it's possible that record is null
-        writer.write(record);
+        writer.write(input);
 
         List<Record> successfulWrites = writer.getSuccessfulWrites();
         for (Record r : successfulWrites) {

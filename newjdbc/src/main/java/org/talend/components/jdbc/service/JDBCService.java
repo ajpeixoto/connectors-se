@@ -105,9 +105,8 @@ public class JDBCService implements Serializable {
 
         // items.add(new SuggestionValues.Item("com.mysql.cj.jdbc.Driver", "com.mysql.cj.jdbc.Driver"));
 
-        getDriverClasses(driverJars).stream().forEach(driverClass -> {
-            items.add(new SuggestionValues.Item(driverClass, driverClass));
-        });
+        getDriverClasses(driverJars)
+                .forEach(driverClass -> items.add(new SuggestionValues.Item(driverClass, driverClass)));
 
         return new SuggestionValues(true, items);
     }
@@ -271,9 +270,8 @@ public class JDBCService implements Serializable {
     public SuggestionValues fetchTables(@Option final JDBCDataStore dataStore) throws SQLException {
         final List<SuggestionValues.Item> items = new ArrayList<>();
 
-        getSchemaNames(dataStore).stream().forEach(tableName -> {
-            items.add(new SuggestionValues.Item(tableName, tableName));
-        });
+        getSchemaNames(dataStore)
+                .forEach(tableName -> items.add(new SuggestionValues.Item(tableName, tableName)));
 
         return new SuggestionValues(true, items);
     }
@@ -286,14 +284,14 @@ public class JDBCService implements Serializable {
 
             Set<String> tableTypes = getAvailableTableTypes(dbMetaData);
 
-            String database_schema = getDatabaseSchema(dataStore);
-            if (database_schema == null) {
+            String databaseSchema = getDatabaseSchema(dataStore);
+            if (databaseSchema == null) {
                 // from jdbc api to get the runtime jdbc schema, but it may not be right?
-                database_schema = getDatabaseSchema(conn);
+                databaseSchema = getDatabaseSchema(conn);
             }
 
             try (ResultSet resultset =
-                    dbMetaData.getTables(conn.getCatalog(), database_schema, null, tableTypes.toArray(new String[0]))) {
+                    dbMetaData.getTables(conn.getCatalog(), databaseSchema, null, tableTypes.toArray(new String[0]))) {
                 while (resultset.next()) {
                     String tableName = resultset.getString("TABLE_NAME");
                     if (tableName == null) {
@@ -315,9 +313,9 @@ public class JDBCService implements Serializable {
      * @return
      */
     private String getDatabaseSchema(final JDBCDataStore dataStore) {
-        String jdbc_url = dataStore.getJdbcUrl();
+        String jdbcUrl = dataStore.getJdbcUrl();
         String username = dataStore.getUserId();
-        if (jdbc_url != null && username != null && jdbc_url.contains("oracle")) {
+        if (jdbcUrl != null && username != null && jdbcUrl.contains("oracle")) {
             return username.toUpperCase();
         }
         return null;
@@ -339,7 +337,7 @@ public class JDBCService implements Serializable {
     }
 
     private Set<String> getAvailableTableTypes(DatabaseMetaData dbMetaData) throws SQLException {
-        Set<String> availableTableTypes = new HashSet<String>();
+        Set<String> availableTableTypes = new HashSet<>();
         List<String> neededTableTypes = Arrays.asList("TABLE", "VIEW", "SYNONYM");
 
         try (ResultSet rsTableTypes = dbMetaData.getTableTypes()) {

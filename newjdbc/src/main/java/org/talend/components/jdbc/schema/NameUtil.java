@@ -14,8 +14,12 @@ package org.talend.components.jdbc.schema;
 
 import java.util.Set;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 // copy from daikon, why do this: as don't want to introduce daikon dependencies
-// if we make sure no risk in future, will remove this class, use the same one in daikon
+// if we make sure no risk in the future, will remove this class, use the same one in daikon
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class NameUtil {
 
     /**

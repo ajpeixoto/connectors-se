@@ -36,8 +36,8 @@ public class AvroRecordWriter implements RecordWriter {
     }
 
     @Override
-    public void add(Record record) throws IOException {
-        final GenericRecord avroRecord = converter.fromRecord(record);
+    public void add(Record rec) throws IOException {
+        final GenericRecord avroRecord = converter.fromRecord(rec);
         output.write(avroRecord);
     }
 

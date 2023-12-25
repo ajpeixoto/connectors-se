@@ -62,12 +62,12 @@ public class ExcelConverter implements RecordConverter<Row> {
     }
 
     /**
-     * @param record
+     * @param rec
      * @return
      */
     @Override
-    public Schema inferSchema(Row record) {
-        return excelToRecord.inferSchema(record, false);
+    public Schema inferSchema(Row rec) {
+        return excelToRecord.inferSchema(rec, false);
     }
 
     public void inferSchemaNames(Row next, boolean isHeader) {
@@ -75,12 +75,12 @@ public class ExcelConverter implements RecordConverter<Row> {
     }
 
     @Override
-    public Record toRecord(Row record) {
-        return excelToRecord.toRecord(record);
+    public Record toRecord(Row rec) {
+        return excelToRecord.toRecord(rec);
     }
 
     @Override
-    public Row fromRecord(Record record) {
+    public Row fromRecord(Record rec) {
         return null;
     }
 
@@ -136,9 +136,9 @@ public class ExcelConverter implements RecordConverter<Row> {
         }
     }
 
-    public List<String> inferRecordColumns(Record record) {
+    public List<String> inferRecordColumns(Record rec) {
         List<String> columnNames = new ArrayList<>();
-        record.getSchema().getEntries().forEach(entry -> columnNames.add(entry.getName()));
+        rec.getSchema().getEntries().forEach(entry -> columnNames.add(entry.getName()));
         return columnNames;
     }
 }

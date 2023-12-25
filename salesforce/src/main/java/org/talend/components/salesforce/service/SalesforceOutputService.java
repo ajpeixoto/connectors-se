@@ -95,11 +95,11 @@ public class SalesforceOutputService implements Serializable {
         return new ThresholdOperation(operation, commitLevel);
     }
 
-    public void write(Record record) throws IOException {
-        if (record == null) {
+    public void write(Record input) throws IOException {
+        if (input == null) {
             return;
         }
-        final List<Result> results = this.operation.execute(record);
+        final List<Result> results = this.operation.execute(input);
         if (results != null) {
             this.handleResults(results);
         }

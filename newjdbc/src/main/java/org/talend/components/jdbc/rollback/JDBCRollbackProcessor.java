@@ -62,11 +62,11 @@ public class JDBCRollbackProcessor implements Serializable {
     }
 
     @ElementListener
-    public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success)
+    public void elementListener(@Input final Record input, @Output final OutputEmitter<Record> success)
             throws SQLException {
         doRollback(connection);
 
-        success.emit(record);
+        success.emit(input);
     }
 
     public void doRollback(java.sql.Connection connection) throws SQLException {

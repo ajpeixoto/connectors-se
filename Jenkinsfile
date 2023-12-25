@@ -401,18 +401,26 @@ pipeline {
             steps {
                 script {
                     withCredentials([nexusCredentials]) {
-                        // checkstyle is skipped because executed dedicated stage
-                        sh """
-                        bash .jenkins/mvn_build.sh \
-                            --define checkstyle.skip=true \
-                            ${extraBuildParams}
-                        """
+                        realtimeJUnit(
+                            testResults: '**/target/failsafe-reports/*.xml') {
+                            realtimeJUnit(
+                                testResults: '**/target/surefire-reports/*.xml') {
+
+                                // checkstyle is skipped because executed dedicated stage
+                                sh """
+                                    bash .jenkins/mvn_build.sh \
+                                        --define checkstyle.skip=true \
+                                        ${extraBuildParams}
+                                """
+                            }
+                        }
                     }
                 }
             }
 
             post {
                 always {
+                    junit '**/target/surefire-reports/*.xml, **/target/failsafe-reports/*.xml' // Needed for TTO
                     recordIssues(
                       enabledForFailure: true,
                       tools: [
@@ -420,6 +428,11 @@ pipeline {
                           id: 'unit-test',
                           name: 'Unit Test',
                           pattern: '**/target/surefire-reports/*.xml'
+                        ),
+                        junitParser(
+                          id: 'integration-test',
+                          name: 'Integration Test',
+                          pattern: '**/target/failsafe-reports/*.xml'
                         )
                       ]
                     )

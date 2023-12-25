@@ -32,7 +32,7 @@ import static org.junit.Assert.assertTrue;
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC close component")
-public class JDBCloseTestIT {
+class JDBCloseTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -51,7 +51,7 @@ public class JDBCloseTestIT {
     }
 
     @Test
-    public void testClose() throws SQLException {
+    void testClose() throws SQLException {
         CloseConnectionObject closeConnectionObject = jdbcService.closeConnection();
         JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore);
         closeConnectionObject.setConnection(dataSourceWrapper.getConnection());

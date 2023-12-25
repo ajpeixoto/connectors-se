@@ -9,7 +9,7 @@ spec:
   containers:
     ##
     - name: docker-daemon # Container that hosts the Docker daemon/socket
-      image: artifactory.datapwn.com/docker-io-remote/docker:23.0.1-dind-rootless # Rootless versions
+      image: artifactory.datapwn.com/docker-io-remote/docker:24.0.7-dind-rootless # Rootless versions
       command:
         - 'dockerd-entrypoint.sh' # Override entry point to add parameters
       args:
@@ -24,7 +24,7 @@ spec:
       # 3.0.9-20220930152032 is the last root version of custom-builder
       # If you use this pod you will be jenkins user
       # TSBI customBuilder documentation: https://github.com/Talend/tsbi-images/blob/main/tsbi/custom-builder/README.md
-      image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/custom-builder:3.1.10-20230315171124'
+      image: 'artifactory.datapwn.com/tlnd-docker-dev/talend/common/tsbi/custom-builder:4.0.9-20231219160458'
       command: [ cat ]
       tty: true
       volumeMounts: [
@@ -33,7 +33,7 @@ spec:
         { name: efs-jenkins-connectors-asdf-rootless,
           mountPath: /home/jenkins/.asdf/installs},
       ]
-      resources: { requests: { memory: 3G, cpu: '4' }, limits: { memory: 8G, cpu: '5' } }
+      resources: { requests: { memory: 4G, cpu: '2' }, limits: { memory: 6G, cpu: '4' } }
       env:
         - name: DOCKER_HOST # Points the Docker client to the socket hosted by the docker-daemon container (see below)
           value: tcp://localhost:2375

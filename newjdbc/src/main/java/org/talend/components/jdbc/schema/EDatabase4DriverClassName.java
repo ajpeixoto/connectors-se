@@ -15,6 +15,8 @@ package org.talend.components.jdbc.schema;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+
 /**
  * cli class global comment. Detailled comment
  */
@@ -110,13 +112,14 @@ public enum EDatabase4DriverClassName {
     //
     ;
 
+    @Getter
     private EDatabaseTypeName dbType;
 
     private String[] usingDriverClasses;
 
     private String[] deprecatedDriverClasses;
 
-    EDatabase4DriverClassName(EDatabaseTypeName dbType, String usingDriverClasses[], String deprecatedDriverClasses[]) {
+    EDatabase4DriverClassName(EDatabaseTypeName dbType, String[] usingDriverClasses, String[] deprecatedDriverClasses) {
         this.dbType = dbType;
         this.usingDriverClasses = usingDriverClasses;
         this.deprecatedDriverClasses = deprecatedDriverClasses;
@@ -128,10 +131,6 @@ public enum EDatabase4DriverClassName {
 
     EDatabase4DriverClassName(EDatabaseTypeName dbType, String driverClass) {
         this(dbType, new String[] { driverClass }, new String[0]);
-    }
-
-    public EDatabaseTypeName getDbType() {
-        return this.dbType;
     }
 
     public String getDbTypeName() {
@@ -168,7 +167,7 @@ public enum EDatabase4DriverClassName {
     }
 
     public static List<EDatabase4DriverClassName> indexOfByDriverClass(String driverClass) {
-        List<EDatabase4DriverClassName> dbType4Drivers = new ArrayList<EDatabase4DriverClassName>();
+        List<EDatabase4DriverClassName> dbType4Drivers = new ArrayList<>();
         for (EDatabase4DriverClassName t4d : EDatabase4DriverClassName.values()) {
             String[] drivers = t4d.getDriverClasses();
             if (drivers != null) {

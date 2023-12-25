@@ -24,10 +24,11 @@ import org.talend.components.http.configuration.auth.Authorization;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class RequestConfigBuilderTest {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
-    private RequestConfigBuilderTest() {
-    }
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class RequestConfigBuilder {
 
     public static RequestConfig getEmptyRequestConfig() {
         RequestConfig config = new RequestConfig();

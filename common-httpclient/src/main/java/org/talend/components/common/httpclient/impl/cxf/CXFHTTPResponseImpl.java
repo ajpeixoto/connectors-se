@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -63,10 +64,12 @@ class CXFHTTPResponseImpl implements HTTPClient.HTTPResponse<Response> {
     }
 
     private void computeHeaders() {
-        this.headers = response.getHeaders().entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> {
-            // Convert multi values to String with ',' as separator
-            return e.getValue().stream().map(Object::toString).collect(Collectors.joining(";"));
-        }));
+        this.headers = response.getHeaders()
+                .entrySet()
+                .stream()
+                .collect(Collectors.toMap(Entry::getKey,
+                        // Convert multi values to String with ',' as separator
+                        e -> e.getValue().stream().map(Object::toString).collect(Collectors.joining(";"))));
 
         encoding = ContentType.getCharsetName(this.headers);
     }

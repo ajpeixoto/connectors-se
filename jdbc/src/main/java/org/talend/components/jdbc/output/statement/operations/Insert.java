@@ -71,12 +71,12 @@ public class Insert extends QueryManagerImpl {
     }
 
     @Override
-    public boolean validateQueryParam(final Record record) {
+    public boolean validateQueryParam(final Record rec) {
         return namedParams
                 .values()
                 .stream()
                 .filter(e -> !e.isNullable())
-                .map(e -> valueOf(record, e))
+                .map(e -> valueOf(rec, e))
                 .allMatch(Optional::isPresent);
     }
 

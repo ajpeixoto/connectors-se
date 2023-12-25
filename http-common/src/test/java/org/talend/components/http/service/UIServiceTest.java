@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @WithComponents(value = "org.talend.components.http")
-public class UIServiceTest {
+class UIServiceTest {
 
     private final static List<Param> extractedValues =
             Arrays.asList(new Param("one", "1"),
@@ -78,7 +78,7 @@ public class UIServiceTest {
     })
     void simpleDiscoverSchemaExtended(boolean outputKeyValuePairs, boolean forwardInputSchema, final Format bodyFormat,
             final OutputContent returnedContent) {
-        final RequestConfig processorConfig = RequestConfigBuilderTest.getEmptyProcessorRequestConfig();
+        final RequestConfig processorConfig = RequestConfigBuilder.getEmptyProcessorRequestConfig();
         processorConfig.getDataset().setFormat(bodyFormat);
         processorConfig.getDataset().setReturnedContent(returnedContent);
 
@@ -107,7 +107,7 @@ public class UIServiceTest {
             "JSON,STATUS_HEADERS_BODY",
     })
     void discoverSchema(Format bodyFormat, OutputContent returnedContent) {
-        final RequestConfig inputConfig = RequestConfigBuilderTest.getEmptyRequestConfig();
+        final RequestConfig inputConfig = RequestConfigBuilder.getEmptyRequestConfig();
         inputConfig.getDataset().setFormat(bodyFormat);
         inputConfig.getDataset().setReturnedContent(returnedContent);
         Supplier<Schema> supplier = () -> service.discoverSchema(inputConfig.getDataset());

@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CXFHTTPClientImpl implements HTTPClient<WebClient> {
 
-    private static String DEFAULT_METHOD = "GET";
+    private static final String DEFAULT_METHOD = "GET";
 
     private QueryConfiguration queryConfiguration;
 

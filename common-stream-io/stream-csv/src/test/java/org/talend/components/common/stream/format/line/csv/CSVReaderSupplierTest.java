@@ -30,7 +30,7 @@ import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 class CSVReaderSupplierTest {
 
     @Test
-    public void testCSV() throws IOException {
+    void testCSV() throws IOException {
         final CSVConfiguration configuration = new CSVConfiguration();
         configuration.setQuotedValue('"');
         configuration.setEscape('\\');

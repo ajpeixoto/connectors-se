@@ -148,11 +148,11 @@ public class JDBCOutputUpdateOrInsertWriter extends JDBCOutputWriter {
 
         initRowWriterIfNot(inputSchema);
 
-        String updateSql_fact = rowWriter4Update.write(input);
-        if (updateSql_fact != null) {
-            context.set("QUERY", updateSql_fact);
+        String updateSqlFact = rowWriter4Update.write(input);
+        if (updateSqlFact != null) {
+            context.set("QUERY", updateSqlFact);
             if (config.isDebugQuery()) {
-                log.debug("'" + updateSql_fact.trim() + "'.");
+                log.debug("'" + updateSqlFact.trim() + "'.");
             }
         }
 
@@ -163,11 +163,11 @@ public class JDBCOutputUpdateOrInsertWriter extends JDBCOutputWriter {
             boolean noDataUpdate = (count == 0);
 
             if (noDataUpdate) {
-                String insertSql_fact = rowWriter4Insert.write(input);
-                if (insertSql_fact != null) {
-                    context.set("QUERY", insertSql_fact);
+                String insertSqlFact = rowWriter4Insert.write(input);
+                if (insertSqlFact != null) {
+                    context.set("QUERY", insertSqlFact);
                     if (config.isDebugQuery()) {
-                        log.debug("'" + insertSql_fact.trim() + "'.");
+                        log.debug("'" + insertSqlFact.trim() + "'.");
                     }
                 }
                 insertCount += execute(input, statementInsert);

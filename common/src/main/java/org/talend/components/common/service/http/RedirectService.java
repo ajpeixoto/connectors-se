@@ -116,16 +116,15 @@ public class RedirectService {
     private String redirectioHistory(RedirectContext context) {
         StringBuilder sb = new StringBuilder();
 
-        context.getHistory().stream().forEach(r -> {
-            sb
-                    .append("\tLocation[")
-                    .append(r.getNbRedirect())
-                    .append("] : ")
-                    .append(r.getMethod())
-                    .append(" ")
-                    .append(r.getNextUrl())
-                    .append("\n");
-        });
+        context.getHistory()
+                .forEach(r -> sb
+                        .append("\tLocation[")
+                        .append(r.getNbRedirect())
+                        .append("] : ")
+                        .append(r.getMethod())
+                        .append(" ")
+                        .append(r.getNextUrl())
+                        .append("\n"));
 
         return sb.toString();
     }

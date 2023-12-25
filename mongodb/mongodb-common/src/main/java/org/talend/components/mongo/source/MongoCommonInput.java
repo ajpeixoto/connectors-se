@@ -137,6 +137,7 @@ public class MongoCommonInput implements Serializable {
             break;
         case BYTES:
             recordBuilder.withBytes(entryBuilder.build(), (byte[]) value);
+            break;
         case STRING:
             // toString is right for all type, like document? TODO
             recordBuilder

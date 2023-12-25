@@ -23,11 +23,11 @@ public class RawTextReaderSupplier implements RecordReaderSupplier {
 
     @Override
     public RecordReader getReader(RecordBuilderFactory factory, ContentFormat config, Object extraParameter) {
-        if (!RawTextConfiguration.class.isInstance(config)) {
+        if (!(config instanceof RawTextConfiguration)) {
             throw new IllegalArgumentException("try to get rawtext-reader with other than rawtext-config");
         }
 
-        if (!ExtendedRawTextConfiguration.class.isInstance(extraParameter)) {
+        if (!(extraParameter instanceof ExtendedRawTextConfiguration)) {
             throw new IllegalArgumentException(
                     "try to get rawtext-reader with other than ExtendedRawTextConfiguration as extra-parameter");
         }

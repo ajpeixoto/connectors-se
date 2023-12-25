@@ -115,7 +115,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
         @Override
         protected boolean hasNextRecordTaken() {
             return getConfig().getExcelOptions().isUseFooter() ? rows.size() > getConfig().getExcelOptions().getFooter()
-                    : rows.size() > 0;
+                    : !rows.isEmpty();
         }
 
         @Override
@@ -162,6 +162,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
                     throw new NoSuchElementException();
                 }
 
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }

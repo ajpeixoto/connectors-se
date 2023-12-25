@@ -32,8 +32,8 @@ public class ThresholdOperation {
         this.records = new ArrayList<>(this.commitLevel);
     }
 
-    public synchronized List<Result> execute(Record record) throws IOException {
-        this.records.add(record);
+    public synchronized List<Result> execute(Record input) throws IOException {
+        this.records.add(input);
         if (this.records.size() >= this.commitLevel) {
             return this.terminate();
         }

@@ -27,13 +27,15 @@ import org.talend.sdk.component.junit5.WithComponents;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC connection component")
-public class JDBCConnectionTestIT {
+class JDBCConnectionTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -52,14 +54,14 @@ public class JDBCConnectionTestIT {
     }
 
     @Test
-    public void testConnection() throws SQLException {
+    void testConnection() throws SQLException {
         try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
 
         }
     }
 
     @Test
-    public void testConnectionWithEmptyJDBCURL() throws IOException {
+    void testConnectionWithEmptyJDBCURL() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setJdbcUrl("");
@@ -72,7 +74,7 @@ public class JDBCConnectionTestIT {
     }
 
     @Test
-    public void testConnectionWithEmptyDriver() throws IOException {
+    void testConnectionWithEmptyDriver() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setJdbcClass(null);
@@ -85,7 +87,7 @@ public class JDBCConnectionTestIT {
     }
 
     @Test
-    public void testConnectionWithWrongDriver() throws IOException {
+    void testConnectionWithWrongDriver() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setJdbcClass("wrongDriver");
@@ -98,7 +100,7 @@ public class JDBCConnectionTestIT {
     }
 
     @Test
-    public void testConnectionWithWrongURL() throws IOException {
+    void testConnectionWithWrongURL() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setJdbcUrl("wrongUrl");
@@ -111,20 +113,20 @@ public class JDBCConnectionTestIT {
     }
 
     @Test
-    public void testNotAutoCommit() throws IOException, SQLException {
+    void testNotAutoCommit() throws IOException, SQLException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setUseAutoCommit(true);
         dataStore.setAutoCommit(false);
 
         try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
-            assertTrue(!dataSourceWrapper.getConnection().getAutoCommit());
-            assertTrue(!dataSourceWrapper.getConnection().isClosed());
+            assertFalse(dataSourceWrapper.getConnection().getAutoCommit());
+            assertFalse(dataSourceWrapper.getConnection().isClosed());
         }
     }
 
     @Test
-    public void testAutoCommit() throws IOException {
+    void testAutoCommit() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
 
         dataStore.setUseAutoCommit(true);
@@ -132,17 +134,17 @@ public class JDBCConnectionTestIT {
 
         try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             assertTrue(dataSourceWrapper.getConnection().getAutoCommit());
-            assertTrue(!dataSourceWrapper.getConnection().isClosed());
+            assertFalse(dataSourceWrapper.getConnection().isClosed());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     @Test
-    public void testEliminateSpaceURL() throws IOException {
+    void testEliminateSpaceURL() throws IOException {
         JDBCDataStore dataStore = DBTestUtils.createDataStore(false);
         dataStore.setJdbcUrl(" a_value_with_space_around_it. ");
-        assertTrue("a_value_with_space_around_it.".equals(dataStore.getJdbcUrl()));
+        assertEquals("a_value_with_space_around_it.", dataStore.getJdbcUrl());
     }
 
 }

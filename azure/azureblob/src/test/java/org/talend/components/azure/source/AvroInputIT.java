@@ -35,6 +35,7 @@ import org.talend.sdk.component.runtime.manager.chain.Job;
 import com.microsoft.azure.storage.StorageException;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.azure")
 class AvroInputIT extends BaseIT {
 

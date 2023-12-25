@@ -57,12 +57,12 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
     }
 
     @Override
-    public GenericRecord fromRecord(final Record record) {
-        if (!this.isSchemaFixed && (avroSchema == null || !(Objects.equals(this.cachedSchema, record.getSchema())))) {
-            this.cachedSchema = record.getSchema();
-            avroSchema = fromRecordSchema(record.getSchema());
+    public GenericRecord fromRecord(final Record rec) {
+        if (!this.isSchemaFixed && (avroSchema == null || !(Objects.equals(this.cachedSchema, rec.getSchema())))) {
+            this.cachedSchema = rec.getSchema();
+            avroSchema = fromRecordSchema(rec.getSchema());
         }
-        return recordToAvro(record, newAvroRecord(avroSchema));
+        return recordToAvro(rec, newAvroRecord(avroSchema));
     }
 
     private GenericRecord recordToAvro(final Record fromRecord,
@@ -85,10 +85,10 @@ public class RecordToAvro implements RecordConverter<GenericRecord, org.apache.a
         String logicalType = AvroHelper.getLogicalType(field);
         switch (fieldType) {
         case RECORD:
-            final Record record = fromRecord.getRecord(name);
-            if (record != null) {
+            final Record rec = fromRecord.getRecord(name);
+            if (rec != null) {
                 final org.apache.avro.Schema subSchema = field.schema();
-                final GenericRecord subrecord = this.recordToAvro(record, newAvroRecord(subSchema));
+                final GenericRecord subrecord = this.recordToAvro(rec, newAvroRecord(subSchema));
                 toRecord.put(name, subrecord);
             }
             break;

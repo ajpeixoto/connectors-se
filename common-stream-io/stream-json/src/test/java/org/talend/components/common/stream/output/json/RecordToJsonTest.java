@@ -50,7 +50,7 @@ class RecordToJsonTest {
         Assertions.assertTrue(fieldDateTime.startsWith("2020-10-10"));
         final String fieldDecimal = jsonObject1.getString("fieldDecimal");
         Assertions.assertNotNull(fieldDecimal);
-        Assertions.assertTrue(new BigDecimal(fieldDecimal).equals(new BigDecimal("123.123")));
+        Assertions.assertEquals(new BigDecimal("123.123"), new BigDecimal(fieldDecimal));
 
         final Record record2 = factory.newRecordBuilder()
                 .withDateTime("fieldDateTime", (ZonedDateTime) null)
@@ -104,10 +104,10 @@ class RecordToJsonTest {
         Assertions.assertTrue(fieldDateTime.startsWith("2020-10-10"));
         final String fieldDecimal = jsonObject1.getString("Prénom?");
         Assertions.assertNotNull(fieldDecimal);
-        Assertions.assertTrue(new BigDecimal(fieldDecimal).equals(new BigDecimal("123.123")));
+        Assertions.assertEquals(new BigDecimal("123.123"), new BigDecimal(fieldDecimal));
         final String string = jsonObject1.getString("&");
         Assertions.assertNotNull(string);
-        Assertions.assertTrue(string.equals("special charactor"));
+        Assertions.assertEquals("special charactor", string);
 
         final Record record2 = factory.newRecordBuilder()
                 .withDateTime("时间", (ZonedDateTime) null)

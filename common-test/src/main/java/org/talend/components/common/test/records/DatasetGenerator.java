@@ -56,7 +56,7 @@ public class DatasetGenerator<T> {
     }
 
     public Iterator<DataSet<T>> generate(int size) {
-        return new RecordIterator<T>(size, this.recordGenerator, this.assertionsBuilder);
+        return new RecordIterator<>(size, this.recordGenerator, this.assertionsBuilder);
     }
 
     private static class RecordIterator<T> implements Iterator<DataSet<T>> {

@@ -61,9 +61,9 @@ public abstract class Platform implements Serializable {
         this.i18n = i18n;
     }
 
-    abstract public String name();
+    public abstract String name();
 
-    abstract public String delimiterToken();
+    public abstract String delimiterToken();
 
     protected abstract String buildQuery(final Connection connection, final Table table,
             final boolean useOriginColumnName, Dbms mapping) throws SQLException;
@@ -283,7 +283,7 @@ public abstract class Platform implements Serializable {
         log.debug("Schema Entries: " + entries);
 
         final Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
-        entries.stream().forEach(entry -> schemaBuilder.withEntry(entry));
+        entries.forEach(schemaBuilder::withEntry);
         final Schema inputSchema = schemaBuilder.build();
 
         final Schema currentSchema = SchemaInferer.mergeRuntimeSchemaAndDesignSchema4Dynamic(

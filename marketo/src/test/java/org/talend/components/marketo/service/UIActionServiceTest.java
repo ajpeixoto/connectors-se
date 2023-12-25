@@ -30,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @WithComponents("org.talend.components.marketo")
 @HttpApi(useSsl = true, responseLocator = MarketoResponseLocator.class)
-public class UIActionServiceTest extends MarketoBaseTest {
+class UIActionServiceTest extends MarketoBaseTest {
 
     @Service
     protected UIActionService service;

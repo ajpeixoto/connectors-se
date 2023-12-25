@@ -32,7 +32,7 @@ public class MongoCommonOutput implements Serializable {
 
     protected transient RecordToDocument recordToDocument;
 
-    protected Document getKeysQueryDocumentAndRemoveKeysFromSourceDocument(List<KeyMapping> keyMappings, Record record,
+    protected Document getKeysQueryDocumentAndRemoveKeysFromSourceDocument(List<KeyMapping> keyMappings, Record rec,
             Document document) {
         Document keysQueryDocument = new Document();
         if (keyMappings == null || keyMappings.isEmpty()) {
@@ -52,7 +52,7 @@ public class MongoCommonOutput implements Serializable {
                 Object value = getKeyValueFromDocumentAndRemoveKeys(document, column);
                 keysQueryDocument.put(isEmpty(keyPath) ? column : keyPath, value);
             } else {
-                Object value = getKeyValueFromRecord(record, column);
+                Object value = getKeyValueFromRecord(rec, column);
                 getKeyValueFromDocumentAndRemoveKeys(document, column);
                 keysQueryDocument.put(isEmpty(keyPath) ? column : keyPath, value);
             }
@@ -94,7 +94,7 @@ public class MongoCommonOutput implements Serializable {
     }
 
     // only support path like a.b.c, not support array
-    protected Object getKeyValueFromRecord(Record record, String keyColumnPath) {
+    protected Object getKeyValueFromRecord(Record rec, String keyColumnPath) {
         if (isEmpty(keyColumnPath)) {
             throw new RuntimeException("Please set the key column for update or upsert.");
         }
@@ -108,10 +108,10 @@ public class MongoCommonOutput implements Serializable {
                 throw new RuntimeException("Please set the right key column for update or upsert.");
             }
 
-            if (record != null) {
-                Object v = record.get(Object.class, path);
+            if (rec != null) {
+                Object v = rec.get(Object.class, path);
                 if (v instanceof Record) {
-                    record = (Record) v;
+                    rec = (Record) v;
                 } else if (i == (paths.length - 1)) {
                     result = v;
                 }
@@ -127,46 +127,46 @@ public class MongoCommonOutput implements Serializable {
         return str == null || str.trim().isEmpty();
     }
 
-    protected Document convertRecord2Document(Record record) {
-        JsonObject jsonObject = this.recordToJson.fromRecord(record);
+    protected Document convertRecord2Document(Record rec) {
+        JsonObject jsonObject = this.recordToJson.fromRecord(rec);
         String jsonContent = jsonObject.toString();
         return Document.parse(jsonContent);
     }
 
-    protected Document convertRecord2DocumentDirectly(Record record) {
-        return recordToDocument.fromRecord(record);
+    protected Document convertRecord2DocumentDirectly(Record rec) {
+        return recordToDocument.fromRecord(rec);
     }
 
     // copy from couchbase, not use now, will use it maybe
-    protected Object jsonValueFromRecordValue(Schema.Entry entry, Record record) {
+    protected Object jsonValueFromRecordValue(Schema.Entry entry, Record rec) {
         String entryName = entry.getName();
-        Object value = record.get(Object.class, entryName);
+        Object value = rec.get(Object.class, entryName);
         if (null == value) {
             // TODO check use what explain null
             return "";
         }
         switch (entry.getType()) {
         case INT:
-            return record.getInt(entryName);
+            return rec.getInt(entryName);
         case LONG:
-            return record.getLong(entryName);
+            return rec.getLong(entryName);
         case BYTES:
-            return java.util.Base64.getEncoder().encodeToString(record.getBytes(entryName));
+            return java.util.Base64.getEncoder().encodeToString(rec.getBytes(entryName));
         case FLOAT:
-            return Double.parseDouble(String.valueOf(record.getFloat(entryName)));
+            return Double.parseDouble(String.valueOf(rec.getFloat(entryName)));
         case DOUBLE:
-            return record.getDouble(entryName);
+            return rec.getDouble(entryName);
         case STRING:
         case DECIMAL:
-            return createJsonFromString(record.getString(entryName));
+            return createJsonFromString(rec.getString(entryName));
         case BOOLEAN:
-            return record.getBoolean(entryName);
+            return rec.getBoolean(entryName);
         case ARRAY:
-            return record.getArray(List.class, entryName);
+            return rec.getArray(List.class, entryName);
         case DATETIME:
-            return record.getDateTime(entryName).toString();
+            return rec.getDateTime(entryName).toString();
         case RECORD:
-            return record.getRecord(entryName);
+            return rec.getRecord(entryName);
         default:
             throw new IllegalArgumentException("Unknown Type " + entry.getType());
         }

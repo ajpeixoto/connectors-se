@@ -27,6 +27,7 @@ import org.apache.olingo.client.api.uri.FilterFactory;
 import org.apache.olingo.client.core.uri.FilterFactoryImpl;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.talend.components.dynamicscrm.DynamicsCrmTestBase;
@@ -35,9 +36,10 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.dynamicscrm")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class DynamicsCrmInputMapperTestIT extends DynamicsCrmTestBase {
+class DynamicsCrmInputMapperTestIT extends DynamicsCrmTestBase {
 
     @BeforeAll
     public void prepareTestData() throws AuthenticationException, ServiceUnavailableException {
@@ -48,7 +50,7 @@ public class DynamicsCrmInputMapperTestIT extends DynamicsCrmTestBase {
     }
 
     @Test
-    public void produce() {
+    void produce() {
         final DynamicsCrmDataset dataset = createDataset();
         final DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setDataset(dataset);

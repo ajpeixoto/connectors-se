@@ -27,7 +27,7 @@ public class FixedReaderSupplier implements RecordReaderSupplier {
 
     @Override
     public RecordReader getReader(RecordBuilderFactory factory, ContentFormat config, Object extraParameter) {
-        if (!FixedConfiguration.class.isInstance(config)) {
+        if (!(config instanceof FixedConfiguration)) {
             throw new IllegalArgumentException("try to get fixed-reader with other than fixed-config");
         }
 

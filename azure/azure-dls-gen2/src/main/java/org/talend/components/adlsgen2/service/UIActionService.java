@@ -15,7 +15,6 @@ package org.talend.components.adlsgen2.service;
 import java.util.ArrayList;
 import java.util.List;
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
-import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
 import org.talend.components.common.connection.adls.AuthMethod;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.exception.ComponentException;

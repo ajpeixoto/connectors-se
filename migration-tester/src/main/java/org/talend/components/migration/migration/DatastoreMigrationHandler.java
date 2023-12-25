@@ -48,6 +48,7 @@ public class DatastoreMigrationHandler extends AbstractTestMigrationHandler {
 
     @Override
     protected void from(Map<String, String> incomingData) {
+        /* NOP */
     }
 
     @Override
@@ -55,6 +56,6 @@ public class DatastoreMigrationHandler extends AbstractTestMigrationHandler {
         if (incomingVersion < 50) {
             incomingData.put("dso_shouldNotBeEmpty", "Not empty");
         }
-    };
+    }
 
 }

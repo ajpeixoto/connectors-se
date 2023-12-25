@@ -12,19 +12,27 @@
  */
 package org.talend.components.jdbc;
 
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.talend.components.jdbc.DBTestUtils.createTestSchemaInfos;
+import static org.talend.components.jdbc.DBTestUtils.getValueByIndex;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.talend.components.jdbc.common.SchemaInfo;
-import org.talend.components.jdbc.dataset.JDBCQueryDataSet;
 import org.talend.components.jdbc.dataset.JDBCTableDataSet;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
-import org.talend.components.jdbc.input.JDBCCommonInputConfig;
-import org.talend.components.jdbc.input.JDBCInputConfig;
-import org.talend.components.jdbc.input.JDBCTableInputConfig;
 import org.talend.components.jdbc.output.DataAction;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.service.JDBCService;
@@ -37,20 +45,13 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.output.Branches;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.talend.components.jdbc.DBTestUtils.*;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC output component")
-public class JDBCOutputTestIT {
+class JDBCOutputTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -100,7 +101,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testDynamicInsert() {
+    void testDynamicInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -127,14 +128,14 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(5, result.size());
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("xiaoming", getValueByIndex(result.get(3), 1));
-        assertEquals(new Integer(5), getValueByIndex(result.get(4), 0));
+        assertEquals(5, getValueByIndex(result.get(4), 0));
         assertEquals("xiaobai", getValueByIndex(result.get(4), 1));
     }
 
     @Test
-    public void testInsert() {
+    void testInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -169,7 +170,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testBatch() {
+    void testBatch() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -204,20 +205,20 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(8, result.size());
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("xiaoming", getValueByIndex(result.get(3), 1));
-        assertEquals(new Integer(5), getValueByIndex(result.get(4), 0));
+        assertEquals(5, getValueByIndex(result.get(4), 0));
         assertEquals("xiaobai", getValueByIndex(result.get(4), 1));
-        assertEquals(new Integer(6), getValueByIndex(result.get(5), 0));
+        assertEquals(6, getValueByIndex(result.get(5), 0));
         assertEquals("xiaohong", getValueByIndex(result.get(5), 1));
-        assertEquals(new Integer(7), getValueByIndex(result.get(6), 0));
+        assertEquals(7, getValueByIndex(result.get(6), 0));
         assertEquals("xiaored", getValueByIndex(result.get(6), 1));
-        assertEquals(new Integer(8), getValueByIndex(result.get(7), 0));
+        assertEquals(8, getValueByIndex(result.get(7), 0));
         assertEquals("xiaohei", getValueByIndex(result.get(7), 1));
     }
 
     @Test
-    public void testInsertReject() {
+    void testInsertReject() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -269,7 +270,7 @@ public class JDBCOutputTestIT {
     // image, input component not set key info, but current output component set it, then no key info, then error, not a
     // bug?
     @Test
-    public void testDynamicUpdate() {
+    void testDynamicUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -296,16 +297,16 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(3, result.size());
-        assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
+        assertEquals(1, getValueByIndex(result.get(0), 0));
         assertEquals("wangwei1", getValueByIndex(result.get(0), 1));
-        assertEquals(new Integer(2), getValueByIndex(result.get(1), 0));
+        assertEquals(2, getValueByIndex(result.get(1), 0));
         assertEquals("gaoyan1", getValueByIndex(result.get(1), 1));
-        assertEquals(new Integer(3), getValueByIndex(result.get(2), 0));
+        assertEquals(3, getValueByIndex(result.get(2), 0));
         assertEquals("dabao", getValueByIndex(result.get(2), 1));
     }
 
     @Test
-    public void testUpdate() {
+    void testUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -333,16 +334,16 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(3, result.size());
-        assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
+        assertEquals(1, getValueByIndex(result.get(0), 0));
         assertEquals("wangwei1", getValueByIndex(result.get(0), 1));
-        assertEquals(new Integer(2), getValueByIndex(result.get(1), 0));
+        assertEquals(2, getValueByIndex(result.get(1), 0));
         assertEquals("gaoyan1", getValueByIndex(result.get(1), 1));
-        assertEquals(new Integer(3), getValueByIndex(result.get(2), 0));
+        assertEquals(3, getValueByIndex(result.get(2), 0));
         assertEquals("dabao", getValueByIndex(result.get(2), 1));
     }
 
     @Test
-    public void testUpdateReject() {
+    void testUpdateReject() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(recordBuilderFactory.newRecordBuilder(schema)
@@ -383,16 +384,16 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(3, result.size());
-        assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
+        assertEquals(1, getValueByIndex(result.get(0), 0));
         assertEquals("wangwei", getValueByIndex(result.get(0), 1));
-        assertEquals(new Integer(2), getValueByIndex(result.get(1), 0));
+        assertEquals(2, getValueByIndex(result.get(1), 0));
         assertEquals("gaoyan1", getValueByIndex(result.get(1), 1));
-        assertEquals(new Integer(3), getValueByIndex(result.get(2), 0));
+        assertEquals(3, getValueByIndex(result.get(2), 0));
         assertEquals("dabao1", getValueByIndex(result.get(2), 1));
     }
 
     @Test
-    public void testDynamicDelete() {
+    void testDynamicDelete() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).build());
@@ -417,12 +418,12 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(1, result.size());
-        assertEquals(new Integer(3), getValueByIndex(result.get(0), 0));
+        assertEquals(3, getValueByIndex(result.get(0), 0));
         assertEquals("dabao", getValueByIndex(result.get(0), 1));
     }
 
     @Test
-    public void testDelete() {
+    void testDelete() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(recordBuilderFactory.newRecordBuilder(schema).withInt("ID", 1).build());
@@ -447,13 +448,13 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(1, result.size());
-        assertEquals(new Integer(3), getValueByIndex(result.get(0), 0));
+        assertEquals(3, getValueByIndex(result.get(0), 0));
         assertEquals("dabao", getValueByIndex(result.get(0), 1));
     }
 
     // TODO how to make a delete action reject happen?
     @Test
-    public void testDeleteReject() {
+    void testDeleteReject() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -493,7 +494,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testDynamicInsertOrUpdate() {
+    void testDynamicInsertOrUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -522,18 +523,18 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
-        assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
+        assertEquals(1, getValueByIndex(result.get(0), 0));
         assertEquals("wangwei1", getValueByIndex(result.get(0), 1));
-        assertEquals(new Integer(2), getValueByIndex(result.get(1), 0));
+        assertEquals(2, getValueByIndex(result.get(1), 0));
         assertEquals("gaoyan1", getValueByIndex(result.get(1), 1));
-        assertEquals(new Integer(3), getValueByIndex(result.get(2), 0));
+        assertEquals(3, getValueByIndex(result.get(2), 0));
         assertEquals("dabao", getValueByIndex(result.get(2), 1));
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("new one", getValueByIndex(result.get(3), 1));
     }
 
     @Test
-    public void testInsertOrUpdate() {
+    void testInsertOrUpdate() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -562,18 +563,18 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
-        assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
+        assertEquals(1, getValueByIndex(result.get(0), 0));
         assertEquals("wangwei1", getValueByIndex(result.get(0), 1));
-        assertEquals(new Integer(2), getValueByIndex(result.get(1), 0));
+        assertEquals(2, getValueByIndex(result.get(1), 0));
         assertEquals("gaoyan1", getValueByIndex(result.get(1), 1));
-        assertEquals(new Integer(3), getValueByIndex(result.get(2), 0));
+        assertEquals(3, getValueByIndex(result.get(2), 0));
         assertEquals("dabao", getValueByIndex(result.get(2), 1));
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("new one", getValueByIndex(result.get(3), 1));
     }
 
     @Test
-    public void testDynamicUpdateOrInsert() {
+    void testDynamicUpdateOrInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -602,18 +603,18 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
-        assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
+        assertEquals(1, getValueByIndex(result.get(0), 0));
         assertEquals("wangwei1", getValueByIndex(result.get(0), 1));
-        assertEquals(new Integer(2), getValueByIndex(result.get(1), 0));
+        assertEquals(2, getValueByIndex(result.get(1), 0));
         assertEquals("gaoyan1", getValueByIndex(result.get(1), 1));
-        assertEquals(new Integer(3), getValueByIndex(result.get(2), 0));
+        assertEquals(3, getValueByIndex(result.get(2), 0));
         assertEquals("dabao", getValueByIndex(result.get(2), 1));
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("new one", getValueByIndex(result.get(3), 1));
     }
 
     @Test
-    public void testUpdateOrInsert() {
+    void testUpdateOrInsert() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -642,18 +643,18 @@ public class JDBCOutputTestIT {
         List<Record> result = DBTestUtils.runInput(componentsHandler, dataStore, tableName, schemaInfos);
 
         assertEquals(4, result.size());
-        assertEquals(new Integer(1), getValueByIndex(result.get(0), 0));
+        assertEquals(1, getValueByIndex(result.get(0), 0));
         assertEquals("wangwei1", getValueByIndex(result.get(0), 1));
-        assertEquals(new Integer(2), getValueByIndex(result.get(1), 0));
+        assertEquals(2, getValueByIndex(result.get(1), 0));
         assertEquals("gaoyan1", getValueByIndex(result.get(1), 1));
-        assertEquals(new Integer(3), getValueByIndex(result.get(2), 0));
+        assertEquals(3, getValueByIndex(result.get(2), 0));
         assertEquals("dabao", getValueByIndex(result.get(2), 1));
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("new one", getValueByIndex(result.get(3), 1));
     }
 
     @Test
-    public void testClearDataInTable() {
+    void testClearDataInTable() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -685,9 +686,9 @@ public class JDBCOutputTestIT {
         if (action == DataAction.INSERT || action == DataAction.INSERT_OR_UPDATE
                 || action == DataAction.UPDATE_OR_INSERT) {
             assertEquals(2, result.size());
-            assertEquals(new Integer(4), getValueByIndex(result.get(0), 0));
+            assertEquals(4, getValueByIndex(result.get(0), 0));
             assertEquals("xiaoming", getValueByIndex(result.get(0), 1));
-            assertEquals(new Integer(5), getValueByIndex(result.get(1), 0));
+            assertEquals(5, getValueByIndex(result.get(1), 0));
             assertEquals("xiaobai", getValueByIndex(result.get(1), 1));
         } else {
             assertEquals(0, result.size());
@@ -708,7 +709,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testDieOnError() {
+    void testDieOnError() {
         Schema schema = DBTestUtils.createTestSchema(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
         records.add(
@@ -753,7 +754,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyle() {
+    void testWriterWithCloudStyle() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -772,7 +773,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyleAndUpdate() {
+    void testWriterWithCloudStyleAndUpdate() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -792,7 +793,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyleAndDesignSchemaAndUpdate() {
+    void testWriterWithCloudStyleAndDesignSchemaAndUpdate() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -813,7 +814,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyleAndDesignSchemaAndDelete() {
+    void testWriterWithCloudStyleAndDesignSchemaAndDelete() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -834,7 +835,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyleAndDesignSchemaAndUpsert() {
+    void testWriterWithCloudStyleAndDesignSchemaAndUpsert() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -855,7 +856,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyleWithCreateTable() {
+    void testWriterWithCloudStyleWithCreateTable() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("testCreateTable1");
@@ -875,7 +876,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyleWithCreateTableAndDesignSchema() {
+    void testWriterWithCloudStyleWithCreateTableAndDesignSchema() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("testCreateTable2");
@@ -897,7 +898,7 @@ public class JDBCOutputTestIT {
     }
 
     @Test
-    public void testWriterWithCloudStyleWithDesignSchema() {
+    void testWriterWithCloudStyleWithDesignSchema() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -918,7 +919,7 @@ public class JDBCOutputTestIT {
 
     @Disabled
     @Test
-    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchema() {
+    void testWriterWithCloudStyleWithSnowflakeAndDesignSchema() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
         dataSet.setTableName("test");
@@ -940,7 +941,7 @@ public class JDBCOutputTestIT {
 
     @Disabled
     @Test
-    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpdate() {
+    void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpdate() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
         dataSet.setTableName("test");
@@ -963,7 +964,7 @@ public class JDBCOutputTestIT {
 
     @Disabled
     @Test
-    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndDelete() {
+    void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndDelete() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
         dataSet.setTableName("test");
@@ -986,7 +987,7 @@ public class JDBCOutputTestIT {
 
     @Disabled
     @Test
-    public void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpsert() {
+    void testWriterWithCloudStyleWithSnowflakeAndDesignSchemaAndUpsert() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
         dataSet.setTableName("test");

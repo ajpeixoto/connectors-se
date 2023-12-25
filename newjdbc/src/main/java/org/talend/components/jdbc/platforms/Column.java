@@ -15,7 +15,6 @@ package org.talend.components.jdbc.platforms;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Delegate;
-import org.talend.components.jdbc.output.JDBCSQLBuilder;
 import org.talend.sdk.component.api.record.Schema;
 
 import java.io.Serializable;

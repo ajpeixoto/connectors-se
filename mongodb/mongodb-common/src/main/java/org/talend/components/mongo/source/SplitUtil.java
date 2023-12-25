@@ -18,6 +18,9 @@ import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;
 import org.bson.BsonInt32;
@@ -35,6 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class SplitUtil {
 
     public static List<String> getQueries4Split(final MongoCommonSourceConfiguration configuration,
@@ -143,9 +147,9 @@ public class SplitUtil {
         Iterator<Document> iterator = buckets.iterator();
         while (iterator.hasNext()) {
             Document bucket = iterator.next();
-            Document id_document = (Document) bucket.get("_id");
-            Object min = id_document.get("min");
-            Object max = id_document.get("max");
+            Document idDocument = (Document) bucket.get("_id");
+            Object min = idDocument.get("min");
+            Object max = idDocument.get("max");
 
             Bson filters = Filters
                     .and(Filters.gte("_id", min),

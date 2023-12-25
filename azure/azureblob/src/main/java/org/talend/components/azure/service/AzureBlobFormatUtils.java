@@ -15,6 +15,10 @@ package org.talend.components.azure.service;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.common.formats.FormatUtils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AzureBlobFormatUtils {
 
     public static String getUsedEncodingValue(AzureBlobDataset dataset) {

@@ -12,12 +12,15 @@
  */
 package org.talend.components.adlsgen2.runtime.output;
 
+import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
+
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import org.junit.Ignore;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.adlsgen2.AdlsGen2IntegrationTestBase;
 import org.talend.components.adlsgen2.common.format.FileFormat;
@@ -28,11 +31,10 @@ import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
-import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.adlsgen2")
-@Ignore /* Fill the Active dir credentials and run manually */
-public class AvroOutputITActiveDirAuth extends AdlsGen2IntegrationTestBase {
+@Disabled("Fill the Active dir credentials and run manually")
+class AvroOutputITActiveDirAuthIT extends AdlsGen2IntegrationTestBase {
 
     private OutputConfiguration outputConfiguration;
 

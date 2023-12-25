@@ -12,6 +12,7 @@
  */
 package org.talend.components.jdbc.bulk;
 
+import java.util.HashMap;
 import java.util.Locale;
 
 /*
@@ -33,23 +34,9 @@ public class FastDateParser {
     }
 
     private static ThreadLocal<java.util.HashMap<DateFormatKey, java.text.DateFormat>> localCache =
-            new ThreadLocal<java.util.HashMap<DateFormatKey, java.text.DateFormat>>() {
+            ThreadLocal.withInitial(HashMap::new);
 
-                @Override
-                protected java.util.HashMap<DateFormatKey, java.text.DateFormat> initialValue() {
-                    return new java.util.HashMap<DateFormatKey, java.text.DateFormat>();
-                }
-
-            };
-
-    private static ThreadLocal<DateFormatKey> localDateFormatKey = new ThreadLocal<DateFormatKey>() {
-
-        @Override
-        protected DateFormatKey initialValue() {
-            return new DateFormatKey();
-        }
-
-    };
+    private static ThreadLocal<DateFormatKey> localDateFormatKey = ThreadLocal.withInitial(DateFormatKey::new);
 
     // Warning : DateFormat objects returned by this method are not thread safe
     public static java.text.DateFormat getInstance(String pattern) {
@@ -91,7 +78,11 @@ public class FastDateParser {
     // Parse and format dates with yyyy-MM-dd format
     private static class DateParser extends java.text.DateFormat {
 
-        private int year, month, day;
+        private int year;
+
+        private int month;
+
+        private int day;
 
         public DateParser() {
             calendar = java.util.Calendar.getInstance();
@@ -149,7 +140,17 @@ public class FastDateParser {
     // Parse dates with yyyy-MM-dd HH:mm:ss format
     private static class DateTimeParser extends java.text.DateFormat {
 
-        private int year, month, day, hour, minute, second;
+        private int year;
+
+        private int month;
+
+        private int day;
+
+        private int hour;
+
+        private int minute;
+
+        private int second;
 
         public DateTimeParser() {
             calendar = java.util.Calendar.getInstance();

@@ -12,7 +12,20 @@
  */
 package org.talend.components.jdbc;
 
-import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.sql.Connection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.components.jdbc.sp.JDBCSPConfig;
@@ -27,18 +40,10 @@ import org.talend.sdk.component.junit5.Injected;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.output.Branches;
 
-import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC sp component")
-public class JDBCSPTestIT {
+class JDBCSPTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -88,7 +93,7 @@ public class JDBCSPTestIT {
     }
 
     @Test
-    public void test_basic_no_connector() {
+    void test_basic_no_connector() {
         JDBCSPConfig config = new JDBCSPConfig();
         config.setDataStore(dataStore);
         config.setSpName("SYSCS_UTIL.SYSCS_EMPTY_STATEMENT_CACHE");
@@ -97,7 +102,7 @@ public class JDBCSPTestIT {
     }
 
     @Test
-    public void test_basic_as_input() {
+    void test_basic_as_input() {
         JDBCSPConfig config = new JDBCSPConfig();
         config.setDataStore(dataStore);
         config.setFunction(true);
@@ -114,13 +119,13 @@ public class JDBCSPTestIT {
     }
 
     @Test
-    public void test_basic_as_output_and_no_input() {
+    void test_basic_as_output_and_no_input() {
         JDBCSPConfig config = new JDBCSPConfig();
         config.setDataStore(dataStore);
 
         config.setSpName("SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE");
         config.setSchema(DBTestUtils.createSPSchemaInfo1());
-        config.setSpParameters(Arrays.asList(new SPParameter("PARAMETER", ParameterType.IN)));
+        config.setSpParameters(Collections.singletonList(new SPParameter("PARAMETER", ParameterType.IN)));
 
         Schema schema = DBTestUtils.createSPSchema1(recordBuilderFactory);
         List<Record> records = new ArrayList<>();
@@ -130,13 +135,13 @@ public class JDBCSPTestIT {
     }
 
     @Test
-    public void test_basic_as_output_and_input() {
+    void test_basic_as_output_and_input() {
         JDBCSPConfig config = new JDBCSPConfig();
         config.setDataStore(dataStore);
 
         config.setSpName("SYSCS_UTIL.SYSCS_DISABLE_LOG_ARCHIVE_MODE");
         config.setSchema(DBTestUtils.createSPSchemaInfo3());
-        config.setSpParameters(Arrays.asList(new SPParameter("PARAMETER1", ParameterType.IN)));
+        config.setSpParameters(Collections.singletonList(new SPParameter("PARAMETER1", ParameterType.IN)));
 
         Schema schema = DBTestUtils.createSPSchema3(recordBuilderFactory);
         List<Record> records = new ArrayList<>();

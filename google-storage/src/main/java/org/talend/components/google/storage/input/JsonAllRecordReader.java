@@ -36,12 +36,13 @@ public class JsonAllRecordReader implements RecordReader {
     @Override
     public Iterator<Record> read(InputStream reader) {
         final JsonValue jsonValue = Json.createReader(reader).readValue();
-        final Record record = this.convertToRecord(jsonValue);
-        return Collections.singletonList(record).iterator();
+        final Record rec = this.convertToRecord(jsonValue);
+        return Collections.singletonList(rec).iterator();
     }
 
     @Override
     public void close() {
+        /* NOP */
     }
 
     /**

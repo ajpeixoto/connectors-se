@@ -12,6 +12,10 @@
  */
 package org.talend.components.marketo;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MarketoApiConstants {
 
     public static final String ATTR_ACCESS_TOKEN = "access_token";

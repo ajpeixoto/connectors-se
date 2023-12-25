@@ -118,17 +118,17 @@ public class CosmosDBService {
         configuration.setDataset(dataset);
         CosmosDBInput cosmosDBInput = new CosmosDBInput(configuration, this, builderFactory);
         cosmosDBInput.init();
-        Record record = cosmosDBInput.next();
+        Record rec = cosmosDBInput.next();
         cosmosDBInput.release();
-        if (record == null) {
+        if (rec == null) {
             throw new IllegalArgumentException(i18n.noResultFetched());
         }
-        return record.getSchema();
+        return rec.getSchema();
     }
 
     @Suggestions(ACTION_SUGGESTION_TABLE_COLUMNS_NAMES)
     public SuggestionValues getTableColumns(@Option("schema") final List<String> schema) {
-        if (schema.size() > 0) {
+        if (!schema.isEmpty()) {
             return new SuggestionValues(true,
                     schema
                             .stream()

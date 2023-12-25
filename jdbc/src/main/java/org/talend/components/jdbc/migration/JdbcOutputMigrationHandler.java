@@ -30,16 +30,16 @@ public class JdbcOutputMigrationHandler implements MigrationHandler {
             final String old_property_path_prefix = "configuration.keys[";
             final String new_property_path_prefix = "configuration.keys.keys[";
 
-            Map<String, String> correct_config = new HashMap<>();
+            Map<String, String> correctConfig = new HashMap<>();
             incomingData.forEach((k, v) -> {
                 if (k.startsWith(old_property_path_prefix)) {
-                    correct_config.put(k.replace(old_property_path_prefix, new_property_path_prefix), v);
+                    correctConfig.put(k.replace(old_property_path_prefix, new_property_path_prefix), v);
                 } else {
-                    correct_config.put(k, v);
+                    correctConfig.put(k, v);
                 }
             });
 
-            return correct_config;
+            return correctConfig;
         }
 
         if (incomingVersion < 3) {

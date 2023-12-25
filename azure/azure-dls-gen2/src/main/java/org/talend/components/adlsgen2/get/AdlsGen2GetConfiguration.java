@@ -12,20 +12,19 @@
  */
 package org.talend.components.adlsgen2.get;
 
+import static org.talend.components.adlsgen2.service.UIActionService.ACTION_FILESYSTEMS;
+import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.FormType.ADVANCED;
+
 import java.io.Serializable;
 
 import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Suggestable;
 import org.talend.sdk.component.api.configuration.constraint.Required;
-import org.talend.sdk.component.api.configuration.ui.DefaultValue;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
 import org.talend.sdk.component.api.meta.Documentation;
 
 import lombok.Data;
-
-import static org.talend.components.adlsgen2.service.UIActionService.ACTION_FILESYSTEMS;
-import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.FormType.ADVANCED;
 
 @Data
 @GridLayout(value = { //

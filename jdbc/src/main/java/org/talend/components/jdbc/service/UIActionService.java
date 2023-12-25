@@ -249,7 +249,7 @@ public class UIActionService {
         try {
             items = listTables(datastore)
                     .stream()
-                    .filter(e -> e != null)
+                    .filter(Objects::nonNull)
                     .map(e -> new Item(e.getName(), e.getName()))
                     .collect(toList());
         } catch (SQLException e) {

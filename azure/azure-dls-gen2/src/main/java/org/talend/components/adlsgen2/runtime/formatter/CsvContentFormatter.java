@@ -66,8 +66,8 @@ public class CsvContentFormatter extends AbstractContentFormatter {
             if (csvConfiguration.getCsvFormatOptions().isUseHeader()) {
                 printer.printRecord(getHeader());
             }
-            for (Record record : records) {
-                printer.printRecord(convertRecordToArray(record));
+            for (Record rec : records) {
+                printer.printRecord(convertRecordToArray(rec));
             }
             printer.flush();
             printer.close();
@@ -97,15 +97,15 @@ public class CsvContentFormatter extends AbstractContentFormatter {
         return headers.toArray();
     }
 
-    private Object[] convertRecordToArray(Record record) {
-        Object[] array = new Object[record.getSchema().getEntries().size()];
+    private Object[] convertRecordToArray(Record rec) {
+        Object[] array = new Object[rec.getSchema().getEntries().size()];
         for (int i = 0; i < schema.getEntries().size(); i++) {
             if (schema.getEntries().get(i).getType() == Schema.Type.DATETIME) {
-                array[i] = record.getDateTime(schema.getEntries().get(i).getName());
+                array[i] = rec.getDateTime(schema.getEntries().get(i).getName());
             } else if (schema.getEntries().get(i).getType() == Schema.Type.BYTES) {
-                array[i] = Arrays.toString(record.getBytes(schema.getEntries().get(i).getName()));
+                array[i] = Arrays.toString(rec.getBytes(schema.getEntries().get(i).getName()));
             } else {
-                array[i] = record.get(Object.class, schema.getEntries().get(i).getName());
+                array[i] = rec.get(Object.class, schema.getEntries().get(i).getName());
             }
         }
         return array;

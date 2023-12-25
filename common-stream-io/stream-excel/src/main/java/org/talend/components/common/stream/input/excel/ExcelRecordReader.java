@@ -51,5 +51,6 @@ public class ExcelRecordReader implements RecordReader {
 
     @Override
     public void close() {
+        /* NOP */
     }
 }

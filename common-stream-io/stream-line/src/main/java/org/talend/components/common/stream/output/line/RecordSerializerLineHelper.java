@@ -23,17 +23,20 @@ import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
 import org.talend.sdk.component.api.record.Schema.Type;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RecordSerializerLineHelper {
 
-    public static List<String> valuesFrom(Record record) {
+    public static List<String> valuesFrom(Record rec) {
         final List<String> result = new ArrayList<>();
 
-        for (Entry entry : record.getSchema().getEntries()) {
+        for (Entry entry : rec.getSchema().getEntries()) {
             if (entry.getType() == Schema.Type.RECORD) {
-                record
+                rec
                         .getOptionalRecord(entry.getName())
                         .map(RecordSerializerLineHelper::valuesFrom)
                         .orElse(Collections.emptyList())
@@ -42,13 +45,13 @@ public class RecordSerializerLineHelper {
                 // can't translate array to Line.
                 log.warn("Can't translate array in line format ({}).", entry.getName());
             } else if (entry.getType() == Type.BYTES) {
-                final String value = record
+                final String value = rec
                         .getOptionalBytes(entry.getName()) //
                         .map(Base64.getEncoder()::encodeToString) //
                         .orElse(null);
                 result.add(value);
             } else {
-                final Object obj = record.get(SchemaHelper.getFrom(entry.getType()), entry.getName());
+                final Object obj = rec.get(SchemaHelper.getFrom(entry.getType()), entry.getName());
                 result.add(obj == null ? null : obj.toString());
             }
         }

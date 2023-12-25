@@ -23,6 +23,10 @@ import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class OutputUtils {
 
     public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
@@ -33,7 +37,7 @@ public class OutputUtils {
     public static List<Schema.Entry> getAllSchemaEntries(List<Record> records) {
         return records
                 .stream()
-                .flatMap(record -> record.getSchema().getEntries().stream())
+                .flatMap(rec -> rec.getSchema().getEntries().stream())
                 .filter(distinctByKey(Schema.Entry::getName))
                 .collect(toList());
     }

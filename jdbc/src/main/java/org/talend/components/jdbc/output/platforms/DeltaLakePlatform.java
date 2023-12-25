@@ -97,6 +97,7 @@ public class DeltaLakePlatform extends Platform {
         ;
     }
 
+    @Override
     protected String isRequired(final Column column) {
         return column.isNullable() && !column.isPrimaryKey() ? "" : "NOT NULL";
     }

@@ -170,10 +170,9 @@ public class JiraInput extends AbstractHTTPInput<JiraInputConfiguration> {
             } else {
                 return null;
             }
+        } catch (HTTPComponentException e) {
+            throw extractJiraError(e);
         } catch (ComponentException e) {
-            if (e instanceof HTTPComponentException) {
-                throw extractJiraError((HTTPComponentException) e);
-            }
             throw e;
         }
     }
@@ -200,7 +199,7 @@ public class JiraInput extends AbstractHTTPInput<JiraInputConfiguration> {
         } else {
             records = parser.getArray();
         }
-        records.forEach(record -> jiraJQLSearchResultQueue.add(record.asJsonObject().toString()));
+        records.forEach(rec -> jiraJQLSearchResultQueue.add(rec.asJsonObject().toString()));
     }
 
     private ComponentException extractJiraError(HTTPComponentException e) {

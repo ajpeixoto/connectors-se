@@ -32,7 +32,7 @@ class RecordIORepositoryTest {
     private RecordIORepository repo;
 
     @Test
-    public void testRepo() {
+    void testRepo() {
 
         final RecordReaderSupplier reader = this.repo.findReader(FakeConfig.class);
         Assertions.assertNotNull(reader, "reader not found");
@@ -48,7 +48,7 @@ class RecordIORepositoryTest {
     }
 
     @Test
-    public void testRepoUnexist() {
+    void testRepoUnexist() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> this.repo.findReader(UnexistingConfig.class));
         Assertions.assertThrows(IllegalArgumentException.class, () -> this.repo.findWriter(UnexistingConfig.class));
     }
@@ -59,7 +59,7 @@ class RecordIORepositoryTest {
     }
 
     @Test
-    public void te2() {
+    void te2() {
         final String baseName = Messages.class.getPackage().getName() + ".Messages";
         final ResourceBundle bundle = ResourceBundle
                 .getBundle(baseName, Locale.getDefault(),

@@ -28,12 +28,13 @@ import org.talend.sdk.component.junit5.WithComponents;
 
 import java.sql.SQLException;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC commit component")
-public class JDBCCommitTestIT {
+class JDBCCommitTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -52,7 +53,7 @@ public class JDBCCommitTestIT {
     }
 
     @Test
-    public void testCommit() throws SQLException {
+    void testCommit() throws SQLException {
         JDBCCommitConfig config = new JDBCCommitConfig();
         JDBCCommitProcessor processor = new JDBCCommitProcessor(config, jdbcService, recordBuilderFactory);
         try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
@@ -62,14 +63,14 @@ public class JDBCCommitTestIT {
     }
 
     @Test
-    public void testClose() throws SQLException {
+    void testClose() throws SQLException {
         JDBCCommitConfig config = new JDBCCommitConfig();
         config.setClose(false);
 
         JDBCCommitProcessor processor = new JDBCCommitProcessor(config, jdbcService, recordBuilderFactory);
         try (JDBCService.DataSourceWrapper dataSourceWrapper = jdbcService.createDataSource(dataStore)) {
             processor.doCommit(dataSourceWrapper.getConnection());
-            assertTrue(!dataSourceWrapper.getConnection().isClosed());
+            assertFalse(dataSourceWrapper.getConnection().isClosed());
         }
     }
 

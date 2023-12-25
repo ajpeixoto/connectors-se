@@ -14,7 +14,8 @@ package org.talend.components.common.formats.excel;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
+
 import org.talend.components.common.formats.Encoding;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
@@ -79,7 +80,7 @@ public class ExcelFormatOptions implements Serializable {
     @Min(0)
     private int footer = 1;
 
-    public String effectiveHTMLFileEncoding(final Function<String, String> errorMsgBuilder) {
+    public String effectiveHTMLFileEncoding(final UnaryOperator<String> errorMsgBuilder) {
         if (excelFormat != ExcelFormat.HTML) {
             throw new IllegalStateException("Only HTML format supports encoding configuration"); // should not be here
         }

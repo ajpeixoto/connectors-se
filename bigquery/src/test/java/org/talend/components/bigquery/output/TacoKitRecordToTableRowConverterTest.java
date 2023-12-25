@@ -12,7 +12,13 @@
  */
 package org.talend.components.bigquery.output;
 
-import com.google.api.services.bigquery.model.TableSchema;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.talend.components.bigquery.service.BigQueryService;
@@ -23,17 +29,10 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.internationalization.InternationalizationServiceFactory;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
 
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-
-public class TacoKitRecordToTableRowConverterTest {
+class TacoKitRecordToTableRowConverterTest {
 
     @Test
-    public void testNullDatetime() {
+    void testNullDatetime() {
         RecordBuilderFactory rbf = new RecordBuilderFactoryImpl(null);
         Schema.Entry arrayEntry = rbf
                 .newEntryBuilder()

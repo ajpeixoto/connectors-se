@@ -18,6 +18,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
@@ -37,6 +38,7 @@ import com.microsoft.azure.storage.StorageException;
 import lombok.SneakyThrows;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.azure")
 class HTMLInputIT extends BaseIT {
 

@@ -85,6 +85,7 @@ public class JDBCBulkExecStandalone implements Serializable {
 
     @PreDestroy
     public void release() throws SQLException {
+        /* NOP */
     }
 
 }

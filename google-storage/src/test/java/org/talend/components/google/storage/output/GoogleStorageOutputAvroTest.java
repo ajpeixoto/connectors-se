@@ -43,7 +43,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents(value = "org.talend.components.google.storage")
-public class GoogleStorageOutputAvroTest {
+class GoogleStorageOutputAvroTest {
 
     @Service
     private RecordIORepository repository;

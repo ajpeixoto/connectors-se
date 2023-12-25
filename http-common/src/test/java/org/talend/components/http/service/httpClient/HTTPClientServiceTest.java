@@ -142,7 +142,7 @@ class HTTPClientServiceTest {
 
     @ParameterizedTest
     @CsvSource(value = { "get", "post", "patch" })
-    public void noAuth(String method) throws HTTPClientException {
+    void noAuth(String method) throws HTTPClientException {
         this.config.getDataset().setResource(String.format("/%s", method));
         this.config.getDataset().setMethodType(method.toUpperCase());
 
@@ -162,7 +162,7 @@ class HTTPClientServiceTest {
     @ParameterizedTest
     @CsvSource(value = { "myLogin,myPassord,myPassord,200",
             "myLogin,myPassord,wrongPassord,401" })
-    public void basicAuth(String login, String expectedPwd, String givenPwd, int expectedStatus)
+    void basicAuth(String login, String expectedPwd, String givenPwd, int expectedStatus)
             throws HTTPClientException {
         this.config.getDataset().setResource(String.format("/basic-auth/%s/%s", login, expectedPwd));
 
@@ -205,7 +205,7 @@ class HTTPClientServiceTest {
      * "myLogin,myPassord,auth-int,SHA-512,wrongPassord,401"
      */
     })
-    public void digestAuth(String login, String expectedPwd, String qop, String algo, String givenPwd,
+    void digestAuth(String login, String expectedPwd, String qop, String algo, String givenPwd,
             int expectedStatus) throws HTTPClientException {
         this.config.getDataset().setResource(String.format("/digest-auth/%s/%s/%s/%s", qop, login, expectedPwd, algo));
 
@@ -235,7 +235,7 @@ class HTTPClientServiceTest {
             "true,/absolute-redirect/2,3,200",
             "false,/absolute-redirect/2,3,302"
     })
-    public void redirectionsOnSameURL(boolean acceptRedirections,
+    void redirectionsOnSameURL(boolean acceptRedirections,
             String resource,
             int maxRedirectionOnSameURL,
             int status) throws HTTPClientException {
@@ -254,7 +254,7 @@ class HTTPClientServiceTest {
             // Only test failing redirection, to not do a real call
             "true,/redirect-to?url=https%3A%2F%2Fwww.talend.org,false"
     })
-    public void redirectionsOnSameHost(boolean onlySameHostRedirection,
+    void redirectionsOnSameHost(boolean onlySameHostRedirection,
             String resource,
             boolean success) throws HTTPClientException {
         this.config.getDataset().setResource(resource);
@@ -264,7 +264,7 @@ class HTTPClientServiceTest {
         QueryConfiguration queryConfiguration = service.convertConfiguration(config, null);
         if (success) {
             HTTPClient.HTTPResponse response = service.invoke(queryConfiguration, config.isDieOnError());
-            Assertions.assertEquals(200, response.getStatus());
+            Assertions.assertEquals(200, response.getStatus().getCode());
         } else {
             Assertions.assertThrows(HTTPClientException.class, () -> {
                 HTTPClient.HTTPResponse response = service.invoke(queryConfiguration, config.isDieOnError());
@@ -272,9 +272,9 @@ class HTTPClientServiceTest {
         }
     }
 
-    @Disabled
+    @Disabled("need a HTTPS server with self signed certificate")
     @Test
-    public void bypassCertificateValidation() throws HTTPClientException {
+    void bypassCertificateValidation() throws HTTPClientException {
         // TODO : need a HTTPS server with self signed certificate.
 
         // Manual test done with :
@@ -307,7 +307,7 @@ class HTTPClientServiceTest {
     }
 
     @Test
-    public void testSubstitutionNotSupportedInSE() {
+    void testSubstitutionNotSupportedInSE() {
         Record.Builder mainBuilder = this.recordBuilderFactory.newRecordBuilder();
         Record.Builder siteBuilder = this.recordBuilderFactory.newRecordBuilder();
         Record.Builder userBuilder = this.recordBuilderFactory.newRecordBuilder();
@@ -380,7 +380,7 @@ class HTTPClientServiceTest {
                     "http://www.domain.com/,get,http://www.domain.com/get",
                     "http://www.domain.com,/get,http://www.domain.com/get",
                     "   http://www.domain.com/ ,  /get ,http://www.domain.com/get" })
-    public void buildUrl(final String base, final String resource, final String expected) {
+    void buildUrl(final String base, final String resource, final String expected) {
         String url = HTTPClientService.buildUrl(base, resource);
         Assertions.assertEquals(expected, url);
     }

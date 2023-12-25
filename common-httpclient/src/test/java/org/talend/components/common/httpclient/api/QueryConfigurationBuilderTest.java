@@ -37,7 +37,7 @@ class QueryConfigurationBuilderTest {
     public final static String HEADER_CONTENT_TYPE_KEY = "Content-Type";
 
     @Test
-    public void createQueryConfigurationTest() {
+    void createQueryConfigurationTest() {
         String url = "https://myurl.com";
         String body = "This is a raw text body.";
         String method = "PATCH";
@@ -90,7 +90,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void bodyTextTest() {
+    void bodyTextTest() {
         String body = "/* Content is not checked */";
 
         QueryConfiguration txt = QueryConfigurationBuilder.create("https://myurl.com")
@@ -113,7 +113,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void bodyFormDataTest() {
+    void bodyFormDataTest() {
         Map<String, String> keyVals = new HashMap<>();
         keyVals.put("name", "peter");
         keyVals.put("age", "30");
@@ -132,7 +132,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void bodyXFormURLEncodedTest() {
+    void bodyXFormURLEncodedTest() {
         Map<String, String> keyVals = new HashMap<>();
         keyVals.put("name", "peter");
         keyVals.put("age", "30");
@@ -151,11 +151,9 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void emptyURL() {
-        IllegalArgumentException e = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            QueryConfiguration config = QueryConfigurationBuilder.create("    ")
-                    .build();
-        });
+    void emptyURL() {
+        IllegalArgumentException e =
+                Assertions.assertThrows(IllegalArgumentException.class, () -> QueryConfigurationBuilder.create("    "));
     }
 
     @ParameterizedTest
@@ -172,7 +170,7 @@ class QueryConfigurationBuilderTest {
             "formdata/urlencoded",
             "urlencoded/formdata"
     })
-    public void changeBodyType(String bodys) {
+    void changeBodyType(String bodys) {
         String[] split = bodys.split("/");
         IllegalArgumentException txtJson = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             QueryConfigurationBuilder builder = QueryConfigurationBuilder.create("https://myurl.com");
@@ -199,7 +197,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void buildWithSubstitutionTest() {
+    void buildWithSubstitutionTest() {
         Map<String, String> dictionary = new HashMap<>();
         dictionary.put("/api/version", "v1");
         dictionary.put("/api/endpoint", "getEntity");
@@ -235,7 +233,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void buildWithSubstitutionBodyTest() {
+    void buildWithSubstitutionBodyTest() {
         Map<String, String> dictionary = new HashMap<>();
         dictionary.put("/user/name", "peter");
         dictionary.put("/user/age", "33");
@@ -264,7 +262,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void setAuthenticationTest() {
+    void setAuthenticationTest() {
         String myLogin = "mylogin";
         String myPassword = "mypassword";
         QueryConfiguration basic = QueryConfigurationBuilder.create("https://myurl.com")
@@ -310,7 +308,7 @@ class QueryConfigurationBuilderTest {
 
     @ParameterizedTest
     @CsvSource({ "true", "false" })
-    public void setAuthenticationTest(boolean bypass) {
+    void setAuthenticationTest(boolean bypass) {
         QueryConfiguration config = QueryConfigurationBuilder.create("https://myurl.com")
                 .bypassCertificateConfiguration(bypass)
                 .build();
@@ -324,7 +322,7 @@ class QueryConfigurationBuilderTest {
             "QUERY_PARAMETERS,'  azerty  ','  prefix  ','  123456  ','prefix 123456'",
             "HEADERS,'  azerty  ','  prefix  ','  123456  ','prefix 123456'",
     })
-    public void setAPIKey(String destStr, String name, String prefix, String token, String expectedValue) {
+    void setAPIKey(String destStr, String name, String prefix, String token, String expectedValue) {
         APIKeyDestination destination = APIKeyDestination.valueOf(destStr);
         QueryConfiguration config = QueryConfigurationBuilder.create("https://myurl.com")
                 .setAPIKey(destination, name, prefix, token)
@@ -350,7 +348,7 @@ class QueryConfigurationBuilderTest {
             "FORM,''",
             "BASIC,qqq",
             "DIGEST,''" })
-    public void setOAuth20ClientCredentials(String mode, String scopes) {
+    void setOAuth20ClientCredentials(String mode, String scopes) {
         List<String> scopeList = Arrays.asList(scopes.split("/"));
         String endpoint = "https://mydomain.com/oauth/token";
         String clientId = "the_client_id";
@@ -409,7 +407,7 @@ class QueryConfigurationBuilderTest {
 
     @ParameterizedTest
     @EnumSource(ResponseFormat.class)
-    public void setResponseFormat(ResponseFormat f) {
+    void setResponseFormat(ResponseFormat f) {
         QueryConfiguration config = QueryConfigurationBuilder.create("https://myurl.com")
                 .setResponseFormat(f)
                 .build();
@@ -418,7 +416,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void setProxyTest() {
+    void setProxyTest() {
         ProxyConfiguration.ProxyType type = ProxyConfiguration.ProxyType.HTTP;
         String host = "myproxy";
         int port = 3128;
@@ -436,7 +434,7 @@ class QueryConfigurationBuilderTest {
     }
 
     @Test
-    public void addAttachmentsTest() {
+    void addAttachmentsTest() {
         Attachment fakeAttachment = new Attachment("someMediaType", new Object());
         QueryConfiguration configuration = QueryConfigurationBuilder.create("https://myurl.com")
                 .addAttachment(fakeAttachment)

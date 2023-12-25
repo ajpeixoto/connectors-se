@@ -34,7 +34,7 @@ import org.talend.sdk.component.junit.SimpleComponentRule;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.jdbc")
-public class SnowflakeCopyTest {
+class SnowflakeCopyTest {
 
     @ClassRule
     public static final SimpleComponentRule COMPONENT_FACTORY = new SimpleComponentRule("org.talend.components.jdbc");
@@ -45,7 +45,7 @@ public class SnowflakeCopyTest {
     private RecordBuilderFactory recordBuilderFactory = COMPONENT_FACTORY.findService(RecordBuilderFactory.class);
 
     @Test
-    public void createTmpDirTest()
+    void createTmpDirTest()
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, IOException {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         Method createWorkDir = SnowflakeCopyService.class.getDeclaredMethod("createWorkDir");
@@ -56,7 +56,7 @@ public class SnowflakeCopyTest {
     }
 
     @Test
-    public void cleanTmpFile() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    void cleanTmpFile() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         Method createWorkDir = SnowflakeCopyService.class.getDeclaredMethod("createWorkDir");
         createWorkDir.setAccessible(true);
@@ -66,7 +66,7 @@ public class SnowflakeCopyTest {
     }
 
     @Test
-    public void testTempTable() {
+    void testTempTable() {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         String tableName = snowflakeCopyService
                 .tmpTableName(
@@ -75,7 +75,7 @@ public class SnowflakeCopyTest {
     }
 
     @Test
-    public void testSplitRecords() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    void testSplitRecords() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         try {
             Method createWorkDir = SnowflakeCopyService.class.getDeclaredMethod("createWorkDir");
@@ -91,7 +91,7 @@ public class SnowflakeCopyTest {
     }
 
     @Test
-    public void getColumnNamesContentInCopyCommand() throws Exception {
+    void getColumnNamesContentInCopyCommand() throws Exception {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         try {
             Method createWorkDir = SnowflakeCopyService.class.getDeclaredMethod("createWorkDir");
@@ -137,7 +137,7 @@ public class SnowflakeCopyTest {
     }
 
     @Test
-    public void testJoinFileNamesString() throws Exception {
+    void testJoinFileNamesString() throws Exception {
         SnowflakeCopyService snowflakeCopyService = new SnowflakeCopyService();
         try {
             Method createWorkDir = SnowflakeCopyService.class.getDeclaredMethod("createWorkDir");
@@ -160,7 +160,7 @@ public class SnowflakeCopyTest {
     }
 
     List<Record> createData(int i) {
-        List<Record> records = new ArrayList<Record>(i);
+        List<Record> records = new ArrayList<>(i);
         for (; i > 0; i--) {
             Record record = recordBuilderFactory
                     .newRecordBuilder() //

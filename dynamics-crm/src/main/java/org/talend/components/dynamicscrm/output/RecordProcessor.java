@@ -18,6 +18,6 @@ import javax.naming.ServiceUnavailableException;
 
 public interface RecordProcessor {
 
-    void processRecord(Record record) throws ServiceUnavailableException;
+    void processRecord(Record rec) throws ServiceUnavailableException;
 
 }

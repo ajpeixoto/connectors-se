@@ -13,6 +13,9 @@
 package org.talend.components.jdbc.platforms;
 
 import com.zaxxer.hikari.HikariDataSource;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.AuthenticationType;
 import org.talend.components.jdbc.common.JDBCConfiguration;
@@ -28,6 +31,7 @@ import java.util.Map;
 import static java.util.Optional.ofNullable;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DatabaseSpecial {
 
     public static void doConfig4DifferentDatabaseAndDifferentRuntimeEnv(final HikariDataSource dataSource,

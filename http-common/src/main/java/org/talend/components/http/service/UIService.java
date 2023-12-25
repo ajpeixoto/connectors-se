@@ -43,15 +43,15 @@ import java.util.stream.Collectors;
 @Service
 public class UIService {
 
-    public final static String ACTION_HTTP_METHOD_LIST = "ACTION_HTTP_METHOD_LIST";
+    public static final String ACTION_HTTP_METHOD_LIST = "ACTION_HTTP_METHOD_LIST";
 
-    public final static String ACTION_DISCOVER_SCHEMA_EXTENDED = "ACTION_DISCOVER_SCHEMA_EXTENDED";
+    public static final String ACTION_DISCOVER_SCHEMA_EXTENDED = "ACTION_DISCOVER_SCHEMA_EXTENDED";
 
-    public final static String ACTION_DISCOVER_SCHEMA = "Dataset";
+    public static final String ACTION_DISCOVER_SCHEMA = "Dataset";
 
-    public final static String ACTION_PAGINATION_FLAVOR_LIST = "ACTION_PAGINATION_FLAVOR_LIST";
+    public static final String ACTION_PAGINATION_FLAVOR_LIST = "ACTION_PAGINATION_FLAVOR_LIST";
 
-    public final static String ACTION_UPDATE_PAGINATION_PRESET = "ACTION_UPDATE_PAGINATION_PRESET";
+    public static final String ACTION_UPDATE_PAGINATION_PRESET = "ACTION_UPDATE_PAGINATION_PRESET";
 
     @Service
     @Getter
@@ -166,7 +166,7 @@ public class UIService {
         }
 
         Schema.Builder builder = recordBuilderService.getRecordBuilderFactory().newSchemaBuilder(Schema.Type.RECORD);
-        entries.forEach(e -> builder.withEntry(e));
+        entries.forEach(builder::withEntry);
 
         return builder.build();
     }

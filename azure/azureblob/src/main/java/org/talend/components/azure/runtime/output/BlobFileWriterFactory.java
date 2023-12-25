@@ -16,6 +16,10 @@ import org.talend.components.azure.output.BlobOutputConfiguration;
 import org.talend.components.azure.runtime.output.excel.ExcelBlobFileWriter;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BlobFileWriterFactory {
 
     public static BlobFileWriter getWriter(BlobOutputConfiguration config,

@@ -38,7 +38,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @WithComponents("org.talend.components.jira")
 @ExtendWith({ JiraIntTestExtension.class })
-public class JiraInputIntTest extends JiraIntTestBase {
+class JiraInputIntTest extends JiraIntTestBase {
 
     @Injected
     protected BaseComponentsHandler componentsHandler;
@@ -61,21 +61,14 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(1)
-    public void testGetProjects() {
+    void testGetProjects() {
         int expectedAmountOfProjects = 3;
 
         inputConfiguration.getDataset().setResourceType(ResourceType.PROJECT);
         inputConfiguration.setProjectId(""); // get all available projects
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
@@ -87,21 +80,14 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(2)
-    public void testGetProjectByKey() {
+    void testGetProjectByKey() {
         int expectedAmountOfProjects = 1;
 
         inputConfiguration.getDataset().setResourceType(ResourceType.PROJECT);
         inputConfiguration.setProjectId("TP");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
 
@@ -111,7 +97,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(3)
-    public void testGetOneIssueByKey() {
+    void testGetOneIssueByKey() {
         int expectedAmountOfRecords = 1;
         final String issueKey = "TP-1";
         inputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
@@ -119,14 +105,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
         inputConfiguration.setIssueId(issueKey);
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
         Assertions.assertEquals(expectedAmountOfRecords, records.size(), "Records amount is different");
@@ -135,7 +114,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(4)
-    public void testIssueSearchWithEmptyJQL() {
+    void testIssueSearchWithEmptyJQL() {
         int expectedAmountOfRecords = 2;
 
         inputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
@@ -143,14 +122,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
         inputConfiguration.setJql("");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
         Assertions.assertEquals(expectedAmountOfRecords, records.size(), "Records amount is different");
@@ -160,7 +132,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(5)
-    public void testIssueSearchOneIssue() {
+    void testIssueSearchOneIssue() {
         String expectedIssueSummary = "Test issue 1";
         int expectedAmountOfRecords = 1;
 
@@ -169,14 +141,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
         inputConfiguration.setJql("summary ~ \"" + expectedIssueSummary + "\"");
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
-        Job.components()
-                .component("jiraInput", "JIRA://Input?" + inputConfig)
-                .component("collector", "test://collector")
-                .connections()
-                .from("jiraInput")
-                .to("collector")
-                .build()
-                .run();
+        runPipeline(inputConfig);
 
         List<Record> records = componentsHandler.getCollectedData(Record.class);
         Assertions.assertEquals(expectedAmountOfRecords, records.size(), "Records amount is different");
@@ -185,7 +150,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
     @Test
     @Order(6)
-    public void testFailureOnUnauthorized() {
+    void testFailureOnUnauthorized() {
         inputConfiguration.getDataset().getDatastore().setUser("notExistingUser");
         inputConfiguration.getDataset().getDatastore().setPass("somePass");
 
@@ -195,22 +160,26 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
         ComponentException componentException = Assertions.assertThrows(ComponentException.class,
-                () -> Job.components()
-                        .component("jiraInput", "JIRA://Input?" + inputConfig)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("jiraInput")
-                        .to("collector")
-                        .build()
-                        .run());
+                () -> runPipeline(inputConfig));
 
         componentException.printStackTrace();
         Assertions.assertTrue(componentException.getMessage().contains("401 Unauthorized"));
     }
 
+    private static void runPipeline(final String inputConfig) {
+        Job.components()
+                .component("jiraInput", "JIRA://Input?" + inputConfig)
+                .component("collector", "test://collector")
+                .connections()
+                .from("jiraInput")
+                .to("collector")
+                .build()
+                .run();
+    }
+
     @Test
     @Order(7) // should be last otherwise user might be locked to enter captcha and other tests would fail
-    public void testFailureOnIncorrectPass403() {
+    void testFailureOnIncorrectPass403() {
         inputConfiguration.getDataset().getDatastore().setPass("fakeIncorrectPass");
 
         inputConfiguration.getDataset().setResourceType(ResourceType.ISSUE);
@@ -219,14 +188,7 @@ public class JiraInputIntTest extends JiraIntTestBase {
 
         String inputConfig = configurationByExample().forInstance(inputConfiguration).configured().toQueryString();
         ComponentException componentException = Assertions.assertThrows(ComponentException.class,
-                () -> Job.components()
-                        .component("jiraInput", "JIRA://Input?" + inputConfig)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("jiraInput")
-                        .to("collector")
-                        .build()
-                        .run());
+                () -> runPipeline(inputConfig));
 
         Assertions.assertTrue(componentException.getMessage().contains("Forbidden (403)"));
     }

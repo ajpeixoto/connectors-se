@@ -85,9 +85,7 @@ public class RecordIORepository {
      * "reader": "[ReaderSupplierClassName]", "writer": "[WriterSupplierClassName]" } }
      */
     private void loadJson(ClassLoader loader, JsonObject json) {
-        json.entrySet().forEach((Entry<String, JsonValue> e) -> {
-            this.loadClasses(loader, e.getKey(), e.getValue());
-        });
+        json.forEach((key, value) -> this.loadClasses(loader, key, value));
     }
 
     /**

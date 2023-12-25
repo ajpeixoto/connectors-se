@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 class DefaultConfigurationValuesTest {
 
     @Test
-    public void getDefaultValuesTests() {
+    void getDefaultValuesTests() {
         String key = "aa.bb.cc";
         int valueAsInt = DefaultConfigurationValues.getValueAsInt(key, 200);
         Assertions.assertEquals(200, valueAsInt);

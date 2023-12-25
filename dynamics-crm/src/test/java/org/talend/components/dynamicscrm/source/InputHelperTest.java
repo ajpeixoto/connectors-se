@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 @WithComponents("org.talend.components.dynamicscrm")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class InputHelperTest {
+class InputHelperTest {
 
     @Service
     private I18n i18n;
@@ -53,7 +53,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testEmptyFilterConversion() {
+    void testEmptyFilterConversion() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -65,7 +65,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOneFieldEquals() {
+    void testOneFieldEquals() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -79,7 +79,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOneFieldNotEquals() {
+    void testOneFieldNotEquals() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -93,7 +93,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOneFieldGreater() {
+    void testOneFieldGreater() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -107,7 +107,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOneFieldGreaterOrEqual() {
+    void testOneFieldGreaterOrEqual() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -121,7 +121,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOneFieldLess() {
+    void testOneFieldLess() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -135,7 +135,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOneFieldLessOrEqual() {
+    void testOneFieldLessOrEqual() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -149,7 +149,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testMultipleAnd() {
+    void testMultipleAnd() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         List<FilterCondition> filterConditionList = new ArrayList<>();
@@ -170,7 +170,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testMultipleOr() {
+    void testMultipleOr() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setCustomFilter(false);
         configuration.setOperator(Operator.OR);
@@ -281,7 +281,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOrderByFieldAsc() {
+    void testOrderByFieldAsc() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setOrderByConditionsList(Arrays.asList(new OrderByCondition("field", Order.ASC)));
 
@@ -292,7 +292,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOrderByFieldDesc() {
+    void testOrderByFieldDesc() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setOrderByConditionsList(Arrays.asList(new OrderByCondition("field", Order.DESC)));
 
@@ -303,7 +303,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testOrderBySeveralFields() {
+    void testOrderBySeveralFields() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration
                 .setOrderByConditionsList(
@@ -318,7 +318,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testEmptyFieldOrderBy() {
+    void testEmptyFieldOrderBy() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setOrderByConditionsList(Arrays.asList(new OrderByCondition("", Order.DESC)));
 
@@ -328,7 +328,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testEmptyOrderBy() {
+    void testEmptyOrderBy() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setOrderByConditionsList(Collections.emptyList());
 
@@ -338,7 +338,7 @@ public class InputHelperTest {
     }
 
     @Test
-    public void testNullListOrderBy() {
+    void testNullListOrderBy() {
         DynamicsCrmInputMapperConfiguration configuration = new DynamicsCrmInputMapperConfiguration();
         configuration.setOrderByConditionsList(null);
 

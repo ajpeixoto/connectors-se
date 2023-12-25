@@ -31,14 +31,14 @@ class UIActionServiceTest {
         for (String name : correct) {
             final ValidationResult validationResult = uiActionService.validateSQLInjection(name);
 
-            Assertions.assertTrue("the table name is valid".equals(validationResult.getComment()));
+            Assertions.assertEquals("the table name is valid", validationResult.getComment());
         }
 
         String[] riskyOnes = { "\"AAA\\\" ; drop table \\\"ABCDE\" ", "105 OR 1=1", "45 --",
                 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa259" };
         for (String name : riskyOnes) {
             final ValidationResult validationResult = uiActionService.validateSQLInjection(name);
-            Assertions.assertFalse("the table name is valid".equals(validationResult.getComment()));
+            Assertions.assertNotEquals("the table name is valid", validationResult.getComment());
         }
     }
 }

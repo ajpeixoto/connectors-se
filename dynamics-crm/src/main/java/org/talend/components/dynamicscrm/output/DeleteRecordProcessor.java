@@ -15,7 +15,6 @@ package org.talend.components.dynamicscrm.output;
 import javax.naming.ServiceUnavailableException;
 
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.talend.components.dynamicscrm.service.DynamicsCrmException;
 import org.talend.components.dynamicscrm.service.I18n;
 import org.talend.ms.crm.odata.DynamicsCRMClient;
 import org.talend.sdk.component.api.record.Record;
@@ -35,9 +34,9 @@ public class DeleteRecordProcessor implements RecordProcessor {
     }
 
     @Override
-    public void processRecord(Record record) throws ServiceUnavailableException {
+    public void processRecord(Record rec) throws ServiceUnavailableException {
         // There is only one key in Dynamics CRM.
         String keyName = entitySet.getEntityType().getKeyPropertyRefs().get(0).getName();
-        client.deleteEntity(record.getString(keyName));
+        client.deleteEntity(rec.getString(keyName));
     }
 }

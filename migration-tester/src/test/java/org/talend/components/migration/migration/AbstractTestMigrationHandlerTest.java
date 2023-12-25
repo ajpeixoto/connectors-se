@@ -41,8 +41,8 @@ class AbstractTestMigrationHandlerTest {
     void testMigrate() {
         final TestMigrationHandler testMigrationHandler = new TestMigrationHandler();
         final Map<String, String> migrated = testMigrationHandler.migrate(1, incomingData);
-        assertEquals(migrated.get("configuration.level1.level2.legacy"), "legacy data");
-        assertEquals(migrated.get("configuration.level1.level2.duplication"), "legacy data");
+        assertEquals("legacy data", migrated.get("configuration.level1.level2.legacy"));
+        assertEquals("legacy data", migrated.get("configuration.level1.level2.duplication"));
 
         final String callback = migrated.get("configuration.test_callback");
         final String[] split = callback.split("\\|");

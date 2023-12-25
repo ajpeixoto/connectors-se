@@ -146,8 +146,8 @@ public class JsonToRecord {
         switch (entry.getType()) {
         case RECORD: {
             final JsonObject jsonObject = json.getJsonObject(jsonName);
-            final Record record = convertJsonObjectToRecord(entry.getElementSchema(), jsonObject);
-            builder.withRecord(entry, record);
+            final Record rec = convertJsonObjectToRecord(entry.getElementSchema(), jsonObject);
+            builder.withRecord(entry, rec);
         }
             break;
         case ARRAY:

@@ -12,6 +12,8 @@
  */
 package org.talend.components.jdbc.schema;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.DBType;
 import org.talend.components.jdbc.common.Driver;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 
 // TODO better to extract this to a new util project as that's used in tcompv0 jdbc too
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommonUtils {
 
     private static Set<String> getPrimaryKeys(DatabaseMetaData databaseMetdata, String catalogName, String schemaName,

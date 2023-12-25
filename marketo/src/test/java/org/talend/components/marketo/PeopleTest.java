@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @WithComponents("org.talend.components.marketo")
 @HttpApi(useSsl = true)
-public class PeopleTest extends MarketoBaseTest {
+class PeopleTest extends MarketoBaseTest {
 
     public static final String LIST_ID_COMPQA = "1011";
 

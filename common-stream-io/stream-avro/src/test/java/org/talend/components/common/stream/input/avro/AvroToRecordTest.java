@@ -53,6 +53,7 @@ import org.talend.components.common.stream.output.avro.RecordToAvro;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.record.Schema.Entry;
+import org.talend.sdk.component.api.record.Schema.Type;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.beam.spi.AvroRecordBuilderFactoryProvider;
 import org.talend.sdk.component.runtime.record.RecordBuilderFactoryImpl;
@@ -171,7 +172,7 @@ class AvroToRecordTest {
         Schema s = toRecord.inferSchema(avro);
         assertNotNull(s);
         assertEquals(8, s.getEntries().size());
-        assertTrue(s.getType().equals(Schema.Type.RECORD));
+        assertEquals(Type.RECORD, s.getType());
         assertTrue(s.getEntries()
                 .stream()
                 .map(Entry::getName)

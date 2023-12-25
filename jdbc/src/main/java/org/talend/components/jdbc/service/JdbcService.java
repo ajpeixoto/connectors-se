@@ -350,7 +350,7 @@ public class JdbcService {
     public Schema createSchema(BaseDataSet dataSet, Connection connection, ResultSet resultSet,
             RecordBuilderFactory recordBuilderFactory) throws SQLException {
         final Map<String, ColumnMetadata> columnMetadata = new HashMap<>();
-        if (TableNameDataset.class.isInstance(dataSet)) {
+        if (dataSet instanceof TableNameDataset) {
             String catalog = null;
             String dbSchema = null;
             // when we generate sql for table fetch, we wrap table name auto like : [select * from `Company`], table

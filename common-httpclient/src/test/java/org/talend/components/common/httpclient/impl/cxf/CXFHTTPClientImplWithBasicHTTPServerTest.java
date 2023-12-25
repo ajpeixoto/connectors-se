@@ -58,7 +58,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     private QueryConfiguration queryConfiguration;
 
     @Test
-    public void simpleTest() throws HTTPClientException {
+    void simpleTest() throws HTTPClientException {
         QueryConfiguration config =
                 QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_SIMPLE)).build();
 
@@ -71,7 +71,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void urlEncodedForm() throws HTTPClientException {
+    void urlEncodedForm() throws HTTPClientException {
         String comment = "<p>This is a <em>description</emp> &to check URL encode of form parameters: !=&éè.</p>";
         String name = "Raphaël";
         String age = "33";
@@ -95,7 +95,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void multiPartFormData() throws HTTPClientException {
+    void multiPartFormData() throws HTTPClientException {
         String comment = "<p>This is a <em>description</emp> &to check URL encode of form parameters: !=&éè.</p>";
         String name = "Raphaël";
         String age = "33";
@@ -165,7 +165,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
      * @CsvSource(value = { "GET", "HEAD", "OPTIONS", "TRACE", "POST", "PUT" }):
      */
     @CsvSource(value = { "GET", "HEAD", "OPTIONS", "TRACE" })
-    public void redirectTest(String method) throws HTTPClientException {
+    void redirectTest(String method) throws HTTPClientException {
         QueryConfiguration config = QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_REDIRECT))
                 .setMethod(method)
                 .addQueryParam("nb_redirect", "5")
@@ -187,7 +187,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void exceededRedirectionTest() {
+    void exceededRedirectionTest() {
         Assertions.assertThrows(HTTPClientException.class, () -> {
             QueryConfiguration config = QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_REDIRECT))
                     .setMethod("GET")
@@ -200,7 +200,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void acceptOnlyRedirectionToSameHost() {
+    void acceptOnlyRedirectionToSameHost() {
         Assertions.assertThrows(HTTPClientException.class, () -> {
             QueryConfiguration config =
                     QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_REDIRECT_CONFIGURE_HOST))
@@ -214,7 +214,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
 
     @ParameterizedTest
     @CsvSource({ "1000,1,true", "10,500,false" })
-    public void receiveTimeoutTest(long receiveTimeout, long serverDelay, boolean success) throws HTTPClientException {
+    void receiveTimeoutTest(long receiveTimeout, long serverDelay, boolean success) throws HTTPClientException {
         final QueryConfiguration config =
                 QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_DELAYED_RESPONSE))
                         .setMethod("GET")
@@ -233,7 +233,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void connectionTimeoutTest() throws HTTPClientException {
+    void connectionTimeoutTest() throws HTTPClientException {
         final QueryConfiguration config =
                 QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_DELAYED_RESPONSE))
                         .setMethod("GET")
@@ -257,7 +257,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void basicAuthentication() throws HTTPClientException {
+    void basicAuthentication() throws HTTPClientException {
         String myPassword = "myPassword";
         String myUser = "myUser";
         final QueryConfiguration config =
@@ -277,7 +277,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
 
     @ParameterizedTest
     @MethodSource("oauth20ClientCredentialAuthenticationParams")
-    public void oauth20ClientCredentialAuthentication(OAuth20.AuthentMode authentMode, String tokenEndpoint,
+    void oauth20ClientCredentialAuthentication(OAuth20.AuthentMode authentMode, String tokenEndpoint,
             String clientId, String clientSecret, boolean exception, Token oauthToken, String expectedToken)
             throws HTTPClientException {
 
@@ -362,7 +362,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void authorizationTokenAuthentication() throws HTTPClientException {
+    void authorizationTokenAuthentication() throws HTTPClientException {
         String prefix = "Bearer";
         String token = "1234567890abcDEF";
         final QueryConfiguration config =
@@ -393,7 +393,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
     }
 
     @Test
-    public void validateSite() throws HTTPClientException {
+    void validateSite() throws HTTPClientException {
         System.setProperty("connectors.enable_local_network_access", "false");
 
         Assertions.assertThrows(HTTPClientException.class, () -> {
@@ -408,7 +408,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
 
     @ParameterizedTest
     @CsvSource({ "true", "false" })
-    public void contentEncodingGZIPBodyQuery(boolean supportGzip) throws HTTPClientException {
+    void contentEncodingGZIPBodyQuery(boolean supportGzip) throws HTTPClientException {
         final QueryConfiguration config =
                 QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_GZIP))
                         .setMethod("GET")
@@ -428,7 +428,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
 
     @ParameterizedTest
     @EnumSource(ResponseFormat.class)
-    public void responseFormatTest(ResponseFormat f) throws HTTPClientException {
+    void responseFormatTest(ResponseFormat f) throws HTTPClientException {
         final QueryConfiguration config =
                 QueryConfigurationBuilder.create(getUrl(BasicHTTPServerFactory.HTTP_ECHO))
                         .setMethod("GET")
@@ -450,7 +450,7 @@ class CXFHTTPClientImplWithBasicHTTPServerTest {
             "QUERY_PARAMETERS,40,10",
             "HEADERS,40,4",
             "HEADERS,1,6", })
-    public void offsetLimitPagination(PaginationParametersLocation location, int offset, int limit)
+    void offsetLimitPagination(PaginationParametersLocation location, int offset, int limit)
             throws HTTPClientException {
 
         QueryConfiguration config =

@@ -22,7 +22,7 @@ public class CSVWriterSupplier implements RecordWriterSupplier {
 
     @Override
     public RecordWriter getWriter(TargetFinder target, ContentFormat config) {
-        if (!CSVConfiguration.class.isInstance(config)) {
+        if (!(config instanceof CSVConfiguration)) {
             throw new IllegalArgumentException("try to get csv-writer with other than csv config");
         }
 

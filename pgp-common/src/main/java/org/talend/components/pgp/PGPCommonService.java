@@ -139,7 +139,7 @@ public class PGPCommonService {
                     getPrivateKeyRing(pgpKeyConfig));
 
             if (passphrase != null
-                    && passphrase.length() > 0) {
+                    && !passphrase.isEmpty()) {
                 consumerOptions = consumerOptions.addDecryptionPassphrase(
                         Passphrase.fromPassword(passphrase));
             }

@@ -47,7 +47,7 @@ class RecordSerializerLineHelperTest {
     }
 
     @Test
-    public void valuesFrom_simple() {
+    void valuesFrom_simple() {
         final Record record = buildRecords_simple();
         final List<String> strings = RecordSerializerLineHelper.valuesFrom(record);
 
@@ -86,7 +86,7 @@ class RecordSerializerLineHelperTest {
     }
 
     @Test
-    public void valuesFrom_withNull() {
+    void valuesFrom_withNull() {
         final Record record = buildRecords_withNull();
         final List<String> strings = RecordSerializerLineHelper.valuesFrom(record);
 

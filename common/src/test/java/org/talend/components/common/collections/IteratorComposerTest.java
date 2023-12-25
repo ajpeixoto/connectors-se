@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 class IteratorComposerTest {
 
     @Test
-    public void map() {
+    void map() {
         final List<String> strings = Arrays.asList("Hello", "all", "of", "you");
         final Iterator<Integer> lengths = IteratorComposer.of(strings.iterator()).map(String::length).build();
         for (int i = 0; i < 6; i++) {
@@ -36,7 +36,7 @@ class IteratorComposerTest {
     }
 
     @Test
-    public void flatmap() {
+    void flatmap() {
         final List<String> strings = Arrays.asList("Hello;all", "of", "you", "", "see;you;later");
         final Iterator<String> iterator = IteratorComposer.of(strings.iterator()).flatmapIterable(this::cut).build();
         for (int i = 0; i < 6; i++) {
@@ -54,7 +54,7 @@ class IteratorComposerTest {
     }
 
     @Test
-    public void filter() {
+    void filter() {
         final List<String> strings = Arrays.asList("Hello", "all", "of", "you");
         final Iterator<Integer> iterator = IteratorComposer
                 .of(strings.iterator()) //
@@ -72,7 +72,7 @@ class IteratorComposerTest {
     }
 
     @Test
-    public void footer() {
+    void footer() {
         final List<String> strings = Arrays.asList("Hello", "all", "of", "you");
         final Iterator<String> it1 = IteratorComposer.of(strings.iterator()).skipFooter(0).build();
         for (int i = 0; i < 4; i++) {

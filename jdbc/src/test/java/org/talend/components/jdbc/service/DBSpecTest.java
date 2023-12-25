@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.jdbc")
-public class DBSpecTest {
+class DBSpecTest {
 
     @Test
-    public void isSnowflakeTableFunction() {
+    void isSnowflakeTableFunction() {
         Assertions.assertFalse(DBSpec.isSnowflakeTableFunction("", "Mysql"));
         Assertions.assertFalse(DBSpec.isSnowflakeTableFunction("select id, name from table('summary')", "Mysql"));
         Assertions.assertFalse(DBSpec.isSnowflakeTableFunction(null, "Snowflake"));

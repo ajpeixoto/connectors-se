@@ -58,7 +58,7 @@ public class ExcelReader implements FormatReader {
             return IteratorComposer
                     .of(rowIterator)
                     .skipFooter(configuration.calcFooter())
-                    .map((Row row) -> this.toRecord.toRecord(row))
+                    .map(this.toRecord::toRecord)
                     .closeable(currentWorkBook)
                     .build();
         } catch (IOException exIO) {

@@ -67,6 +67,7 @@ public abstract class MarketoSource extends MarketoSourceOrProcessor {
         return s;
     }
 
+    @Override
     @PostConstruct
     public void init() {
         super.init();

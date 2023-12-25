@@ -32,7 +32,7 @@ import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import static org.mockito.ArgumentMatchers.any;
 
-public class BlobOutputTest {
+class BlobOutputTest {
 
     AzureBlobComponentServices blobComponentServicesMock;
 

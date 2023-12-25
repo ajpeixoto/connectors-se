@@ -35,7 +35,7 @@ class RawTextRecordReaderTest {
 
     @ParameterizedTest
     @CsvSource({ "ISO-8859-7,true", "ISO-8859-1,false" })
-    public void rawTextTest(String encoding, boolean success) throws IOException {
+    void rawTextTest(String encoding, boolean success) throws IOException {
         RawTextConfiguration rawTextConfiguration = new RawTextConfiguration();
         ExtendedRawTextConfiguration extendedRawTextConfiguration = new ExtendedRawTextConfiguration(encoding, false);
 

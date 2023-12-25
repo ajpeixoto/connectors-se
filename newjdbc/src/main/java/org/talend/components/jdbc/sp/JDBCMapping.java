@@ -12,19 +12,23 @@
  */
 package org.talend.components.jdbc.sp;
 
-import org.talend.components.jdbc.schema.TalendType;
-import org.talend.sdk.component.api.record.Schema;
-import org.talend.sdk.component.api.record.SchemaProperty;
-
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 
+import org.talend.components.jdbc.schema.TalendType;
+import org.talend.sdk.component.api.record.Schema;
+import org.talend.sdk.component.api.record.SchemaProperty;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /**
  * the mapping tool for JDBC
  * this class only work for tJDBCSP component now
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JDBCMapping {
 
     /**
@@ -45,10 +49,8 @@ public class JDBCMapping {
         if (value == null) {
             if (type == Schema.Type.STRING) {
                 int sqlType = Types.VARCHAR;
-                if (studioType != null) {
-                    if (TalendType.CHARACTER.getName().equals(studioType)) {
-                        sqlType = Types.CHAR;
-                    }
+                if (studioType != null && TalendType.CHARACTER.getName().equals(studioType)) {
+                    sqlType = Types.CHAR;
                 }
                 statement.setNull(index, sqlType);
             } else if (type == Schema.Type.INT) {
@@ -132,10 +134,8 @@ public class JDBCMapping {
         final String studioType = f.getProp(SchemaProperty.STUDIO_TYPE);
 
         if (type == Schema.Type.STRING) {
-            if (studioType != null) {
-                if (TalendType.CHARACTER.getName().equals(studioType)) {
-                    return Types.CHAR;
-                }
+            if (studioType != null && TalendType.CHARACTER.getName().equals(studioType)) {
+                return Types.CHAR;
             }
             return Types.VARCHAR;
         } else if (type == Schema.Type.INT) {

@@ -32,6 +32,11 @@ public class HTMLToRecord {
 
     private Supplier<String> notValidHTMLErrorMessageSupplier;
 
+    /**
+     *
+     * @param recordBuilderFactory recordBuilderFactory
+     * @deprecated (do not use it use another constructor instead)
+     */
     @Deprecated
     public HTMLToRecord(RecordBuilderFactory recordBuilderFactory) {
         this.recordBuilderFactory = recordBuilderFactory;
@@ -43,8 +48,8 @@ public class HTMLToRecord {
         this.notValidHTMLErrorMessageSupplier = notValidHTMLErrorMessageSupplier;
     }
 
-    public Schema inferSchema(Element record) {
-        List<String> columnNames = inferSchemaInfo(record, !isHeaderRecord(record));
+    public Schema inferSchema(Element rec) {
+        List<String> columnNames = inferSchemaInfo(rec, !isHeaderRecord(rec));
         Schema.Builder schemaBuilder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
         columnNames
                 .forEach(column -> schemaBuilder
@@ -56,9 +61,9 @@ public class HTMLToRecord {
         return schemaBuilder.build();
     }
 
-    public Record toRecord(Schema schema, Element record) {
+    public Record toRecord(Schema schema, Element rec) {
         final Record.Builder builder = recordBuilderFactory.newRecordBuilder();
-        final Elements rowColumns = record.getAllElements();
+        final Elements rowColumns = rec.getAllElements();
         if (rowColumns.size() > schema.getEntries().size() + 1) {
             throw new ComponentException(notValidHTMLErrorMessageSupplier.get());
         }
@@ -86,7 +91,7 @@ public class HTMLToRecord {
         return result;
     }
 
-    private boolean isHeaderRecord(Element record) {
-        return record.getElementsByTag("th").size() > 0;
+    private boolean isHeaderRecord(Element rec) {
+        return !rec.getElementsByTag("th").isEmpty();
     }
 }

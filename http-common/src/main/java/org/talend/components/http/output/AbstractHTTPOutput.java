@@ -20,7 +20,6 @@ import org.talend.components.http.service.httpClient.HTTPClientService;
 import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.http.Response;
 
 import java.io.Serializable;
 import java.util.Optional;

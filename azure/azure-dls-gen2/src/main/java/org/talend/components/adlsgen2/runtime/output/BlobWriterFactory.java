@@ -18,6 +18,10 @@ import org.talend.components.adlsgen2.output.OutputConfiguration;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BlobWriterFactory {
 
     public static BlobWriter getWriter(OutputConfiguration configuration, RecordBuilderFactory recordBuilderFactory,

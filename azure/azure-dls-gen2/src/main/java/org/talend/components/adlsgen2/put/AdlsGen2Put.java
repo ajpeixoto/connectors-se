@@ -75,7 +75,7 @@ public class AdlsGen2Put implements Serializable {
             List<Map<String, String>> list = new ArrayList<>();
             List<AdlsGen2PutConfiguration.FileMask> fileMasks = configuration.getFiles();
             // process files list
-            if (fileMasks != null && fileMasks.size() > 0) {
+            if (fileMasks != null && !fileMasks.isEmpty()) {
                 for (int idx = 0; idx < fileMasks.size(); idx++) {
                     AdlsGen2PutConfiguration.FileMask fileMask = fileMasks.get(idx);
                     Map<String, String> map = new HashMap<>();
@@ -114,7 +114,7 @@ public class AdlsGen2Put implements Serializable {
      *
      */
     public Map<String, String> genAzureObjectList(File file, String keyParent) {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         if (file.isDirectory()) {
             if (!(keyParent == null || "".equals(keyParent)
                     || keyParent.trim().lastIndexOf("/") == keyParent.trim().length() - 1)) {
@@ -144,10 +144,9 @@ public class AdlsGen2Put implements Serializable {
      */
     public Map<String, String> genFileFilterList(List<Map<String, String>> list, String localdir, String remotedir,
             boolean allowEscapePlusSymbol) {
-        if (remotedir != null) {
-            if (!("".equals(remotedir) || remotedir.trim().lastIndexOf("/") == remotedir.trim().length() - 1)) {
-                remotedir = new StringBuilder(String.valueOf(remotedir)).append("/").toString();
-            }
+        if (remotedir != null
+                && !(remotedir.isEmpty() || remotedir.trim().lastIndexOf("/") == remotedir.trim().length() - 1)) {
+            remotedir = remotedir + "/";
         }
         Map<String, String> fileMap = new HashMap<>();
         for (Map<String, String> map : list) {

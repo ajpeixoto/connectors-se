@@ -42,7 +42,7 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.junit5.WithComponents;
 
 @WithComponents("org.talend.components.splunk")
-public class SplunkEventCollectorTest {
+class SplunkEventCollectorTest {
 
     private HTTPClientService clientService;
 
@@ -74,7 +74,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testOutputThreeRecordsInOneBatch() throws HTTPClientException {
+    void testOutputThreeRecordsInOneBatch() throws HTTPClientException {
         prepareClientServiceMockReturnOk();
         eventCollector = new SplunkEventCollector(properties, clientService, i18n, mockedSplunkI18N);
 
@@ -94,7 +94,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testOutputOneRecordFailing() throws HTTPClientException {
+    void testOutputOneRecordFailing() throws HTTPClientException {
         prepareClientServiceMockReturnFailure();
         eventCollector = new SplunkEventCollector(properties, clientService, i18n, mockedSplunkI18N);
 
@@ -108,7 +108,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testAfterVariable() throws HTTPClientException {
+    void testAfterVariable() throws HTTPClientException {
         prepareClientServiceMockReturnOk();
 
         RuntimeContextHolder contextHolder = new RuntimeContextHolder("SplunkEventCollector", new HashMap<>());
@@ -148,7 +148,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testNullValuesInMetadataIgnored() throws HTTPClientException {
+    void testNullValuesInMetadataIgnored() throws HTTPClientException {
         final AtomicReference<RequestConfig> requestConfigReference = new AtomicReference<>();
         clientService = Mockito.spy(HTTPClientService.class);
 
@@ -187,7 +187,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testCreateEventFromRecord() throws HTTPClientException {
+    void testCreateEventFromRecord() throws HTTPClientException {
         ZonedDateTime expectedDateTime =
                 ZonedDateTime.of(2000, 1, 1, 1, 1, 1, 0,
                         ZoneId.of("Z"));
@@ -249,7 +249,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testTimeAsLong() throws HTTPClientException {
+    void testTimeAsLong() throws HTTPClientException {
         final long expectedLong = 1628197200000L;
         final AtomicReference<RequestConfig> requestConfigReference = new AtomicReference<>();
         clientService = Mockito.spy(HTTPClientService.class);
@@ -288,7 +288,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testTimeAsBigDecimal() throws HTTPClientException {
+    void testTimeAsBigDecimal() throws HTTPClientException {
         final long expectedTime = 1628197200000L;
 
         final AtomicReference<RequestConfig> requestConfigReference = new AtomicReference<>();
@@ -328,7 +328,7 @@ public class SplunkEventCollectorTest {
     }
 
     @Test
-    public void testTimeAsString() throws HTTPClientException {
+    void testTimeAsString() throws HTTPClientException {
         final long expectedTime = 1628197200000L;
 
         final AtomicReference<RequestConfig> requestConfigReference = new AtomicReference<>();

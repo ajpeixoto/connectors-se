@@ -33,6 +33,7 @@ public class DerbyPlatform extends Platform {
         super(i18n, driver);
     }
 
+    @Override
     protected String buildUrlFromPattern(final String protocol, final String host, final int port,
             final String database,
             String params) {
@@ -81,6 +82,7 @@ public class DerbyPlatform extends Platform {
         return e instanceof SQLException && "X0Y32".equals(((SQLException) e).getSQLState());
     }
 
+    @Override
     protected String isRequired(final Column column) {
         return column.isNullable() && !column.isPrimaryKey() ? "" : "NOT NULL";
     }

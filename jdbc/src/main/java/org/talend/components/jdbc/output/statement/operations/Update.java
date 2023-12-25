@@ -33,7 +33,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Getter
@@ -55,14 +54,14 @@ public class Update extends QueryManagerImpl {
     }
 
     @Override
-    public boolean validateQueryParam(final Record record) {
-        final Set<Schema.Entry> entries = new HashSet<>(record.getSchema().getEntries());
+    public boolean validateQueryParam(final Record rec) {
+        final Set<Schema.Entry> entries = new HashSet<>(rec.getSchema().getEntries());
         return keys.stream().allMatch(k -> entries.stream().anyMatch(entry -> entry.getOriginalFieldName().equals(k)))
                 && entries
                         .stream()
                         .filter(entry -> keys.contains(entry.getOriginalFieldName()))
                         .filter(entry -> !entry.isNullable())
-                        .map(entry -> valueOf(record, entry))
+                        .map(entry -> valueOf(rec, entry))
                         .allMatch(Optional::isPresent);
     }
 

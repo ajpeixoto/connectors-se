@@ -33,7 +33,7 @@ import java.util.List;
  *
  */
 @Slf4j
-abstract public class JDBCOutputWriter {
+public abstract class JDBCOutputWriter {
 
     protected JDBCService.DataSourceWrapper conn;
 
@@ -176,7 +176,7 @@ abstract public class JDBCOutputWriter {
 
     private String bufferSizeKey4Parallelize;
 
-    public void write(Record record) throws SQLException {
+    public void write(Record input) throws SQLException {
         if (context != null) {
             Object bufferSizeObject = context.getGlobal(bufferSizeKey4Parallelize);
             if (bufferSizeObject != null) {
@@ -200,7 +200,7 @@ abstract public class JDBCOutputWriter {
         cleanWrites();
     }
 
-    abstract public void close() throws SQLException;
+    public abstract void close() throws SQLException;
 
     protected void commitAndCloseAtLast() throws SQLException {
         if (useExistedConnection) {

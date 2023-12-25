@@ -84,8 +84,8 @@ public class ExcelBlobFileWriter extends BlobFileWriter {
     }
 
     @Override
-    public void writeRecord(Record record) {
-        super.writeRecord(record);
+    public void writeRecord(Record rec) {
+        super.writeRecord(rec);
         try {
             if ((config.getDataset().getExcelOptions().getExcelFormat() == ExcelFormat.EXCEL97
                     && getBatch().size() == excel97MaxRows)

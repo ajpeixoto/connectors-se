@@ -54,9 +54,9 @@ public class ParquetBlobFileReader extends BlobFileReader {
 
     private class ParquetRecordIterator extends ItemRecordIterator<GenericRecord> {
 
-        private final static String AZURE_FILESYSTEM_PROPERTY_KEY = "fs.azure";
+        private static final String AZURE_FILESYSTEM_PROPERTY_KEY = "fs.azure";
 
-        private final static String AZURE_FILESYSTEM_PROPERTY_VALUE =
+        private static final String AZURE_FILESYSTEM_PROPERTY_VALUE =
                 "org.apache.hadoop.fs.azure.NativeAzureFileSystem";
 
         private ParquetConverter converter;
@@ -138,7 +138,7 @@ public class ParquetBlobFileReader extends BlobFileReader {
 
         @Override
         protected GenericRecord takeNextRecord() {
-            GenericRecord currentRecord = this.currentRecord;
+            GenericRecord rec = this.currentRecord;
             try {
                 // read next line for next method call
                 this.currentRecord = reader.read();
@@ -146,7 +146,7 @@ public class ParquetBlobFileReader extends BlobFileReader {
                 log.error("Can't read record from file " + getCurrentItem().getName(), e);
             }
 
-            return currentRecord;
+            return rec;
         }
 
         @Override

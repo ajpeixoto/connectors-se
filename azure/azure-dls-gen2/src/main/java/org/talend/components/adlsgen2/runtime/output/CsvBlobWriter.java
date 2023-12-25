@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CsvBlobWriter extends BlobWriter {
 
-    private final String EXT_CSV = ".csv";
+    private static final String EXT_CSV = ".csv";
 
     private final CsvContentFormatter formatter;
 

@@ -19,10 +19,12 @@ class BlindTrustManager implements X509TrustManager {
 
     public void checkClientTrusted(X509Certificate[] chain,
             String authType) throws java.security.cert.CertificateException {
+        /* NOP */
     }
 
     public void checkServerTrusted(X509Certificate[] chain,
             String authType) throws java.security.cert.CertificateException {
+        /* NOP */
     }
 
     public X509Certificate[] getAcceptedIssuers() {

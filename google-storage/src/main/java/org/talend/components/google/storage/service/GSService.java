@@ -125,6 +125,12 @@ public class GSService {
         }
     }
 
+    /**
+     *
+     * @param jsonCredentials creds
+     * @return storage facade
+     * @deprecated (use another method)
+     */
     @Deprecated
     public StorageFacade buildStorage(final String jsonCredentials) {
         return new StorageImpl(this.credentialService, jsonCredentials, this.i18n);

@@ -35,6 +35,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,7 @@ import static org.talend.components.jdbc.DBTestUtils.getValueByIndex;
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC row component")
-public class JDBCRowTestIT {
+class JDBCRowTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -94,7 +95,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_basic_no_connector() {
+    void test_basic_no_connector() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -110,12 +111,12 @@ public class JDBCRowTestIT {
                 DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(4, result.size());
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("momo", getValueByIndex(result.get(3), 1));
     }
 
     @Test
-    public void test_use_preparedstatement_no_connector() {
+    void test_use_preparedstatement_no_connector() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -134,12 +135,12 @@ public class JDBCRowTestIT {
                 DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(4, result.size());
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("momo", getValueByIndex(result.get(3), 1));
     }
 
     @Test
-    public void test_die_on_error_no_connector() {
+    void test_die_on_error_no_connector() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -158,7 +159,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_basic_as_input() throws SQLException {
+    void test_basic_as_input() throws SQLException {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -179,11 +180,11 @@ public class JDBCRowTestIT {
         Map<String, List<?>> outputs = DBTestUtils.runProcessorWithoutInput(componentsHandler, config, null);
         List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
-        assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
+        assertInstanceOf(ResultSet.class, jdbcResultSetObject);
     }
 
     @Test
-    public void test_use_preparedstatement_as_input() throws SQLException {
+    void test_use_preparedstatement_as_input() throws SQLException {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -208,7 +209,7 @@ public class JDBCRowTestIT {
                 DBTestUtils.runProcessorWithoutInput(componentsHandler, config, Arrays.asList(1));
         List<Record> result = List.class.cast(outputs.get(Branches.DEFAULT_BRANCH));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
-        assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
+        assertInstanceOf(ResultSet.class, jdbcResultSetObject);
 
         // System.out.println("===>" + ResultSet.class.cast(jdbcResultSetObject).next());
         // System.out.println("===>" + ResultSet.class.cast(jdbcResultSetObject).getString(1));
@@ -219,7 +220,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_reject_as_input() {
+    void test_reject_as_input() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -243,7 +244,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_basic_as_output() {
+    void test_basic_as_output() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -274,14 +275,14 @@ public class JDBCRowTestIT {
                 DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(5, result.size());
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("momo", getValueByIndex(result.get(3), 1));
-        assertEquals(new Integer(4), getValueByIndex(result.get(4), 0));
+        assertEquals(4, getValueByIndex(result.get(4), 0));
         assertEquals("momo", getValueByIndex(result.get(4), 1));
     }
 
     @Test
-    public void test_basic_not_use_prepared_statement_as_output() {
+    void test_basic_not_use_prepared_statement_as_output() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -307,14 +308,14 @@ public class JDBCRowTestIT {
                 DBTestUtils.runInput(componentsHandler, dataStore, tableName, DBTestUtils.createTestSchemaInfos());
 
         assertEquals(5, result.size());
-        assertEquals(new Integer(4), getValueByIndex(result.get(3), 0));
+        assertEquals(4, getValueByIndex(result.get(3), 0));
         assertEquals("momo", getValueByIndex(result.get(3), 1));
-        assertEquals(new Integer(4), getValueByIndex(result.get(4), 0));
+        assertEquals(4, getValueByIndex(result.get(4), 0));
         assertEquals("momo", getValueByIndex(result.get(4), 1));
     }
 
     @Test
-    public void test_reject_as_output() {
+    void test_reject_as_output() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -348,7 +349,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_die_on_error_as_output() {
+    void test_die_on_error_as_output() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -379,7 +380,7 @@ public class JDBCRowTestIT {
     }
 
     @Test
-    public void test_propagate_query_result_set_as_output() {
+    void test_propagate_query_result_set_as_output() {
         JDBCRowConfig config = new JDBCRowConfig();
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setTableName(tableName);
@@ -391,7 +392,8 @@ public class JDBCRowTestIT {
         randomCommit(config);
 
         config.setUsePreparedStatement(true);
-        config.setPreparedStatementParameters(Arrays.asList(new PreparedStatementParameter(1, Type.Int, 3)));
+        config.setPreparedStatementParameters(
+                Collections.singletonList(new PreparedStatementParameter(1, Type.Int, 3)));
 
         config.setPropagateRecordSet(true);
         config.setRecordSetColumn("RESULTSET");
@@ -409,7 +411,7 @@ public class JDBCRowTestIT {
         assertEquals(2, result.size());
         assertNull(outputs.get(Record.class, "reject"));
         Object jdbcResultSetObject = result.get(0).get(Object.class, "RESULTSET");
-        assertTrue(jdbcResultSetObject != null && ResultSet.class.isInstance(jdbcResultSetObject));
+        assertInstanceOf(ResultSet.class, jdbcResultSetObject);
     }
 
     private String randomCommit(JDBCRowConfig config) {

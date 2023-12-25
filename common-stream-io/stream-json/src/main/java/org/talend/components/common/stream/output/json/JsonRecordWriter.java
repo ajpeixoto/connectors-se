@@ -44,8 +44,8 @@ public class JsonRecordWriter implements RecordWriter {
     }
 
     @Override
-    public void add(Record record) throws IOException {
-        final JsonObject jsonObject = this.toJson.fromRecord(record);
+    public void add(Record rec) throws IOException {
+        final JsonObject jsonObject = this.toJson.fromRecord(rec);
         this.jsonGenerator.write(jsonObject);
     }
 

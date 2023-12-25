@@ -43,7 +43,7 @@ public class HTMLReader implements FormatReader {
 
         final Iterator<Element> rowIterator = elementTable.iterator();
         final Schema schema = this.toRecord.inferSchema(elementTable.get(0));
-        if (elementTable.first().getElementsByTag("th").size() > 0) {
+        if (!elementTable.first().getElementsByTag("th").isEmpty()) {
             // skip real header.
             rowIterator.next();
         }

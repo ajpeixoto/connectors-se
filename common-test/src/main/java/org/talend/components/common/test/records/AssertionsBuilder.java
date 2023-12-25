@@ -24,5 +24,5 @@ public interface AssertionsBuilder<T> {
 
     void addField(int id, Schema.Entry field, Object value);
 
-    Consumer<T> endRecord(int id, Record record);
+    Consumer<T> endRecord(int id, Record rec);
 }

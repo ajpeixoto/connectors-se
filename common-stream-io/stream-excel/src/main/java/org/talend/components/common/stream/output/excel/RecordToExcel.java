@@ -43,16 +43,16 @@ public class RecordToExcel {
      * Build excel row from record.
      *
      * @param constructor : row builder.
-     * @param record : record for read values.
+     * @param rec : record for read values.
      * @return excel row.
      */
-    public Row from(Supplier<Row> constructor, Record record) {
+    public Row from(Supplier<Row> constructor, Record rec) {
         final Row row = constructor.get();
-        final List<Entry> entries = record.getSchema().getEntries();
+        final List<Entry> entries = rec.getSchema().getEntries();
 
         for (Schema.Entry entry : entries) {
             final Cell cell = this.addCell(row);
-            this.majCellValue(cell, record, entry);
+            this.majCellValue(cell, rec, entry);
         }
         return row;
     }
@@ -91,13 +91,13 @@ public class RecordToExcel {
         return row.createCell(row.getPhysicalNumberOfCells());
     }
 
-    private void majCellValue(Cell cell, Record record, Schema.Entry entry) {
+    private void majCellValue(Cell cell, Record rec, Schema.Entry entry) {
 
         final String name = entry.getName();
         switch (entry.getType()) {
         case BOOLEAN:
             cell.setCellType(CellType.BOOLEAN);
-            final Optional<Boolean> optionalBoolean = record.getOptionalBoolean(name);
+            final Optional<Boolean> optionalBoolean = rec.getOptionalBoolean(name);
             if (optionalBoolean.isPresent()) {
                 cell.setCellValue(optionalBoolean.get());
             }
@@ -111,46 +111,46 @@ public class RecordToExcel {
                 cachedDateCellStyle = cellStyle;
             }
             cell.setCellStyle(cachedDateCellStyle);
-            final Optional<ZonedDateTime> optionalDateTime = record.getOptionalDateTime(name);
+            final Optional<ZonedDateTime> optionalDateTime = rec.getOptionalDateTime(name);
             if (optionalDateTime.isPresent()) {
                 cell.setCellValue(Date.from(optionalDateTime.get().toInstant()));
             }
             break;
         case INT:
             cell.setCellType(CellType.NUMERIC);
-            final OptionalInt optionalInt = record.getOptionalInt(name);
+            final OptionalInt optionalInt = rec.getOptionalInt(name);
             if (optionalInt.isPresent()) {
                 cell.setCellValue(optionalInt.getAsInt());
             }
             break;
         case LONG:
             cell.setCellType(CellType.NUMERIC);
-            final OptionalLong optionalLong = record.getOptionalLong(name);
+            final OptionalLong optionalLong = rec.getOptionalLong(name);
             if (optionalLong.isPresent()) {
                 cell.setCellValue(optionalLong.getAsLong());
             }
             break;
         case FLOAT:
             cell.setCellType(CellType.NUMERIC);
-            final OptionalDouble optionalFloat = record.getOptionalFloat(name);
+            final OptionalDouble optionalFloat = rec.getOptionalFloat(name);
             if (optionalFloat.isPresent()) {
                 cell.setCellValue(optionalFloat.getAsDouble());
             }
             break;
         case DOUBLE:
             cell.setCellType(CellType.NUMERIC);
-            final OptionalDouble optionalDouble = record.getOptionalDouble(name);
+            final OptionalDouble optionalDouble = rec.getOptionalDouble(name);
             if (optionalDouble.isPresent()) {
                 cell.setCellValue(optionalDouble.getAsDouble());
             }
             break;
         case BYTES:
             cell.setCellType(CellType.STRING);
-            cell.setCellValue(Arrays.toString(record.getBytes(name)));
+            cell.setCellValue(Arrays.toString(rec.getBytes(name)));
             break;
         default:
             cell.setCellType(CellType.STRING);
-            cell.setCellValue(String.valueOf(record.get(Object.class, entry.getName())));
+            cell.setCellValue(String.valueOf(rec.get(Object.class, entry.getName())));
         }
     }
 }

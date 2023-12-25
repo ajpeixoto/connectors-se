@@ -12,10 +12,9 @@
  */
 package org.talend.components.adlsgen2.runtime.delete;
 
-import java.nio.file.Path;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.adlsgen2.AdlsGen2IntegrationTestBase;
 import org.talend.components.adlsgen2.delete.AdlsGen2Delete;
@@ -24,8 +23,9 @@ import org.talend.components.adlsgen2.put.AdlsGen2Put;
 import org.talend.components.adlsgen2.put.AdlsGen2PutConfiguration;
 import org.talend.sdk.component.junit5.WithComponents;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.adlsgen2")
-public class AdlsGen2DeleteIT extends AdlsGen2IntegrationTestBase {
+class AdlsGen2DeleteIT extends AdlsGen2IntegrationTestBase {
 
     AdlsGen2DeleteConfiguration gen2DeleteConfig;
 

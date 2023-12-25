@@ -23,14 +23,6 @@
     </properties>
 
     <dependencies>
-        <!--
-        <dependency>
-            <groupId>org.talend.components</groupId>
-            <artifactId>newjdbc-locales</artifactId>
-            <version>${locales.version}</version>
-        </dependency>
-        -->
-
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>

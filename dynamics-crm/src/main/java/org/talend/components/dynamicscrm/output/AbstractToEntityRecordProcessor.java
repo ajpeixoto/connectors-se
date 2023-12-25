@@ -97,21 +97,19 @@ public abstract class AbstractToEntityRecordProcessor implements RecordProcessor
                 .getNavigationPropertyNames()
                 .stream()
                 .map(entitySet.getEntityType()::getNavigationProperty)
-                .forEach(c -> {
-                    c
-                            .getReferentialConstraints()
-                            .stream()
-                            .map(EdmReferentialConstraint::getPropertyName)
-                            .forEach(
-                                    s -> possibleEntitySets
-                                            .computeIfAbsent(s, k -> new ArrayList<>())
-                                            .add(navPropMap.get(c.getName())));
-                });
+                .forEach(c -> c
+                        .getReferentialConstraints()
+                        .stream()
+                        .map(EdmReferentialConstraint::getPropertyName)
+                        .forEach(
+                                s -> possibleEntitySets
+                                        .computeIfAbsent(s, k -> new ArrayList<>())
+                                        .add(navPropMap.get(c.getName()))));
         return possibleEntitySets;
     }
 
     @Override
-    public void processRecord(Record record) throws ServiceUnavailableException {
+    public void processRecord(Record rec) throws ServiceUnavailableException {
         Set<String> keys = entitySet
                 .getEntityType()
                 .getKeyPropertyRefs()
@@ -119,22 +117,22 @@ public abstract class AbstractToEntityRecordProcessor implements RecordProcessor
                 .map(EdmKeyPropertyRef::getName)
                 .collect(Collectors.toSet());
         columnNames.removeAll(keys);
-        ClientEntity entity = createEntity(columnNames, record);
-        doProcessRecord(entity, record);
+        ClientEntity entity = createEntity(columnNames, rec);
+        doProcessRecord(entity, rec);
     }
 
-    protected abstract void doProcessRecord(ClientEntity entity, Record record) throws ServiceUnavailableException;
+    protected abstract void doProcessRecord(ClientEntity entity, Record rec) throws ServiceUnavailableException;
 
-    protected ClientEntity createEntity(Set<String> columnNames, Record record) {
+    protected ClientEntity createEntity(Set<String> columnNames, Record rec) {
         ClientEntity entity =
                 client.getClient().getObjectFactory().newEntity(entitySet.getEntityType().getFullQualifiedName());
-        for (Schema.Entry entry : record.getSchema().getEntries()) {
+        for (Schema.Entry entry : rec.getSchema().getEntries()) {
             // Need to filter not updateable/insertable fields and navigation properties.
             // Navigation properties cannot be inserted as a common property.
             if (!columnNames.contains(entry.getName()) || possibleEntitySetsMap.containsKey(entry.getName())) {
                 continue;
             }
-            ClientProperty property = convertToProperty(record, entry, entitySet.getEntityType());
+            ClientProperty property = convertToProperty(rec, entry, entitySet.getEntityType());
             if (property != null) {
                 entity.getProperties().add(property);
             }
@@ -142,20 +140,20 @@ public abstract class AbstractToEntityRecordProcessor implements RecordProcessor
         return entity;
     }
 
-    protected ClientProperty convertRecordToProperty(Record record, EdmStructuredType valueType, String name) {
+    protected ClientProperty convertRecordToProperty(Record rec, EdmStructuredType valueType, String name) {
         return client
                 .getClient()
                 .getObjectFactory()
-                .newComplexProperty(name, getComplexValueFromRecord(record, valueType));
+                .newComplexProperty(name, getComplexValueFromRecord(rec, valueType));
     }
 
-    protected ClientComplexValue getComplexValueFromRecord(Record record, EdmStructuredType valueType) {
+    protected ClientComplexValue getComplexValueFromRecord(Record rec, EdmStructuredType valueType) {
         ClientComplexValue value = client
                 .getClient()
                 .getObjectFactory()
                 .newComplexValue(valueType.getFullQualifiedName().getFullQualifiedNameAsString());
-        record.getSchema().getEntries().forEach(e -> {
-            ClientProperty property = convertToProperty(record, e, valueType);
+        rec.getSchema().getEntries().forEach(e -> {
+            ClientProperty property = convertToProperty(rec, e, valueType);
             if (property != null || !configuration.isIgnoreNull()) {
                 value.add(property);
             }

@@ -12,21 +12,20 @@
  */
 package org.talend.components.common.httpclient.pagination;
 
+import java.io.StringReader;
+import java.util.List;
+import java.util.Optional;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
 import org.talend.components.common.httpclient.api.HTTPClient;
 import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.common.httpclient.api.KeyValuePair;
 import org.talend.components.common.httpclient.api.QueryConfiguration;
 import org.talend.components.common.httpclient.api.pagination.OffsetLimitPagination;
 import org.talend.components.common.httpclient.api.pagination.PaginationParametersLocation;
-
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import javax.swing.text.html.Option;
-import java.io.StringReader;
-import java.util.List;
-import java.util.Optional;
 
 public class OffsetLimitPaginationStrategy implements PaginationStrategy {
 

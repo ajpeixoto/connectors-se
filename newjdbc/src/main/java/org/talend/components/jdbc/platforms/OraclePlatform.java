@@ -36,10 +36,11 @@ public class OraclePlatform extends Platform {
      */
     private static final String VARCHAR2_MAX = "4000";
 
+    @Override
     protected String buildUrlFromPattern(final String protocol, final String host, final int port,
             final String database,
             String params) {
-        if (!"".equals(params.trim())) {
+        if (!params.trim().isEmpty()) {
             params = "?" + params;
         }
         return String.format("%s:@%s:%s:%s%s", protocol, host, port, database, params);

@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class UiActionService {
 
-    private static Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<String>(Arrays
+    private static final Set<String> MODULE_NOT_SUPPORT_BULK_API = new HashSet<>(Arrays
             .asList("AcceptedEventRelation",
                     "ActivityHistory", "AggregateResult", "AttachedContentDocument", "CaseStatus", "CombinedAttachment",
                     "ContractStatus",
@@ -63,15 +63,11 @@ public class UiActionService {
         try {
             this.service.connect(datastore, localConfiguration);
             return new HealthCheckStatus(OK, i18n.healthCheckOk());
+        } catch (ApiFault ex) {
+            return new HealthCheckStatus(KO,
+                    i18n.healthCheckFailed(ex.getExceptionCode() + " " + ex.getExceptionMessage()));
         } catch (ConnectionException | ComponentException ex) {
-            String error;
-            if (ApiFault.class.isInstance(ex)) {
-                final ApiFault fault = ApiFault.class.cast(ex);
-                error = fault.getExceptionCode() + " " + fault.getExceptionMessage();
-            } else {
-                error = ex.getMessage();
-            }
-            return new HealthCheckStatus(KO, i18n.healthCheckFailed(error));
+            return new HealthCheckStatus(KO, i18n.healthCheckFailed(ex.getMessage()));
         }
     }
 

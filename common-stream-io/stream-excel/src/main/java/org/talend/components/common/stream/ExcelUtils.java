@@ -20,6 +20,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.talend.components.common.stream.format.excel.ExcelConfiguration.ExcelFormat;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ExcelUtils {
 
     public static Workbook createWorkBook(ExcelFormat format) {

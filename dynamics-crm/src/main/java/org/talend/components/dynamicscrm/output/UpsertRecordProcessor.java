@@ -33,10 +33,10 @@ public class UpsertRecordProcessor extends AbstractToEntityRecordProcessor {
     }
 
     @Override
-    protected void doProcessRecord(ClientEntity entity, Record record) throws ServiceUnavailableException {
+    protected void doProcessRecord(ClientEntity entity, Record rec) throws ServiceUnavailableException {
         // There is only one key in Microsoft CRM objects
         String keyField = entitySet.getEntityType().getKeyPropertyRefs().get(0).getProperty().getName();
-        String recordId = record.getString(keyField);
+        String recordId = rec.getString(keyField);
         if (recordId == null || recordId.isEmpty()) {
             throw new DynamicsCrmException(i18n.idCannotBeNull(keyField));
         }
@@ -49,7 +49,7 @@ public class UpsertRecordProcessor extends AbstractToEntityRecordProcessor {
             if (!client
                     .addOrSkipEntityNavigationLink(entity, lookupEntry.getValue(),
                             client.extractNavigationLinkName(lookupEntry.getKey()),
-                            record.getString(lookupEntry.getKey()),
+                            rec.getString(lookupEntry.getKey()),
                             configuration.isEmptyStringToNull(), configuration.isIgnoreNull())) {
                 navigationLinksToDelete.add(client.extractNavigationLinkName(lookupEntry.getKey()));
             }

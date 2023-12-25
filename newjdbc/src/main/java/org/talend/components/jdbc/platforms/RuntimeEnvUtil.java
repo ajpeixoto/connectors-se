@@ -14,6 +14,10 @@ package org.talend.components.jdbc.platforms;
 
 import org.talend.components.jdbc.datastore.JDBCDataStore;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RuntimeEnvUtil {
 
     public static boolean isCloud(final JDBCDataStore dataStore) {

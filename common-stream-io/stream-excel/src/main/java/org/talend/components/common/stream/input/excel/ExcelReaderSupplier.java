@@ -22,7 +22,7 @@ public class ExcelReaderSupplier implements RecordReaderSupplier {
 
     @Override
     public RecordReader getReader(RecordBuilderFactory factory, ContentFormat config, Object extraParameter) {
-        if (!ExcelConfiguration.class.isInstance(config)) {
+        if (!(config instanceof ExcelConfiguration)) {
             throw new IllegalArgumentException("try to get excel-reader with other than excel config");
         }
 

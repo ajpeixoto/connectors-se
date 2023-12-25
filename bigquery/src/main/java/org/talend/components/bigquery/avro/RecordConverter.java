@@ -20,11 +20,11 @@ import java.util.Set;
 
 public interface RecordConverter<T> extends Serializable {
 
-    Schema inferSchema(T record);
+    Schema inferSchema(T rec);
 
-    Record toRecord(T record);
+    Record toRecord(T rec);
 
-    T fromRecord(Record record);
+    T fromRecord(Record rec);
 
     /**
      * correct the field name and make it valid for AVRO schema

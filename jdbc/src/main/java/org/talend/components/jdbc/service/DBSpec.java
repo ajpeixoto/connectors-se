@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 public class DBSpec {
 
     // see https://docs.snowflake.com/en/sql-reference/functions-table
-    private static Pattern SNOWFLAKE_TABLE_FUNCTION_PATTERN =
+    private static final Pattern SNOWFLAKE_TABLE_FUNCTION_PATTERN =
             Pattern.compile("^SELECT\\s+[^;]+\\bFROM\\b([^;]*)\\bTABLE\\s*\\([^;]+\\)([^;]*);?$",
                     Pattern.CASE_INSENSITIVE | Pattern.DOTALL | Pattern.MULTILINE);
 
@@ -26,11 +26,7 @@ public class DBSpec {
             return false;
         }
 
-        if ("Snowflake".equals(dbType) && SNOWFLAKE_TABLE_FUNCTION_PATTERN.matcher(query.trim()).matches()) {
-            return true;
-        }
-
-        return false;
+        return "Snowflake".equals(dbType) && SNOWFLAKE_TABLE_FUNCTION_PATTERN.matcher(query.trim()).matches();
     }
 
 }

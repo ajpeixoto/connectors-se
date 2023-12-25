@@ -150,7 +150,7 @@ public class MongoDBProcessor extends MongoCommonOutput {
             if (parentNodePath == null || "".equals(parentNodePath)) {
                 document.put(curentName, value);
             } else {
-                String objNames[] = parentNodePath.split("\\.");
+                String[] objNames = parentNodePath.split("\\.");
                 Document lastNode = getParentNode(parentNodePath, objNames.length - 1);
                 lastNode.put(curentName, value);
                 Document parentNode = null;
@@ -176,7 +176,7 @@ public class MongoDBProcessor extends MongoCommonOutput {
             if (parentNodePath == null || "".equals(parentNodePath)) {
                 return document;
             } else {
-                String objNames[] = parentNodePath.split("\\.");
+                String[] objNames = parentNodePath.split("\\.");
                 for (int i = 0; i <= index; i++) {
                     parentNode = (Document) parentNode.get(objNames[i]);
                     if (parentNode == null) {
@@ -197,13 +197,13 @@ public class MongoDBProcessor extends MongoCommonOutput {
     }
 
     @ElementListener
-    public void onNext(@Input final Record record) {
+    public void onNext(@Input final Record rec) {
         if (configuration.getDataset().getMode() == Mode.TEXT) {
             // we store the whole document here as a string
-            String uniqueFieldName = record.getSchema().getEntries().get(0).getName();
+            String uniqueFieldName = rec.getSchema().getEntries().get(0).getName();
             Document document = null;
             try {
-                String value = record.getString(uniqueFieldName);
+                String value = rec.getString(uniqueFieldName);
                 document = Document.parse(value);
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -211,11 +211,11 @@ public class MongoDBProcessor extends MongoCommonOutput {
                         "the input record is no valid for TEXT mode, the record's first column must be a json format text.");
             }
 
-            doDataAction(record, document);
+            doDataAction(rec, document);
         } else if (configuration.getDataset().getMode() == Mode.JSON) {
-            Document document = convertRecord2DocumentDirectly(record);
+            Document document = convertRecord2DocumentDirectly(rec);
 
-            doDataAction(record, document);
+            doDataAction(rec, document);
         } else {
             /*
              * DocumentGenerator dg = new DocumentGenerator();
@@ -240,7 +240,7 @@ public class MongoDBProcessor extends MongoCommonOutput {
         }
     }
 
-    private void doDataAction(@Input Record record, Document document) {
+    private void doDataAction(@Input Record rec, Document document) {
         switch (configuration.getDataAction()) {
         case INSERT:
             if (configuration.isBulkWrite()) {
@@ -253,15 +253,15 @@ public class MongoDBProcessor extends MongoCommonOutput {
             if (configuration.isBulkWrite()) {
                 if (configuration.isUpdateAllDocuments()) {
                     writeModels
-                            .add(new UpdateManyModel<Document>(
+                            .add(new UpdateManyModel<>(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document)));
                 } else {
                     writeModels
-                            .add(new UpdateOneModel<Document>(
+                            .add(new UpdateOneModel<>(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document)));
                 }
             } else {
@@ -269,13 +269,13 @@ public class MongoDBProcessor extends MongoCommonOutput {
                     collection
                             .updateMany(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document));
                 } else {
                     collection
                             .updateOne(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document));
                 }
             }
@@ -294,15 +294,15 @@ public class MongoDBProcessor extends MongoCommonOutput {
             if (configuration.isBulkWrite()) {
                 if (configuration.isUpdateAllDocuments()) {
                     writeModels
-                            .add(new UpdateManyModel<Document>(
+                            .add(new UpdateManyModel<>(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document), new UpdateOptions().upsert(true)));
                 } else {
                     writeModels
-                            .add(new UpdateOneModel<Document>(
+                            .add(new UpdateOneModel<>(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document), new UpdateOptions().upsert(true)));
                 }
             } else {
@@ -310,13 +310,13 @@ public class MongoDBProcessor extends MongoCommonOutput {
                     collection
                             .updateMany(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document), new UpdateOptions().upsert(true));
                 } else {
                     collection
                             .updateOne(
                                     getKeysQueryDocumentAndRemoveKeysFromSourceDocument(configuration.getKeyMappings(),
-                                            record, document),
+                                            rec, document),
                                     new Document("$set", document), new UpdateOptions().upsert(true));
                 }
             }

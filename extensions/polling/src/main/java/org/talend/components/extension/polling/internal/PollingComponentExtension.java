@@ -12,8 +12,27 @@
  */
 package org.talend.components.extension.polling.internal;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+
 import org.talend.components.extension.polling.api.Pollable;
 import org.talend.components.extension.polling.api.PollableDuplicateDataset;
 import org.talend.components.extension.polling.internal.impl.PollingConfiguration;
@@ -39,25 +58,8 @@ import org.talend.sdk.component.runtime.manager.reflect.parameterenricher.BasePa
 import org.talend.sdk.component.runtime.manager.util.IdGenerator;
 import org.talend.sdk.component.runtime.manager.util.Lazy;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * todo: ComponentValidator to validate the PollingMapper (ie i18n, ...)
@@ -67,7 +69,7 @@ import static java.util.stream.Collectors.toMap;
 @Slf4j
 public class PollingComponentExtension implements CustomComponentExtension {
 
-    public final static String DUPLICATE_DATASET_KEY = PollingComponentExtension.class.getName() + ".duplicatedataset";
+    public static final String DUPLICATE_DATASET_KEY = PollingComponentExtension.class.getName() + ".duplicatedataset";
 
     public static final String VERSION_SUFFIX = "Version";
 
@@ -92,7 +94,7 @@ public class PollingComponentExtension implements CustomComponentExtension {
 
         // Do we need to duplicate dataset ?
         final boolean duplicateDatasetOption = Boolean
-                .valueOf(Optional.ofNullable(localConfiguration.get(DUPLICATE_DATASET_KEY)).orElse("true"));
+                .parseBoolean(Optional.ofNullable(localConfiguration.get(DUPLICATE_DATASET_KEY)).orElse("true"));
 
         // Duplicate dataset, needed while pipeline designer need only one connector by dataset
         final List<String> duplicatedDataSets = duplicatePollableDataset(container, duplicateDatasetOption);
@@ -295,12 +297,12 @@ public class PollingComponentExtension implements CustomComponentExtension {
     }
 
     private List<ParameterMeta> copyParameters(final List<ParameterMeta> rawParams,
-            final Function<Map<String, String>, Map<String, String>> metaMapper) {
+            final UnaryOperator<Map<String, String>> metaMapper) {
         return rawParams.stream().map(m -> copyParameterMeta(m, metaMapper)).collect(toList());
     }
 
     private ParameterMeta copyParameterMeta(final ParameterMeta m,
-            final Function<Map<String, String>, Map<String, String>> metaMapper) {
+            final UnaryOperator<Map<String, String>> metaMapper) {
         return new ParameterMeta(m.getSource(), m.getJavaType(), m.getType(), m.getPath(), m.getName(),
                 m.getI18nPackages(),
                 m.getNestedParameters() != null ? copyParameters(m.getNestedParameters(), metaMapper) : null,
@@ -545,7 +547,7 @@ public class PollingComponentExtension implements CustomComponentExtension {
             List<String> parametersName = parameters
                     .stream()
                     .filter(e -> '$' != e.getName().charAt(0))
-                    .map(e -> e.getName())
+                    .map(ParameterMeta::getName)
                     .collect(toList());
 
             final Map<String, String> rootMetadata = new HashMap<>();
@@ -567,7 +569,7 @@ public class PollingComponentExtension implements CustomComponentExtension {
     }
 
     private List<String> getNames(List<ParameterMeta> parameters) {
-        return parameters.stream().filter(e -> '$' != e.getName().charAt(0)).map(e -> e.getName()).collect(toList());
+        return parameters.stream().map(ParameterMeta::getName).filter(name -> '$' != name.charAt(0)).collect(toList());
     }
 
     private String getVersionOptionName(final ComponentFamilyMeta.BaseMeta<?> meta) {

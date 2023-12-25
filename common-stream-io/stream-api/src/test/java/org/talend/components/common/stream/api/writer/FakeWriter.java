@@ -20,7 +20,7 @@ import org.talend.sdk.component.api.record.Record;
 public class FakeWriter implements RecordWriter {
 
     @Override
-    public void add(Record record) throws IOException {
+    public void add(Record rec) throws IOException {
     }
 
     @Override

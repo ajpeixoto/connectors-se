@@ -88,7 +88,7 @@ public class MongoDBCollectionMapper implements Serializable {
             }
             return queries4Split
                     .stream()
-                    .map(query4Split -> cloneMapperAndSetSplitParameter4Reader(query4Split))
+                    .map(this::cloneMapperAndSetSplitParameter4Reader)
                     .collect(Collectors.toList());
         }
 

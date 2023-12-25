@@ -23,7 +23,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-public class ServiceTest {
+class ServiceTest {
 
     @Test
     void getPublicKey_FromFile() throws PGPException, IOException {

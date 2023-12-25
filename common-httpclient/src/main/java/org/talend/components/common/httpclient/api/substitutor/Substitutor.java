@@ -99,7 +99,7 @@ public class Substitutor {
 
             // If no new prefix found, concatenate until the end of source
             if (indPrefix < 0) {
-                output.append(source.substring(cursor, source.length()));
+                output.append(source.substring(cursor));
                 continue;
             }
 

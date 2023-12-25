@@ -55,11 +55,11 @@ public abstract class QueryManagerImpl implements QueryManager {
 
     private Integer retryCount = 0;
 
-    abstract protected String buildQuery(List<Record> records);
+    protected abstract String buildQuery(List<Record> records);
 
-    abstract protected Map<Integer, Schema.Entry> getQueryParams();
+    protected abstract Map<Integer, Schema.Entry> getQueryParams();
 
-    abstract protected boolean validateQueryParam(Record record);
+    protected abstract boolean validateQueryParam(Record rec);
 
     @Override
     public List<Reject> execute(final List<Record> records, final JdbcService.JdbcDatasource dataSource)
@@ -179,43 +179,43 @@ public abstract class QueryManagerImpl implements QueryManager {
                 : "") + (schenma != null && !schenma.isEmpty() ? getPlatform().identifier(connection.getSchema()) : "");
     }
 
-    public static Optional<Object> valueOf(final Record record, final Schema.Entry entry) {
+    public static Optional<Object> valueOf(final Record rec, final Schema.Entry entry) {
         switch (entry.getType()) {
         case INT:
-            return record.getOptionalInt(entry.getName()).isPresent()
-                    ? of(record.getOptionalInt(entry.getName()).getAsInt())
+            return rec.getOptionalInt(entry.getName()).isPresent()
+                    ? of(rec.getOptionalInt(entry.getName()).getAsInt())
                     : empty();
         case LONG:
-            return record.getOptionalLong(entry.getName()).isPresent()
-                    ? of(record.getOptionalLong(entry.getName()).getAsLong())
+            return rec.getOptionalLong(entry.getName()).isPresent()
+                    ? of(rec.getOptionalLong(entry.getName()).getAsLong())
                     : empty();
         case FLOAT:
-            return record.getOptionalFloat(entry.getName()).isPresent()
-                    ? of(record.getOptionalFloat(entry.getName()).getAsDouble())
+            return rec.getOptionalFloat(entry.getName()).isPresent()
+                    ? of(rec.getOptionalFloat(entry.getName()).getAsDouble())
                     : empty();
         case DOUBLE:
-            return record.getOptionalDouble(entry.getName()).isPresent()
-                    ? of(record.getOptionalDouble(entry.getName()).getAsDouble())
+            return rec.getOptionalDouble(entry.getName()).isPresent()
+                    ? of(rec.getOptionalDouble(entry.getName()).getAsDouble())
                     : empty();
         case BOOLEAN:
-            return record.getOptionalBoolean(entry.getName()).isPresent()
-                    ? of(record.getOptionalBoolean(entry.getName()).get())
+            return rec.getOptionalBoolean(entry.getName()).isPresent()
+                    ? of(rec.getOptionalBoolean(entry.getName()).get())
                     : empty();
         case BYTES:
-            return record.getOptionalBytes(entry.getName()).isPresent()
-                    ? of(record.getOptionalBytes(entry.getName()).get())
+            return rec.getOptionalBytes(entry.getName()).isPresent()
+                    ? of(rec.getOptionalBytes(entry.getName()).get())
                     : empty();
         case DATETIME:
-            return record.getOptionalDateTime(entry.getName()).isPresent()
-                    ? of(record.getOptionalDateTime(entry.getName()).get())
+            return rec.getOptionalDateTime(entry.getName()).isPresent()
+                    ? of(rec.getOptionalDateTime(entry.getName()).get())
                     : empty();
         case STRING:
-            return record.getOptionalString(entry.getName()).isPresent()
-                    ? of(record.getOptionalString(entry.getName()).get())
+            return rec.getOptionalString(entry.getName()).isPresent()
+                    ? of(rec.getOptionalString(entry.getName()).get())
                     : empty();
         case RECORD:
-            return record.getOptionalRecord(entry.getName()).isPresent()
-                    ? of(record.getOptionalRecord(entry.getName()).get())
+            return rec.getOptionalRecord(entry.getName()).isPresent()
+                    ? of(rec.getOptionalRecord(entry.getName()).get())
                     : empty();
         case ARRAY:
         default:

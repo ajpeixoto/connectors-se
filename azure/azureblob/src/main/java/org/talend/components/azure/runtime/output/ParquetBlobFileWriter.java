@@ -35,6 +35,8 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 
 public class ParquetBlobFileWriter extends BlobFileWriter {
 
+    private static final String PARQUET = ".parquet";
+
     private BlobOutputConfiguration config;
 
     private ParquetConverter converter;
@@ -60,11 +62,11 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
 
     @Override
     public void generateFile(String directoryName) throws URISyntaxException, StorageException {
-        String fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + ".parquet";
+        String fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + PARQUET;
 
         CloudBlob blob = getContainer().getBlockBlobReference(fileName);
         while (blob.exists(null, null, AzureComponentServices.getTalendOperationContext())) {
-            fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + ".parquet";
+            fileName = directoryName + config.getBlobNameTemplate() + System.currentTimeMillis() + PARQUET;
             blob = getContainer().getBlockBlobReference(fileName);
         }
 
@@ -79,7 +81,7 @@ public class ParquetBlobFileWriter extends BlobFileWriter {
 
         File tempFilePath = null;
         try {
-            tempFilePath = File.createTempFile("tempFile", ".parquet");
+            tempFilePath = File.createTempFile("tempFile", PARQUET);
             Path tempFile = new org.apache.hadoop.fs.Path(tempFilePath.getPath());
             ParquetWriter<GenericRecord> writer = AvroParquetWriter
                     .<GenericRecord> builder(tempFile)

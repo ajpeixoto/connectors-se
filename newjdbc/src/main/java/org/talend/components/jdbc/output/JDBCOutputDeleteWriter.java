@@ -94,11 +94,11 @@ public class JDBCOutputDeleteWriter extends JDBCOutputWriter {
 
         initRowWriterIfNot(inputSchema);
 
-        String sql_fact = rowWriter.write(input);
-        if (sql_fact != null) {
-            context.set("QUERY", sql_fact);
+        String sqlFact = rowWriter.write(input);
+        if (sqlFact != null) {
+            context.set("QUERY", sqlFact);
             if (config.isDebugQuery()) {
-                log.debug("'" + sql_fact.trim() + "'.");
+                log.debug("'" + sqlFact.trim() + "'.");
             }
         }
 

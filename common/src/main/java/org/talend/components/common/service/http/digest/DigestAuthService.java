@@ -45,7 +45,7 @@ public class DigestAuthService {
             if (status == 401) {
                 // If status == 401 try to achieve the challenge
                 List<String> lwa = Optional.ofNullable(headers.get("WWW-Authenticate")).orElse(Collections.emptyList());
-                if (lwa.size() > 0) {
+                if (!lwa.isEmpty()) {
                     // if WWW-Authenticate exists
                     BasicHeader authChallenge = new BasicHeader("WWW-Authenticate", lwa.get(0));
                     DigestScheme scheme = new DigestScheme();

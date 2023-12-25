@@ -73,11 +73,11 @@ public class JDBCOutputBulkExecProcessor implements Serializable {
     }
 
     @ElementListener
-    public void elementListener(@Input final Record record, @Output final OutputEmitter<Record> success)
+    public void elementListener(@Input final Record rec, @Output final OutputEmitter<Record> success)
             throws IOException {
-        writer.write(record);
+        writer.write(rec);
 
-        success.emit(record);
+        success.emit(rec);
     }
 
     @PostConstruct

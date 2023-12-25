@@ -23,7 +23,7 @@ public class ExcelWriterSupplier implements RecordWriterSupplier {
 
     @Override
     public RecordWriter getWriter(TargetFinder target, ContentFormat config) {
-        if (!ExcelConfiguration.class.isInstance(config)) {
+        if (!(config instanceof ExcelConfiguration)) {
             throw new IllegalArgumentException("try to get excel-writer with other than excel config");
         }
 

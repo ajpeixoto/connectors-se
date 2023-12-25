@@ -25,7 +25,7 @@ public class AvroWriterSupplier implements RecordWriterSupplier {
 
     @Override
     public RecordWriter getWriter(final TargetFinder target, final ContentFormat config) {
-        if (!AvroConfiguration.class.isInstance(config)) {
+        if (!(config instanceof AvroConfiguration)) {
             throw new IllegalArgumentException("Try to get avro-writer with other than avro config.");
         }
 

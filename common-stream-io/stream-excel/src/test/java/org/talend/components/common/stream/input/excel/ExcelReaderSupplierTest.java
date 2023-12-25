@@ -17,6 +17,11 @@ import java.io.InputStream;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +64,7 @@ class ExcelReaderSupplierTest {
     }
 
     @Test
-    public void testSimple() throws IOException {
+    void testSimple() throws IOException {
         final String path = "excel2007/excel2007_File.xlsx";
         try (final InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path);
                 final RecordReader reader = new ExcelReaderSupplier().getReader(factory, config)) {
@@ -68,8 +73,18 @@ class ExcelReaderSupplierTest {
             config.getHeader().setSize(1);
             config.setSheetName("Another Sheet");
             final Iterator<Record> records = reader.read(stream);
-            while (records.hasNext()) {
-                Record rec = records.next();
+            Assertions.assertNotNull(records);
+
+            final List<Record> listOfRecords = StreamSupport
+                    .stream(Spliterators.spliteratorUnknownSize(records, Spliterator.ORDERED), false)
+                    .collect(Collectors.toList());
+            Assertions.assertEquals(100, listOfRecords.size());
+            for (final Record rec : listOfRecords) {
+                Assertions.assertNotNull(rec.getString("newColumn"));
+                Assertions.assertNotNull(rec.getString("newColumn1"));
+                Assertions.assertNotNull(rec.getString("newColumn2"));
+                Assertions.assertTrue(rec.getString("newColumn2").isEmpty());
+                Assertions.assertNotNull(rec.getString("newColumn3"));
             }
         }
     }

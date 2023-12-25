@@ -21,13 +21,13 @@ import org.talend.components.common.connection.azureblob.AzureStorageConnectionS
 
 public class RegionUtils {
 
-    private final static String AZURE_ACCOUNT_CRED_KEY_FORMAT = "fs.azure.account.key.%s.blob.%s";
+    private static final String AZURE_ACCOUNT_CRED_KEY_FORMAT = "fs.azure.account.key.%s.blob.%s";
 
-    private final static String AZURE_SAS_CRED_KEY_FORMAT = "fs.azure.sas.%s.%s.blob.%s";
+    private static final String AZURE_SAS_CRED_KEY_FORMAT = "fs.azure.sas.%s.%s.blob.%s";
 
-    private final static String AZURE_URI_FORMAT = "wasb%s://%s@%s.blob.%s/%s";
+    private static final String AZURE_URI_FORMAT = "wasb%s://%s@%s.blob.%s/%s";
 
-    private final static Pattern sasPattern = Pattern.compile(SAS_PATTERN);
+    private static final Pattern sasPattern = Pattern.compile(SAS_PATTERN);
 
     private Matcher matcher;
 

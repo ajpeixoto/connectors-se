@@ -72,8 +72,8 @@ public class TacoKitRecordToTableRowConverter {
                 case RECORD:
                     Optional
                             .ofNullable(input.getRecord(fieldName))
-                            .ifPresent(record -> tableRow
-                                    .put(fieldName, convertRecordToTableRow(record, field.getSubFields())));
+                            .ifPresent(rec -> tableRow
+                                    .put(fieldName, convertRecordToTableRow(rec, field.getSubFields())));
                     break;
                 case ARRAY:
                     switch (entry.getElementSchema().getType()) {
@@ -82,7 +82,7 @@ public class TacoKitRecordToTableRowConverter {
                         tableRow
                                 .put(fieldName, records
                                         .stream()
-                                        .map(record -> convertRecordToTableRow(record, field.getSubFields()))
+                                        .map(rec -> convertRecordToTableRow(rec, field.getSubFields()))
                                         .collect(toList()));
                         break;
                     case STRING:

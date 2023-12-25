@@ -15,9 +15,9 @@ package org.talend.components.common.httpclient.api;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -543,15 +543,14 @@ public class QueryConfigurationBuilder {
         Map<String, String> substitutedURLPathParams = this.queryConfiguration.getUrlPathParams()
                 .entrySet()
                 .stream()
-                .collect(Collectors.toMap(p -> p.getKey(), p -> {
-                    return substitutor.replace(p.getValue());
-                }));
+                .collect(Collectors.toMap(Entry::getKey, p -> substitutor.replace(p.getValue())));
         this.queryConfiguration.setUrlPathParams(substitutedURLPathParams);
 
         // Substitute Body query parameters
-        List<KeyValuePair> substitutedKVPBody = this.queryConfiguration.getBodyQueryParams().stream().map(p -> {
-            return new KeyValuePair(p.getKey(), substitutor.replace(p.getValue()));
-        }).collect(Collectors.toList());
+        List<KeyValuePair> substitutedKVPBody = this.queryConfiguration.getBodyQueryParams()
+                .stream()
+                .map(p -> new KeyValuePair(p.getKey(), substitutor.replace(p.getValue())))
+                .collect(Collectors.toList());
         this.queryConfiguration.setBodyQueryParams(substitutedKVPBody);
 
         // Substitute body plain text
@@ -561,15 +560,17 @@ public class QueryConfigurationBuilder {
         }
 
         // Substitute headers
-        List<KeyValuePair> substitutedHeaders = this.queryConfiguration.getHeaders().stream().map(p -> {
-            return new KeyValuePair(p.getKey(), substitutor.replace(p.getValue()));
-        }).collect(Collectors.toList());
+        List<KeyValuePair> substitutedHeaders = this.queryConfiguration.getHeaders()
+                .stream()
+                .map(p -> new KeyValuePair(p.getKey(), substitutor.replace(p.getValue())))
+                .collect(Collectors.toList());
         this.queryConfiguration.setHeaders(substitutedHeaders);
 
         // Substitute query parameters
-        List<KeyValuePair> substitutedHQueryParams = this.queryConfiguration.getQueryParams().stream().map(p -> {
-            return new KeyValuePair(p.getKey(), substitutor.replace(p.getValue()));
-        }).collect(Collectors.toList());
+        List<KeyValuePair> substitutedHQueryParams = this.queryConfiguration.getQueryParams()
+                .stream()
+                .map(p -> new KeyValuePair(p.getKey(), substitutor.replace(p.getValue())))
+                .collect(Collectors.toList());
         this.queryConfiguration.setQueryParams(substitutedHQueryParams);
     }
 }

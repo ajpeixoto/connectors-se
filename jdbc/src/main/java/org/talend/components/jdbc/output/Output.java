@@ -73,13 +73,13 @@ public abstract class Output implements Serializable {
     }
 
     @ElementListener
-    public void elementListener(@Input final Record record) throws SQLException {
+    public void elementListener(@Input final Record rec) throws SQLException {
         if (!init) {
             // prevent creating db connection if no records
             // it's mostly useful for streaming scenario
             lazyInit();
         }
-        records.add(record);
+        records.add(rec);
     }
 
     private void lazyInit() throws SQLException {

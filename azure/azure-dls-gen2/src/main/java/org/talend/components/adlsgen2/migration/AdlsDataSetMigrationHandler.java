@@ -15,7 +15,6 @@ package org.talend.components.adlsgen2.migration;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.talend.components.common.formats.csv.CSVFieldDelimiter;
 import org.talend.sdk.component.api.component.MigrationHandler;
 

@@ -21,14 +21,14 @@ import org.junit.jupiter.api.Test;
 /**
  * Unit-tests for {@link SoqlQueryBuilder} class
  */
-public class SoqlQueryBuilderTest {
+class SoqlQueryBuilderTest {
 
     /**
      * Checks {@link SoqlQueryBuilder#buildSoqlQuery()} returns SOQL query according to column list and entity name
      */
     @Test
     @DisplayName("Test build SOQL query simple")
-    public void testBuildSoqlQuerySimple() {
+    void testBuildSoqlQuerySimple() {
         String expected = "\"SELECT Id, Name, BillingCity FROM Account\"";
 
         String queryFromBuilder =
@@ -43,7 +43,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query child to parent")
-    public void testBuildSoqlQueryChildToParent() {
+    void testBuildSoqlQueryChildToParent() {
         String expected = "\"SELECT Name, Account.Name, Account.Owner.Name FROM Contact\"";
 
         String queryFromBuilder =
@@ -59,7 +59,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query parent to child")
-    public void testBuildSoqlQueryParentToChild() {
+    void testBuildSoqlQueryParentToChild() {
         String expected = "\"SELECT Name, (SELECT LastName FROM Contacts) FROM Account\"";
 
         String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Name", "Contacts_records_LastName"), "Account")
@@ -74,7 +74,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query parent to child depth")
-    public void testBuildSoqlQueryParentToChildDepth() {
+    void testBuildSoqlQueryParentToChildDepth() {
         String expected = "\"SELECT Name, (SELECT LastName, Account.Owner.Name FROM Contacts) FROM Account\"";
 
         String queryFromBuilder = new SoqlQueryBuilder(
@@ -90,7 +90,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query complect relationship")
-    public void testBuildSoqlQueryComplexRelationship() {
+    void testBuildSoqlQueryComplexRelationship() {
         String expected =
                 "\"SELECT Id, Name, (SELECT Quantity, ListPrice, PricebookEntry.UnitPrice, PricebookEntry.Name FROM OpportunityLineItems) FROM Opportunity\"";
         String queryFromBuilder = new SoqlQueryBuilder(Arrays
@@ -109,7 +109,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query custom filed")
-    public void testBuildSoqlQueryCustomField() {
+    void testBuildSoqlQueryCustomField() {
         String expected = "\"SELECT Id, SLAExpirationDate__c FROM Account\"";
 
         String queryFromBuilder =
@@ -124,7 +124,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query with custom module")
-    public void testBuildSoqlQueryWithCustomTable() {
+    void testBuildSoqlQueryWithCustomTable() {
         String expected = "\"SELECT Id, SLAExpirationDate__c FROM talend_custom__c\"";
 
         String queryFromBuilder = new SoqlQueryBuilder(Arrays.asList("Id", "SLAExpirationDate__c"), "talend_custom__c")
@@ -139,7 +139,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query with custom modules child to parent")
-    public void testBuildSoqlQueryWithCustomTablesChildToParent() {
+    void testBuildSoqlQueryWithCustomTablesChildToParent() {
         String expected =
                 "\"SELECT talend_custom__c.Name, talend_custom__c.custom_name__c, talend_contact__r.Name, talend_contact__r.Account.Name FROM talend_custom__c\"";
 
@@ -157,7 +157,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query with custom modules parent to child")
-    public void testBuildSoqlQueryWithCustomTablesParentToChild() {
+    void testBuildSoqlQueryWithCustomTablesParentToChild() {
         String expected =
                 "\"SELECT Name, (SELECT custom.lastName, custom_name__c, talend_account__c.custom_lastName__c, talend_account__c.Age FROM talend_custom__r), contact_title__c FROM talend_contact__c\"";
 
@@ -177,7 +177,7 @@ public class SoqlQueryBuilderTest {
      */
     @Test
     @DisplayName("Test build SOQL query with complex child table name parent to child")
-    public void testBuildSoqlQueryWithComplexChildTableNameParentToChild() {
+    void testBuildSoqlQueryWithComplexChildTableNameParentToChild() {
         String expected =
                 "\"SELECT Name, (SELECT custom.lastName, talend_account__c.Age FROM talend_contact__c.Persons), contact_title__c FROM talend_contact__c\"";
 

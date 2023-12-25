@@ -64,7 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 @Testcontainers
 @WithComponents(value = "org.talend.components.http")
-public class ClientTestWithHttpbinTest {
+class ClientTestWithHttpbinTest {
 
     private final static String HTTPBIN_BASE_PROPERTY = "org.talend.components.rest.httpbin_base";
 
@@ -125,7 +125,7 @@ public class ClientTestWithHttpbinTest {
         followRedirects_backup = HttpURLConnection.getFollowRedirects();
         HttpURLConnection.setFollowRedirects(false);
 
-        config = RequestConfigBuilderTest.getEmptyRequestConfig();
+        config = RequestConfigBuilder.getEmptyRequestConfig();
 
         config.getDataset().getDatastore().setBase(HTTPBIN_BASE.get());
         config.getDataset().getDatastore().setConnectionTimeout(CONNECT_TIMEOUT);

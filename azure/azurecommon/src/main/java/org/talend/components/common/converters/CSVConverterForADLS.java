@@ -99,7 +99,7 @@ public class CSVConverterForADLS extends CSVConverter implements Serializable {
     }
 
     @Override
-    public Schema inferSchema(CSVRecord record) {
+    public Schema inferSchema(CSVRecord rec) {
         Schema.Builder builder = recordBuilderFactory.newSchemaBuilder(Schema.Type.RECORD);
         Set<String> existNames = new HashSet<>();
         String finalName;
@@ -119,7 +119,7 @@ public class CSVConverterForADLS extends CSVConverter implements Serializable {
                                 .build());
             }
         } else {
-            return super.inferSchema(record);
+            return super.inferSchema(rec);
         }
         return builder.build();
     }
@@ -130,7 +130,7 @@ public class CSVConverterForADLS extends CSVConverter implements Serializable {
     }
 
     @Override
-    public CSVRecord fromRecord(Record record) {
+    public CSVRecord fromRecord(Record rec) {
         throw new UnsupportedOperationException("#fromRecord()");
     }
 

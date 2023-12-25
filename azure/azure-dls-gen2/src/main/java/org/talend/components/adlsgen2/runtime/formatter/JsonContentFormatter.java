@@ -46,9 +46,9 @@ public class JsonContentFormatter extends AbstractContentFormatter {
     @Override
     public byte[] feedContent(List<Record> records) {
         JsonArrayBuilder b = jsonBuilderFactory.createArrayBuilder();
-        for (Record record : records) {
+        for (Record rec : records) {
 
-            b.add(converter.fromRecord(record));
+            b.add(converter.fromRecord(rec));
         }
         return b.build().toString().getBytes();
     }

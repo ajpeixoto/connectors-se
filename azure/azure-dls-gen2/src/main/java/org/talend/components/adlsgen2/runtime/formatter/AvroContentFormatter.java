@@ -52,8 +52,8 @@ public class AvroContentFormatter extends AbstractContentFormatter {
             DatumWriter<GenericRecord> datumWriter = new GenericDatumWriter<>();
             DataFileWriter<GenericRecord> dataFileWriter = new DataFileWriter<>(datumWriter);
             dataFileWriter.create(converter.fromRecordSchema(schema), byteBuffer);
-            for (Record record : records) {
-                dataFileWriter.append(converter.fromRecord(record));
+            for (Record rec : records) {
+                dataFileWriter.append(converter.fromRecord(rec));
             }
             dataFileWriter.flush();
             return byteBuffer.toByteArray();

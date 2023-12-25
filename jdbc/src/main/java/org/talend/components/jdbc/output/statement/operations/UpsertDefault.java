@@ -83,14 +83,14 @@ public class UpsertDefault extends QueryManagerImpl {
     }
 
     @Override
-    public boolean validateQueryParam(final Record record) {
-        final Set<Schema.Entry> entries = new HashSet<>(record.getSchema().getEntries());
+    public boolean validateQueryParam(final Record rec) {
+        final Set<Schema.Entry> entries = new HashSet<>(rec.getSchema().getEntries());
         return keys.stream().allMatch(k -> entries.stream().anyMatch(entry -> entry.getOriginalFieldName().equals(k)))
                 && entries
                         .stream()
                         .filter(entry -> keys.contains(entry.getOriginalFieldName()))
                         .filter(entry -> !entry.isNullable())
-                        .map(entry -> valueOf(record, entry))
+                        .map(entry -> valueOf(rec, entry))
                         .allMatch(Optional::isPresent);
     }
 
@@ -111,23 +111,23 @@ public class UpsertDefault extends QueryManagerImpl {
         final List<Reject> discards = new ArrayList<>();
         try (final Connection connection = dataSource.getConnection()) {
             try (final PreparedStatement statement = connection.prepareStatement(query)) {
-                for (final Record record : records) {
+                for (final Record rec : records) {
                     statement.clearParameters();
-                    if (!validateQueryParam(record)) {
-                        discards.add(new Reject("missing required query param in this record", record));
+                    if (!validateQueryParam(rec)) {
+                        discards.add(new Reject("missing required query param in this record", rec));
                         continue;
                     }
                     for (final Map.Entry<Integer, Schema.Entry> entry : getQueryParams().entrySet()) {
                         RecordToSQLTypeConverter
                                 .valueOf(entry.getValue().getType().name())
                                 .setValue(statement, entry.getKey(),
-                                        entry.getValue(), record);
+                                        entry.getValue(), rec);
                     }
                     try (final ResultSet result = statement.executeQuery()) {
                         if (result.next() && result.getInt("RECORD_EXIST") > 0) {
-                            needUpdate.add(record);
+                            needUpdate.add(rec);
                         } else {
-                            needInsert.add(record);
+                            needInsert.add(rec);
                         }
                     }
                 }

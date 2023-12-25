@@ -43,7 +43,7 @@ public class JsonExpected implements AssertionsBuilder<JsonObject> {
     }
 
     @Override
-    public Consumer<JsonObject> endRecord(int id, Record record) {
+    public Consumer<JsonObject> endRecord(int id, Record rec) {
         final List<Consumer<JsonObject>> copy = new ArrayList<>(this.verifiers.size());
         copy.addAll(this.verifiers);
         return new JsonChecker(copy);

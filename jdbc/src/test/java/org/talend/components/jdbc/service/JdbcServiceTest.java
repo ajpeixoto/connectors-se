@@ -35,7 +35,7 @@ class JdbcServiceTest {
             "insert into myTable (id) values ('1')|MYSQL|true",
             "update myTable set id=1 where id < 1|MYSQL|true"
     }, delimiter = '|')
-    public void isInvalidSQLQueryTest(String query, String type, boolean result) {
+    void isInvalidSQLQueryTest(String query, String type, boolean result) {
         System.out.println("SQL : " + query);
         boolean invalidSQLQuery = service.isInvalidSQLQuery(query, type);
         Assertions.assertEquals(result, invalidSQLQuery);

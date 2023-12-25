@@ -109,14 +109,14 @@ public class ParquetBlobReader extends BlobReader {
 
         @Override
         protected GenericRecord peekNextBlobRecord() {
-            GenericRecord currentRecord = this.currentRecord;
+            GenericRecord rec = this.currentRecord;
             try {
                 this.currentRecord = reader.read();
             } catch (IOException e) {
                 log.error("Can't read record from file " + getCurrentBlob().getBlobPath(), e);
             }
 
-            return currentRecord;
+            return rec;
         }
 
         @Override

@@ -32,6 +32,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterQuery(SoqlParser.QueryContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -43,6 +44,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitQuery(SoqlParser.QueryContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -54,6 +56,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterSelectClause(SoqlParser.SelectClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -65,6 +68,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitSelectClause(SoqlParser.SelectClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -76,6 +80,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterFromClause(SoqlParser.FromClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -87,6 +92,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitFromClause(SoqlParser.FromClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -98,6 +104,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterAnythingClause(SoqlParser.AnythingClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -109,6 +116,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitAnythingClause(SoqlParser.AnythingClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -120,6 +128,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterFieldList(SoqlParser.FieldListContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -131,6 +140,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitFieldList(SoqlParser.FieldListContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -142,6 +152,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterSubqueryList(SoqlParser.SubqueryListContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -153,6 +164,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitSubqueryList(SoqlParser.SubqueryListContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -164,6 +176,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterField(SoqlParser.FieldContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -175,6 +188,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitField(SoqlParser.FieldContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -186,6 +200,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterObject(SoqlParser.ObjectContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -197,6 +212,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitObject(SoqlParser.ObjectContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -208,6 +224,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterObjectPrefix(SoqlParser.ObjectPrefixContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -219,6 +236,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitObjectPrefix(SoqlParser.ObjectPrefixContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -230,6 +248,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterSubquery(SoqlParser.SubqueryContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -241,6 +260,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitSubquery(SoqlParser.SubqueryContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -252,6 +272,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterSubSelectClause(SoqlParser.SubSelectClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -263,6 +284,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitSubSelectClause(SoqlParser.SubSelectClauseContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -274,6 +296,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterAnyword(SoqlParser.AnywordContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -285,6 +308,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitAnyword(SoqlParser.AnywordContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -296,6 +320,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterAnything(SoqlParser.AnythingContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -307,6 +332,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitAnything(SoqlParser.AnythingContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -318,6 +344,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void enterEveryRule(ParserRuleContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -329,6 +356,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void exitEveryRule(ParserRuleContext ctx) {
+        /* NOP */
     }
 
     /**
@@ -340,6 +368,7 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void visitTerminal(TerminalNode node) {
+        /* NOP */
     }
 
     /**
@@ -351,5 +380,6 @@ public class SoqlBaseListener implements SoqlListener {
      */
     @Override
     public void visitErrorNode(ErrorNode node) {
+        /* NOP */
     }
 }

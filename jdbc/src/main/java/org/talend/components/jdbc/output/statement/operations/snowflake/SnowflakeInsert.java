@@ -20,7 +20,6 @@ import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JdbcService;
 import org.talend.components.jdbc.service.SnowflakeCopyService;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.service.Service;
 
 import java.sql.Connection;
 import java.sql.SQLException;

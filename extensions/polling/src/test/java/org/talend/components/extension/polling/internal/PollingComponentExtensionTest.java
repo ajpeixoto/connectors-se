@@ -13,6 +13,7 @@
 package org.talend.components.extension.polling.internal;
 
 import org.junit.jupiter.api.Test;
+import org.talend.components.extension.polling.TestConstants;
 import org.talend.components.extension.polling.api.Pollable;
 import org.talend.components.extension.polling.api.PollableDuplicateDataset;
 import org.talend.components.extension.polling.internal.impl.PollingConfiguration;
@@ -57,11 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
 @WithComponents("org.talend.components.extension.polling.mapperA")
-public class PollingComponentExtensionTest {
-
-    public final static int TEST_POLLING_DELAY = 100;
-
-    public final static int TEST_NB_EXPECTED_ROWS = 3;
+class PollingComponentExtensionTest {
 
     @Injected
     private BaseComponentsHandler handler;
@@ -101,7 +98,7 @@ public class PollingComponentExtensionTest {
         mainConfig.setParam1("abcde");
 
         PollingConfiguration pollingConf = new PollingConfiguration();
-        pollingConf.setDelay(TEST_POLLING_DELAY);
+        pollingConf.setDelay(TestConstants.TEST_POLLING_DELAY);
 
         final String mainConfigStr = configurationByExample()
                 .forInstance(mainConfig)
@@ -128,7 +125,7 @@ public class PollingComponentExtensionTest {
                 .run();
 
         final List<Record> records = handler.getCollectedData(Record.class);
-        assertEquals(TEST_NB_EXPECTED_ROWS, records.size());
+        assertEquals(TestConstants.TEST_NB_EXPECTED_ROWS, records.size());
 
         for (int i = 1; i <= records.size(); i++) {
             assertEquals("Data/abcde" + i + "/" + i, records.get(i - 1).getString("valueStr"));

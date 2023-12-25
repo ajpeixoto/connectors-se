@@ -75,8 +75,8 @@ public class CosmosDBOutput implements Serializable {
     }
 
     @ElementListener
-    public void onNext(@Input final Record record) {
-        out.output(record);
+    public void onNext(@Input final Record rec) {
+        out.output(rec);
     }
 
     @PreDestroy

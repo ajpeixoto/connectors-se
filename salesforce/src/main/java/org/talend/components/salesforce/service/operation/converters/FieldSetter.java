@@ -42,23 +42,21 @@ public class FieldSetter {
             return;
         }
         Object valueToAdd = value;
-        if (Utf8.class.isInstance(value)) {
+        if (value instanceof Utf8) {
             valueToAdd = value.toString();
         }
         // Convert stuff here
         // For Nillable base64 type field, we retrieve it as UNION type:[bytes,null]
         // So need to unwrap it and get its real type
-        if (FieldType.base64.equals(field.getType())) {
-            if ((value instanceof String) || (value instanceof byte[])) {
-                byte[] base64Data = null;
-                if (value instanceof byte[]) {
-                    base64Data = (byte[]) value;
-                } else {
-                    base64Data = ((String) value).getBytes();
-                }
-                if (Base64.isBase64(new String(base64Data))) {
-                    valueToAdd = Base64.decode(base64Data);
-                }
+        if (FieldType.base64.equals(field.getType()) && (value instanceof String || value instanceof byte[])) {
+            byte[] base64Data = null;
+            if (value instanceof byte[]) {
+                base64Data = (byte[]) value;
+            } else {
+                base64Data = ((String) value).getBytes();
+            }
+            if (Base64.isBase64(new String(base64Data))) {
+                valueToAdd = Base64.decode(base64Data);
             }
         }
         String fieldName = field.getName();

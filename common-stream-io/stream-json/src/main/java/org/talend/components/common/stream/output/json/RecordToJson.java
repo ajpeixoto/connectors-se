@@ -42,12 +42,12 @@ public class RecordToJson implements RecordConverter<JsonObject, Void> {
     private boolean useOriginColumnName = false;
 
     @Override
-    public JsonObject fromRecord(Record record) {
+    public JsonObject fromRecord(Record rec) {
 
-        if (record == null) {
+        if (rec == null) {
             return null;
         }
-        return convertRecordToJsonObject(record);
+        return convertRecordToJsonObject(rec);
     }
 
     public void setUseOriginColumnName(boolean useOriginColumnName) {
@@ -59,21 +59,21 @@ public class RecordToJson implements RecordConverter<JsonObject, Void> {
     }
 
     @Override
-    public Void fromRecordSchema(Schema record) {
+    public Void fromRecordSchema(Schema rec) {
         return null;
     }
 
-    private JsonObject convertRecordToJsonObject(Record record) {
+    private JsonObject convertRecordToJsonObject(Record rec) {
         final JsonObjectBuilder json = Json.createObjectBuilder();
 
-        for (Entry entry : record.getSchema().getEntries()) {
+        for (Entry entry : rec.getSchema().getEntries()) {
             final String fieldName = entry.getName();
-            Object val = record.get(Object.class, fieldName);
+            Object val = rec.get(Object.class, fieldName);
             log.debug("[convertRecordToJsonObject] entry: {}; type: {}; value: {}.", fieldName, entry.getType(), val);
             if (null == val) {
                 json.addNull(useOriginColumnName ? entry.getOriginalFieldName() : fieldName);
             } else {
-                this.addField(json, record, entry);
+                this.addField(json, rec, entry);
             }
         }
         return json.build();
@@ -103,35 +103,35 @@ public class RecordToJson implements RecordConverter<JsonObject, Void> {
         return array.build();
     }
 
-    private void addField(final JsonObjectBuilder json, final Record record, final Entry entry) {
+    private void addField(final JsonObjectBuilder json, final Record rec, final Entry entry) {
         final String fieldName = entry.getName();
         final String outputFieldName = useOriginColumnName ? entry.getOriginalFieldName() : fieldName;
 
         switch (entry.getType()) {
         case RECORD:
-            final Record subRecord = record.getRecord(fieldName);
+            final Record subRecord = rec.getRecord(fieldName);
             json.add(outputFieldName, convertRecordToJsonObject(subRecord));
             break;
         case ARRAY:
-            final Collection<Object> array = record.getArray(Object.class, fieldName);
+            final Collection<Object> array = rec.getArray(Object.class, fieldName);
             final JsonArray jarray = toJsonArray(array);
             json.add(outputFieldName, jarray);
             break;
         case STRING:
-            json.add(outputFieldName, record.getString(fieldName));
+            json.add(outputFieldName, rec.getString(fieldName));
             break;
         case BYTES:
-            json.add(outputFieldName, new String(record.getBytes(fieldName), Charset.defaultCharset()));
+            json.add(outputFieldName, new String(rec.getBytes(fieldName), Charset.defaultCharset()));
             break;
         case INT:
-            json.add(outputFieldName, record.getInt(fieldName));
+            json.add(outputFieldName, rec.getInt(fieldName));
             break;
         case LONG:
-            json.add(outputFieldName, record.getLong(fieldName));
+            json.add(outputFieldName, rec.getLong(fieldName));
             break;
         case DECIMAL:
             // worry json ser/desr lose precision for decimal, also here keep like before for safe
-            BigDecimal decimal = record.getDecimal(fieldName);
+            BigDecimal decimal = rec.getDecimal(fieldName);
             if (decimal != null) {
                 json.add(outputFieldName, decimal.toString());
             } else {
@@ -139,16 +139,16 @@ public class RecordToJson implements RecordConverter<JsonObject, Void> {
             }
             break;
         case FLOAT:
-            json.add(outputFieldName, record.getFloat(fieldName));
+            json.add(outputFieldName, rec.getFloat(fieldName));
             break;
         case DOUBLE:
-            json.add(outputFieldName, record.getDouble(fieldName));
+            json.add(outputFieldName, rec.getDouble(fieldName));
             break;
         case BOOLEAN:
-            json.add(outputFieldName, record.getBoolean(fieldName));
+            json.add(outputFieldName, rec.getBoolean(fieldName));
             break;
         case DATETIME:
-            final ZonedDateTime dateTime = record.getDateTime(fieldName);
+            final ZonedDateTime dateTime = rec.getDateTime(fieldName);
             if (dateTime != null) {
                 json.add(outputFieldName, dateTime.toString());
             } else {

@@ -17,8 +17,8 @@ import org.talend.sdk.component.api.record.Schema;
 
 public interface RecordConverter<T, U> {
 
-    T fromRecord(Record record);
+    T fromRecord(Record rec);
 
-    U fromRecordSchema(Schema record);
+    U fromRecordSchema(Schema rec);
 
 }

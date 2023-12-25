@@ -15,7 +15,6 @@ package org.talend.components.dynamicscrm.output;
 import org.apache.olingo.client.api.domain.ClientEntity;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.EdmEntitySet;
-import org.talend.components.dynamicscrm.service.DynamicsCrmException;
 import org.talend.components.dynamicscrm.service.I18n;
 import org.talend.ms.crm.odata.DynamicsCRMClient;
 import org.talend.sdk.component.api.record.Record;
@@ -32,13 +31,13 @@ public class InsertRecordProcessor extends AbstractToEntityRecordProcessor {
     }
 
     @Override
-    protected void doProcessRecord(ClientEntity entity, Record record) throws ServiceUnavailableException {
+    protected void doProcessRecord(ClientEntity entity, Record rec) throws ServiceUnavailableException {
         for (Map.Entry<String, String> lookupEntry : lookupMapping.entrySet()) {
             if (columnNames.contains(lookupEntry.getKey())) {
                 client
                         .addOrSkipEntityNavigationLink(entity, lookupEntry.getValue(),
                                 client.extractNavigationLinkName(lookupEntry.getKey()),
-                                record.getString(lookupEntry.getKey()),
+                                rec.getString(lookupEntry.getKey()),
                                 configuration.isEmptyStringToNull(), configuration.isIgnoreNull());
             }
         }

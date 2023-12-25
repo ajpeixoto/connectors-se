@@ -48,7 +48,7 @@ class SimpleObj {
     }
 }
 
-public class OutputUtilsTest {
+class OutputUtilsTest {
 
     @Test
     @DisplayName("should keep both simple object because distinct done on whole object")
@@ -65,7 +65,7 @@ public class OutputUtilsTest {
 
         List<SimpleObj> list = Arrays.asList(obj1, obj2, obj3);
         List<SimpleObj> res = list.stream().distinct().collect(Collectors.toList());
-        Assert.assertTrue(res.size() == 3);
+        Assert.assertEquals(3, res.size());
     }
 
     @Test
@@ -84,6 +84,6 @@ public class OutputUtilsTest {
         List<SimpleObj> list = Arrays.asList(obj1, obj2, obj3);
         List<SimpleObj> res =
                 list.stream().filter(OutputUtils.distinctByKey(SimpleObj::getName)).collect(Collectors.toList());
-        Assert.assertTrue(res.size() == 2);
+        Assert.assertEquals(2, res.size());
     }
 }

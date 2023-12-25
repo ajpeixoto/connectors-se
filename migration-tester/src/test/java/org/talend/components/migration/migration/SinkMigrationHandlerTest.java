@@ -45,20 +45,20 @@ class SinkMigrationHandlerTest {
         SinkMigrationHandler dsmh = new SinkMigrationHandler();
         final Map<String, String> migrated = dsmh.migrate(1, incomingData);
 
-        assertEquals(migrated.get("configuration.dse.dse_legacy"), "legacy data");
+        assertEquals("legacy data", migrated.get("configuration.dse.dse_legacy"));
         assertNull(migrated.get("configuration.dse.dse_duplication"));
         assertTrue(migrated.get("configuration.dse.dse_migration_handler_callback").isEmpty());
 
-        assertEquals(migrated.get("configuration.dse.dso.dso_legacy"), "legacy data");
+        assertEquals("legacy data", migrated.get("configuration.dse.dso.dso_legacy"));
         assertNull(migrated.get("configuration.dse.dso.dso_duplication"));
         assertTrue(migrated.get("configuration.dse.dso.dso_migration_handler_callback").isEmpty());
 
-        assertEquals(migrated.get("configuration.sink_legacy"), "legacy data");
-        assertEquals(migrated.get("configuration.sink_duplication"), "legacy data");
+        assertEquals("legacy data", migrated.get("configuration.sink_legacy"));
+        assertEquals("legacy data", migrated.get("configuration.sink_duplication"));
         assertFalse(migrated.get("configuration.sink_migration_handler_callback").isEmpty());
 
-        assertEquals(migrated.get("configuration.dse.dse_from_sink"), "from sink");
-        assertEquals(migrated.get("configuration.dse.dso.dso_from_sink"), "from sink");
+        assertEquals("from sink", migrated.get("configuration.dse.dse_from_sink"));
+        assertEquals("from sink", migrated.get("configuration.dse.dso.dso_from_sink"));
 
         assertEquals(
                 "{\n" + "\t\"configuration.sink_migration_handler_callback\" : \"\",\n"

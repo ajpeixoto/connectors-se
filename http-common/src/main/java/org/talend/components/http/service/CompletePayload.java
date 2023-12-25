@@ -23,10 +23,10 @@ import java.util.Map;
 @JsonbPropertyOrder({ "status", "headers", "body" })
 public class CompletePayload {
 
-    final private int status;
+    private final int status;
 
-    final private Map<String, String> headers;
+    private final Map<String, String> headers;
 
-    final private Object body;
+    private final Object body;
 
 }

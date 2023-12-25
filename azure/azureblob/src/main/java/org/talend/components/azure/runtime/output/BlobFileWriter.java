@@ -66,6 +66,9 @@ public abstract class BlobFileWriter {
         log.debug("New batch created");
     }
 
+    /**
+     * @deprecated it's deprecated
+     */
     @Deprecated
     protected void generateFile() throws URISyntaxException, StorageException {
         generateFile(this.directoryName);
@@ -73,12 +76,12 @@ public abstract class BlobFileWriter {
 
     protected abstract void generateFile(String directoryName) throws URISyntaxException, StorageException;
 
-    public void writeRecord(Record record) {
+    public void writeRecord(Record rec) {
         if (schema == null) {
-            schema = record.getSchema();
+            schema = rec.getSchema();
         }
 
-        batch.add(record);
+        batch.add(rec);
     }
 
     protected List<Record> getBatch() {

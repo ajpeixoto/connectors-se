@@ -182,14 +182,14 @@ public class MarketoService {
             Builder b = recordBuilder.newSchemaBuilder(Type.RECORD);
             List<String> fields = configuration.getDataSet().getFields();
             Schema people = getEntitySchema(configuration.getDataSet().getDataStore());
-            if (fields.size() > 0) {
+            if (!fields.isEmpty()) {
                 people
                         .getEntries()
                         .stream()
                         .filter(entry -> fields.contains(entry.getName()))
-                        .forEach(entry -> b.withEntry(entry));
+                        .forEach(b::withEntry);
             } else {
-                people.getEntries().stream().forEach(entry -> b.withEntry(entry));
+                people.getEntries().forEach(b::withEntry);
             }
             s = b.build();
             break;
@@ -292,8 +292,8 @@ public class MarketoService {
         return b.build();
     }
 
-    public JsonObject toJson(final Record record) {
-        String recordStr = record.toString().replaceAll("AvroRecord\\{delegate=(.*)\\}$", "$1");
+    public JsonObject toJson(final Record rec) {
+        String recordStr = rec.toString().replaceAll("AvroRecord\\{delegate=(.*)\\}$", "$1");
         JsonReader reader = jsonReader.createReader(new StringReader(recordStr));
         Throwable throwable = null;
         JsonObject json;
@@ -404,9 +404,9 @@ public class MarketoService {
                 break;
             }
         }
-        Record record = b.build();
-        log.debug("[convertToRecord] returning : {}.", record);
-        return record;
+        Record rec = b.build();
+        log.debug("[convertToRecord] returning : {}.", rec);
+        return rec;
     }
 
     /**
@@ -416,7 +416,7 @@ public class MarketoService {
      * @return flattened string
      */
     public String getErrors(JsonArray errors) {
-        StringBuffer error = new StringBuffer();
+        final StringBuilder error = new StringBuilder();
         for (JsonObject json : errors.getValuesAs(JsonObject.class)) {
             error.append(String.format("[%s] %s", json.getString(ATTR_CODE), json.getString(ATTR_MESSAGE)));
         }

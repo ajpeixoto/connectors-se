@@ -151,14 +151,14 @@ public class DeltaBlobReader extends BlobReader {
 
         @Override
         protected RowRecord peekNextBlobRecord() {
-            RowRecord currentRecord = this.currentRecord;
+            RowRecord rec = this.currentRecord;
             try {
                 this.currentRecord = nextRecord();
             } catch (Exception e) {
                 log.error("Can't read record from file " + getCurrentBlob().getBlobPath(), e);
             }
 
-            return currentRecord;
+            return rec;
         }
 
         @Override

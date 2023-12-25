@@ -13,7 +13,6 @@
 package org.talend.components.adlsgen2.input;
 
 import java.io.Serializable;
-import java.util.Iterator;
 
 import javax.annotation.PostConstruct;
 import javax.json.JsonBuilderFactory;
@@ -47,8 +46,6 @@ public class AdlsGen2Input implements Serializable {
     private final JsonBuilderFactory jsonFactory;
 
     private InputConfiguration configuration;
-
-    private Iterator<Record> records;
 
     private BlobReader reader;
 

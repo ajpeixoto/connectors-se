@@ -44,7 +44,7 @@ public class RegisteredComponentExtension implements ContainerListenerExtension 
         selfAsListener = this;
     }
 
-    // @Override 1.1.17 API
+    @Override
     public int order() {
         return Integer.getInteger(getClass().getName() + ".order", 10);
     }

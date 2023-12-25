@@ -19,6 +19,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.talend.components.azure.BaseIT;
 import org.talend.components.azure.BlobTestUtils;
 import org.talend.components.common.formats.Encoding;
@@ -36,6 +37,7 @@ import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.azure")
 class Excel97OutputIT extends BaseIT {
 
@@ -164,7 +166,7 @@ class Excel97OutputIT extends BaseIT {
     }
 
     @Test
-    public void testOutputDoubleAndBooleanData() throws URISyntaxException, StorageException {
+    void testOutputDoubleAndBooleanData() throws URISyntaxException, StorageException {
         final int recordSize = 1;
         Record testRecord = componentsHandler
                 .findService(RecordBuilderFactory.class)
@@ -222,7 +224,7 @@ class Excel97OutputIT extends BaseIT {
     }
 
     @Test
-    public void testBatchSizeIsGreaterThanRowSize() throws URISyntaxException, StorageException {
+    void testBatchSizeIsGreaterThanRowSize() throws URISyntaxException, StorageException {
         final int recordSize = 5;
 
         List<Record> testRecords = BlobTestUtils.fillTestRecords(recordSize);

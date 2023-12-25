@@ -53,22 +53,22 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class RecordBuilderService {
 
-    public final static String CONTEXT_SUBSTITUTOR_INPUT_OPENER = System
+    public static final String CONTEXT_SUBSTITUTOR_INPUT_OPENER = System
             .getProperty("org.talend.components.rest.context_substitutor_input_opener", "{");
 
-    public final static String CONTEXT_SUBSTITUTOR_INPUT_PREFIX_KEY = System
+    public static final String CONTEXT_SUBSTITUTOR_INPUT_PREFIX_KEY = System
             .getProperty("org.talend.components.rest.context_substitutor_input_prefix_key", ".input");
 
-    public final static String CONTEXT_SUBSTITUTOR_INPUT_CLOSER = System
+    public static final String CONTEXT_SUBSTITUTOR_INPUT_CLOSER = System
             .getProperty("org.talend.components.rest.context_substitutor_input_closer", "}");
 
-    public final static String CONTEXT_SUBSTITUTOR_RESULT_OPENER = System
+    public static final String CONTEXT_SUBSTITUTOR_RESULT_OPENER = System
             .getProperty("org.talend.components.rest.context_substitutor_result_opener", "{");
 
-    public final static String CONTEXT_SUBSTITUTOR_RESULT_PREFIX_KEY = System
+    public static final String CONTEXT_SUBSTITUTOR_RESULT_PREFIX_KEY = System
             .getProperty("org.talend.components.rest.context_substitutor_result_prefix_key", ".response");
 
-    public final static String CONTEXT_SUBSTITUTOR_RESULT_CLOSER = System
+    public static final String CONTEXT_SUBSTITUTOR_RESULT_CLOSER = System
             .getProperty("org.talend.components.rest.context_substitutor_result_closer", "}");
 
     @Service
@@ -171,7 +171,7 @@ public class RecordBuilderService {
                     e);
         }
 
-        return new IteratorMap<Record, Record>(readIterator,
+        return new IteratorMap<>(readIterator,
                 r -> this.buildRecord(r, response.getStatus().getCode(), headerRecords, isCompletePayload,
                         createContext,
                         completeContext, format,
@@ -203,11 +203,11 @@ public class RecordBuilderService {
             final List<Param> context,
             final Record input) {
 
-        final Record record = this.buildStandardRecord(body, status, headers, isCompletePayload, format);
+        final Record rec = this.buildStandardRecord(body, status, headers, isCompletePayload, format);
         if (buildContext) {
-            return this.buildExtractedKeyValuesRecord(completeContext, input, record, context);
+            return this.buildExtractedKeyValuesRecord(completeContext, input, rec, context);
         } else {
-            return record;
+            return rec;
         }
     }
 
@@ -255,7 +255,7 @@ public class RecordBuilderService {
     /**
      * Return a record that is a list of key/value pairs.
      */
-    private Record buildExtractedKeyValuesRecord(final boolean completeContext, final Record input, final Record record,
+    private Record buildExtractedKeyValuesRecord(final boolean completeContext, final Record input, final Record rec,
             final List<Param> extractedValueList) {
         final Builder builder;
 
@@ -268,7 +268,7 @@ public class RecordBuilderService {
                             .withName(e.getKey())
                             .withNullable(true)
                             .build())
-                    .forEach(e -> schemaBuilder.withEntry(e));
+                    .forEach(schemaBuilder::withEntry);
 
             builder = input.withNewSchema(schemaBuilder.build());
         } else {
@@ -276,7 +276,7 @@ public class RecordBuilderService {
         }
 
         // Substitution within result of current HTTP call
-        final List<Param> updatedOutSubstituted = substituteExtractedValues(extractedValueList, record,
+        final List<Param> updatedOutSubstituted = substituteExtractedValues(extractedValueList, rec,
                 RecordBuilderService.CONTEXT_SUBSTITUTOR_RESULT_OPENER,
                 RecordBuilderService.CONTEXT_SUBSTITUTOR_RESULT_CLOSER,
                 RecordBuilderService.CONTEXT_SUBSTITUTOR_RESULT_PREFIX_KEY);
@@ -353,7 +353,7 @@ public class RecordBuilderService {
             bodyBuilder.withType(Type.STRING).withNullable(true);
         } else {
             final Schema.Builder bodySchema = this.recordBuilderFactory.newSchemaBuilder(Type.RECORD);
-            body.getSchema().getEntries().forEach(e -> bodySchema.withEntry(e));
+            body.getSchema().getEntries().forEach(bodySchema::withEntry);
             bodyBuilder.withType(Type.RECORD).withElementSchema(bodySchema.build());
         }
         final Schema.Entry bodyEntry = bodyBuilder.build();

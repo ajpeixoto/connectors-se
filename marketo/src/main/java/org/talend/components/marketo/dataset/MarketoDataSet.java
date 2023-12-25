@@ -13,8 +13,6 @@
 package org.talend.components.marketo.dataset;
 
 import java.io.Serializable;
-import java.time.Period;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

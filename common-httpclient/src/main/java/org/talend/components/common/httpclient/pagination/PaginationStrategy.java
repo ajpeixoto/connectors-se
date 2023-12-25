@@ -17,7 +17,6 @@ import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.common.httpclient.api.QueryConfiguration;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Pagination strategy has to be instanciated with initial QueryConfiguration.
@@ -33,7 +32,6 @@ public interface PaginationStrategy {
     QueryConfiguration initiatePagination(QueryConfiguration queryConfiguration);
 
     /**
-     * @param currentConfiguration The last QueryConfiguration.
      * @param response The last HTTP response
      * @return The configuration to retrieve the next page, emtpy if no more page.
      */

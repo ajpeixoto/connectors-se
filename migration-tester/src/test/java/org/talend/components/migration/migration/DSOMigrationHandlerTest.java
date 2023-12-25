@@ -38,8 +38,8 @@ class DSOMigrationHandlerTest {
         DatastoreMigrationHandler dsmh = new DatastoreMigrationHandler();
         final Map<String, String> migrated = dsmh.migrate(1, incomingData);
 
-        assertEquals(migrated.get("dso_legacy"), "legacy data");
-        assertEquals(migrated.get("dso_duplication"), "legacy data");
+        assertEquals("legacy data", migrated.get("dso_legacy"));
+        assertEquals("legacy data", migrated.get("dso_duplication"));
         assertFalse(migrated.get("dso_migration_handler_callback").isEmpty());
         assertEquals(migrated.get("dso_incoming"),
                 "{\n" + "\t\"dso_outgoing\" : \"\",\n" + "\t\"dso_legacy\" : \"legacy data\",\n"

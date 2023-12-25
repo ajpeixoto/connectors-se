@@ -59,7 +59,7 @@ public class LineValueBuilder implements AssertionsBuilder<List<String>> {
     }
 
     @Override
-    public Consumer<List<String>> endRecord(final int id, final Record record) {
+    public Consumer<List<String>> endRecord(final int id, final Record rec) {
         final List<String> newFields = new ArrayList<>(this.fields.size());
         newFields.addAll(this.fields);
         return new LineChecker(newFields);

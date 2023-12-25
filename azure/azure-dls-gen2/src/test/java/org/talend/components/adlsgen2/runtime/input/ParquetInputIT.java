@@ -16,6 +16,7 @@ import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 import org.talend.components.adlsgen2.AdlsGen2IntegrationTestBase;
 import org.talend.components.adlsgen2.common.format.FileFormat;
 import org.talend.components.adlsgen2.input.InputConfiguration;
@@ -24,8 +25,9 @@ import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
 
+@Disabled("https://jira.talendforge.org/browse/TDI-50690")
 @WithComponents("org.talend.components.adlsgen2")
-public class ParquetInputIT extends AdlsGen2IntegrationTestBase {
+class ParquetInputIT extends AdlsGen2IntegrationTestBase {
 
     InputConfiguration adlsInputProperties;
 

@@ -238,8 +238,8 @@ public class SalesforceService {
     public IllegalStateException handleConnectionException(final ConnectionException e) {
         if (e == null) {
             return new IllegalStateException("unexpected error. can't handle connection error.");
-        } else if (ApiFault.class.isInstance(e)) {
-            final ApiFault queryFault = ApiFault.class.cast(e);
+        } else if (e instanceof ApiFault) {
+            final ApiFault queryFault = (ApiFault) e;
             return new IllegalStateException(queryFault.getExceptionMessage(), queryFault);
         } else {
             return new IllegalStateException("connection error", e);

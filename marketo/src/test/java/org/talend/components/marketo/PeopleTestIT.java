@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.talend.components.marketo.dataset.MarketoOutputConfiguration.OutputAction;
 import org.talend.sdk.component.api.record.Record;
@@ -32,7 +33,7 @@ import static org.talend.sdk.component.junit.SimpleFactory.configurationByExampl
 @Slf4j
 @WithComponents("org.talend.components.marketo")
 @HttpApi(useSsl = true)
-public class PeopleTestIT extends MarketoBaseTestIT {
+class PeopleTestIT extends MarketoBaseTestIT {
 
     public static final String LIST_ID_COMPQA = "1011";
 
@@ -62,6 +63,7 @@ public class PeopleTestIT extends MarketoBaseTestIT {
                 .build();
     }
 
+    @Disabled("https://jira.talendforge.org/browse/TDI-50690")
     @Test
     void createOnlyPeopleWithListId() {
         log.warn("[createOnlyPeopleWithListId] using endpoint: {}", dataSet.getDataStore().getEndpoint());

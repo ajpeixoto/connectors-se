@@ -62,11 +62,11 @@ public class RawTextRecordReader implements RecordReader {
         }
 
         try {
-            Record record = recordFactory
+            Record rec = recordFactory
                     .newRecordBuilder()
                     .withString("content", out.toString(this.extendedConfiguration.getCharset()))
                     .build();
-            return Collections.singletonList(record).iterator();
+            return Collections.singletonList(rec).iterator();
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(
                     "Unknown encoding for RawTextRecordReader '" + this.extendedConfiguration.getCharset() + "'", e);

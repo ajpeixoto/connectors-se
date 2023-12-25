@@ -22,7 +22,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 public interface DictionaryProvider {
 
-    UnaryOperator<String> createDictionary(Record record, JsonParserFactory jsonParserFactory,
+    UnaryOperator<String> createDictionary(Record rec, JsonParserFactory jsonParserFactory,
             RecordBuilderFactory recordBuilderFactory, boolean flag);
 
     static DictionaryProvider getProvider() {
@@ -31,15 +31,8 @@ public interface DictionaryProvider {
         if (serviceLoader.iterator().hasNext()) {
             return serviceLoader.iterator().next();
         } else {
-            return new DictionaryProvider() {
-
-                @Override
-                public UnaryOperator<String> createDictionary(Record record, JsonParserFactory jsonParserFactory,
-                        RecordBuilderFactory recordBuilderFactory, boolean logIfNotFound) {
-                    return s -> {
-                        throw new UnsupportedOperationException("DSSL is not supported in the SE code.");
-                    };
-                }
+            return (rec, jsonParserFactory, recordBuilderFactory, logIfNotFound) -> s -> {
+                throw new UnsupportedOperationException("DSSL is not supported in the SE code.");
             };
         }
     }

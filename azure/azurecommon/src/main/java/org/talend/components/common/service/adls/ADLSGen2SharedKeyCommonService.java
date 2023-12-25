@@ -156,10 +156,14 @@ public class ADLSGen2SharedKeyCommonService implements Serializable {
         }
     }
 
-    @Deprecated
     /**
-     * @deprecated use loadPathFromTempFile instead
+     * @param connection connection
+     * @param filesystem filesystem
+     * @param fullPath fullPath
+     * @param tempFilePath tempFilePath
+     * @deprecated (use loadPathFromTempFile instead)
      */
+    @Deprecated
     public void appendPath(@Configuration("connection") final AdlsGen2Connection connection, String filesystem,
             String fullPath, Path tempFilePath) {
         try (InputStream inputStream = new FileInputStream(tempFilePath.toFile())) {
@@ -173,6 +177,14 @@ public class ADLSGen2SharedKeyCommonService implements Serializable {
         }
     }
 
+    /**
+     *
+     * @param connection connection
+     * @param filesystem filesystem
+     * @param fullPath fullPath
+     * @param fileLength fileLength
+     * @deprecated (this method is deprecated)
+     */
     @Deprecated
     public void flushPath(@Configuration("connection") final AdlsGen2Connection connection, String filesystem,
             String fullPath, long fileLength) {

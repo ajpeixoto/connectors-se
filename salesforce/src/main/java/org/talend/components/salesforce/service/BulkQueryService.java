@@ -156,7 +156,7 @@ public class BulkQueryService {
         int tryCount = 0;
         while (true) {
             log.debug("Awaiting " + secToWait + " seconds for results ...\n" + info);
-            Thread.sleep(secToWait * 1000);
+            Thread.sleep(secToWait * 1000L);
             info = getBatchInfo(job.getId(), info.getId());
             if (info.getState() == BatchStateEnum.Completed
                     || (BatchStateEnum.NotProcessed == info.getState() && 0 < chunkSize)) {

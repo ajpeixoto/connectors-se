@@ -86,12 +86,12 @@ public class JDBCSQLBuilder {
                 .append(tmpTableName)
                 .append(" as source on ");
         sql.append(updateKeys.stream()
-                .map(name -> platform.identifier(name))
+                .map(platform::identifier)
                 .map(name -> "source." + name + "= target." + name)
                 .collect(joining(" AND ")));
         sql.append(" when matched then update set ");
         sql.append(updateValues.stream()
-                .map(name -> platform.identifier(name))
+                .map(platform::identifier)
                 .map(name -> "target." + name + "= source." + name)
                 .collect(joining(",", "", " ")));
 
@@ -129,22 +129,22 @@ public class JDBCSQLBuilder {
                 .append(tmpTableName)
                 .append(" as source on ");
         sql.append(updateKeys.stream()
-                .map(name -> platform.identifier(name))
+                .map(platform::identifier)
                 .map(name -> "source." + name + "= target." + name)
                 .collect(joining(" AND ")));
         sql.append(" when matched then update set ");
         sql.append(updateValues.stream()
-                .map(name -> platform.identifier(name))
+                .map(platform::identifier)
                 .map(name -> "target." + name + "= source." + name)
                 .collect(joining(",", "", " ")));
         sql.append(" when not matched then insert ");
         sql.append(insertValues.stream()
-                .map(name -> platform.identifier(name))
+                .map(platform::identifier)
                 .map(name -> "target." + name)
                 .collect(Collectors.joining(",", "(", ")")));
         sql.append(" values ");
         sql.append(insertValues.stream()
-                .map(name -> platform.identifier(name))
+                .map(platform::identifier)
                 .map(name -> "source." + name)
                 .collect(Collectors.joining(",", "(", ")")));
 
@@ -170,7 +170,7 @@ public class JDBCSQLBuilder {
                 .append(tmpTable)
                 .append(" as source where ");
         sql.append(deleteKeys.stream()
-                .map(name -> platform.identifier(name))
+                .map(platform::identifier)
                 .map(name -> "source." + name + "= target." + name)
                 .collect(joining(" AND ")));
 
@@ -201,7 +201,7 @@ public class JDBCSQLBuilder {
 
         void replace(Column replacement) {
             if (replacements == null) {
-                replacements = new ArrayList<Column>();
+                replacements = new ArrayList<>();
             }
 
             replacements.add(replacement);
@@ -297,7 +297,7 @@ public class JDBCSQLBuilder {
                 if (designFields != null) {
                     dynamicColumnName = designFields.stream()
                             .filter(field -> "id_Dynamic".equals(field.getTalendType()))
-                            .map(field -> field.getLabel())
+                            .map(SchemaInfo::getLabel)
                             .findFirst()
                             .orElse(null);
                 }
@@ -665,7 +665,7 @@ public class JDBCSQLBuilder {
     }
 
     public static List<Column> getAllColumns(List<Column> columnList) {
-        List<Column> result = new ArrayList<Column>();
+        List<Column> result = new ArrayList<>();
         for (Column column : columnList) {
             if (column.replacements != null && !column.replacements.isEmpty()) {
                 for (Column replacement : column.replacements) {

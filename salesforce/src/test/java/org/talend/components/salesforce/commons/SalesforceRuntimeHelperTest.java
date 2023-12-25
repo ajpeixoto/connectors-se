@@ -28,11 +28,11 @@ import org.junit.jupiter.api.Test;
 /**
  *
  */
-public class SalesforceRuntimeHelperTest {
+class SalesforceRuntimeHelperTest {
 
     @Test
     @DisplayName("Test convert date to calendar")
-    public void testConvertDateToCalendar() throws Throwable {
+    void testConvertDateToCalendar() throws Throwable {
         long timestamp = System.currentTimeMillis();
         Calendar calendar1 = SalesforceRuntimeHelper.convertDateToCalendar(new Date(timestamp), false);
         assertNotNull(calendar1);

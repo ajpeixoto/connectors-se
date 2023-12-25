@@ -23,11 +23,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JdbcConnectionMigrationHandler implements MigrationHandler {
 
-    private final static String migration_log = "JDBC Connection migration : ";
+    private static final String MIGRATION_LOG = "JDBC Connection migration : ";
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
-        log.debug(migration_log + incomingVersion);
+        log.debug(MIGRATION_LOG + incomingVersion);
         Map<String, String> migrated = new HashMap<>(incomingData);
 
         if (incomingVersion < 2) {

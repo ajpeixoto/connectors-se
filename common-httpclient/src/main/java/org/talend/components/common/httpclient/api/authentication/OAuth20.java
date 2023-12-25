@@ -14,7 +14,7 @@ package org.talend.components.common.httpclient.api.authentication;
 
 public class OAuth20 {
 
-    public final static String BEARER = "Bearer";
+    public static final String BEARER = "Bearer";
 
     public enum AuthentMode {
         FORM,

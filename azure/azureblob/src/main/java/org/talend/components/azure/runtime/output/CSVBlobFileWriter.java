@@ -99,7 +99,7 @@ public class CSVBlobFileWriter extends BlobFileWriter {
     }
 
     private void appendHeader() throws IOException, StorageException {
-        if (getSchema() == null || getSchema().getEntries().size() == 0)
+        if (getSchema() == null || getSchema().getEntries().isEmpty())
             return;
         StringBuilder headerBuilder = new StringBuilder();
         for (int i = 0; i < configCSV.getHeader() - 1; i++) {
@@ -134,15 +134,15 @@ public class CSVBlobFileWriter extends BlobFileWriter {
         return stringWriter.toString();
     }
 
-    private Object[] convertRecordToArray(Record record) {
-        Object[] array = new Object[record.getSchema().getEntries().size()];
+    private Object[] convertRecordToArray(Record rec) {
+        Object[] array = new Object[rec.getSchema().getEntries().size()];
         for (int i = 0; i < getSchema().getEntries().size(); i++) {
             if (getSchema().getEntries().get(i).getType() == Schema.Type.DATETIME) {
-                array[i] = record.getDateTime(getSchema().getEntries().get(i).getName());
+                array[i] = rec.getDateTime(getSchema().getEntries().get(i).getName());
             } else if (getSchema().getEntries().get(i).getType() == Schema.Type.BYTES) {
-                array[i] = Arrays.toString(record.getBytes(getSchema().getEntries().get(i).getName()));
+                array[i] = Arrays.toString(rec.getBytes(getSchema().getEntries().get(i).getName()));
             } else {
-                array[i] = record.get(Object.class, getSchema().getEntries().get(i).getName());
+                array[i] = rec.get(Object.class, getSchema().getEntries().get(i).getName());
             }
         }
 

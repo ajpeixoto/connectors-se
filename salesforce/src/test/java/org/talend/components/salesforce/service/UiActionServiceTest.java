@@ -35,7 +35,7 @@ import org.talend.sdk.component.junit5.WithComponents;
 
 @Disabled("Salesforce credentials is not ready on ci")
 @WithComponents("org.talend.components.salesforce")
-public class UiActionServiceTest extends SalesforceTestBase {
+class UiActionServiceTest extends SalesforceTestBase {
 
     @Service
     private UiActionService service;
@@ -45,7 +45,7 @@ public class UiActionServiceTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test connection OK [Valid]")
-    public void validateBasicConnectionOK() {
+    void validateBasicConnectionOK() {
         final HealthCheckStatus status = service.validateBasicConnection(getDataStore(), i18n);
         assertEquals(i18n.healthCheckOk(), status.getComment());
         assertEquals(HealthCheckStatus.Status.OK, status.getStatus());
@@ -54,7 +54,7 @@ public class UiActionServiceTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test connection password expired [Invalid]")
-    public void validateExpiredPassword() {
+    void validateExpiredPassword() {
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setUserId(EXPIRED_USER_ID);
         datasore.setPassword(EXPIRED_PASSWORD);
@@ -67,7 +67,7 @@ public class UiActionServiceTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test connection Failed [Invalid]")
-    public void validateBasicConnectionFailed() {
+    void validateBasicConnectionFailed() {
         final BasicDataStore datasore = new BasicDataStore();
         datasore.setEndpoint(URL);
         final HealthCheckStatus status = service.validateBasicConnection(datasore, i18n);
@@ -78,12 +78,12 @@ public class UiActionServiceTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test load modules [Valid]")
-    public void loadModules() {
+    void loadModules() {
         final SuggestionValues modules = service.loadSalesforceModules(getDataStore());
         assertNotNull(modules);
         assertTrue(modules.isCacheable());
         final List<String> moduleNames = new ArrayList<>();
-        modules.getItems().stream().forEach(e -> moduleNames.add(e.getId()));
+        modules.getItems().forEach(e -> moduleNames.add(e.getId()));
         assertTrue(moduleNames
                 .containsAll(asList("Account", "AccountContactRole", "AccountFeed", "AccountHistory",
                         "AccountPartner", "AccountShare", "AdditionalNumber", "ApexClass", "ApexComponent", "ApexLog",
@@ -122,36 +122,36 @@ public class UiActionServiceTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test connection with bad credentials [Invalid]")
-    public void loadModulesWithBadCredentials() {
+    void loadModulesWithBadCredentials() {
+        final BasicDataStore datasore = new BasicDataStore();
+        datasore.setEndpoint(URL);
+        datasore.setUserId("basUserName");
+        datasore.setPassword("NoPass");
         assertThrows(IllegalStateException.class, () -> {
-            final BasicDataStore datasore = new BasicDataStore();
-            datasore.setEndpoint(URL);
-            datasore.setUserId("basUserName");
-            datasore.setPassword("NoPass");
             service.loadSalesforceModules(datasore);
         });
     }
 
     @Test
     @DisplayName("Test connection with expired password [Invalid]")
-    public void loadModulesWithExpiredPWD() {
+    void loadModulesWithExpiredPWD() {
+        final BasicDataStore datastore = new BasicDataStore();
+        datastore.setUserId(EXPIRED_USER_ID);
+        datastore.setPassword(EXPIRED_PASSWORD);
+        datastore.setSecurityKey(EXPIRED_SECURITY_KEY);
         assertThrows(IllegalStateException.class, () -> {
-            final BasicDataStore datastore = new BasicDataStore();
-            datastore.setUserId(EXPIRED_USER_ID);
-            datastore.setPassword(EXPIRED_PASSWORD);
-            datastore.setSecurityKey(EXPIRED_SECURITY_KEY);
             service.loadSalesforceModules(datastore);
         });
     }
 
     @Test
     @DisplayName("Test retrieve column names [Valid]")
-    public void retrieveColumnsName() {
+    void retrieveColumnsName() {
         final String moduleName = "Account";
         SuggestionValues filedNameList = service.listColumns(getDataStore(), moduleName);
         assertNotNull(filedNameList);
         List<String> fieldNames = new ArrayList<>();
-        filedNameList.getItems().stream().forEach(item -> fieldNames.add(item.getLabel()));
+        filedNameList.getItems().forEach(item -> fieldNames.add(item.getLabel()));
         assertTrue(
                 fieldNames
                         .containsAll(
@@ -173,13 +173,13 @@ public class UiActionServiceTest extends SalesforceTestBase {
 
     @Test
     @DisplayName("Test retrieve picklist column [Valid]")
-    public void retrievePicklistColumn() {
+    void retrievePicklistColumn() {
         final String moduleName = "Contact";
         SuggestionValues filedNameList = service.listColumns(getDataStore(), moduleName);
         assertNotNull(filedNameList);
         List<String> fieldNames = new ArrayList<>();
-        filedNameList.getItems().stream().forEach(item -> fieldNames.add(item.getLabel()));
-        assertTrue(fieldNames.containsAll(asList("Salutation")),
+        filedNameList.getItems().forEach(item -> fieldNames.add(item.getLabel()));
+        assertTrue(fieldNames.contains("Salutation"),
                 "Return module field name list is not include all expected fields!");
 
     }

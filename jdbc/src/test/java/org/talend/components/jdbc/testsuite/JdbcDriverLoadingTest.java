@@ -19,6 +19,7 @@ import org.talend.components.jdbc.dataset.SqlQueryDataset;
 import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.sdk.component.junit5.WithComponents;
 import org.talend.sdk.component.runtime.manager.chain.Job;
+import org.talend.sdk.component.runtime.manager.chain.Job.ExecutorBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.talend.sdk.component.junit.SimpleFactory.configurationByExample;
@@ -42,16 +43,7 @@ class JdbcDriverLoadingTest {
         final InputQueryConfig config = new InputQueryConfig();
         config.setDataSet(dataset);
         final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-        assertThrows(IllegalStateException.class,
-                () -> Job
-                        .components()
-                        .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                        .component("collector", "test://collector")
-                        .connections()
-                        .from("jdbcInput")
-                        .to("collector")
-                        .build()
-                        .run());
+        assertThrows(IllegalStateException.class, () -> runQueryInputPipeline(configURI));
     }
 
     @Test
@@ -69,15 +61,28 @@ class JdbcDriverLoadingTest {
         final InputQueryConfig config = new InputQueryConfig();
         config.setDataSet(dataset);
         final String configURI = configurationByExample().forInstance(config).configured().toQueryString();
-        assertThrows(IllegalStateException.class,
-                () -> Job
-                        .components()
-                        .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
-                        .component("collector", "jdbcTest://DataCollector")
-                        .connections()
-                        .from("jdbcInput")
-                        .to("collector")
-                        .build()
-                        .run());
+        assertThrows(IllegalStateException.class, () -> runInputToDataCollectorPipeline(configURI));
+    }
+
+    private static void runInputToDataCollectorPipeline(final String configURI) {
+        Job.components()
+                .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                .component("collector", "jdbcTest://DataCollector")
+                .connections()
+                .from("jdbcInput")
+                .to("collector")
+                .build()
+                .run();
+    }
+
+    private static void runQueryInputPipeline(final String configURI) {
+        Job.components()
+                .component("jdbcInput", "Jdbc://QueryInput?" + configURI)
+                .component("collector", "test://collector")
+                .connections()
+                .from("jdbcInput")
+                .to("collector")
+                .build()
+                .run();
     }
 }

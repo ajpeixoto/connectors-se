@@ -32,7 +32,7 @@ public class CXFHTTPClientImplWithJettyHTTPServerTest {
     @ParameterizedTest
     @CsvSource({ "myPassword,200",
             "wrongPassword,401" })
-    public void digestAuthentication(String myPassword, int status) throws HTTPClientException {
+    void digestAuthentication(String myPassword, int status) throws HTTPClientException {
         String myUser = "myLogin";
         final QueryConfiguration config =
                 QueryConfigurationBuilder.create(getUrl(EmbeddedJettyServerFactory.HTTP_OK))

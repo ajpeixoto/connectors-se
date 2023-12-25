@@ -50,16 +50,17 @@ public class ExcelWriter implements RecordWriter {
     }
 
     @Override
-    public void add(Record record) {
+    public void add(Record rec) {
         if (this.first) {
-            this.appendHeader(record);
+            this.appendHeader(rec);
             this.first = false;
         }
-        toExcel.from(this::buildRow, record);
+        toExcel.from(this::buildRow, rec);
     }
 
     @Override
     public void flush() {
+        /* NOP */
     }
 
     @Override

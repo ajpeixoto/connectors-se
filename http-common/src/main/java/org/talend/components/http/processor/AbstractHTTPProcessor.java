@@ -18,7 +18,6 @@ import org.talend.components.http.configuration.RequestConfig;
 import org.talend.components.http.service.I18n;
 import org.talend.components.http.service.RecordBuilderService;
 import org.talend.components.http.service.httpClient.HTTPClientService;
-import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.processor.ElementListener;
 import org.talend.sdk.component.api.processor.Input;

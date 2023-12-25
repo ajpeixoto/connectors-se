@@ -47,7 +47,7 @@ import static org.talend.components.jdbc.DBTestUtils.*;
 @WithComponents("org.talend.components.jdbc")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisplayName("Testing of JDBC input component")
-public class JDBCInputTestIT {
+class JDBCInputTestIT {
 
     @Injected
     private BaseComponentsHandler componentsHandler;
@@ -99,11 +99,11 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testGetSchemaNames() throws Exception {
+    void testGetSchemaNames() throws Exception {
         SuggestionValues values = jdbcService.fetchTables(dataStore);
 
         assertTrue(values != null && values.getItems() != null);
-        assertTrue(!values.getItems().isEmpty());
+        assertFalse(values.getItems().isEmpty());
 
         boolean exists = false;
         for (SuggestionValues.Item name : values.getItems()) {
@@ -182,7 +182,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testGetSchema() throws Exception {
+    void testGetSchema() throws Exception {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
@@ -203,7 +203,7 @@ public class JDBCInputTestIT {
 
     @Disabled
     @Test
-    public void testReaderWithCloudStyleAndQueryDataSet() {
+    void testReaderWithCloudStyleAndQueryDataSet() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setSqlQuery(DBTestUtils.getSQL("test"));
@@ -218,7 +218,7 @@ public class JDBCInputTestIT {
 
     @Disabled
     @Test
-    public void testReaderWithCloudStyleAndQueryDataSetWithDesignSchema() {
+    void testReaderWithCloudStyleAndQueryDataSetWithDesignSchema() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setSqlQuery(DBTestUtils.getSQL("test"));
@@ -234,7 +234,7 @@ public class JDBCInputTestIT {
 
     @Disabled
     @Test
-    public void testReaderWithCloudStyleAndTableDataSet() {
+    void testReaderWithCloudStyleAndTableDataSet() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -249,7 +249,7 @@ public class JDBCInputTestIT {
 
     @Disabled
     @Test
-    public void testReaderWithCloudStyleAndSnowflakeAndTableDataSet() {
+    void testReaderWithCloudStyleAndSnowflakeAndTableDataSet() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleSnowflakeDataStore(true));
         dataSet.setTableName("test");
@@ -264,7 +264,7 @@ public class JDBCInputTestIT {
 
     @Disabled
     @Test
-    public void testReaderWithCloudStyleAndTableDataSetWithDesignSchema() {
+    void testReaderWithCloudStyleAndTableDataSetWithDesignSchema() {
         JDBCTableDataSet dataSet = new JDBCTableDataSet();
         dataSet.setDataStore(DBTestUtils.createCloudStyleDataStore(true));
         dataSet.setTableName("test");
@@ -279,7 +279,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testReader() {
+    void testReader() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
@@ -304,7 +304,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testReaderDynamic() {
+    void testReaderDynamic() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
@@ -328,7 +328,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testTrimAll() {
+    void testTrimAll() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
@@ -352,7 +352,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testTrimField() {
+    void testTrimField() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSchema(DBTestUtils.createTestSchemaInfos());
@@ -376,7 +376,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testTrimFieldWithDynamicColumnOnly() {
+    void testTrimFieldWithDynamicColumnOnly() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSchema(DBTestUtils.createTestDynamicSchemaInfos());
@@ -400,7 +400,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testTrimFieldWithDynamicColumnMix() {
+    void testTrimFieldWithDynamicColumnMix() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSchema(DBTestUtils.createTestDynamicMixSchemaInfos());
@@ -425,7 +425,7 @@ public class JDBCInputTestIT {
 
     // TODO fix the mapping
     @Test
-    public void testReaderAllTypesString() {
+    void testReaderAllTypesString() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName_all_type));
@@ -480,7 +480,7 @@ public class JDBCInputTestIT {
 
     @Test
     @Disabled
-    public void testUsePrepareStatement() throws SQLException {
+    void testUsePrepareStatement() throws SQLException {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName_all_type) + " where INT_COL = ? and VARCHAR_COL = ?");
@@ -524,7 +524,7 @@ public class JDBCInputTestIT {
 
         assertEquals(32767, col0.shortValue());
         assertEquals(2147483647, col1.intValue());
-        assertEquals(9223372036854775807l, col2.longValue());
+        assertEquals(9223372036854775807L, col2.longValue());
         assertTrue(col3 > 1);
         assertTrue(col4 > 2);
         assertEquals(new BigDecimal("1234567890.1234567890"), col5);
@@ -545,7 +545,7 @@ public class JDBCInputTestIT {
     }
 
     @Test
-    public void testType() {
+    void testType() {
         JDBCQueryDataSet dataSet = new JDBCQueryDataSet();
         dataSet.setDataStore(dataStore);
         dataSet.setSqlQuery(DBTestUtils.getSQL(tableName));
