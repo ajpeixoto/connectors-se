@@ -16,15 +16,10 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.jdbc.common.JDBCConfiguration;
 import org.talend.components.jdbc.schema.Dbms;
-import org.talend.components.jdbc.schema.DbmsType;
-import org.talend.components.jdbc.schema.TalendType;
-import org.talend.components.jdbc.schema.TalendTypeAndTckTypeConverter;
 import org.talend.components.jdbc.service.I18nMessage;
-import org.talend.sdk.component.api.record.SchemaProperty;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**

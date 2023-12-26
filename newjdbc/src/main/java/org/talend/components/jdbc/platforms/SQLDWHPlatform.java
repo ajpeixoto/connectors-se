@@ -13,10 +13,7 @@
 package org.talend.components.jdbc.platforms;
 
 import lombok.extern.slf4j.Slf4j;
-import org.talend.components.jdbc.common.DistributionStrategy;
 import org.talend.components.jdbc.common.JDBCConfiguration;
-import org.talend.components.jdbc.common.RedshiftSortStrategy;
-import org.talend.components.jdbc.common.SchemaInfo;
 import org.talend.components.jdbc.output.JDBCOutputConfig;
 import org.talend.components.jdbc.schema.Dbms;
 import org.talend.components.jdbc.service.I18nMessage;

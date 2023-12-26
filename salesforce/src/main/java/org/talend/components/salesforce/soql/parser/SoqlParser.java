@@ -155,11 +155,11 @@ public class SoqlParser extends Parser {
     }
 
     public final QueryContext query() throws RecognitionException {
-        QueryContext _localctx = new QueryContext(_ctx, getState());
-        enterRule(_localctx, 0, RULE_query);
-        int _la;
+        QueryContext localctx = new QueryContext(_ctx, getState());
+        enterRule(localctx, 0, RULE_query);
+        int la;
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(26);
                 selectClause();
@@ -167,8 +167,8 @@ public class SoqlParser extends Parser {
                 fromClause();
                 setState(29);
                 _errHandler.sync(this);
-                _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << COMMA) | (1L << DOT) | (1L << LPAR) | (1L << RPAR)
+                la = _input.LA(1);
+                if ((((la) & ~0x3f) == 0 && ((1L << la) & ((1L << COMMA) | (1L << DOT) | (1L << LPAR) | (1L << RPAR)
                         | (1L << NAME) | (1L << ANYCHAR) | (1L << BY))) != 0)) {
                     {
                         setState(28);
@@ -178,13 +178,13 @@ public class SoqlParser extends Parser {
 
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class SelectClauseContext extends ParserRuleContext {
@@ -228,11 +228,11 @@ public class SoqlParser extends Parser {
     }
 
     public final SelectClauseContext selectClause() throws RecognitionException {
-        SelectClauseContext _localctx = new SelectClauseContext(_ctx, getState());
-        enterRule(_localctx, 2, RULE_selectClause);
-        int _la;
+        SelectClauseContext localctx = new SelectClauseContext(_ctx, getState());
+        enterRule(localctx, 2, RULE_selectClause);
+        int la;
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(31);
                 match(SELECT);
@@ -240,8 +240,8 @@ public class SoqlParser extends Parser {
                 fieldList();
                 setState(35);
                 _errHandler.sync(this);
-                _la = _input.LA(1);
-                if (_la == COMMA) {
+                la = _input.LA(1);
+                if (la == COMMA) {
                     {
                         setState(33);
                         match(COMMA);
@@ -252,13 +252,13 @@ public class SoqlParser extends Parser {
 
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class FromClauseContext extends ParserRuleContext {
@@ -294,10 +294,10 @@ public class SoqlParser extends Parser {
     }
 
     public final FromClauseContext fromClause() throws RecognitionException {
-        FromClauseContext _localctx = new FromClauseContext(_ctx, getState());
-        enterRule(_localctx, 4, RULE_fromClause);
+        FromClauseContext localctx = new FromClauseContext(_ctx, getState());
+        enterRule(localctx, 4, RULE_fromClause);
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(37);
                 match(FROM);
@@ -305,13 +305,13 @@ public class SoqlParser extends Parser {
                 object();
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class AnythingClauseContext extends ParserRuleContext {
@@ -347,15 +347,15 @@ public class SoqlParser extends Parser {
     }
 
     public final AnythingClauseContext anythingClause() throws RecognitionException {
-        AnythingClauseContext _localctx = new AnythingClauseContext(_ctx, getState());
-        enterRule(_localctx, 6, RULE_anythingClause);
-        int _la;
+        AnythingClauseContext localctx = new AnythingClauseContext(_ctx, getState());
+        enterRule(localctx, 6, RULE_anythingClause);
+        int la;
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(41);
                 _errHandler.sync(this);
-                _la = _input.LA(1);
+                la = _input.LA(1);
                 do {
                     {
                         {
@@ -365,19 +365,19 @@ public class SoqlParser extends Parser {
                     }
                     setState(43);
                     _errHandler.sync(this);
-                    _la = _input.LA(1);
-                } while ((((_la) & ~0x3f) == 0
-                        && ((1L << _la) & ((1L << COMMA) | (1L << DOT) | (1L << LPAR) | (1L << RPAR)
+                    la = _input.LA(1);
+                } while ((((la) & ~0x3f) == 0
+                        && ((1L << la) & ((1L << COMMA) | (1L << DOT) | (1L << LPAR) | (1L << RPAR)
                                 | (1L << NAME) | (1L << ANYCHAR) | (1L << BY))) != 0));
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class FieldListContext extends ParserRuleContext {
@@ -421,19 +421,19 @@ public class SoqlParser extends Parser {
     }
 
     public final FieldListContext fieldList() throws RecognitionException {
-        FieldListContext _localctx = new FieldListContext(_ctx, getState());
-        enterRule(_localctx, 8, RULE_fieldList);
+        FieldListContext localctx = new FieldListContext(_ctx, getState());
+        enterRule(localctx, 8, RULE_fieldList);
         try {
-            int _alt;
-            enterOuterAlt(_localctx, 1);
+            int alt;
+            enterOuterAlt(localctx, 1);
             {
                 setState(45);
                 field();
                 setState(50);
                 _errHandler.sync(this);
-                _alt = getInterpreter().adaptivePredict(_input, 3, _ctx);
-                while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
-                    if (_alt == 1) {
+                alt = getInterpreter().adaptivePredict(_input, 3, _ctx);
+                while (alt != 2 && alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER) {
+                    if (alt == 1) {
                         {
                             {
                                 setState(46);
@@ -445,17 +445,17 @@ public class SoqlParser extends Parser {
                     }
                     setState(52);
                     _errHandler.sync(this);
-                    _alt = getInterpreter().adaptivePredict(_input, 3, _ctx);
+                    alt = getInterpreter().adaptivePredict(_input, 3, _ctx);
                 }
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class SubqueryListContext extends ParserRuleContext {
@@ -499,18 +499,18 @@ public class SoqlParser extends Parser {
     }
 
     public final SubqueryListContext subqueryList() throws RecognitionException {
-        SubqueryListContext _localctx = new SubqueryListContext(_ctx, getState());
-        enterRule(_localctx, 10, RULE_subqueryList);
-        int _la;
+        SubqueryListContext localctx = new SubqueryListContext(_ctx, getState());
+        enterRule(localctx, 10, RULE_subqueryList);
+        int la;
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(53);
                 subquery();
                 setState(58);
                 _errHandler.sync(this);
-                _la = _input.LA(1);
-                while (_la == COMMA) {
+                la = _input.LA(1);
+                while (la == COMMA) {
                     {
                         {
                             setState(54);
@@ -521,17 +521,17 @@ public class SoqlParser extends Parser {
                     }
                     setState(60);
                     _errHandler.sync(this);
-                    _la = _input.LA(1);
+                    la = _input.LA(1);
                 }
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class FieldContext extends ParserRuleContext {
@@ -567,10 +567,10 @@ public class SoqlParser extends Parser {
     }
 
     public final FieldContext field() throws RecognitionException {
-        FieldContext _localctx = new FieldContext(_ctx, getState());
-        enterRule(_localctx, 12, RULE_field);
+        FieldContext localctx = new FieldContext(_ctx, getState());
+        enterRule(localctx, 12, RULE_field);
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(62);
                 _errHandler.sync(this);
@@ -585,13 +585,13 @@ public class SoqlParser extends Parser {
                 match(NAME);
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class ObjectContext extends ParserRuleContext {
@@ -627,10 +627,10 @@ public class SoqlParser extends Parser {
     }
 
     public final ObjectContext object() throws RecognitionException {
-        ObjectContext _localctx = new ObjectContext(_ctx, getState());
-        enterRule(_localctx, 14, RULE_object);
+        ObjectContext localctx = new ObjectContext(_ctx, getState());
+        enterRule(localctx, 14, RULE_object);
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(67);
                 _errHandler.sync(this);
@@ -645,13 +645,13 @@ public class SoqlParser extends Parser {
                 match(NAME);
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class ObjectPrefixContext extends ParserRuleContext {
@@ -695,17 +695,17 @@ public class SoqlParser extends Parser {
     }
 
     public final ObjectPrefixContext objectPrefix() throws RecognitionException {
-        ObjectPrefixContext _localctx = new ObjectPrefixContext(_ctx, getState());
-        enterRule(_localctx, 16, RULE_objectPrefix);
+        ObjectPrefixContext localctx = new ObjectPrefixContext(_ctx, getState());
+        enterRule(localctx, 16, RULE_objectPrefix);
         try {
-            int _alt;
-            enterOuterAlt(_localctx, 1);
+            int alt;
+            enterOuterAlt(localctx, 1);
             {
                 setState(73);
                 _errHandler.sync(this);
-                _alt = 1;
+                alt = 1;
                 do {
-                    switch (_alt) {
+                    switch (alt) {
                     case 1: {
                         {
                             setState(71);
@@ -720,17 +720,17 @@ public class SoqlParser extends Parser {
                     }
                     setState(75);
                     _errHandler.sync(this);
-                    _alt = getInterpreter().adaptivePredict(_input, 7, _ctx);
-                } while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER);
+                    alt = getInterpreter().adaptivePredict(_input, 7, _ctx);
+                } while (alt != 2 && alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER);
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class SubqueryContext extends ParserRuleContext {
@@ -774,10 +774,10 @@ public class SoqlParser extends Parser {
     }
 
     public final SubqueryContext subquery() throws RecognitionException {
-        SubqueryContext _localctx = new SubqueryContext(_ctx, getState());
-        enterRule(_localctx, 18, RULE_subquery);
+        SubqueryContext localctx = new SubqueryContext(_ctx, getState());
+        enterRule(localctx, 18, RULE_subquery);
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(77);
                 match(LPAR);
@@ -789,13 +789,13 @@ public class SoqlParser extends Parser {
                 match(RPAR);
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class SubSelectClauseContext extends ParserRuleContext {
@@ -831,10 +831,10 @@ public class SoqlParser extends Parser {
     }
 
     public final SubSelectClauseContext subSelectClause() throws RecognitionException {
-        SubSelectClauseContext _localctx = new SubSelectClauseContext(_ctx, getState());
-        enterRule(_localctx, 20, RULE_subSelectClause);
+        SubSelectClauseContext localctx = new SubSelectClauseContext(_ctx, getState());
+        enterRule(localctx, 20, RULE_subSelectClause);
         try {
-            enterOuterAlt(_localctx, 1);
+            enterOuterAlt(localctx, 1);
             {
                 setState(82);
                 match(SELECT);
@@ -842,13 +842,13 @@ public class SoqlParser extends Parser {
                 fieldList();
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class AnywordContext extends ParserRuleContext {
@@ -884,17 +884,17 @@ public class SoqlParser extends Parser {
     }
 
     public final AnywordContext anyword() throws RecognitionException {
-        AnywordContext _localctx = new AnywordContext(_ctx, getState());
-        enterRule(_localctx, 22, RULE_anyword);
+        AnywordContext localctx = new AnywordContext(_ctx, getState());
+        enterRule(localctx, 22, RULE_anyword);
         try {
-            int _alt;
-            enterOuterAlt(_localctx, 1);
+            int alt;
+            enterOuterAlt(localctx, 1);
             {
                 setState(86);
                 _errHandler.sync(this);
-                _alt = 1;
+                alt = 1;
                 do {
-                    switch (_alt) {
+                    switch (alt) {
                     case 1: {
                         {
                             setState(85);
@@ -907,17 +907,17 @@ public class SoqlParser extends Parser {
                     }
                     setState(88);
                     _errHandler.sync(this);
-                    _alt = getInterpreter().adaptivePredict(_input, 8, _ctx);
-                } while (_alt != 2 && _alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER);
+                    alt = getInterpreter().adaptivePredict(_input, 8, _ctx);
+                } while (alt != 2 && alt != org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER);
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static class AnythingContext extends ParserRuleContext {
@@ -973,50 +973,50 @@ public class SoqlParser extends Parser {
     }
 
     public final AnythingContext anything() throws RecognitionException {
-        AnythingContext _localctx = new AnythingContext(_ctx, getState());
-        enterRule(_localctx, 24, RULE_anything);
+        AnythingContext localctx = new AnythingContext(_ctx, getState());
+        enterRule(localctx, 24, RULE_anything);
         try {
             setState(97);
             _errHandler.sync(this);
             switch (_input.LA(1)) {
             case NAME:
-                enterOuterAlt(_localctx, 1); {
+                enterOuterAlt(localctx, 1); {
                 setState(90);
                 match(NAME);
             }
                 break;
             case ANYCHAR:
-                enterOuterAlt(_localctx, 2); {
+                enterOuterAlt(localctx, 2); {
                 setState(91);
                 anyword();
             }
                 break;
             case COMMA:
-                enterOuterAlt(_localctx, 3); {
+                enterOuterAlt(localctx, 3); {
                 setState(92);
                 match(COMMA);
             }
                 break;
             case DOT:
-                enterOuterAlt(_localctx, 4); {
+                enterOuterAlt(localctx, 4); {
                 setState(93);
                 match(DOT);
             }
                 break;
             case LPAR:
-                enterOuterAlt(_localctx, 5); {
+                enterOuterAlt(localctx, 5); {
                 setState(94);
                 match(LPAR);
             }
                 break;
             case RPAR:
-                enterOuterAlt(_localctx, 6); {
+                enterOuterAlt(localctx, 6); {
                 setState(95);
                 match(RPAR);
             }
                 break;
             case BY:
-                enterOuterAlt(_localctx, 7); {
+                enterOuterAlt(localctx, 7); {
                 setState(96);
                 match(BY);
             }
@@ -1025,13 +1025,13 @@ public class SoqlParser extends Parser {
                 throw new NoViableAltException(this);
             }
         } catch (RecognitionException re) {
-            _localctx.exception = re;
+            localctx.exception = re;
             _errHandler.reportError(this, re);
             _errHandler.recover(this, re);
         } finally {
             exitRule();
         }
-        return _localctx;
+        return localctx;
     }
 
     public static final String _serializedATN = "\3\u0430\ud6d1\u8206\uad2d\u4417\uaef1\u8d80\uaadd\3\ff\4\2\t\2\4\3\t"

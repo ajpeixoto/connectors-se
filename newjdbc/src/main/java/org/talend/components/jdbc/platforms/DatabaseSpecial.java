@@ -128,9 +128,9 @@ public class DatabaseSpecial {
                         "Redshift".equalsIgnoreCase(driverId) ? null : tableName,
                         new String[] { "TABLE", "SYNONYM" })) {
             while (resultSet.next()) {
-                final String table_name = resultSet.getString("TABLE_NAME");
-                log.debug("table_name " + table_name);
-                if (ofNullable(ofNullable(table_name).orElseGet(() -> {
+                final String name = resultSet.getString("TABLE_NAME");
+                log.debug("table_name " + name);
+                if (ofNullable(ofNullable(name).orElseGet(() -> {
                     try {
                         return resultSet.getString("SYNONYM_NAME");
                     } catch (final SQLException e) {

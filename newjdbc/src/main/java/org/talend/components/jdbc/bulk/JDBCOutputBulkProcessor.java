@@ -27,7 +27,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.Serializable;
-import java.sql.SQLException;
 
 @Slf4j
 @Getter

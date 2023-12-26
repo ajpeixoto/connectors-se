@@ -12,7 +12,6 @@
  */
 package org.talend.components.common.httpclient.api.authentication;
 
-import java.io.InputStream;
 import java.io.StringReader;
 
 import javax.json.Json;

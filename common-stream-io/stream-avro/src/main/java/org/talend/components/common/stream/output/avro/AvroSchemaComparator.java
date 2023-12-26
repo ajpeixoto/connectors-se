@@ -13,7 +13,6 @@
 package org.talend.components.common.stream.output.avro;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 import org.apache.avro.Schema;
 

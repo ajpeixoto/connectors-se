@@ -30,7 +30,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Iterator;
 
 @Version(1)

@@ -12,7 +12,6 @@
  */
 package org.talend.components.adlsgen2.datastore;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;

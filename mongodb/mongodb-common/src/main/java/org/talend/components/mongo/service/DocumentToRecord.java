@@ -202,8 +202,7 @@ public class DocumentToRecord {
         final String comment = entry.getComment();
 
         if (comment != null && comment.contains(DocumentToRecord.TYPE_SPLIT_CHARS)) {
-            String origin_name = comment.substring(0, comment.lastIndexOf(DocumentToRecord.TYPE_SPLIT_CHARS));
-            return origin_name;
+            return comment.substring(0, comment.lastIndexOf(DocumentToRecord.TYPE_SPLIT_CHARS));
         }
 
         return comment;

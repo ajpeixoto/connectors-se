@@ -27,13 +27,13 @@ public class JdbcOutputMigrationHandler implements MigrationHandler {
         log.debug("Starting JDBC sink component migration " + incomingVersion);
 
         if (incomingVersion == 1) {
-            final String old_property_path_prefix = "configuration.keys[";
-            final String new_property_path_prefix = "configuration.keys.keys[";
+            final String oldPropertyPathPrefix = "configuration.keys[";
+            final String newPropertyPathPrefix = "configuration.keys.keys[";
 
             Map<String, String> correctConfig = new HashMap<>();
             incomingData.forEach((k, v) -> {
-                if (k.startsWith(old_property_path_prefix)) {
-                    correctConfig.put(k.replace(old_property_path_prefix, new_property_path_prefix), v);
+                if (k.startsWith(oldPropertyPathPrefix)) {
+                    correctConfig.put(k.replace(oldPropertyPathPrefix, newPropertyPathPrefix), v);
                 } else {
                     correctConfig.put(k, v);
                 }

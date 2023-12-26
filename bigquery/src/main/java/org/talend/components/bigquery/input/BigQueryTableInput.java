@@ -22,7 +22,6 @@ import org.talend.components.bigquery.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
-import org.talend.sdk.component.api.input.Emitter;
 import org.talend.sdk.component.api.input.Producer;
 import org.talend.sdk.component.api.meta.Documentation;
 import org.talend.sdk.component.api.record.Record;
@@ -30,7 +29,6 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.Iterator;
 
 @Version(1)

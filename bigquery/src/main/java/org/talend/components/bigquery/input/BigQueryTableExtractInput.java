@@ -12,17 +12,11 @@
  */
 package org.talend.components.bigquery.input;
 
-import com.google.api.gax.paging.Page;
-import com.google.cloud.ReadChannel;
 import com.google.cloud.bigquery.BigQuery;
-import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.file.DataFileStream;
-import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.io.DatumReader;
 import org.talend.components.bigquery.avro.AvroConverter;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryConnectorException;
@@ -36,11 +30,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.nio.channels.Channels;
-import java.util.Iterator;
 
 @Slf4j
 public class BigQueryTableExtractInput implements Serializable {

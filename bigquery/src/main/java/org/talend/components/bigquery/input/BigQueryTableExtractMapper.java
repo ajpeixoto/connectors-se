@@ -16,7 +16,6 @@ import com.google.api.gax.paging.Page;
 import com.google.cloud.bigquery.*;
 import com.google.cloud.storage.Blob;
 import com.google.cloud.storage.Storage;
-import com.google.cloud.storage.StorageOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.talend.components.bigquery.datastore.BigQueryConnection;
 import org.talend.components.bigquery.service.BigQueryConnectorException;

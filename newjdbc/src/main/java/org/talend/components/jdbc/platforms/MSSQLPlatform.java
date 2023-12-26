@@ -20,7 +20,6 @@ import org.talend.components.jdbc.service.I18nMessage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**

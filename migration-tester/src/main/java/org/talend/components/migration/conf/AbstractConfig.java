@@ -22,9 +22,9 @@ import lombok.Data;
 @Data
 public class AbstractConfig implements Serializable {
 
-    public final static String TCK_MIGRATION_COMPONENT_VERSION_NAME = "TCK_MIGRATION_COMPONENT_VERSION";
+    public static final String TCK_MIGRATION_COMPONENT_VERSION_NAME = "TCK_MIGRATION_COMPONENT_VERSION";
 
-    public final static int VERSION = 100;
+    public static final int VERSION = 100;
 
     @Option
     @Documentation("The dataset")

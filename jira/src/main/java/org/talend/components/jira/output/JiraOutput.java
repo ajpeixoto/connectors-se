@@ -21,7 +21,6 @@ import org.talend.components.common.httpclient.api.HTTPClient;
 import org.talend.components.common.httpclient.api.HTTPClientException;
 import org.talend.components.http.configuration.Dataset;
 import org.talend.components.http.configuration.Datastore;
-import org.talend.components.http.configuration.OutputContent;
 import org.talend.components.http.configuration.Param;
 import org.talend.components.http.configuration.RequestBody;
 import org.talend.components.http.configuration.RequestConfig;

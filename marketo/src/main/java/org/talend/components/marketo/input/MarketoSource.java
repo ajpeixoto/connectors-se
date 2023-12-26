@@ -24,7 +24,6 @@ import javax.json.JsonValue;
 import org.talend.components.marketo.MarketoSourceOrProcessor;
 import org.talend.components.marketo.dataset.MarketoInputConfiguration;
 import org.talend.components.marketo.service.MarketoService;
-import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.input.Producer;

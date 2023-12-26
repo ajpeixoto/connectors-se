@@ -15,12 +15,9 @@ package org.talend.components.jdbc.output.platforms;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.talend.components.jdbc.configuration.JdbcConfiguration;
-import org.talend.components.jdbc.configuration.JdbcConfiguration.KeyVal;
-import org.talend.components.jdbc.datastore.JdbcConnection;
 import org.talend.components.jdbc.service.I18nMessage;
 
 import com.zaxxer.hikari.HikariDataSource;

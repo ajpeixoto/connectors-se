@@ -20,7 +20,6 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.cosmosDB.service.CosmosDBService;
-import org.talend.components.cosmosDB.service.I18nMessage;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;

@@ -20,7 +20,6 @@ import org.talend.components.jdbc.platforms.Platform;
 import org.talend.components.jdbc.service.I18nMessage;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.record.Record;
-import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
 import java.sql.*;
