@@ -277,7 +277,7 @@
     <dependency>
       <groupId>org.talend.components.lib</groupId>
       <artifactId>azure-utils</artifactId>
-      <version>1.0.5</version>
+      <version>1.0.5.1</version>
     </dependency>
   </dependencies>
 </project>
