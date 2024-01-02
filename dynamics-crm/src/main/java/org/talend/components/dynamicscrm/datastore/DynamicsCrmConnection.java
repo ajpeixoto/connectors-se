@@ -22,6 +22,7 @@ import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.action.Checkable;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
+import org.talend.sdk.component.api.configuration.condition.ActiveIfs;
 import org.talend.sdk.component.api.configuration.constraint.Required;
 import org.talend.sdk.component.api.configuration.type.DataStore;
 import org.talend.sdk.component.api.configuration.ui.DefaultValue;
@@ -35,7 +36,11 @@ import lombok.Data;
 @Checkable(ACTION_HEALTHCHECK_DYNAMICS365)
 @DataStore("DynamicsCrmConnection")
 @Version(value = 2, migrationHandler = DynamicsConnectionMigrationHandler.class)
-@GridLayout({ @GridLayout.Row({ "appType" }),
+@GridLayout({
+        @GridLayout.Row({ "instance" }),
+        @GridLayout.Row({ "opDomain", "opHost" }),
+        @GridLayout.Row({ "opUserName", "opPassword" }),
+        @GridLayout.Row({ "appType" }),
         @GridLayout.Row({ "flow" }),
         @GridLayout.Row({ "username", "password" }),
         @GridLayout.Row({ "serviceRootUrl" }),
@@ -47,21 +52,62 @@ public class DynamicsCrmConnection implements Serializable {
 
     @Option
     @Required
+    @DefaultValue("CLOUD")
+    @Documentation("Select if you want to query cloud or on-premise instance.")
+    private Instance instance = Instance.CLOUD;
+
+    @Option
+    @Required
+    @DefaultValue("")
+    @ActiveIf(target = "instance", value = "ON_PREMISE")
+    @Documentation("On-premise username.")
+    private String opUserName = "";
+
+    @Option
+    @Required
+    @DefaultValue("")
+    @ActiveIf(target = "instance", value = "ON_PREMISE")
+    @Documentation("On-premise password.")
+    private String opPassword = "";
+
+    @Option
+    @Required
+    @DefaultValue("")
+    @ActiveIf(target = "instance", value = "ON_PREMISE")
+    @Documentation("On-premise domain.")
+    private String opDomain = "";
+
+    @Option
+    @Required
+    @DefaultValue("")
+    @ActiveIf(target = "instance", value = "ON_PREMISE")
+    @Documentation("On-premise host.")
+    private String opHost = "";
+
+    @Option
+    @Required
     @DefaultValue("NATIVE")
+    @ActiveIf(target = "instance", value = "CLOUD")
     @Documentation("Select the type of your application, either Native App or Web App with delegated permissions.")
     private AppType appType = AppType.NATIVE;
 
     @Option
     @DefaultValue("ROPC")
     @Documentation("Select which OAuth flow to use.")
-    @ActiveIf(target = "appType", value = "WEB")
+    @ActiveIfs({
+            @ActiveIf(target = "appType", value = "WEB"),
+            @ActiveIf(target = "instance", value = "CLOUD")
+    })
     private OAuthFlow flow = OAuthFlow.ROPC;
 
     @Option
     @Required
     @DefaultValue("")
     @Documentation("User name.")
-    @ActiveIf(target = "flow", value = "ROPC")
+    @ActiveIfs({
+            @ActiveIf(target = "flow", value = "ROPC"),
+            @ActiveIf(target = "instance", value = "CLOUD")
+    })
     private String username = "";
 
     @Option
@@ -69,7 +115,10 @@ public class DynamicsCrmConnection implements Serializable {
     @Credential
     @DefaultValue("")
     @Documentation("Password.")
-    @ActiveIf(target = "flow", value = "ROPC")
+    @ActiveIfs({
+            @ActiveIf(target = "flow", value = "ROPC"),
+            @ActiveIf(target = "instance", value = "CLOUD")
+    })
     private String password = "";
 
     @Option
@@ -79,22 +128,28 @@ public class DynamicsCrmConnection implements Serializable {
 
     @Option
     @Required
+    @ActiveIf(target = "instance", value = "CLOUD")
     @Documentation("Client ID")
     private String clientId;
 
     @Option
     @Credential
-    @ActiveIf(target = "appType", value = "WEB")
+    @ActiveIfs({
+            @ActiveIf(target = "appType", value = "WEB"),
+            @ActiveIf(target = "instance", value = "CLOUD")
+    })
     @Documentation("Client secret")
     private String clientSecret;
 
     @Option
     @Required
+    @ActiveIf(target = "instance", value = "CLOUD")
     @Documentation("OAuth authorization endpoint")
     private String authorizationEndpoint;
 
     @Option
     @Required
+    @ActiveIf(target = "instance", value = "CLOUD")
     @Documentation("Timeout in seconds")
     private Integer timeout = 60;
 

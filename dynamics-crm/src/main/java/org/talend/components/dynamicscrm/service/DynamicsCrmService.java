@@ -26,6 +26,7 @@ import org.apache.olingo.client.api.uri.URIBuilder;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.talend.components.dynamicscrm.datastore.AppType;
 import org.talend.components.dynamicscrm.datastore.DynamicsCrmConnection;
+import org.talend.components.dynamicscrm.datastore.Instance;
 import org.talend.components.dynamicscrm.datastore.OAuthFlow;
 import org.talend.components.dynamicscrm.source.DynamicsCrmQueryResultsIterator;
 import org.talend.ms.crm.odata.ClientConfiguration;
@@ -49,7 +50,11 @@ public class DynamicsCrmService {
     public DynamicsCRMClient createClient(DynamicsCrmConnection connection, String entitySet)
             throws AuthenticationException {
         ClientConfiguration clientConfig;
-        if (connection.getAppType() == AppType.NATIVE) {
+        if (connection.getInstance() == Instance.ON_PREMISE) {
+            clientConfig = ClientConfigurationFactory.buildNtlmClientConfiguration(connection.getOpUserName(),
+                    connection.getOpPassword(),
+                    connection.getOpHost(), connection.getOpDomain());
+        } else if (connection.getAppType() == AppType.NATIVE) {
             clientConfig = ClientConfigurationFactory
                     .buildOAuthNativeClientConfiguration(connection.getClientId(),
                             connection.getUsername(), connection.getPassword(), connection.getAuthorizationEndpoint());
