@@ -777,7 +777,7 @@
             </snapshots>
         </repository>
         <repository>
-            <id>TalendOpenSourceRelease</id>
+            <id>talend.oss.releases</id>
             <url>https://artifacts-zl.talend.com/nexus/content/repositories/TalendOpenSourceRelease/</url>
             <releases>
                 <enabled>true</enabled>
