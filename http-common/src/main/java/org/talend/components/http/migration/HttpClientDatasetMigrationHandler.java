@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -32,10 +32,14 @@ public class HttpClientDatasetMigrationHandler implements MigrationHandler {
     static void migrateHeaders(Map<String, String> incomingData,
             String prefix) {
         List<String> toAdd = new ArrayList<>();
-        // Add headers destination
+        // Add headers destination if needed
         incomingData.entrySet()
                 .stream()
-                .filter(e -> e.getKey().startsWith(prefix + "headers[") && e.getKey().endsWith("].key"))
+                .filter(e -> {
+                    String key = e.getKey();
+                    return key.startsWith(prefix + "headers[") && key.endsWith("].key") &&
+                            !incomingData.containsKey(key.substring(0, key.length() - "key".length()) + "query");
+                })
                 .forEach(e -> toAdd.add((e.getKey().substring(0, e.getKey().length() - 3))));
         toAdd.stream().forEach(e -> incomingData.put(e + "query", "MAIN"));
     }
