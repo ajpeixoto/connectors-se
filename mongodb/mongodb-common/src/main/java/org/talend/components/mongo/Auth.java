@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -46,13 +46,13 @@ public class Auth implements Serializable {
 
     @Option
     @ActiveIf(target = "needAuth", value = "true")
-    @ActiveIf(target = "authMech", value = { "NEGOTIATE", "SCRAM_SHA_1_SASL" })
+    @ActiveIf(target = "authMech", value = { "NEGOTIATE", "SCRAM_SHA_1_SASL", "SCRAM_SHA_256_SASL" })
     @Documentation("Use auth database")
     private boolean useAuthDatabase;
 
     @Option
     @ActiveIf(target = "needAuth", value = "true")
-    @ActiveIf(target = "authMech", value = { "NEGOTIATE", "SCRAM_SHA_1_SASL" })
+    @ActiveIf(target = "authMech", value = { "NEGOTIATE", "SCRAM_SHA_1_SASL", "SCRAM_SHA_256_SASL" })
     @ActiveIf(target = "useAuthDatabase", value = "true")
     @Documentation("Auth database")
     private String authDatabase;

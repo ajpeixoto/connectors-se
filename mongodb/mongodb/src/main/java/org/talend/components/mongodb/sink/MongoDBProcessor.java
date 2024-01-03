@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,8 +12,7 @@
  */
 package org.talend.components.mongodb.sink;
 
-import com.mongodb.MongoClient;
-import com.mongodb.WriteConcern;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.*;
@@ -26,6 +25,7 @@ import org.talend.components.mongo.output.MongoCommonOutput;
 import org.talend.components.mongo.service.RecordToDocument;
 import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
 import org.talend.components.mongodb.datastore.MongoDBDataStore;
+import org.talend.components.mongodb.migration.MongoDBSinkMigration;
 import org.talend.components.mongodb.service.I18nMessage;
 import org.talend.components.mongodb.service.MongoDBService;
 import org.talend.sdk.component.api.component.Icon;
@@ -42,7 +42,7 @@ import java.util.List;
 
 import static com.mongodb.WriteConcern.*;
 
-@Version(1)
+@Version(value = 2, migrationHandler = MongoDBSinkMigration.class)
 @Slf4j
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
 @Processor(name = "Sink")
@@ -89,8 +89,17 @@ public class MongoDBProcessor extends MongoCommonOutput {
             case JOURNALED:
                 database = database.withWriteConcern(JOURNALED);
                 break;
-            case REPLICA_ACKNOWLEDGED:
-                database = database.withWriteConcern(WriteConcern.REPLICA_ACKNOWLEDGED);
+            case MAJORITY:
+                database = database.withWriteConcern(MAJORITY);
+                break;
+            case W1:
+                database = database.withWriteConcern(W1);
+                break;
+            case W2:
+                database = database.withWriteConcern(W2);
+                break;
+            case W3:
+                database = database.withWriteConcern(W3);
                 break;
             }
         }
@@ -108,8 +117,17 @@ public class MongoDBProcessor extends MongoCommonOutput {
             case JOURNALED:
                 collection = collection.withWriteConcern(JOURNALED);
                 break;
-            case REPLICA_ACKNOWLEDGED:
-                collection = collection.withWriteConcern(WriteConcern.REPLICA_ACKNOWLEDGED);
+            case MAJORITY:
+                collection = collection.withWriteConcern(MAJORITY);
+                break;
+            case W1:
+                collection = collection.withWriteConcern(W1);
+                break;
+            case W2:
+                collection = collection.withWriteConcern(W2);
+                break;
+            case W3:
+                collection = collection.withWriteConcern(W3);
                 break;
             }
         }

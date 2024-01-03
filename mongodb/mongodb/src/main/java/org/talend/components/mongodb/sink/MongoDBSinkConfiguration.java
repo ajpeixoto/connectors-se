@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -19,6 +19,7 @@ import org.talend.components.mongo.WriteConcern;
 import org.talend.components.mongo.output.MongoCommonOutputConfiguration;
 import org.talend.components.mongodb.DataAction;
 import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
+import org.talend.components.mongodb.migration.MongoDBSinkMigration;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
