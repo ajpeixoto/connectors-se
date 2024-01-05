@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,7 +12,12 @@
  */
 package org.talend.components.mongo.service;
 
-import com.mongodb.*;
+import com.mongodb.BasicDBObject;
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.BsonDocument;
@@ -22,10 +27,7 @@ import org.bson.Document;
 import org.bson.json.JsonParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.mongo.Address;
-import org.talend.components.mongo.Auth;
-import org.talend.components.mongo.ConnectionParameter;
-import org.talend.components.mongo.PathMapping;
+import org.talend.components.mongo.*;
 import org.talend.components.mongo.datastore.MongoCommonDataStore;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.record.Schema;
@@ -33,13 +35,12 @@ import org.talend.sdk.component.api.service.Service;
 import org.talend.sdk.component.api.service.healthcheck.HealthCheckStatus;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.talend.components.mongo.AddressType.REPLICA_SET;
+import static org.talend.components.mongo.AddressType.STANDALONE;
 import static org.talend.sdk.component.api.record.Schema.Type.*;
 
 @Version(1)
@@ -53,48 +54,20 @@ public class MongoCommonService {
     protected RecordBuilderFactory builderFactory;
 
     public MongoClient createClient(MongoCommonDataStore datastore) {
-        MongoCredential mc = getMongoCredential(datastore);
+        MongoClient client = null;
         try {
-            switch (datastore.getAddressType()) {
-            case STANDALONE:
-                ServerAddress address =
-                        new ServerAddress(datastore.getAddress().getHost(), datastore.getAddress().getPort());
-                if (mc != null) {
-                    return new MongoClient(address, mc, getOptions(datastore));
-                } else {
-                    return new MongoClient(address, getOptions(datastore));
-                }
-            case REPLICA_SET:
-                // TODO check if it's right, not miss parameter like "replicaSet=myRepl"?
-                // https://docs.mongodb.com/manual/reference/connection-string/
-                if (mc != null) {
-                    return new MongoClient(getServerAddresses(datastore.getReplicaSetAddress()), mc,
-                            getOptions(datastore));
-                } else {
-                    return new MongoClient(getServerAddresses(datastore.getReplicaSetAddress()), getOptions(datastore));
-                }
-                /*
-                 * case SHARDED_CLUSTER:
-                 * if (mc != null) {
-                 * return new MongoClient(getServerAddresses(datastore.getShardedClusterAddress()), mc,
-                 * getOptions(datastore));
-                 * } else {
-                 * return new MongoClient(getServerAddresses(datastore.getShardedClusterAddress()),
-                 * getOptions(datastore));
-                 * }
-                 */
-            }
-            return null;
+            client = MongoClients.create(getMongoClientSettings(datastore));
         } catch (Exception e) {
             // TODO use i18n
             LOG.error(e.getMessage(), e);
             throw new RuntimeException(e);
         }
+        return client;
     }
 
-    private MongoCredential getMongoCredential(MongoCommonDataStore datastore) {
+    protected MongoCredential getMongoCredential(MongoCommonDataStore datastore) {
         Auth auth = datastore.getAuth();
-        if (!auth.isNeedAuth()) {
+        if (auth == null || !auth.isNeedAuth()) {
             return null;
         }
 
@@ -102,32 +75,45 @@ public class MongoCommonService {
         switch (auth.getAuthMech()) {
         case NEGOTIATE:
             return MongoCredential.createCredential(auth.getUsername(), authDatabase, auth.getPassword().toCharArray());
-        /*
-         * case PLAIN_SASL:
-         * return MongoCredential.createPlainCredential(auth.getUsername(), "$external",
-         * auth.getPassword().toCharArray());
-         */
         case SCRAM_SHA_1_SASL:
-            return MongoCredential
-                    .createScramSha1Credential(auth.getUsername(), authDatabase, auth.getPassword().toCharArray());
+            return MongoCredential.createScramSha1Credential(auth.getUsername(), authDatabase,
+                    auth.getPassword().toCharArray());
+        case SCRAM_SHA_256_SASL:
+            return MongoCredential.createScramSha256Credential(auth.getUsername(), authDatabase,
+                    auth.getPassword().toCharArray());
         }
 
         return null;
     }
 
-    private List<ServerAddress> getServerAddresses(List<Address> addresses) {
-        List<ServerAddress> result = new ArrayList<>();
+    protected void getServerAddresses(List<Address> addresses, StringBuilder uri) {
         for (Address address : addresses) {
-            result.add(new ServerAddress(address.getHost(), address.getPort()));
+            uri.append(address.getHost()).append(":").append(address.getPort()).append(",");
         }
-        return result;
+        uri.deleteCharAt(uri.length() - 1);
+        uri.append("/");
     }
 
     // https://docs.mongodb.com/manual/reference/connection-string/#connection-string-options
-    public MongoClientOptions getOptions(MongoCommonDataStore datastore) {
-        StringBuilder uri = new StringBuilder("mongodb://noexist:27017/");// a fake uri, only work for get the options
-                                                                          // from key
-                                                                          // value string
+    public MongoClientSettings getMongoClientSettings(MongoCommonDataStore datastore) {
+
+        MongoClientSettings.Builder clientSettingsBuilder = MongoClientSettings.builder();
+
+        StringBuilder uri = new StringBuilder("mongodb://");
+        // from key
+        // value string
+
+        // no need to set requiredClusterType, just keep it as UNKNOWN
+        // and not found options key related to cluster type, the same with aws docdb
+        if (STANDALONE.equals(datastore.getAddressType())) {
+            uri.append(datastore.getAddress().getHost())
+                    .append(":")
+                    .append(datastore.getAddress().getPort())
+                    .append("/");
+        } else if (REPLICA_SET.equals(datastore.getAddressType())) {
+            getServerAddresses(datastore.getReplicaSetAddress(), uri);
+        }
+
         boolean first = true;
         for (ConnectionParameter parameter : datastore.getConnectionParameter()) {
             if (first) {
@@ -137,23 +123,12 @@ public class MongoCommonService {
             uri.append(parameter.getKey()).append('=').append(parameter.getValue()).append('&');
         }
         uri.deleteCharAt(uri.length() - 1);
-        MongoClientURI muri = new MongoClientURI(uri.toString());
-
-        // TODO call right set method by the list above
-        // optionsBuilder.maxConnectionIdleTime(1000);
-
-        // do special process for ssl cert as sometimes, we need to ingore cert as impossible to provide it
-        /*
-         * if (sslEnabled) {
-         * optionsBuilder.sslEnabled(sslEnabled).sslInvalidHostNameAllowed( );
-         * if (ignoreSSLCertificate) {
-         * SSLContext sslContext = SSLUtils.ignoreSSLCertificate();
-         * optionsBuilder.sslContext(sslContext);
-         * optionsBuilder.socketFactory(sslContext.getSocketFactory());
-         * }
-         * }
-         */
-        return muri.getOptions();
+        clientSettingsBuilder.applyConnectionString(new ConnectionString(uri.toString()));
+        MongoCredential credential = getMongoCredential(datastore);
+        if (credential != null) {
+            clientSettingsBuilder.credential(credential);
+        }
+        return clientSettingsBuilder.build();
     }
 
     public HealthCheckStatus healthCheck(final MongoCommonDataStore datastore) {
@@ -184,7 +159,8 @@ public class MongoCommonService {
 
     public BsonDocument getBsonDocument(String bson) {
         try {
-            return Document.parse(bson).toBsonDocument(BasicDBObject.class, MongoClient.getDefaultCodecRegistry());
+            return Document.parse(bson)
+                    .toBsonDocument(BasicDBObject.class, MongoClientSettings.getDefaultCodecRegistry());
         } catch (JsonParseException e) {
             Pattern pattern = Pattern.compile("^\\s*\\{\\s*\\$where\\s*:\\s*(function.+)\\}\\s*$", Pattern.DOTALL);
             Matcher matcher = pattern.matcher(bson);
@@ -264,7 +240,7 @@ public class MongoCommonService {
         return schemaBuilder.build();
     }
 
-    // use column diretly if path don't exists or empty
+    // use column directly if path don't exists or empty
     // current implement logic copy from studio one, not sure is expected, TODO adjust it
     public Object getValueByPathFromDocument(Document document, String parentNodePath, String elementName) {
         if (document == null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -13,8 +13,9 @@
 package org.talend.components.mongo.source;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.MongoClient;
+import com.mongodb.MongoClientSettings;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -162,7 +163,8 @@ public class SplitUtil {
     }
 
     private static String filtersToJson(Bson filters) {
-        BsonDocument document = filters.toBsonDocument(BsonDocument.class, MongoClient.getDefaultCodecRegistry());
+        BsonDocument document =
+                filters.toBsonDocument(BsonDocument.class, MongoClientSettings.getDefaultCodecRegistry());
         return document.toJson(JsonWriterSettings.builder().outputMode(JsonMode.SHELL).build());
     }
 

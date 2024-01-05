@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -12,10 +12,15 @@
  */
 package org.talend.components.mongodb;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientOptions;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.connection.ClusterSettings;
+import com.mongodb.connection.ConnectionPoolSettings;
+import com.mongodb.connection.SocketSettings;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.Document;
 import org.junit.jupiter.api.*;
@@ -51,6 +56,10 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static org.talend.components.mongo.AddressType.REPLICA_SET;
+import static org.talend.components.mongo.AuthMech.SCRAM_SHA_256_SASL;
 
 @Slf4j
 @WithComponents("org.talend.components.mongodb")
@@ -96,8 +105,7 @@ public class MongoDBTest {
         log.info("Starting MongoDB on port {}", port);
 
         mongoUri = URI.create(MONGO_DB_CONTAINER.getReplicaSetUrl());
-        client = new MongoClient(mongoUri.getHost(), mongoUri.getPort());
-
+        client = MongoClients.create(mongoUri.toString());
         MongoDatabase database = client.getDatabase(DATABASE);
 
         MongoCollection<Document> collection = database.getCollection("basic");
@@ -327,7 +335,7 @@ public class MongoDBTest {
     @Test
     void testMultiServers() {
         MongoDBDataStore datastore = new MongoDBDataStore();
-        datastore.setAddressType(AddressType.REPLICA_SET);
+        datastore.setAddressType(REPLICA_SET);
         datastore.setReplicaSetAddress(Arrays
                 .asList(new Address("192.168.31.228", 27017), new Address("192.168.31.228", 27018),
                         new Address("192.168.31.228", 27019)));
@@ -346,19 +354,29 @@ public class MongoDBTest {
     }
 
     @Test
-    void testGetOptions() {
+    void testGetMongoClientSettings() {
         MongoDBDataStore datastore = new MongoDBDataStore();
         List<ConnectionParameter> cp = Arrays
-                .asList(new ConnectionParameter("connectTimeoutMS", "300000"),
+                .asList(new ConnectionParameter("connectTimeoutMS", "23412"),
                         new ConnectionParameter("appName", "myapp"));
         datastore.setConnectionParameter(cp);
-        MongoClientOptions options = mongoDBService.getOptions(datastore);
-        Assertions.assertEquals(300000, options.getConnectTimeout());
-        Assertions.assertEquals("myapp", options.getApplicationName());
+        datastore.setAuth(new Auth(true, SCRAM_SHA_256_SASL, true, "authdb", "username", "password"));
+        datastore.setAddressType(REPLICA_SET);
 
-        datastore.setConnectionParameter(Collections.emptyList());
-        options = mongoDBService.getOptions(datastore);
-        Assertions.assertNull(options.getApplicationName());
+        Address address = new Address("replica_host", 27018);
+        datastore.setReplicaSetAddress(Collections.singletonList(address));
+
+        MongoClientSettings settings = mongoDBService.getMongoClientSettings(datastore);
+        ClusterSettings clusterSettings = settings.getClusterSettings();
+        SocketSettings socketSettings = settings.getSocketSettings();
+        MongoCredential credential = settings.getCredential();
+
+        Assertions.assertEquals(23412, socketSettings.getConnectTimeout(TimeUnit.MILLISECONDS));
+        Assertions.assertEquals("myapp", settings.getApplicationName());
+        Assertions.assertEquals("SCRAM-SHA-256", credential.getMechanism());
+        Assertions.assertEquals("authdb", credential.getSource());
+        Assertions.assertEquals("replica_host", clusterSettings.getHosts().get(0).getHost());
+        Assertions.assertEquals(27018, clusterSettings.getHosts().get(0).getPort());
     }
 
     private void executeSourceTestJob(MongoCommonSourceConfiguration configuration) {

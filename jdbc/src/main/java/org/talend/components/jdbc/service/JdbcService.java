@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -258,11 +258,30 @@ public class JdbcService {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
                 dataSource.close();
             } finally {
+                shutdownMysqlAbandonedConnectionCleanupThread();
+
                 thread.setContextClassLoader(prev);
                 try {
                     classLoaderDescriptor.close();
                 } catch (final Exception e) {
                     log.error("can't close driver classloader properly", e);
+                }
+            }
+        }
+
+        private void shutdownMysqlAbandonedConnectionCleanupThread() {
+            if ("MySQL".equals(driverId)) {
+                try {
+                    Class<?> clazz = Class.forName("com.mysql.cj.jdbc.AbandonedConnectionCleanupThread", false,
+                            classLoaderDescriptor.asClassLoader());
+                    if (clazz != null) {
+                        Method method = clazz.getDeclaredMethod("checkedShutdown");
+                        if (method != null) {
+                            method.invoke(null);
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore any exception here
                 }
             }
         }

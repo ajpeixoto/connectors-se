@@ -420,7 +420,6 @@ pipeline {
 
             post {
                 always {
-                    junit '**/target/surefire-reports/*.xml, **/target/failsafe-reports/*.xml' // Needed for TTO
                     recordIssues(
                       enabledForFailure: true,
                       tools: [
@@ -436,6 +435,9 @@ pipeline {
                         )
                       ]
                     )
+
+                    archiveArtifacts artifacts: "**/target/surefire-reports/*.xml", allowEmptyArchive: false, onlyIfSuccessful: false
+                    archiveArtifacts artifacts: "**/target/failsafe-reports/*.xml", allowEmptyArchive: false, onlyIfSuccessful: false
                 }
             }
         }

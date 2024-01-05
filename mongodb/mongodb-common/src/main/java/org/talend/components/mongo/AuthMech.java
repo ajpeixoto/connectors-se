@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2023 Talend Inc. - www.talend.com
+ * Copyright (C) 2006-2024 Talend Inc. - www.talend.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
  * the License. You may obtain a copy of the License at
@@ -15,5 +15,6 @@ package org.talend.components.mongo;
 public enum AuthMech {
     NEGOTIATE,
     // PLAIN_SASL,
-    SCRAM_SHA_1_SASL
+    SCRAM_SHA_1_SASL,
+    SCRAM_SHA_256_SASL
 }
