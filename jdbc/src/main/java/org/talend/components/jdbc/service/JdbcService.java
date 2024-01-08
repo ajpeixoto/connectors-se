@@ -258,11 +258,30 @@ public class JdbcService {
                 thread.setContextClassLoader(classLoaderDescriptor.asClassLoader());
                 dataSource.close();
             } finally {
+                shutdownMysqlAbandonedConnectionCleanupThread();
+
                 thread.setContextClassLoader(prev);
                 try {
                     classLoaderDescriptor.close();
                 } catch (final Exception e) {
                     log.error("can't close driver classloader properly", e);
+                }
+            }
+        }
+
+        private void shutdownMysqlAbandonedConnectionCleanupThread() {
+            if ("MySQL".equals(driverId)) {
+                try {
+                    Class<?> clazz = Class.forName("com.mysql.cj.jdbc.AbandonedConnectionCleanupThread", false,
+                            classLoaderDescriptor.asClassLoader());
+                    if (clazz != null) {
+                        Method method = clazz.getDeclaredMethod("checkedShutdown");
+                        if (method != null) {
+                            method.invoke(null);
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore any exception here
                 }
             }
         }
