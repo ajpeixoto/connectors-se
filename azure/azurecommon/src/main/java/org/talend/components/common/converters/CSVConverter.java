@@ -17,6 +17,7 @@ import java.util.Set;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.lang3.StringUtils;
+import org.talend.components.common.formats.FormatUtils;
 import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.text.SchemaUtils;
 import org.talend.sdk.component.api.record.Record;
@@ -72,8 +73,8 @@ public class CSVConverter implements RecordConverter<CSVRecord> {
             format = format.withEscape(enclosureChar);
         }
 
-        if (StringUtils.isNoneEmpty(configuration.effectiveRecordSeparator())) {
-            format = format.withRecordSeparator(configuration.effectiveRecordSeparator());
+        if (StringUtils.isNoneEmpty(FormatUtils.getRecordDelimiterValue(configuration))) {
+            format = format.withRecordSeparator(FormatUtils.getRecordDelimiterValue(configuration));
         }
 
         return format;

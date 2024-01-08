@@ -16,6 +16,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 
 import org.talend.components.common.formats.Encoding;
+import org.talend.components.common.formats.FormatUtils;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
 import org.talend.sdk.component.api.configuration.ui.layout.GridLayout;
@@ -101,6 +102,7 @@ public class CSVFormatOptions implements Serializable {
         }
     }
 
+    @Deprecated
     public String effectiveRecordSeparator() {
         return CSVRecordDelimiter.OTHER.equals(getRecordDelimiter()) ? getCustomRecordDelimiter()
                 : getRecordDelimiter().getDelimiterValue();

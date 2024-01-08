@@ -123,15 +123,4 @@ public class CSVConverterForADLS extends CSVConverter implements Serializable {
         }
         return builder.build();
     }
-
-    @Override
-    public Record toRecord(CSVRecord csvRecord) {
-        return super.toRecord(csvRecord);
-    }
-
-    @Override
-    public CSVRecord fromRecord(Record rec) {
-        throw new UnsupportedOperationException("#fromRecord()");
-    }
-
 }
