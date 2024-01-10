@@ -155,7 +155,7 @@ public abstract class BlobFileReader {
 
         T readNextItemRecord() {
             if (currentItem == null) {
-                return null; // No items exists
+                return null; // No items exist
             }
 
             if (hasNextRecordTaken()) {

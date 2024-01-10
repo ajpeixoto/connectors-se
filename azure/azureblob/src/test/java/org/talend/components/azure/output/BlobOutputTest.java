@@ -12,32 +12,52 @@
  */
 package org.talend.components.azure.output;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.talend.components.azure.common.FileFormat;
+import org.talend.components.azure.dataset.AzureBlobDataset;
+import org.talend.components.azure.runtime.output.BlobFileWriter;
+import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.components.common.formats.excel.ExcelFormat;
 import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
-import org.talend.components.azure.dataset.AzureBlobDataset;
-import org.talend.components.azure.service.AzureBlobComponentServices;
-import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.exception.ComponentException;
+import org.talend.sdk.component.api.record.Record;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
+
 import static org.mockito.ArgumentMatchers.any;
 
 class BlobOutputTest {
 
     AzureBlobComponentServices blobComponentServicesMock;
 
+    @Mock
+    BlobFileWriter writerMock;
+
+    @InjectMocks
+    BlobOutput sut;
+
+    private MessageService messageServiceMock;
+
     @BeforeEach
     public void initMocks() throws URISyntaxException {
+        messageServiceMock = Mockito.mock();
+        sut = new BlobOutput(null, null, messageServiceMock);
+        MockitoAnnotations.openMocks(this);
+
         CloudBlobClient blobClientMock = Mockito.mock(CloudBlobClient.class);
         CloudStorageAccount cloudStorageAccountMock = Mockito.mock(CloudStorageAccount.class);
         AzureComponentServices componentServicesMock = Mockito.mock(AzureComponentServices.class);
@@ -83,5 +103,46 @@ class BlobOutputTest {
         BlobOutput output =
                 new BlobOutput(outputConfiguration, blobComponentServicesMock, Mockito.mock(MessageService.class));
         Assertions.assertDoesNotThrow(output::init);
+    }
+
+    @Test
+    void testBeforeGroup() {
+        sut.beforeGroup();
+        Mockito.verify(writerMock).newBatch();
+    }
+
+    @Test
+    void testAfterGroup() throws IOException, StorageException {
+        sut.afterGroup();
+        Mockito.verify(writerMock).flush();
+    }
+
+    @Test
+    void testAfterGroupException() throws IOException, StorageException {
+        Mockito.doThrow(IOException.class).when(writerMock).flush();
+        Assertions.assertThrows(ComponentException.class, () -> sut.afterGroup());
+        Mockito.verify(messageServiceMock).errorSubmitRows();
+    }
+
+    @Test
+    void testNextRecord() {
+        Record someRecord = Mockito.mock();
+        sut.onNext(someRecord);
+
+        Mockito.verify(writerMock).writeRecord(someRecord);
+    }
+
+    @Test
+    void testRelease() throws Exception {
+        sut.release();
+
+        Mockito.verify(writerMock).complete();
+    }
+
+    @Test
+    void testReleaseException() throws Exception {
+        Mockito.doThrow(IOException.class).when(writerMock).complete();
+        Assertions.assertThrows(ComponentException.class, () -> sut.release());
+        Mockito.verify(messageServiceMock).errorSubmitRows();
     }
 }
