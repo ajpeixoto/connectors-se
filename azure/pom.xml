@@ -1,34 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>connectors-se</artifactId>
         <version>1.27.29-SNAPSHOT</version>
     </parent>
-
     <artifactId>azure</artifactId>
     <packaging>pom</packaging>
-
     <name>Connectors SE :: Azure</name>
-
     <modules>
         <module>azurecommon</module>
         <module>azureblob</module>
         <module>azure-dls-gen2</module>
     </modules>
-
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <!--
         Set it to true if you want the documentation to be rendered as HTML and PDF
 
         You can also use it on the command line: -Dtalend.documentation.htmlAndPdf=true
         -->
         <talend.documentation.htmlAndPdf>false</talend.documentation.htmlAndPdf>
-
         <!--
         if you want to deploy into the studio you can use the related goal:
 
@@ -36,12 +29,10 @@
 
         TIP: it is recommended to set this property into your settings.xml in an active by default profile.
         -->
-        <talend.component.studioHome />
-
+        <talend.component.studioHome/>
         <hadoop-common.version>3.2.4</hadoop-common.version>
         <hadoop-azure.version>3.2.2.1</hadoop-azure.version>
     </properties>
-
     <dependencies>
         <!-- AzureBlob library -->
         <dependency>
@@ -49,11 +40,19 @@
             <artifactId>azure-storage</artifactId>
             <version>8.1.0</version>
         </dependency>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
             <scope>compile</scope>
         </dependency>
     </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.projectreactor.netty</groupId>
+                <artifactId>reactor-netty-http</artifactId>
+                <version>1.0.40</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 </project>
