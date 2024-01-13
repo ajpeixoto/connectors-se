@@ -105,6 +105,7 @@ public class BigQueryTableExtractMapper implements Serializable {
 
     @Assessor
     public long estimateSize() {
+        log.info("table.getNumBytes(): {}", table.getNumBytes());
         return table.getNumBytes();
     }
 
@@ -112,6 +113,7 @@ public class BigQueryTableExtractMapper implements Serializable {
     public List<BigQueryTableExtractMapper> split(@PartitionSize final long bundleSize) {
 
         try {
+            log.info("bundleSize: {}", bundleSize);
             // extract table to Google Storage
             String uuid = UUID.randomUUID().toString();
             String blobGenericName =
@@ -122,9 +124,10 @@ public class BigQueryTableExtractMapper implements Serializable {
             Storage storage = storageService.getStorage(bigQuery.getOptions().getCredentials());
             String prefix = "tmp/" + uuid + "/f_";
             log.info(i18n.blobsPrefix(), prefix);
+            log.info("storage: {}", storage);
             Page<Blob> blobs =
                     storage.list(configuration.getTableDataset().getGsBucket(), Storage.BlobListOption.prefix(prefix));
-
+            log.info("blobs: {}", blobs);
             // Create and return mapper
             List<BigQueryTableExtractMapper> mappers = new ArrayList<>();
             blobs
