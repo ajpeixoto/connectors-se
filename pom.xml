@@ -170,12 +170,13 @@
         <!-- component-runtime validations -->
         <talend.validation.locale>root</talend.validation.locale>
         <validation.model>true</validation.model>
-        <validation.placeholder>false</validation.placeholder>
+        <validation.placeholder>true</validation.placeholder>
         <validation.documentation>true</validation.documentation>
-        <validation.wording>false</validation.wording>
-        <talend-component.icon.skip>true</talend-component.icon.skip>
-        <!-- TODO: replace with a 'validation.svg' -->
+        <validation.wording>true</validation.wording>
+        <validation.svg>true</validation.svg>
+        <validation.familyIcon>true</validation.familyIcon>
         <validation.metadata>true</validation.metadata>
+        <validation.failOnInvalidExceptions>true</validation.failOnInvalidExceptions>
 
         <!-- plugin versions -->
         <spotless.version>2.22.5</spotless.version>
@@ -1008,8 +1009,10 @@
                             <validatePlaceholder>${validation.placeholder}</validatePlaceholder>
                             <validateDocumentation>${validation.documentation}</validateDocumentation>
                             <validateWording>${validation.wording}</validateWording>
-                            <!-- TODO: replace with a 'validateSvg' -->
+                            <validateSvg>${validation.svg}</validateSvg>
+                            <validateFamily>${validation.familyIcon}</validateFamily>
                             <validateMetadata>${validation.metadata}</validateMetadata>
+                            <failOnValidateExceptions>${validation.failOnInvalidExceptions}</failOnValidateExceptions>
                         </configuration>
                     </execution>
                     <execution>
