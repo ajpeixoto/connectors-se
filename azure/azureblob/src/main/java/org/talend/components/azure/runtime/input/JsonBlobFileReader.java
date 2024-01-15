@@ -105,7 +105,7 @@ public class JsonBlobFileReader extends BlobFileReader {
                 }
             } catch (Exception e) {
                 log.error("[readBlob] {}", e.getMessage());
-                throw new RuntimeException(e.getMessage());
+                throw new RuntimeException(e.getMessage(), e);
             }
         }
 
