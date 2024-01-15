@@ -1044,11 +1044,6 @@
                         <goals>
                             <goal>car</goal>
                         </goals>
-                        <configuration>
-                          <excludeArtifactsFilter>
-                            com.fasterxml.jackson.core:jackson-databind,com.fasterxml.jackson.core:jackson-core,com.fasterxml.jackson.core:jackson-annotations
-                          </excludeArtifactsFilter>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>talend-scan-descriptor</id>
