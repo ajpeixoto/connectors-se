@@ -13,6 +13,7 @@
 package org.talend.components.jdbc.input;
 
 import lombok.extern.slf4j.Slf4j;
+import org.talend.components.jdbc.migration.JDBCInputMigrationHandler;
 import org.talend.components.jdbc.service.JDBCService;
 import org.talend.sdk.component.api.component.Icon;
 import org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable;
@@ -35,7 +36,7 @@ import java.sql.SQLException;
 import static org.talend.sdk.component.api.component.ReturnVariables.ReturnVariable.AVAILABILITY.AFTER;
 
 @Slf4j
-@Version(1)
+@Version(value = 2, migrationHandler = JDBCInputMigrationHandler.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "JDBCInput")
 @ReturnVariable(value = "QUERY", availability = AFTER, type = String.class)
 @Emitter(name = "Input")

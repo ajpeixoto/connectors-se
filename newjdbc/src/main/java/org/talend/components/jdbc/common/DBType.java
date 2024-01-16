@@ -29,7 +29,6 @@ public enum DBType {
     NETEZZA,
     ORACLE,
     POSTGRESQL,
-    POSTGREPLUS,
     SQLITE,
     SYBASE,
     SAPHANA,
