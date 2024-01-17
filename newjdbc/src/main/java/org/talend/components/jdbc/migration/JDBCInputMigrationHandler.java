@@ -23,7 +23,7 @@ public class JDBCInputMigrationHandler implements MigrationHandler {
 
     @Override
     public Map<String, String> migrate(int incomingVersion, Map<String, String> incomingData) {
-        if (incomingVersion < 2 && incomingData.get(MAPPING).equals("POSTGREPLUS")) {
+        if (incomingVersion < 2 && "POSTGREPLUS".equals(incomingData.get(MAPPING))) {
             incomingData.put(MAPPING, DBType.POSTGRESQL.toString());
         }
 
