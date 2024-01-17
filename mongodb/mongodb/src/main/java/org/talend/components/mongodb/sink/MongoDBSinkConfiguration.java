@@ -19,7 +19,6 @@ import org.talend.components.mongo.WriteConcern;
 import org.talend.components.mongo.output.MongoCommonOutputConfiguration;
 import org.talend.components.mongodb.DataAction;
 import org.talend.components.mongodb.dataset.MongoDBReadAndWriteDataSet;
-import org.talend.components.mongodb.migration.MongoDBSinkMigration;
 import org.talend.sdk.component.api.component.Version;
 import org.talend.sdk.component.api.configuration.Option;
 import org.talend.sdk.component.api.configuration.condition.ActiveIf;
