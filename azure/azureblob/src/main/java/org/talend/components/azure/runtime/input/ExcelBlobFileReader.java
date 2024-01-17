@@ -57,7 +57,7 @@ public class ExcelBlobFileReader extends BlobFileReader {
 
     private class BatchExcelRecordIterator extends BlobFileReader.ItemRecordIterator<Row> {
 
-        private LinkedList<Row> rows;
+        private final LinkedList<Row> rows;
 
         private ExcelConverter converter;
 

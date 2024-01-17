@@ -37,13 +37,10 @@ class AvroBlobFileReaderTest extends BaseFileReaderTest {
 
     private AvroBlobFileReader sut;
 
-    private MessageService messageServiceMock;
-
     private MockedConstruction<DataFileStream> avroItemIteratorConstructorMock;
 
     @BeforeEach
     void setUp() throws URISyntaxException, StorageException {
-        messageServiceMock = Mockito.mock();
         initRecordBuilderFactoryMocks();
         initConfig();
 

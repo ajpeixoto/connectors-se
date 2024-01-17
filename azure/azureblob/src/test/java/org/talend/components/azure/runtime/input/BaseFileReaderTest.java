@@ -21,6 +21,7 @@ import org.mockito.Mockito;
 import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.datastore.AzureCloudConnection;
 import org.talend.components.azure.service.AzureBlobComponentServices;
+import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.service.azureblob.AzureComponentServices;
 import org.talend.sdk.component.api.record.Schema;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
@@ -47,6 +48,12 @@ public class BaseFileReaderTest {
 
     protected List<ListBlobItem> listItems;
 
+    protected MessageService messageServiceMock;
+
+    protected BaseFileReaderTest() {
+        messageServiceMock = Mockito.mock();
+    }
+
     protected void initConfig() {
         config = new AzureBlobDataset();
         config.setConnection(new AzureCloudConnection());
@@ -59,6 +66,7 @@ public class BaseFileReaderTest {
         Mockito.when(recordBuilderFactoryMock.newEntryBuilder())
                 .thenReturn(new SchemaImpl.EntryImpl.BuilderImpl());
         Mockito.when(recordBuilderFactoryMock.newRecordBuilder(Mockito.any())).thenReturn(new RecordImpl.BuilderImpl());
+        Mockito.when(recordBuilderFactoryMock.newRecordBuilder()).thenReturn(new RecordImpl.BuilderImpl());
     }
 
     protected void initComponentServicesMock() throws StorageException, URISyntaxException {

@@ -74,7 +74,7 @@ public class ExcelHTMLBlobFileReader extends BlobFileReader {
                     convertToRecord(rowIterator.next());
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                throw new ComponentException(e);
             }
         }
 
