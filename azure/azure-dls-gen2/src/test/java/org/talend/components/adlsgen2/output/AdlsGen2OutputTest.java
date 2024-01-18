@@ -87,7 +87,7 @@ class AdlsGen2OutputTest {
     }
 
     @Test
-    void testGetReaderThrowsExceptionOnInit() {
+    void testGetWriterThrowsExceptionOnInit() {
         mockedStatic.when(() -> BlobWriterFactory.getWriter(Mockito.any(),
                 Mockito.any(), Mockito.any(), Mockito.any())).thenThrow(RuntimeException.class);
 
@@ -95,7 +95,7 @@ class AdlsGen2OutputTest {
     }
 
     @Test
-    void testGetReaderThrowsExceptionOnFlush() throws Exception {
+    void testGetWriterThrowsExceptionOnFlush() throws Exception {
         Record testRecord = recordBuilderFactoryMock.newRecordBuilder().withString("key", "value").build();
         BlobWriter writerMock = Mockito.mock();
         mockedStatic.when(() -> BlobWriterFactory.getWriter(Mockito.any(),
@@ -110,7 +110,7 @@ class AdlsGen2OutputTest {
     }
 
     @Test
-    void testGetReaderThrowsExceptionOnClose() throws Exception {
+    void testGetWriterThrowsExceptionOnClose() throws Exception {
         Record testRecord = recordBuilderFactoryMock.newRecordBuilder().withString("key", "value").build();
         BlobWriter writerMock = Mockito.mock();
         mockedStatic.when(() -> BlobWriterFactory.getWriter(Mockito.any(),

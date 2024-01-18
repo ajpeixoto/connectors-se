@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AvroContentFormatterTest {
 
     @Test
-    void feedContent() throws IOException {
+    void testFeedContentIsDeserializable() throws IOException {
         Record testRecord = new RecordImpl.BuilderImpl().withString("key", "value").build();
         OutputConfiguration configuration = new OutputConfiguration();
         RecordBuilderFactory mock = Mockito.mock();

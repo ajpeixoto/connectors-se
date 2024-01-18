@@ -107,7 +107,7 @@ class AdlsGen2GetTest {
 
     @Order(1)
     @Test
-    void testSimpleDeleteWithInjectedConnection() throws Exception {
+    void testSimpleGetWithInjectedConnection() throws Exception {
         fileMockedConstruction.close();
         fileOutputStreamMockedConstruction.close();
         ioUtilsMockedStatic.close();
@@ -130,7 +130,7 @@ class AdlsGen2GetTest {
 
     @Order(2)
     @Test
-    void testDeleteThrowsAnException() throws IOException {
+    void testGetThrowsAnException() throws IOException {
         configuration.setDieOnError(true);
         Mockito.doThrow(IOException.class)
                 .when(serviceMock)
