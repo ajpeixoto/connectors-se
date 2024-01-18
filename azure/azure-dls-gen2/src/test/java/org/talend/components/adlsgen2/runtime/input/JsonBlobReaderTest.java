@@ -10,44 +10,41 @@
  * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations under the License.
  */
-package org.talend.components.azure.runtime.input;
+package org.talend.components.adlsgen2.runtime.input;
 
+import java.io.IOException;
 import java.io.Reader;
-import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.EnumSet;
 
 import javax.json.Json;
+import javax.json.JsonBuilderFactory;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
-import com.microsoft.azure.storage.blob.BlobRequestOptions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.record.Record;
 
-import com.microsoft.azure.storage.StorageException;
+class JsonBlobReaderTest extends BaseBlobReaderTest {
 
-class JsonBlobFileReaderTest extends BaseFileReaderTest {
-
-    private JsonBlobFileReader sut;
+    private JsonBlobReader sut;
 
     private MockedStatic<Json> mockedStaticJson;
 
+    private JsonBuilderFactory jsonBuilderFactoryMock;
+
     @BeforeEach
-    void setUp() throws URISyntaxException, StorageException {
-        messageServiceMock = Mockito.mock();
+    void setUp() throws IOException {
+        jsonBuilderFactoryMock = Mockito.mock();
         initRecordBuilderFactoryMocks();
         initConfig();
         initMockJson();
         initComponentServicesMock();
 
-        sut = new JsonBlobFileReader(config, recordBuilderFactoryMock, componentServicesMock, messageServiceMock);
+        sut = new JsonBlobReader(config, recordBuilderFactoryMock, jsonBuilderFactoryMock, servicesMock);
     }
 
     private void initMockJson() {
@@ -57,18 +54,6 @@ class JsonBlobFileReaderTest extends BaseFileReaderTest {
         mockedStaticJson.when(() -> Json.createReader(Mockito.any(Reader.class))).thenReturn(jsonReaderMock);
         Mockito.when(jsonReaderMock.read())
                 .thenReturn(builder.add("testKey", "value").build(), null);
-    }
-
-    @Test
-    void testReadJsonNoData() throws URISyntaxException, StorageException {
-        Mockito.when(clientMock.getContainerReference(Mockito.any())
-                .listBlobs(Mockito.any(), Mockito.anyBoolean(),
-                        Mockito.nullable(EnumSet.class),
-                        Mockito.nullable(BlobRequestOptions.class), Mockito.any()))
-                .thenReturn(Collections.emptyList());
-        Assertions.assertThrows(RuntimeException.class,
-                () -> new JsonBlobFileReader(config,
-                        recordBuilderFactoryMock, componentServicesMock, messageServiceMock));
     }
 
     @Test
@@ -83,4 +68,5 @@ class JsonBlobFileReaderTest extends BaseFileReaderTest {
     void release() {
         mockedStaticJson.close();
     }
+
 }

@@ -12,9 +12,8 @@
  */
 package org.talend.components.adlsgen2.delete;
 
-import com.azure.core.util.Context;
-import com.azure.storage.file.datalake.DataLakeDirectoryClient;
-import com.azure.storage.file.datalake.DataLakeServiceClient;
+import java.time.Duration;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,9 @@ import org.talend.components.adlsgen2.datastore.AdlsGen2Connection;
 import org.talend.components.adlsgen2.runtime.AdlsGen2RuntimeException;
 import org.talend.components.adlsgen2.service.AdlsGen2Service;
 
-import java.time.Duration;
+import com.azure.core.util.Context;
+import com.azure.storage.file.datalake.DataLakeDirectoryClient;
+import com.azure.storage.file.datalake.DataLakeServiceClient;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 
