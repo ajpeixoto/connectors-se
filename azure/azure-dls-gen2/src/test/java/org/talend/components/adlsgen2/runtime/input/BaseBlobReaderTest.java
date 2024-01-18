@@ -28,7 +28,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 import org.talend.sdk.component.runtime.record.RecordImpl;
 import org.talend.sdk.component.runtime.record.SchemaImpl;
 
-public class BaseBlobReaderTest {
+public abstract class BaseBlobReaderTest {
 
     protected RecordBuilderFactory recordBuilderFactoryMock;
 

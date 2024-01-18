@@ -26,7 +26,7 @@ import org.talend.components.common.service.azureblob.AzureComponentServices;
 
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 
-public class BlobFileWriterFactoryTest {
+class BlobFileWriterFactoryTest {
 
     @Test
     void testGetWriter() throws Exception {

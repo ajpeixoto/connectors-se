@@ -28,13 +28,10 @@ import org.talend.components.common.formats.excel.ExcelFormatOptions;
 import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.Iterator;
 
-class ExcelHTMLBlobFileReaderTest extends BaseFileReaderTest {
+class ExcelHTMLBlobFileReaderTest extends BaseBlobFileReaderTest {
 
     private ExcelHTMLBlobFileReader sut;
 

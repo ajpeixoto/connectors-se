@@ -28,12 +28,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.talend.components.azure.service.MessageService;
 import org.talend.sdk.component.api.record.Record;
 
 import com.microsoft.azure.storage.StorageException;
 
-class JsonBlobFileReaderTest extends BaseFileReaderTest {
+class JsonBlobFileReaderTest extends BaseBlobFileReaderTest {
 
     private JsonBlobFileReader sut;
 

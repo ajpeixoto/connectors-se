@@ -21,7 +21,6 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
 import org.apache.parquet.hadoop.util.HadoopInputFile;
-import org.apache.parquet.io.InputFile;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
@@ -36,9 +35,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class BlobFileReaderTest extends BaseFileReaderTest {
+class BlobFileReaderTest extends BaseBlobFileReaderTest {
 
     @Test
     void testGetParquetFileReaderViaFactory() throws Exception {

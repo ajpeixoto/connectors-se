@@ -31,7 +31,7 @@ import org.talend.sdk.component.api.record.Record;
 import java.net.URISyntaxException;
 import java.util.Spliterators;
 
-class Excel97BlobFileReaderTest extends BaseFileReaderTest {
+class Excel97BlobFileReaderTest extends BaseBlobFileReaderTest {
 
     private ExcelBlobFileReader sut;
 

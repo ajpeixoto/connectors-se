@@ -31,6 +31,7 @@ import org.talend.components.azure.dataset.AzureBlobDataset;
 import org.talend.components.azure.service.AzureBlobComponentServices;
 import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.stream.input.json.JsonToRecord;
+import org.talend.sdk.component.api.exception.ComponentException;
 import org.talend.sdk.component.api.record.Record;
 import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 
@@ -105,7 +106,7 @@ public class JsonBlobFileReader extends BlobFileReader {
                 }
             } catch (Exception e) {
                 log.error("[readBlob] {}", e.getMessage());
-                throw new RuntimeException(e.getMessage(), e);
+                throw new ComponentException(e.getMessage(), e);
             }
         }
 

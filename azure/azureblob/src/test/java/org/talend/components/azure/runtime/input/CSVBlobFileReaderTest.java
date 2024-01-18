@@ -23,7 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.Mockito;
-import org.talend.components.azure.service.MessageService;
 import org.talend.components.common.formats.Encoding;
 import org.talend.components.common.formats.csv.CSVFormatOptions;
 import org.talend.sdk.component.api.record.Record;
@@ -35,7 +34,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 
-class CSVBlobFileReaderTest extends BaseFileReaderTest {
+class CSVBlobFileReaderTest extends BaseBlobFileReaderTest {
 
     private CSVBlobFileReader sut;
 

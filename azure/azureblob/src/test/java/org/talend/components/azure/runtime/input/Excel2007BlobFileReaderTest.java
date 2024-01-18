@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Spliterators;
 
-class Excel2007BlobFileReaderTest extends BaseFileReaderTest {
+class Excel2007BlobFileReaderTest extends BaseBlobFileReaderTest {
 
     private ExcelBlobFileReader sut;
 

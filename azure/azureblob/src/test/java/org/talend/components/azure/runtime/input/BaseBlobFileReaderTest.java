@@ -36,7 +36,7 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 
-public class BaseFileReaderTest {
+abstract class BaseBlobFileReaderTest {
 
     protected RecordBuilderFactory recordBuilderFactoryMock;
 
@@ -50,7 +50,7 @@ public class BaseFileReaderTest {
 
     protected MessageService messageServiceMock;
 
-    protected BaseFileReaderTest() {
+    protected BaseBlobFileReaderTest() {
         messageServiceMock = Mockito.mock();
     }
 
