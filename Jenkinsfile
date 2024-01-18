@@ -26,7 +26,6 @@ final String branch_name = pullRequestId != null ? env.CHANGE_BRANCH : env.BRANC
 
 // Job config
 final boolean isOnMasterOrMaintenanceBranch = branch_name == "master" || branch_name.startsWith("maintenance/")
-final boolean isOnLocalesBranch = branch_name.startsWith("locales/")
 
 // Job variables declaration
 String branch_user
@@ -103,10 +102,10 @@ pipeline {
             - RELEASE : Build release, deploy to the Nexus for master/maintenance branches''')
         booleanParam(
           name: 'MAVEN_DEPLOY',
-          defaultValue: !isOnLocalesBranch,
+          defaultValue: isOnMasterOrMaintenanceBranch,
           description: '''
             Deploy A build to the Nexus after the build
-            Default is true for any branches except "locales/"''')
+            Default is true for master and maintenance branches''')
         string(
           name: 'VERSION_QUALIFIER',
           defaultValue: 'DEFAULT',
