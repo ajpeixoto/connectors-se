@@ -38,16 +38,16 @@ public class UnusedConfig implements Serializable {
     @Version(1)
     @Data
     @DataSet("unusedDatasetName")
-    @Documentation("unusedDataset documentation")
+    @Documentation("UnusedDataset documentation.")
     @GridLayout({ @GridLayout.Row({ "dso" }), @GridLayout.Row({ "paramdse" }) })
     public class UnusedDataset {
 
         @Option
-        @Documentation("The datastore")
+        @Documentation("The datastore.")
         UnusedDatastore dso;
 
         @Option
-        @Documentation("Param of dataset")
+        @Documentation("Param of dataset.")
         int paramdse;
 
     }
@@ -55,12 +55,12 @@ public class UnusedConfig implements Serializable {
     @Version(1)
     @Data
     @DataStore("unusedDatastoreName")
-    @Documentation("MyDatastore documentation")
+    @Documentation("MyDatastore documentation.")
     @GridLayout({ @GridLayout.Row({ "paramdso" }) })
     public class UnusedDatastore {
 
         @Option
-        @Documentation("Param of datastore")
+        @Documentation("Param of datastore.")
         String paramdso;
 
     }

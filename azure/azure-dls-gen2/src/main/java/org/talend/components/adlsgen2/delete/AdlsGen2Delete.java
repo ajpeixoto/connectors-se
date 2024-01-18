@@ -39,7 +39,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "AdlsGen2-delete")
 @DriverRunner(name = "AdlsGen2Delete")
-@Documentation("Delete blobs from a Azure Data Lake Storage Gen2 container")
+@Documentation("Delete blobs from a Azure Data Lake Storage Gen2 container.")
 public class AdlsGen2Delete implements Serializable {
 
     @Service

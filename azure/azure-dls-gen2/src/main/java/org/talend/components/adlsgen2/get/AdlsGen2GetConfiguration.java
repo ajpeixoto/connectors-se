@@ -37,18 +37,18 @@ import lombok.Data;
         @GridLayout.Row("dieOnError"), //
 })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row({ "connection" }) })
-@Documentation("ADLS get configuration")
+@Documentation("ADLS get configuration.")
 public class AdlsGen2GetConfiguration implements Serializable {
 
     @Option
     @Required
-    @Documentation("ADLS Gen2 Connection")
+    @Documentation("ADLS Gen2 Connection.")
     private AdlsGen2Connection connection;
 
     @Option
     @Required
     @Suggestable(value = ACTION_FILESYSTEMS, parameters = { "connection" })
-    @Documentation("FileSystem")
+    @Documentation("FileSystem.")
     private String filesystem;
 
     @Option

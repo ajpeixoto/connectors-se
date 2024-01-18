@@ -31,22 +31,22 @@ import java.util.List;
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = {
         @GridLayout.Row("bulkCommonConfig")
 })
-@Documentation("jdbc output bulk file")
+@Documentation("Jdbc output bulk file.")
 public class JDBCOutputBulkConfig implements Serializable {
 
     @Option
     @Structure(type = Structure.Type.OUT)
-    @Documentation("schema")
+    @Documentation("Schema.")
     private List<SchemaInfo> schema;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private JDBCBulkCommonConfig bulkCommonConfig;
 
     // advanced setting
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean append;
 
 }

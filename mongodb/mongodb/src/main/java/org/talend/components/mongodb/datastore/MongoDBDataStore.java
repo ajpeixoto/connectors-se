@@ -41,22 +41,22 @@ import java.util.List;
                 @GridLayout.Row({ "replicaSetAddress" }), @GridLayout.Row({ "database" }),
                 @GridLayout.Row({ "auth" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "connectionParameter" }) })
-@Documentation("MongoDB connection")
+@Documentation("MongoDB connection.")
 public class MongoDBDataStore implements MongoCommonDataStore {
 
     @Option
     @Required
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+    @Documentation("Https://docs.mongodb.com/manual/reference/connection-string/.")
     private AddressType addressType = AddressType.STANDALONE;
 
     @Option
     @ActiveIf(target = "addressType", value = "STANDALONE")
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+    @Documentation("Https://docs.mongodb.com/manual/reference/connection-string/.")
     private Address address;
 
     @Option
     @ActiveIf(target = "addressType", value = "REPLICA_SET")
-    @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+    @Documentation("Https://docs.mongodb.com/manual/reference/connection-string/.")
     private List<Address> replicaSetAddress = Collections.emptyList();
 
     /*
@@ -64,13 +64,13 @@ public class MongoDBDataStore implements MongoCommonDataStore {
      *
      * @ActiveIf(target = "addressType", value = "SHARDED_CLUSTER")
      *
-     * @Documentation("https://docs.mongodb.com/manual/reference/connection-string/")
+     * @Documentation("Https://docs.mongodb.com/manual/reference/connection-string/.")
      * private List<Address> shardedClusterAddress = Collections.emptyList();
      */
 
     @Option
     @Required
-    @Documentation("Database")
+    @Documentation("Database.")
     private String database;
 
     // TODO have to support the function for locate a file for cert if need cert? or trust any cert, not good for me?
@@ -78,16 +78,16 @@ public class MongoDBDataStore implements MongoCommonDataStore {
     /*
      * @Option
      *
-     * @Documentation("Use SSL")
+     * @Documentation("Use SSL.")
      * private boolean useSSL;
      */
 
     @Option
-    @Documentation("auth page")
+    @Documentation("Auth page.")
     private Auth auth;
 
     // advanced page
     @Option
-    @Documentation("Connection parameter")
+    @Documentation("Connection parameter.")
     private List<ConnectionParameter> connectionParameter = Collections.emptyList();
 }

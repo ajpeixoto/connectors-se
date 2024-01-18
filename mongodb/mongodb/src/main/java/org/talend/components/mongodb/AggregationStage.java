@@ -28,11 +28,11 @@ import java.io.Serializable;
 // so here remove the construct with one field
 @NoArgsConstructor
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "stage" }) }) })
-@Documentation("Aggregation stage")
+@Documentation("Aggregation stage.")
 public class AggregationStage implements Serializable {
 
     @Option
-    @Documentation("Stage")
+    @Documentation("Stage.")
     private String stage;
 
 }

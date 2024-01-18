@@ -26,24 +26,24 @@ import java.io.Serializable;
 @OptionsOrder({ "columnName", "sqlExpression", "position", "refColumn" })
 @NoArgsConstructor
 @AllArgsConstructor
-@Documentation("")
+@Documentation("Undefined.")
 public class AdditionalColumn implements Serializable {
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private String columnName;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private String sqlExpression;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private Position position;
 
     @BuiltInSuggestable(BuiltInSuggestable.Name.CURRENT_SCHEMA_ENTRY_NAMES)
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private String refColumn;
 
 }

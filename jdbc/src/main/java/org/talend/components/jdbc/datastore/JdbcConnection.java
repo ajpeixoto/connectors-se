@@ -73,34 +73,34 @@ public class JdbcConnection implements Serializable {
     private String handler;
 
     @Option
-    @Documentation("Let user define complete jdbc url or not")
+    @Documentation("Let user define complete jdbc url or not.")
     @DefaultValue("false")
     private Boolean setRawUrl = false;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "true" })
-    @Documentation("jdbc connection raw url")
+    @Documentation("Jdbc connection raw url.")
     private String jdbcUrl;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc host")
+    @Documentation("Jdbc host.")
     private String host;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc port")
+    @Documentation("Jdbc port.")
     @DefaultValue("80")
     private int port = 80;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc database")
+    @Documentation("Jdbc database.")
     private String database;
 
     @Option
     @ActiveIf(target = "setRawUrl", value = { "false" })
-    @Documentation("jdbc parameters")
+    @Documentation("Jdbc parameters.")
     private List<KeyVal> parameters = new ArrayList<>();
 
     @Option
@@ -112,7 +112,7 @@ public class JdbcConnection implements Serializable {
     @Option
     @ActiveIfs(value = { @ActiveIf(target = "setRawUrl", value = { "false" }),
             @ActiveIf(target = "defineProtocol", value = { "true" }) })
-    @Documentation("Protocol")
+    @Documentation("Protocol.")
     private String protocol;
 
     @Option
@@ -124,14 +124,14 @@ public class JdbcConnection implements Serializable {
     @Option
     @ActiveIfs(value = { @ActiveIf(target = "dbType", value = "Snowflake", negate = true),
             @ActiveIf(target = "authenticationType", value = "OAUTH", negate = true) }, operator = OR)
-    @Documentation("database user.")
+    @Documentation("Database user.")
     private String userId;
 
     @Option
     @ActiveIfs(value = { @ActiveIf(target = "dbType", value = "Snowflake", negate = true),
             @ActiveIf(target = "authenticationType", value = "BASIC") }, operator = OR)
     @Credential
-    @Documentation("database password.")
+    @Documentation("Database password.")
     private String password;
 
     @Option

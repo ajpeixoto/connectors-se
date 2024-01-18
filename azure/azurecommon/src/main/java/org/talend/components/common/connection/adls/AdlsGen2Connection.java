@@ -25,24 +25,24 @@ import lombok.Data;
 @Data
 @GridLayout({ @GridLayout.Row("accountName"), @GridLayout.Row("sharedKey"), @GridLayout.Row("endpointSuffix"),
         @GridLayout.Row("authMethod") })
-@Documentation("The datastore to connect Azure Data Lake Storage Gen2")
+@Documentation("The datastore to connect Azure Data Lake Storage Gen2.")
 public class AdlsGen2Connection implements Serializable {
 
     @Option
-    @Documentation("Storage Account Name")
+    @Documentation("Storage Account Name.")
     private String accountName;
 
     @Option
     @Credential
-    @Documentation("Storage Shared Key")
+    @Documentation("Storage Shared Key.")
     private String sharedKey;
 
     @Option
-    @Documentation("Endpoint suffix")
+    @Documentation("Endpoint suffix.")
     private String endpointSuffix = Constants.DFS_DEFAULT_ENDPOINT_SUFFIX;
 
     @Option
-    @Documentation("Authentication method")
+    @Documentation("Authentication method.")
     private AuthMethod authMethod;
 
     public String apiUrl() {

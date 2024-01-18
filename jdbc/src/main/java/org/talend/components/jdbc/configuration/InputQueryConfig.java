@@ -21,11 +21,11 @@ import org.talend.sdk.component.api.meta.Documentation;
 @Data
 @GridLayout(value = { @GridLayout.Row({ "dataSet" }) })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataSet" }) })
-@Documentation("Query input configuration")
+@Documentation("Query input configuration.")
 public class InputQueryConfig implements InputConfig {
 
     @Option
-    @Documentation("SQL query dataset")
+    @Documentation("SQL query dataset.")
     private SqlQueryDataset dataSet;
 
 }

@@ -26,16 +26,16 @@ import java.io.Serializable;
 @OptionsOrder({ "column", "trim" })
 @NoArgsConstructor
 @AllArgsConstructor
-@Documentation("")
+@Documentation("Undefined.")
 public class ColumnTrim implements Serializable {
 
     @BasedOnSchema
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private String column;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean trim;
 
 }

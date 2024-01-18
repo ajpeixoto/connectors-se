@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @Version(JdbcConnection.VERSION)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @Emitter(name = "TableNameInput")
-@Documentation("JDBC input using table name")
+@Documentation("JDBC input using table name.")
 public class TableNameInputEmitter extends AbstractInputEmitter implements Serializable {
 
     public TableNameInputEmitter(@Option("configuration") final InputTableNameConfig config,

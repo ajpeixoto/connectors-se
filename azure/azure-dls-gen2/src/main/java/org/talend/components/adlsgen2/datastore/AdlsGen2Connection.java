@@ -44,54 +44,54 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
         @GridLayout.Row("clientSecret"), //
 })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("timeout") })
-@Documentation("The datastore to connect Azure Data Lake Storage Gen2")
+@Documentation("The datastore to connect Azure Data Lake Storage Gen2.")
 public class AdlsGen2Connection implements Serializable {
 
     @Option
     @Required
-    @Documentation("Storage Account Name")
+    @Documentation("Storage Account Name.")
     private String accountName;
 
     @Option
     @Required
-    @Documentation("Endpoint suffix")
+    @Documentation("Endpoint suffix.")
     private String endpointSuffix = Constants.DFS_DEFAULT_ENDPOINT_SUFFIX;
 
     @Option
     @Required
-    @Documentation("Authentication method")
+    @Documentation("Authentication method.")
     private AuthMethod authMethod;
 
     @Option
     @Credential
     @ActiveIf(target = "authMethod", value = "SharedKey")
-    @Documentation("Storage Shared Key")
+    @Documentation("Storage Shared Key.")
     private String sharedKey;
 
     @Option
     @ActiveIf(target = "authMethod", value = "SAS")
-    @Documentation("Shared Access Signature")
+    @Documentation("Shared Access Signature.")
     private String sas;
 
     @Option
     @ActiveIf(target = "authMethod", value = "ActiveDirectory")
-    @Documentation("ID of Azure active directory (tenant)")
+    @Documentation("ID of Azure active directory (tenant).")
     private String tenantId;
 
     @Option
     @ActiveIf(target = "authMethod", value = "ActiveDirectory")
-    @Documentation("ID of Azure active directory authentication application")
+    @Documentation("ID of Azure active directory authentication application.")
     private String clientId;
 
     @Option
     @ActiveIf(target = "authMethod", value = "ActiveDirectory")
     @Credential
-    @Documentation("Secret key for provided auth application")
+    @Documentation("Secret key for provided auth application.")
     private String clientSecret;
 
     @Option
     @Min(5)
-    @Documentation("Timeout")
+    @Documentation("Timeout.")
     private Integer timeout = 600;
 
     public String apiUrl() {

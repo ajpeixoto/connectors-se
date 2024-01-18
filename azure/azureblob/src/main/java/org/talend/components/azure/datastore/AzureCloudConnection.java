@@ -60,11 +60,11 @@ public class AzureCloudConnection implements Serializable {
 
     @ActiveIfs({ @ActiveIf(target = "useAzureSharedSignature", value = "false"),
             @ActiveIf(target = "../accountConnection.authType", value = "MANAGED_IDENTITIES", negate = true) })
-    @Documentation("Region of Azure : Azure cloud, Azure China cloud, Azure German cloud, Azure US government")
+    @Documentation("Region of Azure : Azure cloud, Azure China cloud, Azure German cloud, Azure US government.")
     private Region region = Region.CUSTOM;
 
     @Option
-    @Documentation("Endpoint suffix, decide the region of current service : core.chinacloudapi.cn, core.windows.net, core.cloudapi.de, core.usgovcloudapi.net")
+    @Documentation("Endpoint suffix, decide the region of current service : core.chinacloudapi.cn, core.windows.net, core.cloudapi.de, core.usgovcloudapi.net.")
     @ActiveIf(target = "useAzureSharedSignature", value = "false")
     @ActiveIfs({ @ActiveIf(target = "region", value = "CUSTOM"), @ActiveIf(target = "../accountConnection.authType",
             value = { "BASIC", "ACTIVE_DIRECTORY_CLIENT_CREDENTIAL" }),
@@ -74,17 +74,17 @@ public class AzureCloudConnection implements Serializable {
     @Option
     @Documentation("Use a shared access signature (SAS) to access the storage resources without need for the account key. "
             + "For more information, see Using Shared Access Signatures (SAS): "
-            + "https://docs.microsoft.com/en-us/azure/storage/storage-dotnet-shared-access-signature-part-1")
+            + "https://docs.microsoft.com/en-us/azure/storage/storage-dotnet-shared-access-signature-part-1.")
     private boolean useAzureSharedSignature;
 
     @Option
-    @Documentation("Enter your account SAS URL.\n"
-            + "You can get the SAS URL for each allowed service on Microsoft Azure portal after generating SAS.\n"
+    @Documentation("Enter your account SAS URL. "
+            + "You can get the SAS URL for each allowed service on Microsoft Azure portal after generating SAS. "
             + "The SAS URL format is https://<$storagename>.<$service>.core.windows.net/<$sastoken>, "
             + "where <$storagename> is the storage account name, "
             + "<$service> is the allowed service name (blob, file, queue or table),"
             + "and <$sastoken> is the SAS token value."
-            + "For more information, see Azure documentation.\n" + "Note that the SAS has valid period, "
+            + "For more information, see Azure documentation. Note that the SAS has valid period, "
             + "you can set the start time at which the SAS becomes valid and the expiry time after which the SAS is no longer valid when generating it, "
             + "and you need to make sure your SAS is still valid when running your Job.")
     @ActiveIf(target = "useAzureSharedSignature", value = "true")
@@ -93,6 +93,6 @@ public class AzureCloudConnection implements Serializable {
     @Option
     @ActiveIfs({ @ActiveIf(target = "region", value = "CUSTOM"),
             @ActiveIf(target = "../accountConnection.authType", value = "ACTIVE_DIRECTORY_CLIENT_CREDENTIAL") })
-    @Documentation("AuthorityHost for AD")
+    @Documentation("AuthorityHost for AD.")
     private String authorityHost = EndpointUtil.DEFAULT_AUTHORITY;
 }

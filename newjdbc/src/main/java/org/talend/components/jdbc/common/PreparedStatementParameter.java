@@ -26,20 +26,20 @@ import java.io.Serializable;
 @OptionsOrder({ "index", "type", "dataValue" })
 @NoArgsConstructor
 @AllArgsConstructor
-@Documentation("")
+@Documentation("Undefined.")
 public class PreparedStatementParameter implements Serializable {
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private int index;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private Type type;
 
     @JsonbTransient
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private transient Object dataValue;
 
 }

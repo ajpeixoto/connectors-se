@@ -15,37 +15,48 @@ package org.talend.components.http.service.httpClient;
 import org.talend.components.common.httpclient.api.HTTPClient;
 import org.talend.sdk.component.api.exception.ComponentException;
 
-public class HTTPComponentException extends ComponentException {
+public class HTTPComponentException extends RuntimeException {
+
+    private ComponentException componentException;
 
     private HTTPClient.HTTPResponse response;
 
-    public HTTPComponentException(ErrorOrigin errorOrigin, String type, String message, StackTraceElement[] stackTrace,
+    public HTTPComponentException(ComponentException.ErrorOrigin errorOrigin, String type, String message,
+            StackTraceElement[] stackTrace,
             Throwable cause) {
-        super(errorOrigin, type, message, stackTrace, cause);
+        super(message, cause);
+        this.componentException = new ComponentException(errorOrigin, type, message, stackTrace, cause);
     }
 
     public HTTPComponentException(String type, String message, StackTraceElement[] stackTrace, Throwable cause) {
-        super(type, message, stackTrace, cause);
+        super(message, cause);
+        this.componentException = new ComponentException(type, message, stackTrace, cause);
     }
 
-    public HTTPComponentException(ErrorOrigin errorOrigin, String message) {
-        super(errorOrigin, message);
+    public HTTPComponentException(ComponentException.ErrorOrigin errorOrigin, String message) {
+        super(message);
+        this.componentException = new ComponentException(errorOrigin, message);
     }
 
-    public HTTPComponentException(ErrorOrigin errorOrigin, String message, Throwable cause) {
-        super(errorOrigin, message, cause);
+    public HTTPComponentException(ComponentException.ErrorOrigin errorOrigin, String message, Throwable cause) {
+        super(message, cause);
+        this.componentException = new ComponentException(errorOrigin, message, cause);
+
     }
 
     public HTTPComponentException(String message) {
-        super(message);
+        super((message));
+        this.componentException = new ComponentException(message);
     }
 
     public HTTPComponentException(String message, Throwable cause) {
         super(message, cause);
+        this.componentException = new ComponentException(message, cause);
     }
 
     public HTTPComponentException(Throwable cause) {
         super(cause);
+        this.componentException = new ComponentException(cause);
     }
 
     public HTTPClient.HTTPResponse getResponse() {
@@ -54,5 +65,9 @@ public class HTTPComponentException extends ComponentException {
 
     public void setResponse(HTTPClient.HTTPResponse response) {
         this.response = response;
+    }
+
+    public ComponentException getComponentException() {
+        return this.componentException;
     }
 }

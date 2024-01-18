@@ -37,41 +37,41 @@ import lombok.Data;
         @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "dataset" }),
                 @GridLayout.Row({ "offerThroughput" }), @GridLayout.Row({ "partitionKey" }),
                 @GridLayout.Row({ "partitionKeyForDelete" }) }) })
-@Documentation("cosmosDB output configuration")
+@Documentation("CosmosDB output configuration.")
 public class CosmosDBOutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Dataset")
+    @Documentation("Dataset.")
     private QueryDataset dataset;
 
     @Option
-    @Documentation("Data Action")
+    @Documentation("Data Action.")
     private DataAction dataAction = DataAction.INSERT;
 
     @Option
     @ActiveIf(target = "dataAction", value = { "INSERT", "UPSERT" })
-    @Documentation("Create collection if not exist")
+    @Documentation("Create collection if not exist.")
     private boolean createCollection;
 
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "dataAction", value = { "INSERT", "UPSERT" }),
             @ActiveIf(target = "createCollection", value = "true") })
-    @Documentation("Collection Offer Throughput")
+    @Documentation("Collection Offer Throughput.")
     private int offerThroughput = 400;
 
     @Option
-    @Documentation("Partition Key ")
+    @Documentation("Partition Key.")
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "dataAction", value = { "INSERT", "UPSERT" }),
             @ActiveIf(target = "createCollection", value = "true") })
     private String partitionKey;
 
     @Option
-    @Documentation("Partition Key ")
+    @Documentation("Partition Key.")
     @ActiveIf(target = "dataAction", value = "DELETE")
     private String partitionKeyForDelete;
 
     @Option
-    @Documentation("Auto generation ID")
+    @Documentation("Auto generation ID.")
     @ActiveIf(target = "dataAction", value = { "INSERT", "UPSERT" })
     private boolean autoIDGeneration;
 

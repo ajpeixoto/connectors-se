@@ -36,16 +36,16 @@ public class SinkConfig extends AbstractConfig {
     String sink_legacy;
 
     @Option
-    @Documentation("Sink migration handler callback")
+    @Documentation("Sink migration handler callback.")
     String sink_migration_handler_callback;
 
     @Option
-    @Documentation("Incoming configuration")
+    @Documentation("Incoming configuration.")
     @Code("json")
     String sink_incoming;
 
     @Option
-    @Documentation("Outgoing configuration")
+    @Documentation("Outgoing configuration.")
     @Code("json")
     String sink_outgoing;
 

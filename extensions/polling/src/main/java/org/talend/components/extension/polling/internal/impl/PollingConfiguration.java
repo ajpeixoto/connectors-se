@@ -38,7 +38,7 @@ public class PollingConfiguration implements Serializable {
     private Integer delay = 5000;
 
     @Option
-    @Documentation("Max read before pause")
+    @Documentation("Max read before pause.")
     @DefaultValue("1")
     private Integer maxRead = 1;
 

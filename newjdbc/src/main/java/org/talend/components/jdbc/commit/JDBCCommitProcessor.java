@@ -34,7 +34,7 @@ import java.sql.SQLException;
 @Version(1)
 @Processor(name = "Commit")
 @Icon(value = Icon.IconType.CUSTOM, custom = "JDBCCommit")
-@Documentation("JDBC commit component")
+@Documentation("JDBC commit component.")
 public class JDBCCommitProcessor implements Serializable {
 
     private static final long serialVersionUID = 1;

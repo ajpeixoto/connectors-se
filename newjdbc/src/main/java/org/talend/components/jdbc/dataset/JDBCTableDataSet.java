@@ -37,22 +37,22 @@ import java.util.List;
         @GridLayout.Row("dataStore")
 })
 @DataSet("JDBCTableDataSet")
-@Documentation("A table dataset")
+@Documentation("A table dataset.")
 public class JDBCTableDataSet implements CommonDataSet, Serializable {
 
     @Option
-    @Documentation("The connection information to execute")
+    @Documentation("The connection information to execute.")
     private JDBCDataStore dataStore;
 
     @Option
     @Suggestable(value = "FETCH_TABLES", parameters = { "dataStore" })
-    @Documentation("The table name")
+    @Documentation("The table name.")
     private String tableName;
 
     // use new DiscoverSchemaExtended
     @Option
     @Structure(type = Structure.Type.OUT/* , discoverSchema = "JDBCTableDataSet" */)
-    @Documentation("schema")
+    @Documentation("Schema.")
     private List<SchemaInfo> schema;
 
     @Override

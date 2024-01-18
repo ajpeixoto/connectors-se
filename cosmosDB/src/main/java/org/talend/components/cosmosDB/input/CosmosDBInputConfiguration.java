@@ -29,11 +29,11 @@ import java.io.Serializable;
 }), @GridLayout(names = GridLayout.FormType.ADVANCED,
         value = { @GridLayout.Row({ "dataset" }),
                 @GridLayout.Row({ "jsonForceDouble" }) }) })
-@Documentation("cosmosDB input Mapper Configuration")
+@Documentation("CosmosDB input Mapper Configuration.")
 public class CosmosDBInputConfiguration implements Serializable {
 
     @Option
-    @Documentation("dataset")
+    @Documentation("Dataset.")
     private QueryDataset dataset;
 
     @Option

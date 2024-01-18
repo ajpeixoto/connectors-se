@@ -33,7 +33,7 @@ import java.io.Serializable;
 @Version(1)
 @Processor(name = "OutputBulk")
 @Icon(value = Icon.IconType.CUSTOM, custom = "JDBCOutputBulk")
-@Documentation("JDBC Output Bulk component")
+@Documentation("JDBC Output Bulk component.")
 public class JDBCOutputBulkProcessor implements Serializable {
 
     private static final long serialVersionUID = 1;

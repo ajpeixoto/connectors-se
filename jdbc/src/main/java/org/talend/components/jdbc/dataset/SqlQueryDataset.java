@@ -34,23 +34,23 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 @DataSet("SqlQueryDataset")
 @GridLayout({ @GridLayout.Row("connection"), @GridLayout.Row("sqlQuery") })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("connection"), @GridLayout.Row("advancedCommon") })
-@Documentation("This configuration define a read only query")
+@Documentation("This configuration define a read only query.")
 public class SqlQueryDataset implements BaseDataSet {
 
     @Option
-    @Documentation("The connection information to execute the query")
+    @Documentation("The connection information to execute the query.")
     @Updatable(value = ACTION_DEFAULT_VALUES, parameters = { "." }, after = "setRawUrl")
     private JdbcConnection connection;
 
     @Option
     @Code("sql")
     @Validable(ACTION_VALIDATION_READONLY_QUERY)
-    @Documentation("A valid read only query is the source type is Query")
+    @Documentation("A valid read only query is the source type is Query.")
     private String sqlQuery;
 
     @Option
     @Delegate
-    @Documentation("common input configuration")
+    @Documentation("Common input configuration.")
     private AdvancedCommon advancedCommon = new AdvancedCommon();
 
     @Override

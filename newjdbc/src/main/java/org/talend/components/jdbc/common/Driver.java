@@ -23,12 +23,12 @@ import lombok.Data;
 
 @Data
 @OptionsOrder({ "path" })
-@Documentation("")
+@Documentation("Undefined.")
 public class Driver implements Serializable {
 
     @ModuleList
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private String path;
 
 }

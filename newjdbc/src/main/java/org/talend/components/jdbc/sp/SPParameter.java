@@ -26,16 +26,16 @@ import java.io.Serializable;
 @OptionsOrder({ "columnName", "parameterType" })
 @NoArgsConstructor
 @AllArgsConstructor
-@Documentation("")
+@Documentation("Undefined.")
 public class SPParameter implements Serializable {
 
     @Option
     @BuiltInSuggestable(BuiltInSuggestable.Name.CURRENT_SCHEMA_ENTRY_NAMES)
-    @Documentation("")
+    @Documentation("Undefined.")
     private String columnName;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private ParameterType parameterType;
 
 }

@@ -30,18 +30,18 @@ import java.io.Serializable;
         @GridLayout.Row("dataSet"),
         @GridLayout.Row("bulkCommonConfig")
 })
-@Documentation("jdbc bulk exec")
+@Documentation("Jdbc bulk exec.")
 public class JDBCOutputBulkExecConfig implements Serializable {
 
     @Option
-    @Documentation("table dataset")
+    @Documentation("Table dataset.")
     private JDBCTableDataSet dataSet;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private JDBCBulkCommonConfig bulkCommonConfig;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean append;
 }

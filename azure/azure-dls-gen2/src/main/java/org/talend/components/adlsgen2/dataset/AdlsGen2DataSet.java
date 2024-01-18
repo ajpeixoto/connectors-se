@@ -51,29 +51,29 @@ import static org.talend.sdk.component.api.configuration.ui.layout.GridLayout.Fo
 })
 @Version(value = 4, migrationHandler = AdlsDataSetMigrationHandler.class)
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row({ "connection" }) })
-@Documentation("ADLS DataSet")
+@Documentation("ADLS DataSet.")
 public class AdlsGen2DataSet implements Serializable {
 
     @Option
     @Required
-    @Documentation("ADLS Gen2 Connection")
+    @Documentation("ADLS Gen2 Connection.")
     private AdlsGen2Connection connection;
 
     @Option
     @Required
     @Suggestable(value = ACTION_FILESYSTEMS, parameters = { "connection" })
-    @Documentation("FileSystem")
+    @Documentation("FileSystem.")
     private String filesystem;
 
     @Option
     @Required
-    @Documentation("Path to Blob Object")
+    @Documentation("Path to Blob Object.")
     private String blobPath;
 
     @Option
     @Required
     @DefaultValue("CSV")
-    @Documentation("Format of Blob content")
+    @Documentation("Format of Blob content.")
     private FileFormat format;
 
     @Option

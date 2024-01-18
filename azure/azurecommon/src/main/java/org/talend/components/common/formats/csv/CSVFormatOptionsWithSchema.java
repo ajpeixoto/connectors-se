@@ -30,17 +30,17 @@ import lombok.extern.slf4j.Slf4j;
 @GridLayout(value = { //
         @GridLayout.Row("csvFormatOptions"), @GridLayout.Row("csvSchema") })
 @Data
-@Documentation("Basic CSV configuration and CSV Schema")
+@Documentation("Basic CSV configuration and CSV Schema.")
 public class CSVFormatOptionsWithSchema implements Serializable {
 
     private static final long serialVersionUID = 2210924710439683018L;
 
     @Option
-    @Documentation("Basic CSV Format options")
+    @Documentation("Basic CSV Format options.")
     private CSVFormatOptions csvFormatOptions;
 
     @Option
-    @Documentation("Schema")
+    @Documentation("Schema.")
     private String csvSchema;
 
     public List<String> getCsvSchemaHeaders() {

@@ -28,7 +28,7 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
 
 @Data
 @GridLayout(value = { @GridLayout.Row({ "keys" }) })
-@Documentation("Operation Key for output")
+@Documentation("Operation Key for output.")
 public class OperationKey implements Serializable {
 
     @Option
@@ -36,7 +36,7 @@ public class OperationKey implements Serializable {
             @ActiveIf(target = "../../dataSet.dataStore.dbType", value = { "SQLDWH" }, negate = true),
             @ActiveIf(target = "../../dataAction", value = { "BULK_LOAD" }, negate = true) })
     @Suggestable(value = "ACTION_SUGGESTION_TABLE_COLUMNS_NAMES", parameters = { "../../dataSet" })
-    @Documentation("List of columns to be used as keys for this operation")
+    @Documentation("List of columns to be used as keys for this operation.")
     private List<String> keys = new ArrayList<>();
 
 }

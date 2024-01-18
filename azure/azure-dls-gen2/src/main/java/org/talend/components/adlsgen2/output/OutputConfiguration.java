@@ -28,16 +28,16 @@ import lombok.Data;
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { //
         @GridLayout.Row({ "dataSet" }), //
         @GridLayout.Row({ "blobNameTemplate" }) })
-@Documentation("ADLS output configuration")
+@Documentation("ADLS output configuration.")
 public class OutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Dataset")
+    @Documentation("Dataset.")
     private AdlsGen2DataSet dataSet;
 
     @Option
-    @Documentation("Generated blob item name prefix.\nBatch file would have name prefix + UUID + extension.\n"
-            + "I.e. myPrefix-5deaa8ff-7d22-4b86-a864-9a6fa414501a.avro")
+    @Documentation("Generated blob item name prefix. Batch file would have name prefix + UUID + extension."
+            + "I.e. myPrefix-5deaa8ff-7d22-4b86-a864-9a6fa414501a.avro.")
     private String blobNameTemplate = "data-";
 
 }

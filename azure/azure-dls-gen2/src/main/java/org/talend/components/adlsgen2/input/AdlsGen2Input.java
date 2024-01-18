@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Version(1)
-@Documentation("Azure Data Lake Storage Gen2 Input")
+@Documentation("Azure Data Lake Storage Gen2 Input.")
 public class AdlsGen2Input implements Serializable {
 
     @Service

@@ -37,7 +37,7 @@ import org.talend.sdk.component.api.record.Record;
 @Version(value = 2, migrationHandler = AzureStorageRuntimeDatasetMigration.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "azure-blob-output")
 @Processor(name = "Output")
-@Documentation("Azure Blob Storage Writer")
+@Documentation("Azure Blob Storage Writer.")
 public class BlobOutput implements Serializable {
 
     private final BlobOutputConfiguration configuration;

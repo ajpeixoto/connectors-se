@@ -26,11 +26,11 @@ import lombok.Data;
 public class AzureConnectionActiveDir implements Serializable {
 
     @Option
-    @Documentation("Directory (tenant) ID of active directory application")
+    @Documentation("Directory (tenant) ID of active directory application.")
     private String tenantId;
 
     @Option
-    @Documentation("Application (client) ID of active directory application")
+    @Documentation("Application (client) ID of active directory application.")
     private String clientId;
 
     @Option

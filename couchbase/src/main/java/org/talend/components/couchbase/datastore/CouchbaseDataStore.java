@@ -74,18 +74,18 @@ public class CouchbaseDataStore implements Serializable {
     private boolean enableTLS = false;
 
     @Option
-    @Documentation("Java Truststore")
+    @Documentation("Java Truststore.")
     @ActiveIf(target = "enableTLS", value = "true")
     private String trustStorePath;
 
     @Option
     @Credential
-    @Documentation("Java Truststore Password")
+    @Documentation("Java Truststore Password.")
     @ActiveIf(target = "enableTLS", value = "true")
     private String trustStorePassword;
 
     @Option
-    @Documentation("Java Truststore Type")
+    @Documentation("Java Truststore Type.")
     @ActiveIf(target = "enableTLS", value = "true")
     private String trustStoreType = "JKS";
 

@@ -25,7 +25,7 @@ import lombok.ToString;
 @GridLayout({ //
         @GridLayout.Row({ "dataSet" }), //
 }) //
-@Documentation("Marketo Source Configuration")
+@Documentation("Marketo Source Configuration.")
 @ToString(callSuper = true)
 public class MarketoInputConfiguration implements Serializable {
 
@@ -35,7 +35,7 @@ public class MarketoInputConfiguration implements Serializable {
      * DataSet
      */
     @Option
-    @Documentation("Marketo DataSet")
+    @Documentation("Marketo DataSet.")
     private MarketoDataSet dataSet;
 
 }

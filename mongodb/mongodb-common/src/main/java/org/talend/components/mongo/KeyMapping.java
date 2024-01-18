@@ -26,15 +26,15 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "column" }), @GridLayout.Row({ "originElementPath" }) }) })
-@Documentation("Path mapping")
+@Documentation("Path mapping.")
 public class KeyMapping implements Serializable {
 
     @Option
-    @Documentation("Field which is value provider")
+    @Documentation("Field which is value provider.")
     private String column;
 
     @Option
-    @Documentation("the mongodb's origin element path in bson as key")
+    @Documentation("The mongodb's origin element path in bson as key.")
     private String originElementPath;
 
 }

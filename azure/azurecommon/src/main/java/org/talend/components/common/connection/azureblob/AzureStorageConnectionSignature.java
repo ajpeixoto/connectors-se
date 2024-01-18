@@ -25,13 +25,13 @@ import lombok.Data;
 public class AzureStorageConnectionSignature implements Serializable {
 
     @Option
-    @Documentation("Enter your account SAS URL.\n"
-            + "You can get the SAS URL for each allowed service on Microsoft Azure portal after generating SAS.\n"
+    @Documentation("Enter your account SAS URL."
+            + "You can get the SAS URL for each allowed service on Microsoft Azure portal after generating SAS."
             + "The SAS URL format is https://<$storagename>.<$service>.core.windows.net/<$sastoken>, "
             + "where <$storagename> is the storage account name, "
             + "<$service> is the allowed service name (blob, file, queue or table),"
             + "and <$sastoken> is the SAS token value."
-            + "For more information, see Azure documentation.\n" + "Note that the SAS has valid period, "
+            + "For more information, see Azure documentation." + "Note that the SAS has valid period, "
             + "you can set the start time at which the SAS becomes valid and the expiry time after which the SAS is no longer valid when generating it, "
             + "and you need to make sure your SAS is still valid when running your Job.")
     private String azureSharedAccessSignature;

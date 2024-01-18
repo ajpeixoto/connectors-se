@@ -28,7 +28,7 @@ import static java.util.Collections.singletonList;
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "CosmosDB-input")
 @PartitionMapper(name = "SQLAPIInput")
-@Documentation("cosmosDB input Mapper")
+@Documentation("CosmosDB input Mapper.")
 public class CosmosDBInputMapper implements Serializable {
 
     private final CosmosDBInputConfiguration configuration;

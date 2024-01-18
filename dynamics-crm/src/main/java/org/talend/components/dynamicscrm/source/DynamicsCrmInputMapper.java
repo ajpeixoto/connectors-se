@@ -35,7 +35,7 @@ import org.talend.sdk.component.api.service.record.RecordBuilderFactory;
 @Version(value = 2, migrationHandler = DynamicsRuntimeMigrationHandler.class)
 @Icon(value = IconType.CUSTOM, custom = "azure-dynamics-connector")
 @PartitionMapper(name = "AzureDynamics365Input")
-@Documentation("Dynamics CRM input")
+@Documentation("Dynamics CRM input.")
 public class DynamicsCrmInputMapper implements Serializable {
 
     private final DynamicsCrmInputMapperConfiguration configuration;

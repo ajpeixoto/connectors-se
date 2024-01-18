@@ -30,21 +30,21 @@ import org.talend.sdk.component.api.meta.Documentation;
 @DataSet("MongoDBReadAndWriteDataSet")
 @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "collection" }), @GridLayout.Row({ "mode" }) })
 // @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row({ "todo" }) })
-@Documentation("MongoDB DataSet for read and write both")
+@Documentation("MongoDB DataSet for read and write both.")
 public class MongoDBReadAndWriteDataSet implements MongoCommonDataSet {
 
     @Option
-    @Documentation("Connection")
+    @Documentation("Connection.")
     private MongoDBDataStore datastore;
 
     @Option
     @Required
-    @Documentation("Collection")
+    @Documentation("Collection.")
     private String collection;
 
     @Option
     @Required
-    @Documentation("Mode")
+    @Documentation("Mode.")
     private Mode mode = Mode.JSON;
 
     // TODO almost impossible to split dataset with source and sink, the common part is almost no meaning as dataset
@@ -53,7 +53,7 @@ public class MongoDBReadAndWriteDataSet implements MongoCommonDataSet {
      *
      * @ActiveIf(target = "mode", value = "MAPPING")
      *
-     * @Documentation("Path Mapping")
+     * @Documentation("Path Mapping.")
      * private List<PathMapping> pathMappings = Collections.emptyList();
      */
 
@@ -66,7 +66,7 @@ public class MongoDBReadAndWriteDataSet implements MongoCommonDataSet {
      *
      * @ActiveIf(target = "mode", value = "DOCUMENT")
      *
-     * @Documentation("Sample for document json")
+     * @Documentation("Sample for document json.")
      * private String sample;
      */
 }

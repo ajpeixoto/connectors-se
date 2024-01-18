@@ -44,43 +44,43 @@ import static org.talend.sdk.component.api.configuration.condition.ActiveIfs.Ope
         @GridLayout.Row("distributionStrategy"), @GridLayout.Row("distributionKeys"), @GridLayout.Row("ignoreUpdate") })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("dataset"),
         @GridLayout.Row("rewriteBatchedStatements"), @GridLayout.Row("useSanitizedColumnName") })
-@Documentation("Those properties define an output data set for the JDBC output component")
+@Documentation("Those properties define an output data set for the JDBC output component.")
 public class OutputConfig implements Serializable {
 
     @Option
     @Required
-    @Documentation("Dataset configuration")
+    @Documentation("Dataset configuration.")
     private TableNameDataset dataset;
 
     @Option
     @Required
     @Suggestable(value = ACTION_SUGGESTION_ACTION_ON_DATA, parameters = { "../dataset" })
-    @Documentation("The action on data to be performed")
+    @Documentation("The action on data to be performed.")
     private String actionOnData = "INSERT";
 
     @Option
     @Required
     @ActiveIf(target = "actionOnData", value = { "INSERT", "UPSERT", "BULK_LOAD" })
-    @Documentation("Create table if don't exists")
+    @Documentation("Create table if don't exists.")
     private boolean createTableIfNotExists = false;
 
     @Option
     @Required
     @ActiveIf(target = "../createTableIfNotExists", value = { "true" })
     @Documentation("The length of varchar types. This value will be used to create varchar columns in this table."
-            + "\n-1 means that the max supported length of the targeted database will be used.")
+            + "-1 means that the max supported length of the targeted database will be used.")
     private int varcharLength = -1;
 
     @Option
     @ActiveIfs(operator = OR, value = { @ActiveIf(target = "../createTableIfNotExists", value = { "true" }),
             @ActiveIf(target = "../actionOnData", value = { "INSERT", "BULK_LOAD" }, negate = true) })
-    @Documentation("List of columns to be used as keys for this operation")
+    @Documentation("List of columns to be used as keys for this operation.")
     private OperationKey keys = new OperationKey();
 
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "../dataset.connection.dbType", value = { "Redshift" }),
             @ActiveIf(target = "../createTableIfNotExists", value = { "true" }) })
-    @Documentation("Define the sort strategy of Redshift table")
+    @Documentation("Define the sort strategy of Redshift table.")
     private RedshiftSortStrategy sortStrategy = RedshiftSortStrategy.COMPOUND;
 
     @Option
@@ -89,13 +89,13 @@ public class OutputConfig implements Serializable {
             @ActiveIf(target = "../createTableIfNotExists", value = { "true" }),
             @ActiveIf(target = "../sortStrategy", value = { "NONE" }, negate = true), })
     @Suggestable(value = ACTION_SUGGESTION_TABLE_COLUMNS_NAMES, parameters = { "../dataset" })
-    @Documentation("List of columns to be used as sort keys for redshift")
+    @Documentation("List of columns to be used as sort keys for redshift.")
     private List<String> sortKeys = new ArrayList<>();
 
     @Option
     @ActiveIfs(operator = AND, value = { @ActiveIf(target = "../dataset.connection.dbType", value = { "Redshift" }),
             @ActiveIf(target = "../createTableIfNotExists", value = { "true" }) })
-    @Documentation("Define the distribution strategy of Redshift table")
+    @Documentation("Define the distribution strategy of Redshift table.")
     private DistributionStrategy distributionStrategy = DistributionStrategy.AUTO;
 
     @Option
@@ -103,27 +103,27 @@ public class OutputConfig implements Serializable {
             @ActiveIf(target = "../distributionStrategy", value = { "KEYS" }),
             @ActiveIf(target = "../createTableIfNotExists", value = { "true" }) })
     @Suggestable(value = ACTION_SUGGESTION_TABLE_COLUMNS_NAMES, parameters = { "../dataset" })
-    @Documentation("List of columns to be used as distribution keys for redshift")
+    @Documentation("List of columns to be used as distribution keys for redshift.")
     private List<String> distributionKeys = new ArrayList<>();
 
     @Option
     @Suggestable(value = ACTION_SUGGESTION_TABLE_COLUMNS_NAMES, parameters = { "../dataset" })
     @ActiveIf(target = "../actionOnData", value = { "UPDATE", "UPSERT" })
-    @Documentation("List of columns to be ignored from update")
+    @Documentation("List of columns to be ignored from update.")
     private List<String> ignoreUpdate = new ArrayList<>();
 
     @Option
     @ActiveIfs(operator = OR, value = { @ActiveIf(target = "../dataset.connection.dbType", value = { "MySQL" }),
             @ActiveIf(target = "../dataset.connection.handler", evaluationStrategy = CONTAINS, value = { "MySQL" }) })
-    @Documentation("Rewrite batched statements, to execute one statement per batch combining values in the sql query")
+    @Documentation("Rewrite batched statements, to execute one statement per batch combining values in the sql query.")
     private boolean rewriteBatchedStatements = true;
 
     // @Option
-    // @Documentation("To keep the old behavior that use sanitized name as column name")
+    // @Documentation("To keep the old behavior that use sanitized name as column name.")
     // private boolean useOriginColumnName = true;
 
     @Option
-    @Documentation("To keep the old behavior that use sanitized name as column name")
+    @Documentation("To keep the old behavior that use sanitized name as column name.")
     private boolean useSanitizedColumnName = false;
 
     public ActionOnData getActionOnData() {

@@ -34,7 +34,7 @@ public class JiraDatastore implements Serializable {
     private String jiraURL = "https://jira.atlassian.com";
 
     @Option
-    @Documentation("Jira authentication")
+    @Documentation("Jira authentication.")
     @DefaultValue("BASIC")
     private AuthenticationType authenticationType = AuthenticationType.BASIC;
 

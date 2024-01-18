@@ -61,6 +61,6 @@ public class PGPEncryptConfig implements Serializable {
     }
 
     @Option
-    @Documentation("Encrypt action")
+    @Documentation("Encrypt action.")
     private BehaviorEnum action = BehaviorEnum.Encrypt;
 }

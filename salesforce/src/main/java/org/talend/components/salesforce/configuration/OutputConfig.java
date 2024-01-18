@@ -33,27 +33,27 @@ import lombok.Data;
         @GridLayout.Row({ "moduleDataSet" }), @GridLayout.Row({ "outputAction" }),
         @GridLayout.Row({ "upsertKeyColumn" }),
         @GridLayout.Row({ "batchMode" }), @GridLayout.Row("commitLevel"), @GridLayout.Row("exceptionForErrors") })
-@Documentation("This configuration of output component")
+@Documentation("This configuration of output component.")
 public class OutputConfig implements Serializable {
 
     @Option
     @Required
-    @Documentation("the configuration of connection and target module")
+    @Documentation("The configuration of connection and target module.")
     private ModuleDataSet moduleDataSet;
 
     @Option
     @Required
-    @Documentation("write operation")
+    @Documentation("Write operation.")
     private OutputAction outputAction = OutputAction.INSERT;
 
     @Option
     @ActiveIf(target = "outputAction", value = "UPSERT")
-    @Documentation("key column for upsert")
+    @Documentation("Key column for upsert.")
     private String upsertKeyColumn;
 
     @Option
     @Required
-    @Documentation("whether use batch operation")
+    @Documentation("Whether use batch operation.")
     private boolean batchMode = true;
 
     /**
@@ -69,13 +69,13 @@ public class OutputConfig implements Serializable {
     @Max(200)
     @Option
     @ActiveIf(target = "batchMode", value = "true")
-    @Documentation("max size of batch")
+    @Documentation("Max size of batch.")
     private int commitLevel = 200;
 
     @Option
     @Required
     @DefaultValue("true")
-    @Documentation("whether throw exception when got error during operation")
+    @Documentation("Whether throw exception when got error during operation.")
     private boolean exceptionForErrors;
 
     public enum OutputAction {

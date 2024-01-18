@@ -33,7 +33,7 @@ import static java.util.Collections.singletonList;
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
 @PartitionMapper(name = "CollectionSource")
-@Documentation("MongoDB Source without query")
+@Documentation("MongoDB Source without query.")
 @Slf4j
 public class MongoDBCollectionMapper implements Serializable {
 

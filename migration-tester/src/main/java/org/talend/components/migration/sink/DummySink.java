@@ -30,7 +30,7 @@ import java.io.Serializable;
 @Version(value = AbstractConfig.VERSION, migrationHandler = SinkMigrationHandler.class)
 @Icon(Icon.IconType.STAR)
 @Processor(name = "DummySink")
-@Documentation("")
+@Documentation("Undefined.")
 public class DummySink implements Serializable {
 
     private final SinkConfig config;

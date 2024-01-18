@@ -27,7 +27,7 @@ public class AbstractConfig implements Serializable {
     public static final int VERSION = 100;
 
     @Option
-    @Documentation("The dataset")
+    @Documentation("The dataset.")
     public DSE dse;
 
 }

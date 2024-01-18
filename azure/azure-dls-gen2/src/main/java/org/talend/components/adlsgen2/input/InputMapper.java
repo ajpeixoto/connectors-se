@@ -35,7 +35,7 @@ import static java.util.Collections.singletonList;
 @Version(value = 4, migrationHandler = AdlsRuntimeDatasetMigration.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "AdlsGen2-input")
 @PartitionMapper(name = "AdlsGen2Input")
-@Documentation("Mapper for Azure Data Lake Storage Gen2")
+@Documentation("Mapper for Azure Data Lake Storage Gen2.")
 public class InputMapper implements Serializable {
 
     @Service

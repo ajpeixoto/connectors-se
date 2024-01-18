@@ -40,7 +40,7 @@ import static org.talend.components.marketo.MarketoApiConstants.ATTR_RESULT;
 
 @Slf4j
 @Version
-@Documentation("Marketo input component")
+@Documentation("Marketo input component.")
 public abstract class MarketoSource extends MarketoSourceOrProcessor {
 
     protected final MarketoInputConfiguration configuration;

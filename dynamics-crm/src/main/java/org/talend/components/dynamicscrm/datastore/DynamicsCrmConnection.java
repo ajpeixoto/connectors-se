@@ -42,7 +42,7 @@ import lombok.Data;
         @GridLayout.Row({ "clientId" }), @GridLayout.Row({ "clientSecret" }),
         @GridLayout.Row({ "authorizationEndpoint" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("timeout"), @GridLayout.Row("maxRetries") })
-@Documentation("Dynamics CRM connection")
+@Documentation("Dynamics CRM connection.")
 public class DynamicsCrmConnection implements Serializable {
 
     @Option
@@ -74,33 +74,33 @@ public class DynamicsCrmConnection implements Serializable {
 
     @Option
     @Required
-    @Documentation("Service Root URL")
+    @Documentation("Service Root URL.")
     private String serviceRootUrl;
 
     @Option
     @Required
-    @Documentation("Client ID")
+    @Documentation("Client ID.")
     private String clientId;
 
     @Option
     @Credential
     @ActiveIf(target = "appType", value = "WEB")
-    @Documentation("Client secret")
+    @Documentation("Client secret.")
     private String clientSecret;
 
     @Option
     @Required
-    @Documentation("OAuth authorization endpoint")
+    @Documentation("OAuth authorization endpoint.")
     private String authorizationEndpoint;
 
     @Option
     @Required
-    @Documentation("Timeout in seconds")
+    @Documentation("Timeout in seconds.")
     private Integer timeout = 60;
 
     @Option
     @Required
-    @Documentation("Max retries")
+    @Documentation("Max retries.")
     private Integer maxRetries = 5;
 
 }

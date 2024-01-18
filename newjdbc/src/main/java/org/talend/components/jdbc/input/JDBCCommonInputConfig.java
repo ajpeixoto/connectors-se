@@ -39,63 +39,63 @@ import java.util.List;
         @GridLayout.Row("useQueryTimeout"),
         @GridLayout.Row("queryTimeout")
 })
-@Documentation("jdbc common input")
+@Documentation("Jdbc common input.")
 public class JDBCCommonInputConfig implements Serializable {
 
     // advanced setting
 
     @Option
-    @Documentation("use cursor")
+    @Documentation("Use cursor.")
     private boolean useCursor;
 
     // cloud use this fetch size in dataset config, not input config, how to uniform it? as query dataset only for
     // reading, so maybe move this to query dataset, but how table dataset? TODO
     @Option
     @ActiveIf(target = "useCursor", value = { "true" })
-    @Documentation("cursor size")
+    @Documentation("Cursor size.")
     private int cursorSize = 1000;
 
     @Option
-    @Documentation("trim all columns")
+    @Documentation("Trim all columns.")
     private boolean trimAllStringOrCharColumns;
 
     @Option
     @ActiveIf(target = "trimAllStringOrCharColumns", value = { "false" })
-    @Documentation("")
+    @Documentation("Undefined.")
     private List<ColumnTrim> columnTrims = Collections.emptyList();
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
-    @Documentation("enable mapping")
+    @Documentation("Enable mapping.")
     private boolean enableMapping;
 
     @Option
     @ActiveIf(target = UIScope.TARGET, value = { UIScope.STUDIO_SCOPE })
     @ActiveIf(target = "enableMapping", value = { "true" })
-    @Documentation("select DB mapping")
+    @Documentation("Select DB mapping.")
     // private String mapping;
     private DBType mapping = DBType.MYSQL;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean allowSpecialName = true;
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean usePreparedStatement;
 
     @Option
     @ActiveIf(target = "usePreparedStatement", value = { "true" })
-    @Documentation("")
+    @Documentation("Undefined.")
     private List<PreparedStatementParameter> preparedStatementParameters = Collections.emptyList();
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean useQueryTimeout;
 
     @Option
     @ActiveIf(target = "useQueryTimeout", value = { "true" })
-    @Documentation("")
+    @Documentation("Undefined.")
     private int queryTimeout = 30;
 
 }

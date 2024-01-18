@@ -30,30 +30,30 @@ import lombok.Data;
 @DataStore("basic")
 @Checkable("basic.healthcheck")
 @GridLayout({ @GridLayout.Row("endpoint"), @GridLayout.Row("userId"), @GridLayout.Row({ "password", "securityKey" }) })
-@Documentation("The datastore to connect salesforce")
+@Documentation("The datastore to connect salesforce.")
 public class BasicDataStore implements Serializable {
 
     @Option
     @Required
     @Pattern("^https?://.+\\S$")
     @DefaultValue("local_configuration:salesforce.endpoint")
-    @Documentation("salesforce service endpoint")
+    @Documentation("Salesforce service endpoint.")
     private String endpoint;
 
     @Option
     @Required
-    @Documentation("user id")
+    @Documentation("User id.")
     private String userId;
 
     @Option
     @Required
     @Credential
-    @Documentation("password of user")
+    @Documentation("Password of user.")
     private String password;
 
     @Option
     @Credential
-    @Documentation("security key of user")
+    @Documentation("Security key of user.")
     private String securityKey;
 
 }

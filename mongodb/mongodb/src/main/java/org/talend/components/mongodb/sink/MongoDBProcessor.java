@@ -46,7 +46,7 @@ import static com.mongodb.WriteConcern.*;
 @Slf4j
 @Icon(value = Icon.IconType.CUSTOM, custom = "mongo_db-connector")
 @Processor(name = "Sink")
-@Documentation("This component writes data to MongoDB")
+@Documentation("This component writes data to MongoDB.")
 public class MongoDBProcessor extends MongoCommonOutput {
 
     private I18nMessage i18n;

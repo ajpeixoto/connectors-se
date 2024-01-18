@@ -30,7 +30,7 @@ import org.talend.sdk.component.api.record.Record;
 @Version(1)
 @Icon(value = Icon.IconType.CUSTOM)
 @Processor(name = "FakeOutput")
-@Documentation("Fake component to allow test classes use @WithComponent annotation")
+@Documentation("Fake component to allow test classes use @WithComponent annotation.")
 public class FakeComponentOutput implements Serializable {
 
     public FakeComponentOutput() {

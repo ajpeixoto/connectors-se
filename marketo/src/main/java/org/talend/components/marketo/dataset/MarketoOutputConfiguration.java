@@ -31,7 +31,7 @@ import static org.talend.components.marketo.service.UIActionService.LEAD_KEY_NAM
         @GridLayout.Row({ "action" }), //
         @GridLayout.Row({ "lookupField" }), //
 }) //
-@Documentation("Marketo Sink Configuration")
+@Documentation("Marketo Sink Configuration.")
 @ToString(callSuper = true)
 public class MarketoOutputConfiguration implements Serializable {
 
@@ -49,11 +49,11 @@ public class MarketoOutputConfiguration implements Serializable {
      * DataSet
      */
     @Option
-    @Documentation("Marketo DataSet")
+    @Documentation("Marketo DataSet.")
     private MarketoDataSet dataSet;
 
     @Option
-    @Documentation("Action")
+    @Documentation("Action.")
     private OutputAction action = OutputAction.createOrUpdate;
 
     /*
@@ -62,7 +62,7 @@ public class MarketoOutputConfiguration implements Serializable {
     @Option
     @ActiveIf(negate = true, target = "action", value = "delete")
     @Suggestable(value = LEAD_KEY_NAME_LIST, parameters = { "../dataSet/dataStore" })
-    @Documentation("Lookup Field")
+    @Documentation("Lookup Field.")
     private String lookupField;
 
 }

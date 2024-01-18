@@ -26,16 +26,16 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @GridLayouts({ @GridLayout({ @GridLayout.Row({ "key" }), @GridLayout.Row({ "value" }) }) })
-@Documentation("Connection parameter")
+@Documentation("Connection parameter.")
 public class ConnectionParameter implements Serializable {
 
     // TODO make it to a closedlist to choose? not good as not flexable if driver change?
     @Option
-    @Documentation("key")
+    @Documentation("Key.")
     private String key;
 
     @Option
-    @Documentation("value")
+    @Documentation("Value.")
     private String value;
 
 }

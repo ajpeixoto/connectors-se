@@ -41,18 +41,18 @@ import lombok.Data;
 })
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { //
         @GridLayout.Row({ "allowEscapePlusSymbol" }) })
-@Documentation("ADLS get configuration")
+@Documentation("ADLS get configuration.")
 public class AdlsGen2PutConfiguration implements Serializable {
 
     @Option
     @Required
-    @Documentation("ADLS Gen2 Connection")
+    @Documentation("ADLS Gen2 Connection.")
     private AdlsGen2Connection connection;
 
     @Option
     @Required
     @Suggestable(value = ACTION_FILESYSTEMS, parameters = { "connection" })
-    @Documentation("FileSystem")
+    @Documentation("FileSystem.")
     private String filesystem;
 
     @Option
@@ -62,7 +62,7 @@ public class AdlsGen2PutConfiguration implements Serializable {
 
     @Option
     @Required
-    @Documentation("Local folder")
+    @Documentation("Local folder.")
     private String localFolder;
 
     @Option

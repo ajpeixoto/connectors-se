@@ -35,7 +35,7 @@ import java.io.Serializable;
 @Version(value = JdbcConnection.VERSION, migrationHandler = JdbcOutputMigrationHandler.class)
 @Processor(name = "Output")
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
-@Documentation("JDBC Output component")
+@Documentation("JDBC Output component.")
 public class SimpleOutput extends Output implements Serializable {
 
     private QueryManagerImpl queryManager;

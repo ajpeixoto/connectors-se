@@ -24,16 +24,16 @@ import lombok.Data;
 @GridLayout({ @GridLayout.Row({ "dataset" }) })
 
 @GridLayout(names = GridLayout.FormType.ADVANCED, value = { @GridLayout.Row("blobNameTemplate") })
-@Documentation("Options for the output component")
+@Documentation("Options for the output component.")
 @Data
 public class BlobOutputConfiguration implements Serializable {
 
     @Option
-    @Documentation("Azure Blob connection")
+    @Documentation("Azure Blob connection.")
     private AzureBlobDataset dataset;
 
     @Option
-    @Documentation("Generated blob item name prefix.\nBatch file would have name prefix + UUID + extension.\n"
-            + "I.e. myPrefix-5deaa8ff-7d22-4b86-a864-9a6fa414501a.avro")
+    @Documentation("Generated blob item name prefix. Batch file would have name prefix + UUID + extension."
+            + "I.e. myPrefix-5deaa8ff-7d22-4b86-a864-9a6fa414501a.avro.")
     private String blobNameTemplate = "data-";
 }

@@ -204,7 +204,7 @@ public class JiraInput extends AbstractHTTPInput<JiraInputConfiguration> {
 
     private ComponentException extractJiraError(HTTPComponentException e) {
         if (e.getResponse() == null) {
-            return e;
+            return e.getComponentException();
         }
         try {
             String responseString = e.getResponse().getBodyAsString();

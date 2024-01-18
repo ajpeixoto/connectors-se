@@ -19,6 +19,6 @@ import org.talend.sdk.component.api.meta.Documentation;
 import lombok.Data;
 
 @Data
-@Documentation("JSON Configuration")
+@Documentation("JSON Configuration.")
 public class JSONFormatOptions implements Serializable {
 }

@@ -34,7 +34,7 @@ import java.sql.SQLException;
 @Version(1)
 @Processor(name = "Rollback")
 @Icon(value = Icon.IconType.CUSTOM, custom = "JDBCRollback")
-@Documentation("JDBC rollback component")
+@Documentation("JDBC rollback component.")
 public class JDBCRollbackProcessor implements Serializable {
 
     private static final long serialVersionUID = 1;

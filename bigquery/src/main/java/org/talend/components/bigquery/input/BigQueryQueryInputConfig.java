@@ -29,7 +29,7 @@ import java.io.Serializable;
 public class BigQueryQueryInputConfig implements Serializable {
 
     @Option
-    @Documentation("BigQuery Query Dataset")
+    @Documentation("BigQuery Query Dataset.")
     private QueryDataSet queryDataset;
 
     public BigQueryConnection getDataStore() {

@@ -36,47 +36,47 @@ import lombok.extern.slf4j.Slf4j;
 public class ExcelFormatOptions implements Serializable {
 
     @Option
-    @Documentation("Excel format")
+    @Documentation("Excel format.")
     private ExcelFormat excelFormat = ExcelFormat.EXCEL2007;
 
     @Option
     @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
     // @Required
     // FIXME: Required doesn't work simultaneously with @ActiveIf
-    @Documentation("")
+    @Documentation("Undefined.")
     private String sheetName = "Sheet1";
 
     @Option
     @ActiveIf(target = "excelFormat", value = "HTML")
-    @Documentation("")
+    @Documentation("Undefined.")
     private Encoding encoding = Encoding.UTF8;
 
     @Option
     @ActiveIfs({ @ActiveIf(target = "excelFormat", value = "HTML"), @ActiveIf(target = "encoding", value = "OTHER") })
-    @Documentation("Encoding ")
+    @Documentation("Encoding.")
     private String customEncoding;
 
     @Option
     @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean useHeader;
 
     @Option
     @ActiveIfs(operator = ActiveIfs.Operator.AND, value = { @ActiveIf(target = "useHeader", value = "true"),
             @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" }) })
-    @Documentation("")
+    @Documentation("Undefined.")
     @Min(0)
     private int header = 1;
 
     @Option
     @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" })
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean useFooter;
 
     @Option
     @ActiveIfs(operator = ActiveIfs.Operator.AND, value = { @ActiveIf(target = "useFooter", value = "true"),
             @ActiveIf(target = "excelFormat", value = { "EXCEL2007", "EXCEL97" }) })
-    @Documentation("")
+    @Documentation("Undefined.")
     @Min(0)
     private int footer = 1;
 

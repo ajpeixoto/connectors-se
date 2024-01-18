@@ -23,11 +23,11 @@ import java.io.Serializable;
 @GridLayout({
         @GridLayout.Row("close")
 })
-@Documentation("jdbc rollback")
+@Documentation("Jdbc rollback.")
 public class JDBCRollbackConfig implements Serializable {
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean close = true;
 
 }

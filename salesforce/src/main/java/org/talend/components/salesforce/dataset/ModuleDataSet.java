@@ -28,27 +28,27 @@ import lombok.Data;
 @DataSet("ModuleSelection")
 @GridLayout(value = { @GridLayout.Row("dataStore"), @GridLayout.Row("moduleName"), @GridLayout.Row("selectColumnNames"),
         @GridLayout.Row("condition") })
-@Documentation("This dataset use module name, query condition and selected columns build SOQL to query records")
+@Documentation("This dataset use module name, query condition and selected columns build SOQL to query records.")
 public class ModuleDataSet implements QueryDataSet {
 
     @Option
     @Required
-    @Documentation("the connection information of salesforce")
+    @Documentation("The connection information of salesforce.")
     private BasicDataStore dataStore;
 
     @Option
     @Required
     @Suggestable(value = "loadSalesforceModules", parameters = { "dataStore" })
-    @Documentation("module name")
+    @Documentation("Module name.")
     private String moduleName;
 
     @Option
-    @Documentation("selected column names")
+    @Documentation("Selected column names.")
     @Suggestable(value = "listColumns", parameters = { "dataStore", "moduleName" })
     private List<String> selectColumnNames;
 
     @Option
-    @Documentation("condition of query")
+    @Documentation("Condition of query.")
     private String condition;
 
 }

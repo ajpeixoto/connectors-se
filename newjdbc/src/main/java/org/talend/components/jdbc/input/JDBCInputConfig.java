@@ -28,15 +28,15 @@ import java.io.Serializable;
         @GridLayout.Row("dataSet"),
         @GridLayout.Row("config")
 })
-@Documentation("jdbc input")
+@Documentation("Jdbc input.")
 public class JDBCInputConfig implements BaseInputConfig, Serializable {
 
     @Option
-    @Documentation("SQL query dataset")
+    @Documentation("SQL query dataset.")
     private JDBCQueryDataSet dataSet;
 
     @Option
-    @Documentation("common input config")
+    @Documentation("Common input config.")
     private JDBCCommonInputConfig config = new JDBCCommonInputConfig();
 
 }

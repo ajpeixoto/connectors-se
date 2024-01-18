@@ -34,17 +34,17 @@ import lombok.Data;
 @Version(value = 2, migrationHandler = DynamicsDatasetMigrationHandler.class)
 @GridLayout({ @GridLayout.Row({ "datastore" }), @GridLayout.Row({ "entitySet" }) })
 @GridLayout(names = ADVANCED, value = { @GridLayout.Row("datastore") })
-@Documentation("Dynamics CRM dataset")
+@Documentation("Dynamics CRM dataset.")
 public class DynamicsCrmDataset implements Serializable {
 
     @Option
-    @Documentation("Dynamics CRM connection")
+    @Documentation("Dynamics CRM connection.")
     private DynamicsCrmConnection datastore;
 
     @Option
     @Required
     @Suggestable(value = UIActionService.ACTION_ENTITY_SETS_DYNAMICS365, parameters = { "datastore" })
-    @Documentation("Name of entity set")
+    @Documentation("Name of entity set.")
     private String entitySet;
 
 }

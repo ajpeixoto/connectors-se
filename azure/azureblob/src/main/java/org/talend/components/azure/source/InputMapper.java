@@ -39,7 +39,7 @@ import org.talend.components.azure.service.AzureBlobComponentServices;
 @Version(value = 2, migrationHandler = AzureStorageRuntimeDatasetMigration.class)
 @Icon(value = Icon.IconType.CUSTOM, custom = "azure-blob-input")
 @PartitionMapper(name = "Input")
-@Documentation("Mapper for AzureBlobStorage Readers")
+@Documentation("Mapper for AzureBlobStorage Readers.")
 public class InputMapper implements Serializable {
 
     private final BlobInputProperties configuration;

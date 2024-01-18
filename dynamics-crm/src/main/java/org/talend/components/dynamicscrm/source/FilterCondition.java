@@ -26,19 +26,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @OptionsOrder({ "field", "filterOperator", "value" })
-@Documentation("Filter condition")
+@Documentation("Filter condition.")
 public class FilterCondition implements Serializable {
 
     @Option
-    @Documentation("Field to use in filter")
+    @Documentation("Field to use in filter.")
     private String field;
 
     @Option
-    @Documentation("Filter operator")
+    @Documentation("Filter operator.")
     private FilterOperator filterOperator = FilterOperator.EQUAL;
 
     @Option
-    @Documentation("Value for filtering")
+    @Documentation("Value for filtering.")
     private String value;
 
     public enum FilterOperator {

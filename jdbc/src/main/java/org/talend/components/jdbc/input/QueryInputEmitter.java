@@ -30,7 +30,7 @@ import java.io.Serializable;
 @Version(JdbcConnection.VERSION)
 @Icon(value = Icon.IconType.CUSTOM, custom = "datastore-connector")
 @Emitter(name = "QueryInput")
-@Documentation("JDBC query input")
+@Documentation("JDBC query input.")
 public class QueryInputEmitter extends AbstractInputEmitter implements Serializable {
 
     public QueryInputEmitter(@Option("configuration") final InputQueryConfig inputQueryConfig,

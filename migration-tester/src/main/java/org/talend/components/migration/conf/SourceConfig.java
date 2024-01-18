@@ -35,16 +35,16 @@ public class SourceConfig extends AbstractConfig {
     String source_legacy;
 
     @Option
-    @Documentation("Source migration handler callback")
+    @Documentation("Source migration handler callback.")
     String source_migration_handler_callback;
 
     @Option
-    @Documentation("Incoming configuration")
+    @Documentation("Incoming configuration.")
     @Code("json")
     String source_incoming;
 
     @Option
-    @Documentation("Outgoing configuration")
+    @Documentation("Outgoing configuration.")
     @Code("json")
     String source_outgoing;
 }

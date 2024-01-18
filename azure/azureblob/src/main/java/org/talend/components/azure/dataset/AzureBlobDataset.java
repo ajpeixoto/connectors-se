@@ -40,32 +40,32 @@ public class AzureBlobDataset implements Serializable {
 
     @Option
     @Required
-    @Documentation("Azure Connection")
+    @Documentation("Azure Connection.")
     private AzureCloudConnection connection;
 
     @Option
-    @Documentation("The name of the container to access")
+    @Documentation("The name of the container to access.")
     @Required
     @Suggestable(value = AzureBlobComponentServices.GET_CONTAINER_NAMES, parameters = "connection")
     private String containerName;
 
     @Option
-    @Documentation("The full path of folder in the selected container")
+    @Documentation("The full path of folder in the selected container.")
     private String directory;
 
     @Option
     @Required
-    @Documentation("File format")
+    @Documentation("File format.")
     private FileFormat fileFormat;
 
     @Option
     @ActiveIf(target = "fileFormat", value = "CSV")
-    @Documentation("CSV format")
+    @Documentation("CSV format.")
     private CSVFormatOptions csvOptions;
 
     @Option
     @ActiveIf(target = "fileFormat", value = "EXCEL")
-    @Documentation("Excel format")
+    @Documentation("Excel format.")
     private ExcelFormatOptions excelOptions;
 
 }

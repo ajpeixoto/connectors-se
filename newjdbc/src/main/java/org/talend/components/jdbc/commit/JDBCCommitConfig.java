@@ -23,11 +23,11 @@ import java.io.Serializable;
 @GridLayout({
         @GridLayout.Row("close")
 })
-@Documentation("jdbc commit")
+@Documentation("Jdbc commit.")
 public class JDBCCommitConfig implements Serializable {
 
     @Option
-    @Documentation("")
+    @Documentation("Undefined.")
     private boolean close = true;
 
 }
